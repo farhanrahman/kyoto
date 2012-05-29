@@ -1,14 +1,29 @@
 This is the master branch for the kyoto repo
 =====
 
-This is the master branch. This will be the final working simulation. So groups need to be working on their separate branches.
+This is the master branch - code in this branch should be final and working.
 
-You can branch into your groups according to your group number such as:
+Work in progress should be managed within group branches and merged into
+master when it working.
 
-1) Group1: gp1
+When merging into master please use this process to avoid committing 
+conflicts:
 
-and so on.
+    git checkout master
+    git merge --no-commit groupbranch
+    
+    FIX ANY CONFLICTS AND TEST
+    git commit
+    git push
 
-This README will be updated later on with proper instructions to make it look amazing with proper wiki page setup.
+Please be descriptive in your commit messages! If you are unsure what to
+include, take a look at a few of the big GitHub projects.
+
+Recommended reading:
+ - http://nvie.com/posts/a-successful-git-branching-model/
+ - The GIT man pages
+
+This README will be updated later on with proper instructions to make it
+look amazing with proper wiki page setup.
 
 We are gonna go big guys!!!!!
