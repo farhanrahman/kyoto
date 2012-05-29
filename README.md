@@ -11,8 +11,9 @@ conflicts:
 
     git checkout master
     git merge --no-commit groupbranch
-    
     FIX ANY CONFLICTS AND TEST
+    git add -u # Adds all updated (tracked) files
+    git status # Check what files you are changing
     git commit
     git push
 
