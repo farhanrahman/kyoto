@@ -16,5 +16,4 @@ public class AnnexOneReduce extends AbstractParticipant {
 		// TODO Auto-generated method stub
 
 	}
-
 }
