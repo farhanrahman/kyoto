@@ -6,10 +6,6 @@ import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 // Action object for advertising that you want to buy/sell
 public final class PublicOffer implements Action {
 
-	public enum TradeType{
-		BUY, SELL
-	}
-
 	private final TradeType type;
 	private final int quantity;
 	private final int unitPrice;
