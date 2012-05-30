@@ -1,4 +1,4 @@
-package uk.ac.ic.kyoto;
+package uk.ac.ic.kyoto.trade;
 
 import uk.ac.imperial.presage2.core.Action;
 
