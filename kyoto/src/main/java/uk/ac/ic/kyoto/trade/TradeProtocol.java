@@ -16,10 +16,19 @@ import uk.ac.imperial.presage2.util.protocols.ConversationCondition;
 import uk.ac.imperial.presage2.util.protocols.ConversationSpawnEvent;
 import uk.ac.imperial.presage2.util.protocols.FSMConversation;
 import uk.ac.imperial.presage2.util.protocols.FSMProtocol;
+import uk.ac.imperial.presage2.util.protocols.InitialiseConversationAction;
 import uk.ac.imperial.presage2.util.protocols.MessageAction;
 import uk.ac.imperial.presage2.util.protocols.MessageTypeCondition;
 import uk.ac.imperial.presage2.util.protocols.SpawnAction;
 
+
+/**
+ * 
+ * Really unsure about this: taken from https://github.com/Presage/HelloWorld/blob/master/src/main/java/uk/ac/imperial/presage2/helloworld/HelloWorldProtocol.java
+ * 
+ * @author cmd08
+ *
+ */
 public class TradeProtocol extends FSMProtocol {
 	
 	private final String name;
@@ -87,7 +96,20 @@ public class TradeProtocol extends FSMProtocol {
 				.addState(States.OFFERS_PUBLISHED)
 				.addState(States.TRADE_COMPLETE)
 				.addTransition(Transitions.RECEIVE_PROPOSITIONS, 
-						new MessageTypeCondition("PROPOSITION"))
+						new MessageTypeCondition("PROPOSITION"), 
+						States.START,
+						States.PROPOSITION_RECEIVED,
+						new InitialiseConversationAction() {
+							
+							@Override
+							public void processInitialMessage(Message<?> message, FSMConversation conv,
+									Transition transition) {
+								logger.info("Propositions received")
+								//Logic here to decide if offer made?
+								conv.getNetwork().sendMessage(m)
+								
+							}
+						})
 				
 				/* Receiver FSM */
 				
