@@ -4,6 +4,13 @@ import uk.ac.imperial.presage2.core.Action;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 // Action object for responding to advertised offer
+@Deprecated
+/**
+ * Deprecated in preference for TradeProtocol
+ * 
+ * @author cmd08
+ *
+ */
 public final class InitiateTrade implements Action {
 	
 	private final PublicOffer offer;
