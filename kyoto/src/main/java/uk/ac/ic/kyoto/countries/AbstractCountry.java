@@ -49,7 +49,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	@Override
-	abstract protected void processInput(Input arg0);
+	abstract protected void processInput(Input input);
 	
 	@Override
 	public void initialise(){
@@ -61,13 +61,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		
 	}
 	
-	@Override
-	abstract public void execute();
-	
-	/**
-	 * Calculate GDPRate at end of time cycle
-	 * @param e
-	 */
 	@EventListener
 	public void calculateGDPRate(EndOfTimeCycle e){
 		//TODO Implement

@@ -23,14 +23,12 @@ public class EUCountry extends AbstractCountry {
 		EU.addMemberState(this);
 	}
 
+	/**
+	 * Take an input and process the data.
+	 * May or may not be used
+	 */
 	@Override
-	protected void processInput(Input arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	@Override
-	public void execute() {
+	protected void processInput(Input input) {
 		// TODO Auto-generated method stub
 		
 	}
