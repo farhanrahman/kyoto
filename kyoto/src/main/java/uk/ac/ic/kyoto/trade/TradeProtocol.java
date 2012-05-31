@@ -116,6 +116,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 									Transition transition) {
 								// TODO Auto-generated method stub
 								logger.info("Trade was accepted");
+								
 							}
 						}
 					)
