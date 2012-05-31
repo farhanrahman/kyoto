@@ -4,6 +4,13 @@ import uk.ac.imperial.presage2.core.Action;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 // Action object for advertising that you want to buy/sell
+@Deprecated
+/**
+ * Deprecated in preference for TradeProtocol
+ * 
+ * @author cmd08
+ *
+ */
 public final class PublicOffer implements Action {
 
 	private final TradeType type;
