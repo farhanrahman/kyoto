@@ -1,6 +1,5 @@
 package uk.ac.ic.kyoto.trade;
 
-import java.util.List;
 import java.util.UUID;
 import org.apache.log4j.Logger;
 import uk.ac.ic.kyoto.countries.TradeAction;
@@ -9,7 +8,6 @@ import uk.ac.imperial.presage2.core.environment.ActionHandlingException;
 import uk.ac.imperial.presage2.core.environment.EnvironmentConnector;
 import uk.ac.imperial.presage2.core.messaging.Performative;
 import uk.ac.imperial.presage2.core.network.Message;
-import uk.ac.imperial.presage2.core.network.MulticastMessage;
 import uk.ac.imperial.presage2.core.network.NetworkAdaptor;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.core.network.UnicastMessage;
