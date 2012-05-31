@@ -3,6 +3,7 @@ package uk.ac.ic.kyoto.countries;
 import java.util.Set;
 import java.util.UUID;
 
+import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
@@ -25,7 +26,7 @@ abstract class AbstractCountry extends AbstractParticipant {
 	private CarbonReductionHandler 	carbonReductionHandler;
 	private CarbonAbsorptionHandler carbonAbsorptionHandler;
 
-	private AbstractCountry(UUID id, String name, double landArea, double arableLandArea, double GDP,
+	public AbstractCountry(UUID id, String name, double landArea, double arableLandArea, double GDP,
 					double GDPRate, double dirtyIndustry, double emissionsTarget, long carbonOffset,
 					float availableToSpend, long carbonTraded) {
 		
@@ -50,12 +51,14 @@ abstract class AbstractCountry extends AbstractParticipant {
 		
 		carbonAbsorptionHandler = new CarbonAbsorptionHandler();
 		carbonReductionHandler = new CarbonReductionHandler();
+		
+		
 	}
 	
 	@Override
 	abstract public void execute();
 	
-	//TODO Should carbonReduction and carbonAbsorption be broadcast to the environment (an action)?
+	//TODO Implement EventListener for GDPRate
 	
 	private final class CarbonReductionHandler{
 		
