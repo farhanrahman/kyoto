@@ -5,6 +5,7 @@ import uk.ac.imperial.presage2.core.messaging.Performative;
 import uk.ac.imperial.presage2.core.network.Message;
 import uk.ac.imperial.presage2.core.network.MulticastMessage;
 import uk.ac.imperial.presage2.core.network.NetworkAdaptor;
+import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.core.network.UnicastMessage;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
 import uk.ac.imperial.presage2.util.fsm.AndCondition;
@@ -118,41 +119,51 @@ public abstract class TradeProtocol extends FSMProtocol {
 							}
 						}
 					)
+					/*
+					 * Transitions: TRADE_PROPOSED -> TRADE_REJECTED
+					 * Trade proposal has been rejected by someone else.
+					 */
 					.addTransition(Transitions.RECEIVE_RESPONSE,
-							new AndCondition(new MessageTypeCondition("REJECT"),
-								new ConversationCondition()),
-							States.TRADE_PROPOSED, States.TRADE_REJECTED,
-							new MessageAction() {
-								
-								@Override
-								public void processMessage(Message<?> message, FSMConversation conv,
-										Transition transition) {
-									// TODO Auto-generated method stub
-									logger.info("Trade was accepted");
+						new AndCondition(new MessageTypeCondition("REJECT"),
+							new ConversationCondition()),
+						States.TRADE_PROPOSED,
+						States.TRADE_REJECTED,
+						new MessageAction() {
+							
+							@Override
+							public void processMessage(Message<?> message, FSMConversation conv,
+									Transition transition) {
+								// TODO Auto-generated method stub
+								logger.info("Trade was rejected");
 							}
-					})
+						}
+					)
+					
 					/* Non-initiator FSM */
 					.addTransition(Transitions.RECIEVE_TRADE, 
-							new AndCondition(new MessageTypeCondition("TRADE")),
-							States.START,
-							States.TRADE_ACCEPTED, new InitialiseConversationAction() {
-								
-								@Override
-								public void processInitialMessage(Message<?> message, FSMConversation conv,
-										Transition transition) {
-									logger.info("Propositions received");								//Logic here to decide if offer made?
-									conv.getNetwork().sendMessage(
-										new UnicastMessage<Object>(
-												Performative.AGREE,
-												"ACCEPT", 
-												SimTime.get(),
-												conv.getNetwork().getAddress(),
-												message.getFrom()
-												));
-								}
-							}).build();
+						new AndCondition(new MessageTypeCondition("TRADE")),
+						States.START,
+						States.TRADE_ACCEPTED,
+						new InitialiseConversationAction() {
+							
+							@Override
+							public void processInitialMessage(Message<?> message, FSMConversation conv,
+									Transition transition) {
+								logger.info("Propositions received");								//Logic here to decide if offer made?
+								conv.getNetwork().sendMessage(
+									new UnicastMessage<Object>(
+											Performative.AGREE,
+											"ACCEPT", 
+											SimTime.get(),
+											conv.getNetwork().getAddress(),
+											message.getFrom()
+											));
+							}
+						}
+					)	
+					.build();
+				
 			} catch (FSMException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 				
@@ -160,4 +171,43 @@ public abstract class TradeProtocol extends FSMProtocol {
 		
 	}
 
+	class TradeSpawnEvent extends ConversationSpawnEvent {
+
+		public TradeSpawnEvent(NetworkAddress with) {
+			super(with);
+			// TODO Auto-generated constructor stub
+		}
+		
+	}
+	
+	public final static class Trade{
+		final int quantity;
+		final int unitCost;
+		final TradeType type;
+		
+		public Trade(int quantity, int unitCost, TradeType type) {
+			this.quantity = quantity;
+			this.unitCost = unitCost;
+			this.type = type;
+		}
+
+		public int getQuantity() {
+			return quantity;
+		}
+
+		public int getUnitCost() {
+			return unitCost;
+		}
+		
+		public int getTotalCost() {
+			return unitCost * quantity;
+		}
+		
+		@Override
+		public String toString() {
+			return "Trade: "+quantity+" @ "+unitCost; 
+		}
+	}
+	
 }
+
