@@ -1,4 +1,4 @@
-package uk.ac.ic.carbon;
+package uk.ac.ic.kyoto.carbon;
 
 import uk.ac.imperial.presage2.core.environment.EnvironmentRegistrationRequest;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
