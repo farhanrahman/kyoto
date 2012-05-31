@@ -1,18 +1,16 @@
-package uk.ac.ic.kyoto.countries;
+package uk.ac.ic.kyoto.annex1reduce;
 
-import java.util.Set;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.imperial.presage2.core.messaging.Input;
 
 /**
- * Extends AbstractCountry to provide additional functions for EU countries
- * All EU countries MUST inherit this
+ * Extends AbstractCountry, provides a skeleton for all EU member countries
  * @author Nik
  *
  */
-abstract public class EUCountry extends AbstractCountry {
+public class EUCountry extends AbstractCountry {
 	
 	public EUCountry(UUID id, String name, double landArea, double arableLandArea, double GDP,
 			double GDPRate, double dirtyIndustry, double emissionsTarget, long carbonOffset,
@@ -22,22 +20,19 @@ abstract public class EUCountry extends AbstractCountry {
 					GDPRate, dirtyIndustry, emissionsTarget, carbonOffset,
 					availableToSpend, carbonTraded);
 		
-		memberStates.add(this);
+		EU.addMemberState(this);
 	}
 
 	@Override
-	abstract protected void processInput(Input arg0);
-
-	@Override
-	abstract public void execute();
-	
-	static private Set<EUCountry> memberStates;
-	
-	static protected void allocateCredits() {
-		for (int i = 0; i < memberStates.size(); i++) {
-			
-		}
+	protected void processInput(Input arg0) {
+		// TODO Auto-generated method stub
+		
 	}
-
+	
+	@Override
+	public void execute() {
+		// TODO Auto-generated method stub
+		
+	}
 
 }
