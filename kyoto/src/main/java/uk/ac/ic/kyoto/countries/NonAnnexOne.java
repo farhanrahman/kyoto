@@ -4,9 +4,9 @@ import java.util.UUID;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
-public class AnnexTwo extends AbstractParticipant {
+public class NonAnnexOne extends AbstractParticipant {
 
-	public AnnexTwo(UUID id, String name) {
+	public NonAnnexOne(UUID id, String name) {
 		super(id, name);
 		// TODO Auto-generated constructor stub
 	}
