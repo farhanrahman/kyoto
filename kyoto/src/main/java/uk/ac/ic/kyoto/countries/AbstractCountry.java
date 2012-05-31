@@ -1,5 +1,7 @@
 package uk.ac.ic.kyoto.countries;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -64,6 +66,14 @@ abstract class AbstractCountry extends AbstractParticipant {
 	
 	private final class CarbonReductionHandler{
 		
+		final Map<Long, Double> investTable = new HashMap<Long, Double>();
+		
+		public CarbonReductionHandler() {
+			for (double i=0.00; i <= 1.00; i += 0.01) {
+				investTable.put(Math.round((i/Math.exp(-(1-i)))), i);
+			}
+		}
+		
 		/**
 		 * Returns the cost of investment required to
 		 * reduce dirty industry.
@@ -77,16 +87,17 @@ abstract class AbstractCountry extends AbstractParticipant {
 		 */
 		public final double getCost(double percentage){
 			// TODO improve
-			double proportion = percentage;
-			if (proportion > 0.31) {
-				return (proportion - 0.1) * GDP;
-			}
-			else if (proportion > 0.19) {
-				return (proportion - 0.05) * GDP;
-			}
-			else {
-				return proportion * GDP;
-			}
+//			double proportion = percentage;
+//			if (proportion > 0.31) {
+//				return (proportion - 0.1) * GDP;
+//			}
+//			else if (proportion > 0.19) {
+//				return (proportion - 0.05) * GDP;
+//			}
+//			else {
+//				return proportion * GDP;
+//			}
+			return percentage/Math.exp(-(1-percentage));
 		}
 		
 		/**
@@ -96,25 +107,26 @@ abstract class AbstractCountry extends AbstractParticipant {
 		 * @param currency
 		 * 
 		 * Investment is an amount, say $10,000,000.
-		 * The return value is a percentage of total industry.
-		 * If this function returns 5% and you are at 30%
-		 * dirty industry, you will go to 25%.
+		 * The return value is the percentage of your
+		 * carbon output that will be reduced.
+		 * Eg. If it returns 10%, you will go from
+		 * 100 tons to 90 tons.
 		 */
 		public final double getPercentage(double investment){
 			//TODO Improve
 			double proportion = investment / GDP;
 			double result;
 			
-			if (proportion > 0.21) {
-				result = (proportion + 0.1) * dirtyIndustry;
-			}
-			else if (proportion > 0.14) {
-				result = (proportion + 0.05) * dirtyIndustry;
-			}
-			else {
-				result = proportion * dirtyIndustry;
-			}
-			return result;
+//			if (proportion > 0.21) {
+//				result = (proportion + 0.1) * dirtyIndustry;
+//			}
+//			else if (proportion > 0.14) {
+//				result = (proportion + 0.05) * dirtyIndustry;
+//			}
+//			else {
+//				result = proportion * dirtyIndustry;
+//			}
+			return (double)investTable.get(investment);
 		}
 		
 		/**
