@@ -51,10 +51,8 @@ public class EU extends AbstractParticipant {
 	 * member states
 	 */
 	static private void applySanctions() {
-		for (int i=0; i<memberStates.size();i++) {
-			EUCountry euc = memberStates.get(i);
+		for (EUCountry state : memberStates) {
 			//TODO calculate and apply sanctions to member states
-			
 		}
 	}
 	
@@ -63,8 +61,7 @@ public class EU extends AbstractParticipant {
 	 * member states
 	 */
 	static private void allocateCredits() {
-		for (int i=0; i<memberStates.size();i++) {
-			EUCountry euc = memberStates.get(i);
+		for (EUCountry state : memberStates) {
 			//TODO Calculate credits to give to all EU member states
 		}
 	}
