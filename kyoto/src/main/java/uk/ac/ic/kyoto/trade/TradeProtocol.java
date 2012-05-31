@@ -48,7 +48,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 	};
 	
 	enum Transitions {
-		PROPOSE_TRADE, RECEIVE_RESPONSE, RECIEVE_TRADE, ACCEPT_TRADE, REJECT_TRADE,
+		PROPOSE_TRADE, RECEIVE_RESPONSE, RECEIVE_TRADE, ACCEPT_TRADE, REJECT_TRADE,
 		//PUBLISH_PROPOSITION, RECEIVE_OFFERS, ACCEPT_OFFER, REJECT_OFFER, 
 		//RECEIVE_PROPOSITIONS, PUBLISH_OFFERS, COMPLETE_TRADE,
 		TIMEOUT
@@ -141,7 +141,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 					)
 					
 					/* Non-initiator FSM */
-					.addTransition(Transitions.RECIEVE_TRADE, 
+					.addTransition(Transitions.RECEIVE_TRADE, 
 						new AndCondition(new MessageTypeCondition("TRADE")),
 						States.START,
 						States.TRADE_ACCEPTED,
@@ -173,10 +173,12 @@ public abstract class TradeProtocol extends FSMProtocol {
 	}
 
 	class TradeSpawnEvent extends ConversationSpawnEvent {
+		
+		final Trade trade;
 
-		public TradeSpawnEvent(NetworkAddress with) {
+		public TradeSpawnEvent(NetworkAddress with, int quantity, int unitCost, TradeType type) {
 			super(with);
-			// TODO Auto-generated constructor stub
+			this.trade = new Trade(quantity, unitCost, type);
 		}
 		
 	}
