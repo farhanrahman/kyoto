@@ -1,5 +1,7 @@
 package uk.ac.ic.kyoto.trade;
 
+import java.util.List;
+import java.util.UUID;
 import org.apache.log4j.Logger;
 import uk.ac.imperial.presage2.core.messaging.Performative;
 import uk.ac.imperial.presage2.core.network.Message;
@@ -36,7 +38,8 @@ import uk.ac.imperial.presage2.util.protocols.SpawnAction;
  */
 public abstract class TradeProtocol extends FSMProtocol {
 	
-	private final String name;
+	private final UUID id;
+	private final UUID authkey;
 	
 	private final Logger logger;
 	
@@ -54,11 +57,12 @@ public abstract class TradeProtocol extends FSMProtocol {
 		TIMEOUT
 	}
 
-	public TradeProtocol(String agentName, NetworkAdaptor network) {
+	public TradeProtocol(final UUID id, final UUID authkey, NetworkAdaptor network) {
 		super("Trade Protocol", FSM.description(), network);
-		this.name = agentName;
+		this.id = id;
+		this.authkey = authkey;
 		
-		logger = Logger.getLogger(TradeProtocol.class.getName() + ", " + name);
+		logger = Logger.getLogger(TradeProtocol.class.getName() + ", " + id);
 		
 			try {
 				this.description
@@ -87,6 +91,10 @@ public abstract class TradeProtocol extends FSMProtocol {
 							public void processSpawn(ConversationSpawnEvent event,
 									FSMConversation conv, Transition transition) {
 								
+								//Send message stating intention of trading
+								TradeSpawnEvent e = (TradeSpawnEvent) event;
+								NetworkAddress from = conv.getNetwork().getAddress();
+								List<NetworkAddress> to = conv.recipients;
 								logger.info("Publishing proposition");
 								conv.getNetwork().sendMessage(
 									new MulticastMessage<Object>(
