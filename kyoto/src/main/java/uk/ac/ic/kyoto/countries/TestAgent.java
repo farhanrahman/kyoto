@@ -3,6 +3,7 @@ package uk.ac.ic.kyoto.countries;
 import java.util.UUID;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.imperial.presage2.core.messaging.Input;
+import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 public class TestAgent extends AbstractParticipant {
@@ -17,9 +18,15 @@ public class TestAgent extends AbstractParticipant {
 	@Override
 	public void initialise(){
 		super.initialise();
-		try {
-			this.trade = new TradeProtocol(getID(), authkey, environment, network) {}
-		}
+		
+		this.trade = new TradeProtocol(getID().toString(), network) {
+			
+			@Override
+			protected boolean acceptExchange(NetworkAddress from, Trade trade) {
+				// TODO decide if we should accept the trade
+				return false;
+			}
+		};
 	}
 
 	@Override

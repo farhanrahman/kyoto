@@ -212,5 +212,17 @@ public abstract class TradeProtocol extends FSMProtocol {
 		}
 	}
 	
+	public void offer(NetworkAddress to, int quantity, int unitPrice, TradeType type)
+			throws FSMException {
+		this.spawnAsInititor(new TradeSpawnEvent(to, quantity, unitPrice, type));
+	}
+
+	protected abstract boolean acceptExchange(NetworkAddress from,
+			Trade trade);
+
+	protected boolean surrenderToken(NetworkAddress to, Trade trade) {
+		return true;
+	}
+	
 }
 
