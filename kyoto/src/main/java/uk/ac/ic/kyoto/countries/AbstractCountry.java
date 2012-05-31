@@ -15,9 +15,10 @@ import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
  */
 public abstract class AbstractCountry extends AbstractParticipant {
 	
-	//TODO fields taken from early meeting. Do we still agree and want to follow this model?
+	//TODO Register UUID and country ISO with the environment
 	
 	final private double landArea;
+	final private String ISO;		//ISO 3166-1 alpha-3
 	
 	private double 	arableLandArea;
 	private double 	GDP;
@@ -32,12 +33,15 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	private CarbonReductionHandler 	carbonReductionHandler;
 	private CarbonAbsorptionHandler carbonAbsorptionHandler;
 
-	public AbstractCountry(UUID id, String name, double landArea, double arableLandArea, double GDP,
-					double GDPRate, double dirtyIndustry, double emissionsTarget, long carbonOffset,
-					float availableToSpend, long carbonTraded) {
+	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea,
+			double GDP,	double GDPRate, double dirtyIndustry, double emissionsTarget, long carbonOffset,
+			float availableToSpend, long carbonTraded) {
+		
+		//TODO Validate parameters
 		
 		super(id, name);
 		this.landArea = landArea;
+		this.ISO = ISO;
 		this.arableLandArea = arableLandArea;
 		this.GDP = GDP;
 		this.GDPRate = GDPRate;
@@ -152,6 +156,42 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				throw new Exception("Investment is greated than available GDP");
 			}
 		}
+	}
+
+	public double getLandArea() {
+		return landArea;
+	}
+
+	public double getArableLandArea() {
+		return arableLandArea;
+	}
+
+	public double getGDP() {
+		return GDP;
+	}
+
+	public double getGDPRate() {
+		return GDPRate;
+	}
+
+	public double getDirtyIndustry() {
+		return dirtyIndustry;
+	}
+
+	public double getEmissionTarget() {
+		return emissionTarget;
+	}
+
+	public long getCarbonOffset() {
+		return carbonOffset;
+	}
+
+	public float getAvailableToSpend() {
+		return availableToSpend;
+	}
+
+	public long getCarbonTraded() {
+		return carbonTraded;
 	}
 	
 }
