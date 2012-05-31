@@ -3,6 +3,9 @@ package uk.ac.ic.kyoto;
 import java.util.HashSet;
 import java.util.Set;
 import com.google.inject.AbstractModule;
+
+import uk.ac.ic.kyoto.KnowledgeBaseService;
+
 import uk.ac.imperial.presage2.core.simulator.InjectedSimulation;
 import uk.ac.imperial.presage2.core.simulator.Parameter;
 import uk.ac.imperial.presage2.core.simulator.Scenario;
@@ -23,9 +26,10 @@ public class Simulation extends InjectedSimulation {
 	@Override
 	protected Set<AbstractModule> getModules() {
 		Set<AbstractModule> modules = new HashSet<AbstractModule>();
-		modules.add(new AbstractEnvironmentModule());
+		modules.add(new AbstractEnvironmentModule()
 			//.addParticipantEnvironmentService(FooService.class)
 			//.addParticipantGlobalEnvironmentService(FooService.class)
+			.addParticipantGlobalEnvironmentService(KnowledgeBaseService.class));
 			//.addActionHandler(FooHandler.class)
 		modules.add(new RuleModule());
 			//.addClasspathDrlFile("foo.drl")

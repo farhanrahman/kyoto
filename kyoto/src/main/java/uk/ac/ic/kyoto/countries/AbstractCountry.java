@@ -23,7 +23,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	private double 	arableLandArea;
 	private double 	GDP;
 	private double 	GDPRate;
-	private double 	dirtyIndustry;
+	private long 	carbonOutput; // In tons of carbon dioxide
 	private double	emissionTarget;
 	private long 	carbonOffset;
 	private float 	availableToSpend;
@@ -77,10 +77,24 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		 * reduce dirty industry.
 		 * 
 		 * @param percentage
+		 * 
+		 * Percentage is of your dirty industry.
+		 * Eg. If you have 30% dirty industry, reducing
+		 * by 10% will bring you down to 27%.
+		 * (Because 10% of 30 is 3)
 		 */
 		public final double getCost(double percentage){
-			//TODO Implementation
-			throw new UnsupportedOperationException();
+			// TODO improve
+			double proportion = percentage;
+			if (proportion > 0.31) {
+				return (proportion - 0.1) * GDP;
+			}
+			else if (proportion > 0.19) {
+				return (proportion - 0.05) * GDP;
+			}
+			else {
+				return proportion * GDP;
+			}
 		}
 		
 		/**
@@ -88,10 +102,28 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		 * for a given investment.
 		 * 
 		 * @param currency
+		 * 
+		 * Investment is an amount, say $10,000,000.
+		 * The return value is a percentage of total industry.
+		 * If this function returns 5% and you are at 30%
+		 * dirty industry, you will go to 25%.
 		 */
-		public final long getPercentage(double investment){
-			//TODO Implementation
-			throw new UnsupportedOperationException();
+
+		public final double getPercentage(double investment){
+			//TODO Improve
+			double proportion = investment / GDP;
+			double result;
+			
+			if (proportion > 0.21) {
+				result = (proportion + 0.1) * dirtyIndustry;
+			}
+			else if (proportion > 0.14) {
+				result = (proportion + 0.05) * dirtyIndustry;
+			}
+			else {
+				result = proportion * dirtyIndustry;
+			}
+			return result;
 		}
 		
 		/**
@@ -103,13 +135,13 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		 * @param investment
 		 * @throws Exception
 		 */
-		public final void execute(double investment) throws Exception{
+		public final void invest(double investment) throws Exception{
 			if(investment < GDP){
-				//TODO Implement reduction in GDP
-				//TODO Implement reduction in dirtyIndustry
+				GDP -= investment;
+				carbonOutput -= (getPercentage(investment) * carbonOutput);
 			}else{
 				//TODO Use better exception
-				throw new Exception("Investment is greated than available GDP");
+				throw new Exception("Investment is greater than available GDP");
 			}
 		}
 	}
