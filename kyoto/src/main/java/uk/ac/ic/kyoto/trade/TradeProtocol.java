@@ -25,7 +25,9 @@ import uk.ac.imperial.presage2.util.protocols.SpawnAction;
 
 /**
  * 
- * Really unsure about this: taken from https://github.com/Presage/HelloWorld/blob/master/src/main/java/uk/ac/imperial/presage2/helloworld/HelloWorldProtocol.java
+ * More sure about this: taken from https://github.com/Presage/HelloWorld/blob/master/src/main/java/uk/ac/imperial/presage2/helloworld/HelloWorldProtocol.java
+ * 
+ * https://github.com/sammacbeth/ColouredTrls/blob/master/src/main/java/uk/ac/imperial/colrdtrls/protocols/TokenExchangeProtocol.java
  * 
  * This is just a really simple implementation where one party can only ever accept a trade
  * 
