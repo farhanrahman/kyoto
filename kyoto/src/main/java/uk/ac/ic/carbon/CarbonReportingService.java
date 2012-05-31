@@ -17,8 +17,10 @@ public class CarbonReportingService extends EnvironmentService {
 	
 	@Override
 	public void registerParticipant(EnvironmentRegistrationRequest req){
-		
+		super.registerParticipant(req);
+		//TODO extra stuff required when participant registers?
 	}
+	
 	
 	
 
