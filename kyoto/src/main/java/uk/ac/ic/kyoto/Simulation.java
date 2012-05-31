@@ -24,10 +24,12 @@ public class Simulation extends InjectedSimulation {
 	protected Set<AbstractModule> getModules() {
 		Set<AbstractModule> modules = new HashSet<AbstractModule>();
 		modules.add(new AbstractEnvironmentModule());
-			//.addFooService()
+			//.addParticipantEnvironmentService(FooService.class)
+			//.addParticipantGlobalEnvironmentService(FooService.class)
+			//.addActionHandler(FooHandler.class)
 		modules.add(new RuleModule());
 			//.addClasspathDrlFile("foo.drl")
-		return null;
+		return modules;
 	}
 
 	@Override
