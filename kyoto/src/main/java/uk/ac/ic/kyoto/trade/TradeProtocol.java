@@ -26,7 +26,6 @@ import uk.ac.imperial.presage2.util.protocols.SpawnAction;
 /**
  * 
  * More sure about this: taken from https://github.com/Presage/HelloWorld/blob/master/src/main/java/uk/ac/imperial/presage2/helloworld/HelloWorldProtocol.java
- * 
  * https://github.com/sammacbeth/ColouredTrls/blob/master/src/main/java/uk/ac/imperial/colrdtrls/protocols/TokenExchangeProtocol.java
  * 
  * This is just a really simple implementation where one party can only ever accept a trade
@@ -61,48 +60,64 @@ public abstract class TradeProtocol extends FSMProtocol {
 		logger = Logger.getLogger(TradeProtocol.class.getName() + ", " + name);
 		
 			try {
-				this.description.addState(States.START, StateType.START)
+				this.description
 				
 					/* Initiator FSM */
+					.addState(States.START, StateType.START)
 					.addState(States.TRADE_PROPOSED)
 					.addState(States.RESPONSE_RECEIVED)
 					.addState(States.TRADE_ACCEPTED, StateType.END)
 					.addState(States.TRADE_REJECTED, StateType.END)
-					.addState(States.TIMED_OUT, StateType.END)
+					.addState(States.TIMED_OUT, StateType.END);
+					
+				this.description
+					/*
+					 * Transition: START -> TRADE_PROPOSED.
+					 * Send a trade proposal to all other agents
+					 * Signals intention to trade (either buy or sell).
+					 */
 					.addTransition(Transitions.PROPOSE_TRADE,
-							new EventTypeCondition(ConversationSpawnEvent.class), 
-							States.START, States.TRADE_PROPOSED, 
-							new SpawnAction() {
+						new EventTypeCondition(ConversationSpawnEvent.class), 
+						States.START,
+						States.TRADE_PROPOSED, 
+						new SpawnAction() {
 
-								@Override
-								public void processSpawn(ConversationSpawnEvent event,
-										FSMConversation conv, Transition transition) {
-									
-									logger.info("Publishing proposition");
-									conv.getNetwork().sendMessage(
-										new MulticastMessage<Object>(
-												Performative.PROPOSE, 
-												"TRADE", 
-												SimTime.get(), 
-												conv.getNetwork().getAddress(), 
-												new TradeMessage()
-										)
-									);			
-								}
-							})
-					.addTransition(Transitions.RECEIVE_RESPONSE,
-							new AndCondition(new MessageTypeCondition("ACCEPT"),
-								new ConversationCondition()),
-							States.TRADE_PROPOSED, States.TRADE_ACCEPTED,
-							new MessageAction() {
+							@Override
+							public void processSpawn(ConversationSpawnEvent event,
+									FSMConversation conv, Transition transition) {
 								
-								@Override
-								public void processMessage(Message<?> message, FSMConversation conv,
-										Transition transition) {
-									// TODO Auto-generated method stub
-									logger.info("Trade was accepted");
+								logger.info("Publishing proposition");
+								conv.getNetwork().sendMessage(
+									new MulticastMessage<Object>(
+											Performative.PROPOSE, 
+											"TRADE", 
+											SimTime.get(), 
+											conv.getNetwork().getAddress(), 
+											new TradeMessage()
+									)
+								);			
 							}
-					})
+						}
+					)
+					/*
+					 * Transitions: TRADE_PROPOSED -> TRADE_ACCEPTED
+					 * Trade proposal has been accepted by someone
+					 */
+					.addTransition(Transitions.RECEIVE_RESPONSE,
+						new AndCondition(new MessageTypeCondition("ACCEPT"),
+							new ConversationCondition()),
+						States.TRADE_PROPOSED, 
+						States.TRADE_ACCEPTED,
+						new MessageAction() {
+							
+							@Override
+							public void processMessage(Message<?> message, FSMConversation conv,
+									Transition transition) {
+								// TODO Auto-generated method stub
+								logger.info("Trade was accepted");
+							}
+						}
+					)
 					.addTransition(Transitions.RECEIVE_RESPONSE,
 							new AndCondition(new MessageTypeCondition("REJECT"),
 								new ConversationCondition()),
