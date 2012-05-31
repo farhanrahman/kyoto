@@ -12,6 +12,7 @@ import uk.ac.imperial.presage2.core.network.Message;
 import uk.ac.imperial.presage2.core.network.MulticastMessage;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
+import uk.ac.imperial.presage2.util.fsm.FSMException;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 public class TestAgent extends AbstractParticipant {
@@ -28,19 +29,24 @@ public class TestAgent extends AbstractParticipant {
 	public void initialise(){
 		super.initialise();
 		
-		this.trade = new TradeProtocol(getID(), this.authkey, network) {
-			
-			@Override
-			protected boolean acceptExchange(NetworkAddress from, Trade trade) {
-				// TODO decide if we should accept the trade
-				// for example...
-				if(trade.getUnitCost() == 0){
-					return true;
-				} else {
-					return false;
+		try {
+			this.trade = new TradeProtocol(getID(), this.authkey, environment, network) {
+				
+				@Override
+				protected boolean acceptExchange(NetworkAddress from, Trade trade) {
+					// TODO decide if we should accept the trade
+					// for example...
+					if(trade.getUnitCost() == 0){
+						return true;
+					} else {
+						return false;
+					}
 				}
-			}
-		};
+			};
+		} catch (FSMException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
