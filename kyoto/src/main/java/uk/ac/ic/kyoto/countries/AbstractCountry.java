@@ -3,11 +3,17 @@ package uk.ac.ic.kyoto.countries;
 import java.util.Set;
 import java.util.UUID;
 
+import uk.ac.ic.kyoto.trade.PublicOffer;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
+import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
-abstract class AbstractCountry extends AbstractParticipant {
+/**
+ * 
+ * @author cs2309
+ */
+public abstract class AbstractCountry extends AbstractParticipant {
 	
 	//TODO fields taken from early meeting. Do we still agree and want to follow this model?
 	
@@ -58,7 +64,14 @@ abstract class AbstractCountry extends AbstractParticipant {
 	@Override
 	abstract public void execute();
 	
-	//TODO Implement EventListener for GDPRate
+	/**
+	 * Calculate GDPRate at end of time cycle
+	 * @param e
+	 */
+	@EventListener
+	public void calculateGDPRate(EndOfTimeCycle e){
+		//TODO Implement
+	}
 	
 	private final class CarbonReductionHandler{
 		
@@ -70,6 +83,7 @@ abstract class AbstractCountry extends AbstractParticipant {
 		 */
 		public final double getCost(double percentage){
 			//TODO Implementation
+			throw new UnsupportedOperationException();
 		}
 		
 		/**
@@ -80,6 +94,7 @@ abstract class AbstractCountry extends AbstractParticipant {
 		 */
 		public final long getPercentage(double investment){
 			//TODO Implementation
+			throw new UnsupportedOperationException();
 		}
 		
 		/**
@@ -112,6 +127,7 @@ abstract class AbstractCountry extends AbstractParticipant {
 		 */
 		public double getCost(long carbonCredits){
 			//TODO Implementation
+			throw new UnsupportedOperationException();
 		}
 		
 		/**
@@ -122,6 +138,7 @@ abstract class AbstractCountry extends AbstractParticipant {
 		 */
 		public long getCarbonCredits(double investment){
 			//TODO Implementation
+			throw new UnsupportedOperationException();
 		}
 		
 		/**
