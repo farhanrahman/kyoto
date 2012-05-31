@@ -172,10 +172,12 @@ public abstract class TradeProtocol extends FSMProtocol {
 	}
 
 	class TradeSpawnEvent extends ConversationSpawnEvent {
+		
+		final Trade trade;
 
-		public TradeSpawnEvent(NetworkAddress with) {
+		public TradeSpawnEvent(NetworkAddress with, int quantity, int unitCost, TradeType type) {
 			super(with);
-			// TODO Auto-generated constructor stub
+			this.trade = new Trade(quantity, unitCost, type);
 		}
 		
 	}
