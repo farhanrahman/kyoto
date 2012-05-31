@@ -32,7 +32,7 @@ import uk.ac.imperial.presage2.util.protocols.SpawnAction;
  * @author cmd08
  *
  */
-public class TradeProtocol extends FSMProtocol {
+public abstract class TradeProtocol extends FSMProtocol {
 	
 	private final String name;
 	
