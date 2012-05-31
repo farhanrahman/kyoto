@@ -48,6 +48,11 @@
 			<type>war</type>
 		</dependency>
 		<dependency>
+			<groupId>uk.ac.imperial.presage2</groupId>
+			<artifactId>presage2-rules</artifactId>
+			<version>${presage.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.8.2</version>
