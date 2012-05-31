@@ -1,8 +1,11 @@
 package uk.ac.ic.kyoto.countries;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.trade.PublicOffer;
@@ -66,7 +69,8 @@ abstract class AbstractCountry extends AbstractParticipant {
 	
 	private final class CarbonReductionHandler{
 		
-		final Map<Long, Double> investTable = new HashMap<Long, Double>();
+		final Map<Long, Double> investTable = new TreeMap<Long, Double>();
+//		final ArrayList<Long> investTable = new ArrayList<Long>();
 		
 		public CarbonReductionHandler() {
 			for (double i=0.00; i <= 1.00; i += 0.01) {
@@ -86,17 +90,6 @@ abstract class AbstractCountry extends AbstractParticipant {
 		 * (Because 10% of 30 is 3)
 		 */
 		public final double getCost(double percentage){
-			// TODO improve
-//			double proportion = percentage;
-//			if (proportion > 0.31) {
-//				return (proportion - 0.1) * GDP;
-//			}
-//			else if (proportion > 0.19) {
-//				return (proportion - 0.05) * GDP;
-//			}
-//			else {
-//				return proportion * GDP;
-//			}
 			return percentage/Math.exp(-(1-percentage));
 		}
 		
@@ -112,21 +105,14 @@ abstract class AbstractCountry extends AbstractParticipant {
 		 * Eg. If it returns 10%, you will go from
 		 * 100 tons to 90 tons.
 		 */
-		public final double getPercentage(double investment){
+		public final double getPercentage(long investment) throws IllegalArgumentException{
 			//TODO Improve
-			double proportion = investment / GDP;
-			double result;
-			
-//			if (proportion > 0.21) {
-//				result = (proportion + 0.1) * dirtyIndustry;
-//			}
-//			else if (proportion > 0.14) {
-//				result = (proportion + 0.05) * dirtyIndustry;
-//			}
-//			else {
-//				result = proportion * dirtyIndustry;
-//			}
-			return (double)investTable.get(investment);
+			for (Entry<Long, Double> el : investTable.entrySet()) {
+				if (el.getKey() > investment) {
+					return (double)el.getValue();
+				}
+			}
+			throw new IllegalArgumentException("Out of bounds: no record in the table");
 		}
 		
 		/**
