@@ -124,7 +124,7 @@ abstract class AbstractCountry extends AbstractParticipant {
 		 * @param investment
 		 * @throws Exception
 		 */
-		public final void invest(double investment) throws Exception{
+		public final void invest(long investment) throws Exception{
 			if(investment < GDP){
 				GDP -= investment;
 				carbonOutput -= (getPercentage(investment) * carbonOutput);
