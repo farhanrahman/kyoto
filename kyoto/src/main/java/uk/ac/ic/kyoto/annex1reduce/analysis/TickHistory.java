@@ -50,10 +50,10 @@ public class TickHistory{
 	/**
 	 * Calculates unit price, updates High/Low values and stores to Set
 	 * @param m
+	 * @return 
+	 * @throws Exception 
 	 */
-	public void addMessage(Object m){
-		//TODO 	Make this genetic (eg. Class<? extends Message>)
-		//		OR use instanceof and typecast objects
+	public void addMessage(Message m) throws Exception{
 		
 		int quantity = m.getQuantity();
 		float price = m.getPrice();
@@ -93,7 +93,7 @@ public class TickHistory{
 			investmentAverage = tempSum/messages.size();
 			
 		}else{
-			//throw new Exception("Jizz all up my arse");
+			throw new Exception();
 		}
 		
 		messages.add(m);

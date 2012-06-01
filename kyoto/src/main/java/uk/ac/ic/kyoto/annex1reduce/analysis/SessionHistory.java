@@ -40,8 +40,9 @@ public class SessionHistory {
 	 * is added to session history Set.
 	 * @param m
 	 * @param currentTick
+	 * @throws Exception 
 	 */
-	public void add(Class<? extends Message> m, int currentTick){
+	public void add(Message m, int currentTick) throws Exception{
 		
 		if(tick == null){
 			tick = new TickHistory(currentTick);
