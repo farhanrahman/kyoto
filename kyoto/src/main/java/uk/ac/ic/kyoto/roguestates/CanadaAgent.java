@@ -9,8 +9,6 @@ import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.util.fsm.FSMException;
 
 public class CanadaAgent extends NonParticipant {
-	
-	TradeProtocol tradeProtocol;
 
 	public CanadaAgent(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
 			double GDPRate, long emissionsTarget, long carbonOffset,
@@ -28,8 +26,8 @@ public class CanadaAgent extends NonParticipant {
 	}
 	
 	@Override
-	public void execute() {
-		// TODO Auto-generated method stub
+	public void initialise() {
+		super.initialise();
 		try {
 			tradeProtocol = new TradeProtocol(getID(), authkey, environment, network) {
 				@Override
@@ -41,10 +39,16 @@ public class CanadaAgent extends NonParticipant {
 					return false;
 				}
 			};
+			
 		} catch (FSMException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	@Override
+	public void execute() {
+		// TODO Auto-generated method stub
 	}
 
 }
