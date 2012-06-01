@@ -1,4 +1,4 @@
-package roguestates;
+package uk.ac.ic.kyoto.roguestates;
 
 import java.util.UUID;
 
