@@ -16,6 +16,11 @@ public class USAgent extends NonParticipant {
 	}
 	
 	@Override
+	protected void processInput(uk.ac.imperial.presage2.core.messaging.Input input) {
+		
+	};
+	
+	@Override
 	public void execute() {
 		// TODO Auto-generated method stub
 		

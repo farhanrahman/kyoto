@@ -13,10 +13,4 @@ public abstract class NonParticipant extends AbstractCountry {
 				carbonOffset, availableToSpend, carbonTraded);
 		// TODO Auto-generated constructor stub
 	}
-
-	@Override
-	protected void processInput(Input in) {
-		// TODO Auto-generated method stub
-	}
-
 }
