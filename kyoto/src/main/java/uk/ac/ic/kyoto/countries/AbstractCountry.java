@@ -34,30 +34,30 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	//TODO Register UUID and country ISO with the environment
 	
-	final private double landArea;
-	final private String ISO;		//ISO 3166-1 alpha-3
+	final protected double landArea;
+	final protected String ISO;		//ISO 3166-1 alpha-3
 	
-	private double 	arableLandArea;
-	private double 	GDP;
-	private double 	GDPRate;
-	private long 	carbonOutput; // In tons of carbon dioxide
-	private long	emissionsTarget; // Number of tons of carbon you SHOULD produce
-	private long 	carbonOffset;
+	protected double 	arableLandArea;
+	protected double 	GDP;
+	protected double 	GDPRate;
+	protected long 	carbonOutput; // In tons of carbon dioxide
+	protected long	emissionsTarget; // Number of tons of carbon you SHOULD produce
+	protected long 	carbonOffset;
 	//private float 	availableToSpend;
-	private double marketState;
+	protected double marketState;
 	//private long 	carbonTraded;
 	//private double  dirtyIndustry;
-	private float economicOutput;
+	protected float economicOutput;
 	/**
 	 * carbonEmission and carbonEmissionReports added
 	 */
-	private double carbonEmission = 10.0;  //Farhan test
+	protected double carbonEmission = 10.0;  //Farhan test
 
-	private Map<Integer, Double> carbonEmissionReports;	
+	protected Map<Integer, Double> carbonEmissionReports;	
 	
-	private Set<PublicOffer> 		offers;
-	private CarbonReductionHandler 	carbonReductionHandler;
-	private CarbonAbsorptionHandler carbonAbsorptionHandler;
+	protected Set<PublicOffer> 		offers;
+	protected CarbonReductionHandler 	carbonReductionHandler;
+	protected CarbonAbsorptionHandler carbonAbsorptionHandler;
 
 	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
 					double GDPRate, long emissionsTarget, long carbonOffset,
