@@ -3,8 +3,6 @@ package uk.ac.ic.kyoto.annex1reduce.analysis;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import uk.ac.imperial.presage2.core.network.Message;
-
 /**
  * Stores and makes available all given TickHistories for current Session<br>
  * <br>
@@ -43,7 +41,7 @@ public class SessionHistory {
 	 * @param m
 	 * @param currentTick
 	 */
-	public void add(Message m, int currentTick){
+	public void add(Class<? extends Message> m, int currentTick){
 		
 		if(tick == null){
 			tick = new TickHistory(currentTick);

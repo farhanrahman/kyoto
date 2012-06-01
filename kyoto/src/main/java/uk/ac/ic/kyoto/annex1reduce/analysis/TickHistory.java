@@ -3,9 +3,6 @@ package uk.ac.ic.kyoto.annex1reduce.analysis;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import uk.ac.ic.kyoto.trade.TradeMessage;
-import uk.ac.imperial.presage2.core.network.Message;
-
 /**
  * Stores all messages (trade and investment), and automagically
  * computes high, low & average.<br>
@@ -54,7 +51,9 @@ public class TickHistory{
 	 * Calculates unit price, updates High/Low values and stores to Set
 	 * @param m
 	 */
-	public void addMessage(Message m){
+	public void addMessage(Object m){
+		//TODO 	Make this genetic (eg. Class<? extends Message>)
+		//		OR use instanceof and typecast objects
 		
 		int quantity = m.getQuantity();
 		float price = m.getPrice();
@@ -94,7 +93,7 @@ public class TickHistory{
 			investmentAverage = tempSum/messages.size();
 			
 		}else{
-			throw new Exception("Jizz all up my arse");
+			//throw new Exception("Jizz all up my arse");
 		}
 		
 		messages.add(m);
