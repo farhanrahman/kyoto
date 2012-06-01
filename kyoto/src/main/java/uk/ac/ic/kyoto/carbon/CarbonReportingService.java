@@ -14,7 +14,10 @@ import uk.ac.imperial.presage2.core.environment.StateTransformer;
 
 import com.google.inject.Inject;
 
-
+/**
+ * 
+ * @author farhanrahman
+ */
 public class CarbonReportingService extends EnvironmentService {
 
 	Logger logger = Logger.getLogger(CarbonReportingService.class);

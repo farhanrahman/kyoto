@@ -4,6 +4,10 @@ import uk.ac.imperial.presage2.core.Action;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
+/**
+ * 
+ * @author farhanrahman
+ */
 public class SubmitCarbonEmissionReport implements Action {
 	
 	final private Double carbonEmission;	
