@@ -62,12 +62,36 @@ public abstract class TradeProtocol extends FSMProtocol {
 		public int getTotalCost() {
 			return unitCost * quantity;
 		}
+		
+		public TradeType getType(){
+			return this.type;
+		}
 
 		@Override
 		public String toString() {
 			return "Trade: "+quantity+" @ "+unitCost; 
 		}
 
+		public boolean equals(Trade t){
+			if(this == t) {
+				return true;
+			} else if (	this.quantity == t.getQuantity() && 
+						this.unitCost == t.getUnitCost() && 
+						this.type == t.getType()) {
+				return true;
+			} else if (	this.quantity == -t.getQuantity() &&
+						this.unitCost == t.getUnitCost() && 
+						this.type == t.reverse().getType()){
+				return true;
+			} else if ( this.quantity == t.getQuantity() &&
+						this.unitCost == -t.getUnitCost() &&
+						this.type == t.reverse().getType()){
+				return true;
+			} else {
+				return false;
+			}
+		}
+		
 		public Trade reverse(){
 			TradeType t = this.type.equals(TradeType.BUY)?TradeType.SELL:TradeType.BUY;
 			return new Trade(this.quantity, this.unitCost, t);
@@ -103,6 +127,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 		this.id = id;
 		this.authkey = authkey;
 		this.environment = environment;
+
 
 		logger = Logger.getLogger(TradeProtocol.class.getName() + ", " + id);
 
