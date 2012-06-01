@@ -45,7 +45,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 */
 	private double carbonEmission = 10.0;
 
-	private Map<Time, Double> carbonEmissionReports;	
+	private Map<Integer, Double> carbonEmissionReports;	
 	
 	private Set<PublicOffer> 		offers;
 	private CarbonReductionHandler 	carbonReductionHandler;
@@ -68,7 +68,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.carbonOffset = carbonOffset;
 		this.availableToSpend = availableToSpend;
 		this.carbonTraded = carbonTraded;
-		this.carbonEmissionReports = new HashMap<Time, Double>();		
+		this.carbonEmissionReports = new HashMap<Integer, Double>();		
 	}
 	
 	@Override
@@ -91,12 +91,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return s;
 	}
 	
-	public Map<Time,Double> getCarbonEmissionReports(){
+	public Map<Integer,Double> getCarbonEmissionReports(){
 		return this.carbonEmissionReports;
 	}
 	
-	public Map<Time,Double> addToReports(Time simTime, Double emission){
-		this.carbonEmissionReports.put(simTime, emission);
+	public Map<Integer,Double> addToReports(Time simTime, Double emission){
+		this.carbonEmissionReports.put(simTime.intValue(), emission);
 		return this.carbonEmissionReports;
 	}
 	
