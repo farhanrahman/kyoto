@@ -1,6 +1,8 @@
-package uk.ac.ic.kyoto.countries;
+package roguestates;
 
 import java.util.UUID;
+
+import uk.ac.ic.kyoto.countries.NonParticipant;
 
 public class USAgent extends NonParticipant {
 
