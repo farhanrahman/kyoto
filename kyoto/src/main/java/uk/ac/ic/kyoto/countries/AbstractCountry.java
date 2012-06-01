@@ -12,6 +12,7 @@ import java.util.UUID;
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
 
 import uk.ac.ic.kyoto.trade.PublicOffer;
+import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.ActionHandlingException;
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
@@ -55,6 +56,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 
 	protected Map<Integer, Double> carbonEmissionReports;	
 	
+	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
 	protected Set<PublicOffer> 		offers;
 	protected CarbonReductionHandler 	carbonReductionHandler;
 	protected CarbonAbsorptionHandler carbonAbsorptionHandler;
