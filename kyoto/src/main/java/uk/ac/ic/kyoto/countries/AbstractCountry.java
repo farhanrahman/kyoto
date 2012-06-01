@@ -122,7 +122,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		
 		public CarbonReductionHandler() {
 			for (double i=0.00; i <= 1.00; i += 0.01) {
-				investTable.put(GameConst.carbonReductionCoeff*Math.round((i/Math.exp(-(1-i)))), i);
+				investTable.put(GameConst.CARBON_REDUCTION_COEFF*Math.round((i/Math.exp(-(1-i)))), i);
 			}
 		}
 		
@@ -138,7 +138,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		 * (Because 10% of 30 is 3)
 		 */
 		public final double getCost(double percentage){
-			return Gameconst.carbonReductionCoeff*(percentage/Math.exp(-(1-percentage)));
+			return GameConst.CARBON_REDUCTION_COEFF*(percentage/Math.exp(-(1-percentage)));
 		}
 		
 		/**
