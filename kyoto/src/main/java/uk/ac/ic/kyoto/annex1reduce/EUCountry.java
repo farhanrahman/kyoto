@@ -34,4 +34,3 @@ public class EUCountry extends AbstractCountry {
 	}
 
 }
->>>>>>> development
