@@ -12,6 +12,7 @@ import java.util.UUID;
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
 
 import uk.ac.ic.kyoto.trade.PublicOffer;
+import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.ActionHandlingException;
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
@@ -34,33 +35,36 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	//TODO Register UUID and country ISO with the environment
 	
-	final private double landArea;
-	final private String ISO;		//ISO 3166-1 alpha-3
+	final protected double landArea;
+	final protected String ISO;		//ISO 3166-1 alpha-3
 	
-	private double 	arableLandArea;
-	private double 	GDP;
-	private double 	GDPRate;
-	private long 	carbonOutput; // In tons of carbon dioxide
-	private double	emissionTarget;
-	private long 	carbonOffset;
-	private float 	availableToSpend;
-	private long 	carbonTraded;
-	private double  dirtyIndustry;
-	
+	protected double 	arableLandArea;
+	protected double 	GDP;
+	protected double 	GDPRate;
+	protected long 	carbonOutput; // In tons of carbon dioxide
+	protected long	emissionsTarget; // Number of tons of carbon you SHOULD produce
+	protected long 	carbonOffset;
+	//private float 	availableToSpend;
+	protected double marketState;
+	//private long 	carbonTraded;
+	//private double  dirtyIndustry;
+	protected float economicOutput;
 	/**
 	 * carbonEmission and carbonEmissionReports added
 	 */
-	private double carbonEmission = 10.0;
+	protected double carbonEmission = 10.0;  //Farhan test
 
-	private Map<Integer, Double> carbonEmissionReports;	
+	protected Map<Integer, Double> carbonEmissionReports;	
 	
-	private Set<PublicOffer> 		offers;
-	private CarbonReductionHandler 	carbonReductionHandler;
-	private CarbonAbsorptionHandler carbonAbsorptionHandler;
+	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
+	protected Set<PublicOffer> 		offers;
+	protected CarbonReductionHandler 	carbonReductionHandler;
+	protected CarbonAbsorptionHandler carbonAbsorptionHandler;
 
 	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
-					double GDPRate, double emissionsTarget, long carbonOffset,
-					float availableToSpend, long carbonTraded) {
+					double GDPRate, long emissionsTarget, long carbonOffset,
+					float economicOutput) {
+
 		//TODO Validate parameters
 		
 		super(id, name);
@@ -69,11 +73,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.arableLandArea = arableLandArea;
 		this.GDP = GDP;
 		this.GDPRate = GDPRate;
-		this.emissionTarget = emissionsTarget;
+		this.emissionsTarget = emissionsTarget;
 		this.carbonOffset = carbonOffset;
-		this.availableToSpend = availableToSpend;
-		this.carbonTraded = carbonTraded;
-		this.carbonEmissionReports = new HashMap<Integer, Double>();		
+	//	this.availableToSpend = availableToSpend; -- replaced with a function since availiable to spend can be derived from GDP
+	//	this.carbonTraded = carbonTraded;
+		this.carbonEmissionReports = new HashMap<Integer, Double>();
+		this.economicOutput = economicOutput;
 	}
 	
 	@Override
@@ -110,9 +115,13 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return new Double(carbonEmission);
 	}	
 	
+	public Double getCash(){
+		return this.GDP*GameConst.PERCENTAGE_OF_GDP;
+	}
 	@EventListener
 	public void calculateGDPRate(EndOfTimeCycle e){
-		//TODO Implement
+		//TODO Make work, adjust economicOutput
+		GDPRate = GDPRate + marketState + (GameConst.GROWTH_SCALER*(economicOutput))/GDP;
 	}
 	
 	private final class CarbonReductionHandler{
@@ -250,18 +259,18 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return GDPRate;
 	}
 
-	public double getDirtyIndustry() {
+/*	public double getDirtyIndustry() {
 		return dirtyIndustry;
 	}
-
+*/
 	public double getEmissionTarget() {
-		return emissionTarget;
+		return emissionsTarget;
 	}
 
 	public long getCarbonOffset() {
 		return carbonOffset;
 	}
-
+/*
 	public float getAvailableToSpend() {
 		return availableToSpend;
 	}
@@ -269,5 +278,5 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	public long getCarbonTraded() {
 		return carbonTraded;
 	}
-	
+*/	
 }
