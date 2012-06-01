@@ -41,7 +41,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	private double 	GDP;
 	private double 	GDPRate;
 	private long 	carbonOutput; // In tons of carbon dioxide
-	private long	emissionTarget; // Number of tons of carbon you SHOULD produce
+	private long	emissionsTarget; // Number of tons of carbon you SHOULD produce
 	private long 	carbonOffset;
 	//private float 	availableToSpend;
 	private double marketState;
@@ -60,7 +60,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	private CarbonAbsorptionHandler carbonAbsorptionHandler;
 
 	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
-					double GDPRate, double emissionsTarget, long carbonOffset,
+					double GDPRate, long emissionsTarget, long carbonOffset,
 					float economicOutput) {
 
 		//TODO Validate parameters
@@ -71,7 +71,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.arableLandArea = arableLandArea;
 		this.GDP = GDP;
 		this.GDPRate = GDPRate;
-		this.emissionTarget = emissionTarget;
+		this.emissionsTarget = emissionsTarget;
 		this.carbonOffset = carbonOffset;
 	//	this.availableToSpend = availableToSpend; -- replaced with a function since availiable to spend can be derived from GDP
 	//	this.carbonTraded = carbonTraded;
@@ -262,7 +262,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 */
 	public double getEmissionTarget() {
-		return emissionTarget;
+		return emissionsTarget;
 	}
 
 	public long getCarbonOffset() {
