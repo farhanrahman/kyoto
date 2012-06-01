@@ -25,7 +25,7 @@ public class CanadaAgent extends NonParticipant {
 	@Override
 	public void execute() {
 		// TODO Auto-generated method stub
-		if (carbonOutput - emissionTarget + carbonOffset > 0) {
+		if (carbonOutput - emissionsTarget + carbonOffset > 0) {
 			
 		}
 	}
