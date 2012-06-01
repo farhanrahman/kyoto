@@ -16,14 +16,17 @@ public class TickHistory{
 	
 	private final int tickId;
 	
-	//TODO Message object does not yet exist. Needs to be specified.
 	private HashSet<Message> messages;
+	
 	private float tradeHigh;
 	private float tradeLow;
-	private float tradeAverage;
+	private float tradeNo;
+	private float tradeSum;
+	
 	private float investmentHigh;
 	private float investmentLow;
-	private float investmentAverage;
+	private float investmentNo;
+	private float investmentSum;
 
 	/**
 	 * Constructs a TickHistory with ID of currentTick
@@ -42,9 +45,14 @@ public class TickHistory{
 		messages = new HashSet<Message>();
 		
 		tradeHigh = Float.MIN_VALUE;
+		tradeLow = Float.MAX_VALUE;
+		tradeNo = 0;
+		tradeSum = 0;
+		
 		investmentHigh = Float.MIN_VALUE;
 		investmentLow = Float.MAX_VALUE;
-		tradeLow = Float.MAX_VALUE;
+		investmentNo = 0;
+		investmentSum = 0;
 	}
 	
 	/**
@@ -58,8 +66,8 @@ public class TickHistory{
 		int quantity = m.getQuantity();
 		float price = m.getPrice();
 		
-		//TODO What if price is zero
-		float unitPrice = quantity/price;
+		//TODO What if quantity is zero
+		float unitPrice = price/quantity;
 		float tempSum = 0;
 		
 		if (m instanceof TradeMessage){
@@ -70,12 +78,8 @@ public class TickHistory{
 				tradeLow = unitPrice;
 			}
 			
-			//TODO Make more efficient
-			for (Message m1 : messages) {
-				tempSum += (m1.getQuantity())/(m1.getPrice());
-			}
-			
-			tradeAverage = tempSum/messages.size();
+			tradeNo++;
+			tradeSum += unitPrice;
 			
 		}else if (m instanceof InvestmentMessage) {
 			
@@ -85,15 +89,12 @@ public class TickHistory{
 				investmentLow = unitPrice;
 			}
 			
-			//TODO Make more efficient
-			for (Message m1 : messages) {
-				tempSum += (m1.getQuantity())/(m1.getPrice());
-			}
-			
-			investmentAverage = tempSum/messages.size();
+			investmentNo++;
+			investmentSum += unitPrice;
 			
 		}else{
-			throw new Exception();
+			//TODO Should be be able to accept Message objects?
+			throw new Exception("Input arg must extend Message");
 		}
 		
 		messages.add(m);
@@ -124,11 +125,11 @@ public class TickHistory{
 	}
 
 	public float getTradeAverage() {
-		return tradeAverage;
+		return tradeSum/tradeNo;
 	}
 
 	public float getInvestmentAverage() {
-		return investmentAverage;
+		return investmentSum/investmentNo;
 	}
 	
 }

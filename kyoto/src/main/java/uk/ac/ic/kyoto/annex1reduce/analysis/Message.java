@@ -7,8 +7,8 @@ package uk.ac.ic.kyoto.annex1reduce.analysis;
 @Deprecated
 public class Message{
 	
-	private final int quantity;
-	private final float price;
+	protected final int quantity;
+	protected final float price;
 	
 	public Message(int quantity, float price) {
 		this.quantity = quantity;
@@ -23,5 +23,17 @@ public class Message{
 		return price;
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		if ((obj instanceof Message) == false){
+			return false;
+		}
+		
+		/*boolean test1 = super.equals(obj);*/
+		boolean test2 = ((Message) obj).getPrice() == price;
+		boolean test3 = ((Message) obj).getQuantity() == quantity;
+		
+		return /*test1 &&*/ test2 && test3;
+	}
 	
 }
