@@ -6,17 +6,16 @@ public class CountryFile {
 	
 	Agent agent;
 	
-	private double 	dirtyIndustry;
 	private double	emissionTarget;
 	private long 	carbonOffset;
 	private float 	availableToSpend;
 	private long 	carbonTraded;
 
-	public CountryFile(Agent agent, double dirtyIndustry, double emissionsTarget, long carbonOffset,
+	public CountryFile(Agent agent, double emissionsTarget, long carbonOffset,
 					float availableToSpend, long carbonTraded) {
 		
 		super();
-		this.dirtyIndustry = dirtyIndustry;
+		this.agent = agent;
 		this.emissionTarget = emissionsTarget;
 		this.carbonOffset = carbonOffset;
 		this.availableToSpend = availableToSpend;
@@ -25,10 +24,6 @@ public class CountryFile {
 
 	public Agent getAgent() {
 		return agent;
-	}
-
-	public double getDirtyIndustry() {
-		return dirtyIndustry;
 	}
 
 	public double getEmissionTarget() {
@@ -45,10 +40,6 @@ public class CountryFile {
 
 	public long getCarbonTraded() {
 		return carbonTraded;
-	}
-
-	public void setDirtyIndustry(double dirtyIndustry) {
-		this.dirtyIndustry = dirtyIndustry;
 	}
 
 	public void setEmissionTarget(double emissionTarget) {
@@ -91,7 +82,7 @@ public class CountryFile {
 
 	@Override
 	public String toString() {
-		return "CountryFile [agent=" + agent + ", dirtyIndustry=" + dirtyIndustry +
+		return "CountryFile [agent=" + agent +
 							", emissionTarget=" + emissionTarget +
 							", carbonOffset=" + carbonOffset +
 							", availableToSpend=" + availableToSpend +

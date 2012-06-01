@@ -6,6 +6,7 @@ import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 public abstract class NonParticipant extends AbstractCountry {
 
+
 	public NonParticipant(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
 			double GDPRate, double emissionsTarget, long carbonOffset,
 			float economicOutput) {
@@ -14,10 +15,4 @@ public abstract class NonParticipant extends AbstractCountry {
 				economicOutput);
 		// TODO Auto-generated constructor stub
 	}
-
-	@Override
-	protected void processInput(Input in) {
-		// TODO Auto-generated method stub
-	}
-
 }
