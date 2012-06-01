@@ -10,7 +10,7 @@ public class NonAnnexOne extends AbstractCountry {
 			double GDP,	double GDPRate, double dirtyIndustry, double emissionsTarget, long carbonOffset,
 			float availableToSpend, long carbonTraded) {
 		super(id, name, ISO, landArea, arableLandArea,
-				GDP,GDPRate,dirtyIndustry,emissionsTarget,carbonOffset,
+				GDP,GDPRate,emissionsTarget,carbonOffset,
 				availableToSpend,carbonTraded);
 	}
 
