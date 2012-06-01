@@ -1,12 +1,29 @@
 package uk.ac.ic.kyoto.countries;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.UUID;
 
+import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
+
 import uk.ac.ic.kyoto.trade.PublicOffer;
+import uk.ac.imperial.presage2.core.Time;
+import uk.ac.imperial.presage2.core.environment.ActionHandlingException;
+import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
+import uk.ac.imperial.presage2.core.simulator.SimTime;
+import uk.ac.imperial.presage2.util.location.ParticipantLocationService;
+import uk.ac.ic.kyoto.trade.PublicOffer;
+import uk.ac.imperial.presage2.core.event.EventListener;
+import uk.ac.imperial.presage2.core.messaging.Input;
+import uk.ac.imperial.presage2.core.simulator.Parameter;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 /**
@@ -28,15 +45,22 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	private long 	carbonOffset;
 	private float 	availableToSpend;
 	private long 	carbonTraded;
+	private double  dirtyIndustry;
+	
+	/**
+	 * carbonEmission and carbonEmissionReports added
+	 */
+	private double carbonEmission = 10.0;
+
+	private Map<Integer, Double> carbonEmissionReports;	
 	
 	private Set<PublicOffer> 		offers;
 	private CarbonReductionHandler 	carbonReductionHandler;
 	private CarbonAbsorptionHandler carbonAbsorptionHandler;
 
-	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea,
-			double GDP,	double GDPRate, double dirtyIndustry, double emissionsTarget, long carbonOffset,
-			float availableToSpend, long carbonTraded) {
-		
+	public AbstractCountry(UUID id, String name, double landArea, double arableLandArea, double GDP,
+					double GDPRate, double emissionsTarget, long carbonOffset,
+					float availableToSpend, long carbonTraded) {
 		//TODO Validate parameters
 		
 		super(id, name);
@@ -45,11 +69,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.arableLandArea = arableLandArea;
 		this.GDP = GDP;
 		this.GDPRate = GDPRate;
-		this.dirtyIndustry = dirtyIndustry;
 		this.emissionTarget = emissionsTarget;
 		this.carbonOffset = carbonOffset;
 		this.availableToSpend = availableToSpend;
-		this.carbonTraded = carbonTraded;		
+		this.carbonTraded = carbonTraded;
+		this.carbonEmissionReports = new HashMap<Integer, Double>();		
 	}
 	
 	@Override
@@ -65,12 +89,42 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		
 	}
 	
+	protected Set<ParticipantSharedState> getSharedState(){
+		Set<ParticipantSharedState> s = super.getSharedState();
+		s.add(new ParticipantSharedState("Report", 
+	            (Serializable) this.getCarbonEmissionReports(), getID()));
+		return s;
+	}
+	
+	public Map<Integer,Double> getCarbonEmissionReports(){
+		return this.carbonEmissionReports;
+	}
+	
+	public Map<Integer,Double> addToReports(Time simTime, Double emission){
+		this.carbonEmissionReports.put(simTime.intValue(), emission);
+		return this.carbonEmissionReports;
+	}
+	
+	public Double calculateCarbonEmission(){
+		//TODO add code to calculate whether to submit true or false report (cheat)
+		return new Double(carbonEmission);
+	}	
+	
 	@EventListener
 	public void calculateGDPRate(EndOfTimeCycle e){
 		//TODO Implement
 	}
 	
 	private final class CarbonReductionHandler{
+		
+		final Map<Long, Double> investTable = new TreeMap<Long, Double>();
+//		final ArrayList<Long> investTable = new ArrayList<Long>();
+		
+		public CarbonReductionHandler() {
+			for (double i=0.00; i <= 1.00; i += 0.01) {
+				investTable.put(GameConst.carbonReductionCoeff*Math.round((i/Math.exp(-(1-i)))), i);
+			}
+		}
 		
 		/**
 		 * Returns the cost of investment required to
@@ -84,17 +138,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		 * (Because 10% of 30 is 3)
 		 */
 		public final double getCost(double percentage){
-			// TODO improve
-			double proportion = percentage;
-			if (proportion > 0.31) {
-				return (proportion - 0.1) * GDP;
-			}
-			else if (proportion > 0.19) {
-				return (proportion - 0.05) * GDP;
-			}
-			else {
-				return proportion * GDP;
-			}
+			return Gameconst.carbonReductionCoeff*(percentage/Math.exp(-(1-percentage)));
 		}
 		
 		/**
@@ -104,26 +148,19 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		 * @param currency
 		 * 
 		 * Investment is an amount, say $10,000,000.
-		 * The return value is a percentage of total industry.
-		 * If this function returns 5% and you are at 30%
-		 * dirty industry, you will go to 25%.
+		 * The return value is the percentage of your
+		 * carbon output that will be reduced.
+		 * Eg. If it returns 10%, you will go from
+		 * 100 tons to 90 tons.
 		 */
-
-		public final double getPercentage(double investment){
+		public final double getPercentage(long investment) throws IllegalArgumentException{
 			//TODO Improve
-			double proportion = investment / GDP;
-			double result;
-			
-			if (proportion > 0.21) {
-				result = (proportion + 0.1) * dirtyIndustry;
+			for (Entry<Long, Double> el : investTable.entrySet()) {
+				if (el.getKey() > investment) {
+					return (double)el.getValue();
+				}
 			}
-			else if (proportion > 0.14) {
-				result = (proportion + 0.05) * dirtyIndustry;
-			}
-			else {
-				result = proportion * dirtyIndustry;
-			}
-			return result;
+			throw new IllegalArgumentException("Out of bounds: no record in the table");
 		}
 		
 		/**
@@ -135,7 +172,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		 * @param investment
 		 * @throws Exception
 		 */
-		public final void invest(double investment) throws Exception{
+		public final void invest(long investment) throws Exception{
 			if(investment < GDP){
 				GDP -= investment;
 				carbonOutput -= (getPercentage(investment) * carbonOutput);
@@ -183,6 +220,13 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			if(investment <= GDP){
 				//TODO Implement reduction in GDP
 				//TODO Implement change in CO2 emissions/arable land
+				//Test for submitting reports
+				/*try{
+					this.environment.act(new SubmitCarbonEmissionReport(this.calculateCarbonEmission(), SimTime.get(), this), this.getID(), this.authkey);
+				}catch(ActionHandlingException e){
+					logger.warn("Error trying to submit report");
+				}*/
+								
 			}else{
 				//TODO Use better exception
 				throw new Exception("Investment is greated than available GDP");
