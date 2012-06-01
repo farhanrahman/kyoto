@@ -43,14 +43,15 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	private long 	carbonOutput; // In tons of carbon dioxide
 	private double	emissionTarget;
 	private long 	carbonOffset;
-	private float 	availableToSpend;
-	private long 	carbonTraded;
-	private double  dirtyIndustry;
-	
+	//private float 	availableToSpend;
+	private double marketState;
+	//private long 	carbonTraded;
+	//private double  dirtyIndustry;
+	private float economicOutput;
 	/**
 	 * carbonEmission and carbonEmissionReports added
 	 */
-	private double carbonEmission = 10.0;
+	private double carbonEmission = 10.0;  //Farhan test
 
 	private Map<Integer, Double> carbonEmissionReports;	
 	
@@ -60,7 +61,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 
 	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
 					double GDPRate, double emissionsTarget, long carbonOffset,
-					float availableToSpend, long carbonTraded) {
+					float economicOutput) {
 		//TODO Validate parameters
 		
 		super(id, name);
@@ -71,9 +72,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.GDPRate = GDPRate;
 		this.emissionTarget = emissionsTarget;
 		this.carbonOffset = carbonOffset;
-		this.availableToSpend = availableToSpend;
-		this.carbonTraded = carbonTraded;
-		this.carbonEmissionReports = new HashMap<Integer, Double>();		
+	//	this.availableToSpend = availableToSpend; -- replaced with a function since availiable to spend can be derived from GDP
+	//	this.carbonTraded = carbonTraded;
+		this.carbonEmissionReports = new HashMap<Integer, Double>();
+		this.economicOutput = economicOutput;
 	}
 	
 	@Override
@@ -110,9 +112,13 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return new Double(carbonEmission);
 	}	
 	
+	public Double getCash(){
+		return this.GDP*GameConst.PERCENTAGE_OF_GDP;
+	}
 	@EventListener
 	public void calculateGDPRate(EndOfTimeCycle e){
-		//TODO Implement
+		//TODO Make work, adjust economicOutput
+		GDPRate = GDPRate + marketState + (GameConst.GROWTH_SCALER*(economicOutput))/GDP;
 	}
 	
 	private final class CarbonReductionHandler{
@@ -250,10 +256,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return GDPRate;
 	}
 
-	public double getDirtyIndustry() {
+/*	public double getDirtyIndustry() {
 		return dirtyIndustry;
 	}
-
+*/
 	public double getEmissionTarget() {
 		return emissionTarget;
 	}
@@ -261,7 +267,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	public long getCarbonOffset() {
 		return carbonOffset;
 	}
-
+/*
 	public float getAvailableToSpend() {
 		return availableToSpend;
 	}
@@ -269,5 +275,5 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	public long getCarbonTraded() {
 		return carbonTraded;
 	}
-	
+*/	
 }
