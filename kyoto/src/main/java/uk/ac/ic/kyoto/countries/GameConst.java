@@ -11,6 +11,7 @@ public final class GameConst {
 	
 	//GDP - percentage of GDP availaible to spend
 	public static final double PERCENTAGE_OF_GDP = 0.1;
+	public static long CARBON_REDUCTION_COEFF = 1;
 	
 	
 	//Carbon Absorbtion
