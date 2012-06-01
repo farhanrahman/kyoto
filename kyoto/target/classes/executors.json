@@ -1,0 +1,10 @@
+{
+	"executors": [
+		{
+			"class": "uk.ac.imperial.presage2.core.cli.run.LocalSubProcessExecutor",
+			"args": [1],
+			"__comment": "Local sub process executor with 1 concurrent process."
+		}
+	],
+	"enableLogs": true
+}
