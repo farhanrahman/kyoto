@@ -17,7 +17,6 @@ public abstract class NonParticipant extends AbstractCountry {
 	@Override
 	protected void processInput(Input in) {
 		// TODO Auto-generated method stub
-
 	}
 
 }
