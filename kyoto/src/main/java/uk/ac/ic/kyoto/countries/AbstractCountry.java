@@ -58,7 +58,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	private CarbonReductionHandler 	carbonReductionHandler;
 	private CarbonAbsorptionHandler carbonAbsorptionHandler;
 
-	public AbstractCountry(UUID id, String name, double landArea, double arableLandArea, double GDP,
+	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
 					double GDPRate, double emissionsTarget, long carbonOffset,
 					float availableToSpend, long carbonTraded) {
 		//TODO Validate parameters

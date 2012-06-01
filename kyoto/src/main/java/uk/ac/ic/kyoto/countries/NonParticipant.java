@@ -6,10 +6,10 @@ import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 public abstract class NonParticipant extends AbstractCountry {
 
-	public NonParticipant(UUID id, String name, double landArea, double arableLandArea, double GDP,
-			double GDPRate, double dirtyIndustry, double emissionsTarget, long carbonOffset,
+	public NonParticipant(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
+			double GDPRate, double emissionsTarget, long carbonOffset,
 			float availableToSpend, long carbonTraded) {
-		super(id, name, landArea, arableLandArea, GDP, GDPRate, dirtyIndustry, emissionsTarget, 
+		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, emissionsTarget, 
 				carbonOffset, availableToSpend, carbonTraded);
 		// TODO Auto-generated constructor stub
 	}
