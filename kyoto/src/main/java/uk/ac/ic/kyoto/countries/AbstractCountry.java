@@ -43,7 +43,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	protected double 	GDPRate;
 	protected long 	carbonOutput; // In tons of carbon dioxide
 	protected long	emissionsTarget; // Number of tons of carbon you SHOULD produce
-	protected long 	carbonOffset;
+	protected long 	carbonOffset; // In tons of carbon
 	//private float 	availableToSpend;
 	protected double marketState;
 	//private long 	carbonTraded;

@@ -39,7 +39,6 @@ public class CanadaAgent extends NonParticipant {
 					return false;
 				}
 			};
-			
 		} catch (FSMException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
