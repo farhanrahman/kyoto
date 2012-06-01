@@ -9,7 +9,7 @@ public class CanadaAgent extends NonParticipant {
 
 	public CanadaAgent(UUID id, String name, String ISO, double landArea,
 			double arableLandArea, double GDP, double GDPRate,
-			double emissionsTarget, long carbonOffset, float availableToSpend,
+			long emissionsTarget, long carbonOffset, float availableToSpend,
 			long carbonTraded) {
 		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate,
 				emissionsTarget, carbonOffset, availableToSpend, carbonTraded);
@@ -20,6 +20,12 @@ public class CanadaAgent extends NonParticipant {
 	protected void processInput(Input input) {
 		// TODO Auto-generated method stub
 
+	}
+	
+	@Override
+	public void execute() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

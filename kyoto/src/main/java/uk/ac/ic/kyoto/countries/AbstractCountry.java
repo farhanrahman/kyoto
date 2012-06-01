@@ -41,7 +41,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	private double 	GDP;
 	private double 	GDPRate;
 	private long 	carbonOutput; // In tons of carbon dioxide
-	private double	emissionTarget;
+	private long	emissionTarget; // Number of tons of carbon you SHOULD produce
 	private long 	carbonOffset;
 	private float 	availableToSpend;
 	private long 	carbonTraded;
@@ -59,7 +59,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	private CarbonAbsorptionHandler carbonAbsorptionHandler;
 
 	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
-					double GDPRate, double emissionsTarget, long carbonOffset,
+					double GDPRate, long emissionsTarget, long carbonOffset,
 					float availableToSpend, long carbonTraded) {
 		//TODO Validate parameters
 		
