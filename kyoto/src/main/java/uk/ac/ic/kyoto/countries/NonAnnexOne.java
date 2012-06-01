@@ -25,7 +25,7 @@ public class NonAnnexOne extends AbstractCountry {
 	public void execute() {
 		// TODO Auto-generated method stub - what does this mean?
 		
-		//write some behaviors
+		//write some behaviors pseudocode
 	}
 
 }
