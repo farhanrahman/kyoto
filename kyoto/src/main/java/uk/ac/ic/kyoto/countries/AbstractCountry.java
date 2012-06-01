@@ -34,7 +34,7 @@ abstract class AbstractCountry extends AbstractParticipant {
 	private CarbonAbsorptionHandler carbonAbsorptionHandler;
 
 	public AbstractCountry(UUID id, String name, double landArea, double arableLandArea, double GDP,
-					double GDPRate, double dirtyIndustry, double emissionsTarget, long carbonOffset,
+					double GDPRate, double emissionsTarget, long carbonOffset,
 					float availableToSpend, long carbonTraded) {
 		
 		super(id, name);
@@ -42,7 +42,6 @@ abstract class AbstractCountry extends AbstractParticipant {
 		this.arableLandArea = arableLandArea;
 		this.GDP = GDP;
 		this.GDPRate = GDPRate;
-		this.dirtyIndustry = dirtyIndustry;
 		this.emissionTarget = emissionsTarget;
 		this.carbonOffset = carbonOffset;
 		this.availableToSpend = availableToSpend;
@@ -74,7 +73,7 @@ abstract class AbstractCountry extends AbstractParticipant {
 		
 		public CarbonReductionHandler() {
 			for (double i=0.00; i <= 1.00; i += 0.01) {
-				investTable.put(Math.round((i/Math.exp(-(1-i)))), i);
+				investTable.put(GameConst.carbonReductionCoeff*Math.round((i/Math.exp(-(1-i)))), i);
 			}
 		}
 		
@@ -90,7 +89,7 @@ abstract class AbstractCountry extends AbstractParticipant {
 		 * (Because 10% of 30 is 3)
 		 */
 		public final double getCost(double percentage){
-			return percentage/Math.exp(-(1-percentage));
+			return Gameconst.carbonReductionCoeff*(percentage/Math.exp(-(1-percentage)));
 		}
 		
 		/**
