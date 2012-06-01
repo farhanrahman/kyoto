@@ -1,12 +1,22 @@
 package uk.ac.ic.kyoto.countries;
 
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
+
 import uk.ac.ic.kyoto.trade.PublicOffer;
+import uk.ac.imperial.presage2.core.Time;
+import uk.ac.imperial.presage2.core.environment.ActionHandlingException;
+import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
+import uk.ac.imperial.presage2.core.simulator.SimTime;
+import uk.ac.imperial.presage2.util.location.ParticipantLocationService;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 /**
@@ -28,6 +38,14 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	private long 	carbonOffset;
 	private float 	availableToSpend;
 	private long 	carbonTraded;
+	private double  dirtyIndustry;
+	
+	/**
+	 * carbonEmission and carbonEmissionReports added
+	 */
+	private double carbonEmission = 10.0;
+
+	private Map<Time, Double> carbonEmissionReports;	
 	
 	private Set<PublicOffer> 		offers;
 	private CarbonReductionHandler 	carbonReductionHandler;
@@ -49,7 +67,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.emissionTarget = emissionsTarget;
 		this.carbonOffset = carbonOffset;
 		this.availableToSpend = availableToSpend;
-		this.carbonTraded = carbonTraded;		
+		this.carbonTraded = carbonTraded;
+		this.carbonEmissionReports = new HashMap<Time, Double>();		
 	}
 	
 	@Override
@@ -64,6 +83,27 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		
 		
 	}
+	
+	protected Set<ParticipantSharedState> getSharedState(){
+		Set<ParticipantSharedState> s = super.getSharedState();
+		s.add(new ParticipantSharedState("Report", 
+	            (Serializable) this.getCarbonEmissionReports(), getID()));
+		return s;
+	}
+	
+	public Map<Time,Double> getCarbonEmissionReports(){
+		return this.carbonEmissionReports;
+	}
+	
+	public Map<Time,Double> addToReports(Time simTime, Double emission){
+		this.carbonEmissionReports.put(simTime, emission);
+		return this.carbonEmissionReports;
+	}
+	
+	public Double calculateCarbonEmission(){
+		//TODO add code to calculate whether to submit true or false report (cheat)
+		return new Double(carbonEmission);
+	}	
 	
 	@EventListener
 	public void calculateGDPRate(EndOfTimeCycle e){
@@ -183,6 +223,13 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			if(investment <= GDP){
 				//TODO Implement reduction in GDP
 				//TODO Implement change in CO2 emissions/arable land
+				//Test for submitting reports
+				/*try{
+					this.environment.act(new SubmitCarbonEmissionReport(this.calculateCarbonEmission(), SimTime.get(), this), this.getID(), this.authkey);
+				}catch(ActionHandlingException e){
+					logger.warn("Error trying to submit report");
+				}*/
+								
 			}else{
 				//TODO Use better exception
 				throw new Exception("Investment is greated than available GDP");
