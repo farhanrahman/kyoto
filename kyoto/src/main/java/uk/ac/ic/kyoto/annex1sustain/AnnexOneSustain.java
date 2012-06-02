@@ -1,4 +1,4 @@
-package uk.ac.ic.kyoto.countries;
+package uk.ac.ic.kyoto.annex1sustain;
 
 import java.util.UUID;
 import uk.ac.imperial.presage2.core.messaging.Input;
