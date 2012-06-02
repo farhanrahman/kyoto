@@ -55,7 +55,7 @@ public class Market
 		}
 	}
 	
-	public static EconomyState getEconomtyState() {
+	public static EconomyState getEconomyState() {
 		return currentEconomyState;
 	}
 }
