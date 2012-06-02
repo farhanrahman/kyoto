@@ -31,6 +31,8 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		
 	}
 
+	// Functions called once per tick
+	
 	protected void updateInternalPrice() {
 		double marketPrice = getMarketPrice();
 		
