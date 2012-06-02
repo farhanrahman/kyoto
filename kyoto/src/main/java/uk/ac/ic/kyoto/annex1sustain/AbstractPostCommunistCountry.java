@@ -76,4 +76,8 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	protected void updateCounter() {
 		ticksToEndOfRound--;
 	}
+	
+	protected void calculateLastYearPercentageSold() {
+		lastYearPercentageSold = (carbonToSellTarget - carbonToSell) / carbonToSellTarget;
+	}
 }
