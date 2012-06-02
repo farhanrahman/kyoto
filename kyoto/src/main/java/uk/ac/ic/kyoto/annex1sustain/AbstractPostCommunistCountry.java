@@ -4,7 +4,9 @@ import java.util.UUID;
 import java.util.List;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
+import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
+import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 
 public class AbstractPostCommunistCountry extends AbstractCountry {
 	
@@ -33,14 +35,23 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 
 	// Functions called once per tick
 	
+	@EventListener
+	public void updateInternalData(EndOfTimeCycle e)
+	{
+		updateCounter();
+		addUncommittedTransaction();
+		addCommittedTransaction();
+		updateInternalPrice();
+	}
+	
 	protected void updateInternalPrice() {
 		double marketPrice = getMarketPrice();
 		
-		internalPrice = 	Constants.MARKET_PRICE_COEFFICIENT * marketPrice +
+		internalPrice   = 	Constants.MARKET_PRICE_COEFFICIENT * marketPrice +
 							Constants.TIME_COEFFICIENT * ticksToEndOfRound + 
 							Constants.PREVIOUS_OFFER_COEFFICIENT * lastYearPercentageSold;
 	}
-	
+
 	protected double getMarketPrice() {
 		double maximumCommittedPrice = 0;
 		double minimumUncommittedPrice = Double.MAX_VALUE;
