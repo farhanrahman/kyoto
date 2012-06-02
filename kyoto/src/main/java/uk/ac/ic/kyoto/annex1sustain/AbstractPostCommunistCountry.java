@@ -14,6 +14,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	protected long 			ticksToEndOfRound;
 	protected long 			carbonToSell;
 	protected long 			carbonToSellTarget;
+	protected double		lastYearPercentageSold;
 	
 	public AbstractPostCommunistCountry(UUID id, String name, String ISO,
 			double landArea, double arableLandArea, double GDP, double GDPRate,
@@ -30,13 +31,17 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		
 	}
 
-	protected void calculateInternalPrice() {
-		// TODO implement
+	protected void updateInternalPrice() {
+		double marketPrice = getMarketPrice();
+		
+		internalPrice = 	Constants.MARKET_PRICE_COEFFICIENT * marketPrice +
+							Constants.TIME_COEFFICIENT * ticksToEndOfRound + 
+							Constants.PREVIOUS_OFFER_COEFFICIENT * lastYearPercentageSold;
 	}
 	
 	protected double getMarketPrice() {
 		double maximumCommittedPrice = 0;
-		double minimumUncommittedPrice = Integer.MAX_VALUE;
+		double minimumUncommittedPrice = Double.MAX_VALUE;
 		
 		try {
 			// Find maximum price of the committed transactions
