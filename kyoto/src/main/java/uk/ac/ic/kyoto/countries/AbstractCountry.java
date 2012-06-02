@@ -42,13 +42,14 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	protected double 	GDP;
 	protected double 	GDPRate;
 	protected long 	carbonOutput; // In tons of carbon dioxide
+	protected long  energyOutput; // In tons of carbon equivalence (how much carbon would be used if the whole energy production was carbon based)
+	protected long  energyOutputCeiling; // As above, limit for the energyOutput
 	protected long	emissionsTarget; // Number of tons of carbon you SHOULD produce
 	protected long 	carbonOffset;
 	//private float 	availableToSpend;
-	protected double marketState;
 	//private long 	carbonTraded;
 	//private double  dirtyIndustry;
-	protected float economicOutput;
+
 	/**
 	 * carbonEmission and carbonEmissionReports added
 	 */
@@ -63,7 +64,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 
 	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
 					double GDPRate, long emissionsTarget, long carbonOffset,
-					float economicOutput) {
+					long energyOutput) {
 
 		//TODO Validate parameters
 		
@@ -78,7 +79,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	//	this.availableToSpend = availableToSpend; -- replaced with a function since availiable to spend can be derived from GDP
 	//	this.carbonTraded = carbonTraded;
 		this.carbonEmissionReports = new HashMap<Integer, Double>();
-		this.economicOutput = economicOutput;
+		this.energyOutput = energyOutput;
 	}
 	
 	@Override
@@ -122,17 +123,19 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	public void calculateGDPRate(EndOfTimeCycle e){
 		//TODO Make work, adjust economicOutput
 		
+		double marketStateFactor = 0;
+		
 		EconomyState economyState = Market.getEconomyState();
 		switch(economyState) {
 		case GROWTH:
-			marketState = GameConst.GROWTH_MARKET_STATE;
+			marketStateFactor = GameConst.GROWTH_MARKET_STATE;
 		case STABLE:
-			marketState = GameConst.STABLE_MARKET_STATE;
+			marketStateFactor = GameConst.STABLE_MARKET_STATE;
 		case RECESSION:
-			marketState = GameConst.RECESSION_MARKET_STATE;
+			marketStateFactor = GameConst.RECESSION_MARKET_STATE;
 		}
 		
-		GDPRate = GDPRate + marketState + (GameConst.GROWTH_SCALER*(economicOutput))/GDP;
+		GDPRate = GDPRate + marketStateFactor + (GameConst.GROWTH_SCALER*(energyOutput))/GDP;
 	}
 	
 	private final class CarbonReductionHandler{
