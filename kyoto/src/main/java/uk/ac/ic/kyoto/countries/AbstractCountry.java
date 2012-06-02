@@ -114,7 +114,50 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	public Double calculateCarbonEmission(){
 		//TODO add code to calculate whether to submit true or false report (cheat)
 		return new Double(carbonEmission);
-	}	
+	}
+	
+	/**
+	 * Reduces both the energyOutput and carbonOutput of the country
+	 * It can be used to limit carbonOuput without any financial cost
+	 * As the energyOuput goes down, the GDP growth will be limited
+	 * 
+	 * @param amount
+	 * 
+	 * Amount of energyOuput that should be reduced
+	 * It has to be positive and lower than the total carbonOuput
+	 */
+	public void reduceEnergyOutput (long amount) throws IllegalArgumentException{
+		if (amount < carbonOutput && amount > 0) {
+			energyOutput -= amount;
+			carbonOutput -= amount;
+		}
+		else
+			throw new IllegalArgumentException("Specified amount should be > 0 and < carbonOutput");
+	}
+	
+	/**
+	 * Retrieves the energyOutput and carbonOutput of the country
+	 * It can only be used on the energy that was earlier reduced
+	 * There exists a ceiling of total energy for each country
+	 * 
+	 * @param amount
+	 * 
+	 * Amount of energyOuput that should be retrieved
+	 * It has to be positive and not exceed the energyOuputCeiling
+	 */
+	public void retrieveEnergyOutput (long amount) throws IllegalArgumentException{
+		if (amount > 0) {
+			long newEnergyOutput = energyOutput + amount;
+			if(newEnergyOutput <= energyOutputCeiling) {
+				energyOutput = newEnergyOutput;
+				carbonOutput += amount;
+			}
+			else
+				throw new IllegalArgumentException("You aimed to exceed your Energy Ouput limit");
+		}
+		else
+			throw new IllegalArgumentException("Specified amount should be positive");
+	}
 	
 	public Double getCash(){
 		return this.GDP*GameConst.PERCENTAGE_OF_GDP;
