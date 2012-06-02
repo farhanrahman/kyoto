@@ -121,6 +121,17 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	@EventListener
 	public void calculateGDPRate(EndOfTimeCycle e){
 		//TODO Make work, adjust economicOutput
+		
+		EconomyState economyState = Market.getEconomyState();
+		switch(economyState) {
+		case GROWTH:
+			marketState = GameConst.GROWTH_MARKET_STATE;
+		case STABLE:
+			marketState = GameConst.STABLE_MARKET_STATE;
+		case RECESSION:
+			marketState = GameConst.RECESSION_MARKET_STATE;
+		}
+		
 		GDPRate = GDPRate + marketState + (GameConst.GROWTH_SCALER*(economicOutput))/GDP;
 	}
 	
