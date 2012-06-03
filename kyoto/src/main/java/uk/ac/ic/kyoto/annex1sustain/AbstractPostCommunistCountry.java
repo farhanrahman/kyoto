@@ -45,14 +45,13 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	}
 	
 	protected void updateInternalPrice() {
-		double marketPrice = getMarketPrice();
 		
-		internalPrice   = 	Constants.MARKET_PRICE_COEFFICIENT * marketPrice +
-							Constants.TIME_COEFFICIENT * ticksToEndOfRound + 
+		internalPrice   = 	calculateMarketPrice() * 
+							calculateEndOfRoundFactor() * 
 							Constants.PREVIOUS_OFFER_COEFFICIENT * lastYearPercentageSold;
 	}
 
-	protected double getMarketPrice() {
+	protected double calculateMarketPrice() {
 		double maximumCommittedPrice = 0;
 		double minimumUncommittedPrice = Double.MAX_VALUE;
 		
@@ -76,6 +75,18 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		return (maximumCommittedPrice + minimumUncommittedPrice) / 2;
 	}
 	
+	protected double calculateEndOfRoundFactor() {
+		double endOfRoundFactor = 1;
+		if(ticksToEndOfRound < Constants.WHEN_TIME_STARTS_TO_INFLUENCE_THE_PRICE)
+			endOfRoundFactor = 	Constants.SLOPE_OF_TIME_TO_END_OF_ROUND_VS_PRICE *
+								(
+									Constants.NUMBER_OF_TICKS_IN_ROUND
+									- Constants.WHEN_TIME_STARTS_TO_INFLUENCE_THE_PRICE
+									- ticksToEndOfRound
+								);
+		return endOfRoundFactor;
+	}
+	
 	protected void addUncommittedTransaction() {
 		// TODO implement
 	}
@@ -91,28 +102,33 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	// Functions called once per year
 	
 	protected void calculateLastYearPercentageSold() {
+		// TODO exception handling (division by 0)
 		lastYearPercentageSold = (creditsToSellTarget - creditsToSell) / creditsToSellTarget;
 	}
 	
 	protected double getAvailableCreditsFactor() {
 		// TODO implement
 		//   Which variable of AbstractCountry represents available credits?
+		double availableCreditsFactor = 1;
+		return availableCreditsFactor;
 	}
 	
 	protected double getFossilFuelsFactor() {
 		// TODO implement
 		//   Will red from csv file to get fossil fuel price gradient
+		double fossilFuelsFactor = 1;
+		return fossilFuelsFactor;
 	}
 	
-	protected double getMarketFactor() {
+	protected double calculateMarketFactor() {
 		// TODO exception handling
 		Market.EconomyState economyState = Market.getEconomyState();
 		double marketFactor = 1;
 		switch (economyState) {
 			case GROWTH:
-				marketFactor = Constants.MARKET_STATE_COEFFICIENT;
+				marketFactor = 1 + Constants.MARKET_STATE_COEFFICIENT;
 			case RECESSION:
-				marketFactor =  -(Constants.MARKET_STATE_COEFFICIENT);
+				marketFactor =  1 - Constants.MARKET_STATE_COEFFICIENT;
 		}
 		return marketFactor;
 	}
@@ -127,7 +143,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			long newTarget =	(long) 
 								( getAvailableCreditsFactor() *
 								  getFossilFuelsFactor() *
-								  getMarketFactor() );
+								  calculateMarketFactor() );
 			
 			// Adjust the new target if out of possible range
 			if (newTarget > availableCredits) {
