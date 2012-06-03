@@ -8,14 +8,15 @@ import org.apache.log4j.Logger;
  * @author Adam Zysko
  */
 
-enum EconomyState {
-	GROWTH,
-	STABLE,
-	RECESSION
-}
 
 public class Market
 {
+	public enum EconomyState {
+		GROWTH,
+		STABLE,
+		RECESSION
+	}
+	
 	static Logger logger = Logger.getLogger(Market.class);
 	
 	private static EconomyState currentEconomyState;

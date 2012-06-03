@@ -168,7 +168,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		
 		double marketStateFactor = 0;
 		
-		EconomyState economyState = Market.getEconomyState();
+		Market.EconomyState economyState = Market.getEconomyState();
+		
 		switch(economyState) {
 		case GROWTH:
 			marketStateFactor = GameConst.GROWTH_MARKET_STATE;

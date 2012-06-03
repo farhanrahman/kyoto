@@ -4,6 +4,7 @@ import java.util.UUID;
 import java.util.List;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
+import uk.ac.ic.kyoto.countries.Market;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
@@ -104,14 +105,16 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	}
 	
 	protected double getMarketFactor() {
-		switch (Market.EconomyState) {
+		// TODO exception handling
+		Market.EconomyState economyState = Market.getEconomyState();
+		double marketFactor = 1;
+		switch (economyState) {
 			case GROWTH:
-				return Constants.MARKET_STATE_COEFFICIENT;
-			case STABLE:
-				return 1;
+				marketFactor = Constants.MARKET_STATE_COEFFICIENT;
 			case RECESSION:
-				return -(Constants.MARKET_STATE_COEFFICIENT);
+				marketFactor =  -(Constants.MARKET_STATE_COEFFICIENT);
 		}
+		return marketFactor;
 	}
 	
 	protected void yearlyFunction() {
@@ -121,9 +124,10 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			calculateLastYearPercentageSold();
 			
 			// Calculate the new target
-			long newTarget =	getAvailableCreditsFactor() *
-								getFossilFuelsFactor() *
-								getMarketFactor();
+			long newTarget =	(long) 
+								( getAvailableCreditsFactor() *
+								  getFossilFuelsFactor() *
+								  getMarketFactor() );
 			
 			// Adjust the new target if out of possible range
 			if (newTarget > availableCredits) {
