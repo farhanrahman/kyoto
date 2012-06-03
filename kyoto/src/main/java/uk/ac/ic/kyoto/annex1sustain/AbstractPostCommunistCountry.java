@@ -17,7 +17,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	protected long 			ticksToEndOfRound;
 	protected long 			creditsToSell;
 	protected long 			creditsToSellTarget;
-	protected double		lastYearPercentageSold;
+	protected double		lastYearFactor;
 	
 	public AbstractPostCommunistCountry(UUID id, String name, String ISO,
 			double landArea, double arableLandArea, double GDP, double GDPRate,
@@ -48,7 +48,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		
 		internalPrice   = 	calculateMarketPrice() * 
 							calculateEndOfRoundFactor() * 
-							Constants.PREVIOUS_OFFER_COEFFICIENT * lastYearPercentageSold;
+							lastYearFactor;
 	}
 
 	protected double calculateMarketPrice() {
@@ -77,13 +77,18 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	
 	protected double calculateEndOfRoundFactor() {
 		double endOfRoundFactor = 1;
-		if(ticksToEndOfRound < Constants.WHEN_TIME_STARTS_TO_INFLUENCE_THE_PRICE)
-			endOfRoundFactor = 	Constants.SLOPE_OF_TIME_TO_END_OF_ROUND_VS_PRICE *
-								(
-									Constants.NUMBER_OF_TICKS_IN_ROUND
-									- Constants.WHEN_TIME_STARTS_TO_INFLUENCE_THE_PRICE
-									- ticksToEndOfRound
-								);
+		try {
+			if(ticksToEndOfRound < Constants.END_OF_ROUND_MINIMUM_NUMBER_OF_TICKS)
+				endOfRoundFactor = 	Constants.END_OF_ROUND_FACTOR_SLOPE *
+									(
+										Constants.NUMBER_OF_TICKS_IN_ROUND
+										- Constants.END_OF_ROUND_MINIMUM_NUMBER_OF_TICKS
+										- ticksToEndOfRound
+									);
+		}
+		catch (Exception e) {
+			// TODO log the exception
+		}
 		return endOfRoundFactor;
 	}
 	
@@ -101,9 +106,10 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	
 	// Functions called once per year
 	
-	protected void calculateLastYearPercentageSold() {
+	protected double calculateLastYearPercentageSold() {
 		// TODO exception handling (division by 0)
-		lastYearPercentageSold = (creditsToSellTarget - creditsToSell) / creditsToSellTarget;
+		double lastYearPercentageSold = (creditsToSellTarget - creditsToSell) / creditsToSellTarget;
+		return lastYearPercentageSold;
 	}
 	
 	protected double getAvailableCreditsFactor() {
@@ -138,11 +144,20 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		return marketFactor;
 	}
 	
+	protected void calculateLastYearFactor(double lastYearPercentageSold) {
+		// TODO exception handling
+		// TODO boundary conditions
+		lastYearFactor = 1 + Constants.LAST_YEAR_FACTOR_SLOPE * (lastYearPercentageSold - Constants.LAST_YEAR_FACTOR_OFFSET);
+	}
+	
 	protected void yearlyFunction() {
 		
 		try {
 			// Calculate the percentage of credits sold last year
-			calculateLastYearPercentageSold();
+			double lastYearPercentageSold = calculateLastYearPercentageSold();
+			
+			// Calculate the lastYearFactor for the current year
+			calculateLastYearFactor(lastYearPercentageSold);
 			
 			// Calculate the new target
 			long newTarget =	(long) 
@@ -151,12 +166,12 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 								  calculateMarketFactor() );
 			
 			// Adjust the new target if out of possible range
-			if (newTarget > availableCredits) {
+			/*if (newTarget > availableCredits) {
 				newTarget = availableCredits;
 			}
 			else if (newTarget < 0) {
 				newTarget = 0;
-			}
+			}*/
 			
 			// Set the new target
 			creditsToSellTarget = newTarget;
