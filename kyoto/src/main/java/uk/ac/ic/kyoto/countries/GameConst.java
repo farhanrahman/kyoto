@@ -17,7 +17,7 @@ public final class GameConst {
 	/**
 	 * Normalises value of GDP rate increase
 	 */
-	public static final int GROWTH_SCALER = 1;
+	public static final double GROWTH_SCALER = 0.001;
 	
 	/**
 	 * Percentage of GDP availaible to spend on development
