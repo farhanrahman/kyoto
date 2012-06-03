@@ -39,6 +39,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		// TODO Auto-generated method stub
 	}
 
+	
 	// Functions called once per tick
 	
 	@EventListener
@@ -130,10 +131,50 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	
 	protected double calculateFossilFuelsFactor() {
 		double fossilFuelsFactor;
+		Map<long,double> oilPriceMap = new HashMap<long,double>();
+		Map<long,double> gasPriceMap = new HashMap<long,double>();
+		String line;
+		String[] entries;
+		long year;
+		long currentYear;
+		double oilPrice;
+		double gasPrice;
 		
 		try {
-			// TODO implement
-			//   Read from csv file
+			File file = new File("FossilFuelPrices.csv"); // path?
+			BufferedReader reader  = new BufferedReader(new FileReader(file));
+			
+			// Read the values into two maps
+			line = reader.readLine(); // to drop the title line - not really elegant
+			while((line = reader.readLine()) != null) {
+				 entries = data.split(",");
+				 year = Long.parseLong(entries[0]);
+				 oilPrice = Double.parseDouble(entries[1]);
+				 gasPrice = Double.parseDouble(entries[2]);
+				 oilPriceMap.put(year, oilPrice);
+				 gasPriceMap.put(year, gasPrice);
+			}
+			reader.close();
+			
+			// Calculate which year are we in
+			//   TODO currentYear = ...
+			//     How many ticks are in one year?
+			//     Should probably be a separate function
+			
+			// Make sure current and previous year are in the map
+			if (oilPriceMap.containsKey(currentYear) && oilPriceMap.containsKey(currentYear - 1)) {
+				double newOilPrice = oilPriceMap.get(currentYear);
+				double oldOilPrice = oilPriceMap.get(currentYear - 1);
+				double newGasPrice = gasPriceMap.get(currentYear);
+				double oldGasPrice = gasPriceMap.get(currentYear - 1);
+				double oilGradient = (newOilPrice - oldOilPrice) / oldOilPrice;
+				double gasGradient = (newGasPrice - oldGasPrice) / oldGasPrice;
+				
+				fossilFuelsFactor = FOSSIL_FUEL_PRICE_COEFFICIENT * (oilGradient + gasGradient) / 2;
+			}
+			else {
+				fossilFuelsFactor = 1;
+			}
 		}
 		catch (Exception e) {
 			logger.warn("Problem when calculating fossilFuelsFactor " + e);
