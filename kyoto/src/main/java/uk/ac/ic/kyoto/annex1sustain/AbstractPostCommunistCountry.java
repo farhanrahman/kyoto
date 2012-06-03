@@ -14,8 +14,8 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	protected List<Double> 	uncommittedTransactionsCosts;
 	protected List<Double> 	committedTransactionsCosts;
 	protected long 			ticksToEndOfRound;
-	protected long 			carbonToSell;
-	protected long 			carbonToSellTarget;
+	protected long 			creditsToSell;
+	protected long 			creditsToSellTarget;
 	protected double		lastYearPercentageSold;
 	
 	public AbstractPostCommunistCountry(UUID id, String name, String ISO,
@@ -30,7 +30,6 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	@Override
 	protected void processInput(Input input) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	// Functions called once per tick
@@ -88,7 +87,57 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		ticksToEndOfRound--;
 	}
 	
+	// Functions called once per year
+	
 	protected void calculateLastYearPercentageSold() {
-		lastYearPercentageSold = (carbonToSellTarget - carbonToSell) / carbonToSellTarget;
+		lastYearPercentageSold = (creditsToSellTarget - creditsToSell) / creditsToSellTarget;
+	}
+	
+	protected double getAvailableCreditsFactor() {
+		// TODO implement
+		//   Which variable of AbstractCountry represents available credits?
+	}
+	
+	protected double getFossilFuelsFactor() {
+		// TODO implement
+		//   Will red from csv file to get fossil fuel price gradient
+	}
+	
+	protected double getMarketFactor() {
+		switch (Market.EconomyState) {
+			case GROWTH:
+				return Constants.MARKET_STATE_COEFFICIENT;
+			case STABLE:
+				return 1;
+			case RECESSION:
+				return -(Constants.MARKET_STATE_COEFFICIENT);
+		}
+	}
+	
+	protected void yearlyFunction() {
+		
+		try {
+			// Calculate the percentage of credits sold last year
+			calculateLastYearPercentageSold();
+			
+			// Calculate the new target
+			long newTarget =	getAvailableCreditsFactor() *
+								getFossilFuelsFactor() *
+								getMarketFactor();
+			
+			// Adjust the new target if out of possible range
+			if (newTarget > availableCredits) {
+				newTarget = availableCredits;
+			}
+			else if (newTarget < 0) {
+				newTarget = 0;
+			}
+			
+			// Set the new target
+			creditsToSellTarget = newTarget;
+		}
+		catch (Exception e) {
+			// TODO log exception
+		}
 	}
 }
