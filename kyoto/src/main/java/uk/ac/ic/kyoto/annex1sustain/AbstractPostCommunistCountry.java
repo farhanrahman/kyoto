@@ -111,14 +111,95 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		ticksToEndOfRound--;
 	}
 	
+	
 	// Functions called once per year
 	
-	protected double calculateLastYearPercentageSold() {
+	protected double calculateAvailableCreditsFactor() {
+		double availableCreditsFactor;
+		
+		try {
+			// TODO implement
+			//   Which variable of AbstractCountry represents available credits?
+		}
+		catch (Exception e) {
+			logger.warn("Problem when calculating availableCreditsFactor " + e);
+			availableCreditsFactor = 1; // This "default" value will actually need to be set to all available credits
+		}
+		return availableCreditsFactor;
+	}
+	
+	protected double calculateFossilFuelsFactor() {
+		double fossilFuelsFactor;
+		
+		try {
+			// TODO implement
+			//   Read from csv file
+		}
+		catch (Exception e) {
+			logger.warn("Problem when calculating fossilFuelsFactor " + e);
+			fossilFuelsFactor = 1;
+		}
+		return fossilFuelsFactor;
+	}
+	
+	protected double calculateMarketFactor() {
+		double marketFactor;
+		
+		try {
+			Market.EconomyState economyState = Market.getEconomyState();
+			
+			switch (economyState) {
+				case GROWTH:
+					marketFactor = 1 + Constants.MARKET_STATE_COEFFICIENT;
+					break;
+				case RECESSION:
+					marketFactor =  1 - Constants.MARKET_STATE_COEFFICIENT;
+					break;
+				default:
+					marketFactor = 1;
+					break;
+			}
+		}
+		catch (Exception e) {
+			logger.warn("Problem when calculating marketFactor " + e);
+			marketFactor = 1;
+		}
+		return marketFactor;
+	}
+	
+	protected void calculateNewTarget() {
+		long newTarget;
+		
+		try {
+			// Calculate new target based on three factors
+			newTarget =	(long) 
+						( calculateAvailableCreditsFactor() *
+						  calculateFuelsFactor() *
+						  calculateMarketFactor() );
+			
+			// Adjust the new target if out of possible range
+			if (newTarget > availableCredits) {
+				newTarget = availableCredits;
+			}
+			else if (newTarget < 0) {
+				newTarget = 0;
+			}
+		}
+		catch (Exception e) {
+			logger.warn("Problem when calculating newTarget " + e);
+			newTarget = creditsToSellTarget;
+		}
+		creditsToSellTarget = newTarget;
+	}
+	
+	protected void calculateLastYearFactor() {
 		double lastYearPercentageSold;
 		
 		try {
+			// Calculate the percentage of successfully sold credits in the last year
 			lastYearPercentageSold = (creditsToSellTarget - creditsToSell) / creditsToSellTarget;
 			
+			// Adjust if out of boundaries
 			if (lastYearPercentageSold > 100) {
 				logger.warn("The calculated percentage of carbon emission sold exceeded 100%");
 				lastYearPercentageSold = 100;
@@ -126,87 +207,28 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			if (lastYearPercentageSold < 0 ) {
 				logger.warn("The calculated percentage of carbon emission sold was lower than 0%");
 				lastYearPercentageSold = 0;
-			}			
+			}
 		}
 		catch (ArithmeticException e) {
 			logger.warn("Division by 0 error " + e);
 			lastYearPercentageSold = 0;
 		}
-		return lastYearPercentageSold;
-	}
-	
-	protected double getAvailableCreditsFactor() {
-		// TODO implement
-		//   Which variable of AbstractCountry represents available credits?
-		double availableCreditsFactor = 1;
-		return availableCreditsFactor;
-	}
-	
-	protected double getFossilFuelsFactor() {
-		// TODO implement
-		//   Will red from csv file to get fossil fuel price gradient
-		double fossilFuelsFactor = 1;
-		return fossilFuelsFactor;
-	}
-	
-	protected double calculateMarketFactor() {
-		// TODO exception handling
-		Market.EconomyState economyState = Market.getEconomyState();
-		double marketFactor;
-		switch (economyState) {
-			case GROWTH:
-				marketFactor = 1 + Constants.MARKET_STATE_COEFFICIENT;
-				break;
-			case RECESSION:
-				marketFactor =  1 - Constants.MARKET_STATE_COEFFICIENT;
-				break;
-			default:
-				marketFactor = 1;
-				break;
-		}
-		return marketFactor;
-	}
-	
-	protected void calculateLastYearFactor(double lastYearPercentageSold) {
-		// TODO exception handling
-		// TODO boundary conditions
+		
 		try {
+			// Calculate the factor
 			lastYearFactor = 1 + Constants.LAST_YEAR_FACTOR_SLOPE * (lastYearPercentageSold - Constants.LAST_YEAR_FACTOR_OFFSET);
 		}
-		catch (Exception e)
-		{
+		catch (Exception e) {
 			logger.warn("Problem when calculating lastYearFactor " + e);
+			lastYearFactor = 1;
 		}
 	}
 	
 	protected void yearlyFunction() {
+		// Calculate the lastYearFactor for the current year
+		calculateLastYearFactor();
 		
-		try {
-			// Calculate the percentage of credits sold last year
-			double lastYearPercentageSold = calculateLastYearPercentageSold();
-			
-			// Calculate the lastYearFactor for the current year
-			calculateLastYearFactor(lastYearPercentageSold);
-			
-			// Calculate the new target
-			long newTarget =	(long) 
-								( getAvailableCreditsFactor() *
-								  getFossilFuelsFactor() *
-								  calculateMarketFactor() );
-			
-			// Adjust the new target if out of possible range
-			/*if (newTarget > availableCredits) {
-				newTarget = availableCredits;
-			}
-			else if (newTarget < 0) {
-				newTarget = 0;
-			}*/
-			
-			// Set the new target
-			creditsToSellTarget = newTarget;
-		}
-		catch (Exception e) {
-			// TODO log exception
-		}
+		// Calculate the new target
+		calculateNewTarget();
 	}
 }
