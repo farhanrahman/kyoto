@@ -107,12 +107,17 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	protected double getMarketFactor() {
 		// TODO exception handling
 		Market.EconomyState economyState = Market.getEconomyState();
-		double marketFactor = 1;
+		double marketFactor;
 		switch (economyState) {
 			case GROWTH:
 				marketFactor = Constants.MARKET_STATE_COEFFICIENT;
+				break;
 			case RECESSION:
-				marketFactor =  -(Constants.MARKET_STATE_COEFFICIENT);
+				marketFactor =  Constants.MARKET_STATE_COEFFICIENT - 1;
+				break;
+			default:
+				marketFactor = 1;
+				break;
 		}
 		return marketFactor;
 	}
