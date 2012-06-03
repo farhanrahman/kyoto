@@ -2,10 +2,7 @@ package uk.ac.ic.kyoto.actions;
 
 import java.util.UUID;
 
-import uk.ac.ic.kyoto.carbon.CarbonReportingService;
-
-import com.google.inject.Inject;
-
+import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.imperial.presage2.core.Action;
 import uk.ac.imperial.presage2.core.environment.ActionHandler;
 import uk.ac.imperial.presage2.core.environment.ActionHandlingException;
@@ -14,6 +11,8 @@ import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
 import uk.ac.imperial.presage2.core.environment.ServiceDependencies;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.messaging.Input;
+
+import com.google.inject.Inject;
 /**
  * 
  * @author farhanrahman
@@ -21,12 +20,11 @@ import uk.ac.imperial.presage2.core.messaging.Input;
 @ServiceDependencies({CarbonReportingService.class})
 public class SubmitCarbonEmissionReportHandler implements ActionHandler{
 
-	final protected EnvironmentSharedStateAccess sharedState;
 	final protected CarbonReportingService crs;
 	
 	@Inject
 	public SubmitCarbonEmissionReportHandler(EnvironmentSharedStateAccess sharedState, EnvironmentServiceProvider environment) throws UnavailableServiceException{
-		this.sharedState = sharedState;
+		//this.sharedState = sharedState;
 		this.crs = environment.getEnvironmentService(CarbonReportingService.class);
 	}
 	

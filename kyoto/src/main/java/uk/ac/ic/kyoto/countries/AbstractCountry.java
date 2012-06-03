@@ -1,6 +1,5 @@
 package uk.ac.ic.kyoto.countries;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,17 +9,17 @@ import java.util.TreeMap;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
-
+import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.trade.PublicOffer;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.ActionHandlingException;
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
+import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
-import uk.ac.imperial.presage2.util.location.ParticipantLocationService;
 import uk.ac.ic.kyoto.trade.PublicOffer;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
@@ -55,7 +54,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 */
 	protected double carbonEmission = 10.0;  //Farhan test
 
-	protected Map<Integer, Double> carbonEmissionReports;	
+	protected Map<Integer, Double> carbonEmissionReports;
+	
+	ParticipantCarbonReportingService reportingService;
 	
 	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
 	protected Set<PublicOffer> 		offers;
@@ -91,14 +92,18 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		
 		carbonAbsorptionHandler = new CarbonAbsorptionHandler();
 		carbonReductionHandler = new CarbonReductionHandler();
-		
+		try {
+			this.reportingService = this.getEnvironmentService(ParticipantCarbonReportingService.class);
+		} catch (UnavailableServiceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 	
 	protected Set<ParticipantSharedState> getSharedState(){
 		Set<ParticipantSharedState> s = super.getSharedState();
-		s.add(new ParticipantSharedState("Report", 
-	            (Serializable) this.getCarbonEmissionReports(), getID()));
+		s.add(ParticipantCarbonReportingService.createSharedState("Report", this.getCarbonEmissionReports(), this.getID()));
 		return s;
 	}
 	
@@ -106,13 +111,30 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return this.carbonEmissionReports;
 	}
 	
-	public Map<Integer,Double> addToReports(Time simTime, Double emission){
+	/**
+	 * Private setter function for personal reports
+	 * @param simTime
+	 * @param emission
+	 * @return
+	 */
+	private Map<Integer,Double> addToReports(Time simTime, Double emission){
 		this.carbonEmissionReports.put(simTime.intValue(), emission);
 		return this.carbonEmissionReports;
 	}
 	
-	public Double calculateCarbonEmission(){
+	/**
+	 * Report the carbonEmissions. This function internally
+	 * updates the report already owned by the agent after
+	 * calculating the carbon emission that the agent wants
+	 * to report to the environment
+	 * @param t: Simulation time at which report submission was made
+	 * @return
+	 */
+	public Double reportCarbonEmission(Time t){
 		//TODO add code to calculate whether to submit true or false report (cheat)
+		//Once calculations done, update the report owned by this agent
+		carbonEmission++; //Default code now just increments it
+		this.addToReports(t, carbonEmission);
 		return new Double(carbonEmission);
 	}
 	
@@ -286,9 +308,13 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			if(investment <= GDP){
 				//TODO Implement reduction in GDP
 				//TODO Implement change in CO2 emissions/arable land
-				//Test for submitting reports
+				//Stub for submitting reports
 				/*try{
-					this.environment.act(new SubmitCarbonEmissionReport(this.calculateCarbonEmission(), SimTime.get(), this), this.getID(), this.authkey);
+					Time t = SimTime.get();
+					AbstractCountry.this.environment.act(new SubmitCarbonEmissionReport(
+								AbstractCountry.this.reportCarbonEmission(t), t), 
+								AbstractCountry.this.getID(), 
+								AbstractCountry.this.authkey);
 				}catch(ActionHandlingException e){
 					logger.warn("Error trying to submit report");
 				}*/
