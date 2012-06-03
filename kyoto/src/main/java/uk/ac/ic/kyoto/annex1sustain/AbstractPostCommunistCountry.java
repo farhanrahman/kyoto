@@ -9,8 +9,11 @@ import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 
+import org.apache.log4j.Logger;
+
 public class AbstractPostCommunistCountry extends AbstractCountry {
 	
+	protected Logger		logger;
 	protected double 		internalPrice;
 	protected List<Double> 	uncommittedTransactionsCosts;
 	protected List<Double> 	committedTransactionsCosts;
@@ -25,7 +28,10 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	{
 		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, emissionsTarget,
 				carbonOffset, energyOutput);
-		// TODO Auto-generated constructor stub
+		// TODO Initialize the fields
+		
+		// Initialize logger. Should be done in AbstractCountry
+		logger = Logger.getLogger(AbstractPostCommunistCountry.class);
 	}
 	
 	@Override
@@ -69,7 +75,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			}
 		}
 		catch (Exception e) {
-			// TODO log the exception
+			logger.warn("Problem calculating marketPrice: " + e);
 		}
 		
 		return (maximumCommittedPrice + minimumUncommittedPrice) / 2;
@@ -87,7 +93,8 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 									);
 		}
 		catch (Exception e) {
-			// TODO log the exception
+			logger.warn("Problem calculating endOfRoundFactor: " + e);
+			endOfRoundFactor = 1;
 		}
 		return endOfRoundFactor;
 	}
@@ -107,8 +114,24 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	// Functions called once per year
 	
 	protected double calculateLastYearPercentageSold() {
-		// TODO exception handling (division by 0)
-		double lastYearPercentageSold = (creditsToSellTarget - creditsToSell) / creditsToSellTarget;
+		double lastYearPercentageSold;
+		
+		try {
+			lastYearPercentageSold = (creditsToSellTarget - creditsToSell) / creditsToSellTarget;
+			
+			if (lastYearPercentageSold > 100) {
+				logger.warn("The calculated percentage of carbon emission sold exceeded 100%");
+				lastYearPercentageSold = 100;
+			}
+			if (lastYearPercentageSold < 0 ) {
+				logger.warn("The calculated percentage of carbon emission sold was lower than 0%");
+				lastYearPercentageSold = 0;
+			}			
+		}
+		catch (ArithmeticException e) {
+			logger.warn("Division by 0 error " + e);
+			lastYearPercentageSold = 0;
+		}
 		return lastYearPercentageSold;
 	}
 	
@@ -147,7 +170,13 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	protected void calculateLastYearFactor(double lastYearPercentageSold) {
 		// TODO exception handling
 		// TODO boundary conditions
-		lastYearFactor = 1 + Constants.LAST_YEAR_FACTOR_SLOPE * (lastYearPercentageSold - Constants.LAST_YEAR_FACTOR_OFFSET);
+		try {
+			lastYearFactor = 1 + Constants.LAST_YEAR_FACTOR_SLOPE * (lastYearPercentageSold - Constants.LAST_YEAR_FACTOR_OFFSET);
+		}
+		catch (Exception e)
+		{
+			logger.warn("Problem when calculating lastYearFactor " + e);
+		}
 	}
 	
 	protected void yearlyFunction() {
