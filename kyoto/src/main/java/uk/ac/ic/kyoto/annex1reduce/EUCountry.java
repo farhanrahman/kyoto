@@ -14,11 +14,11 @@ public class EUCountry extends AbstractCountry {
 	
 	public EUCountry(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
 			double GDPRate, float availiableToSpend, long emissionsTarget, long carbonOffset,
-			long energyOutput) {
+			long energyOutput, long carbonOutput) {
 		
 		super(id, name, ISO, landArea, arableLandArea, GDP,
 					GDPRate, availiableToSpend, emissionsTarget, carbonOffset,
-					energyOutput);
+					energyOutput, carbonOutput);
 		
 		EU.addMemberState(this);
 	}
