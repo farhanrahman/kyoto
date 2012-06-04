@@ -45,7 +45,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	protected long  energyOutput; // In tons of carbon equivalence (how much carbon would be used if the whole energy production was carbon based)
 	protected long  energyOutputCeiling; // As above, limit for the energyOutput
 	protected long	emissionsTarget; // Number of tons of carbon you SHOULD produce
-	protected long 	carbonOffset;
+	protected long 	carbonOffset; // In tons of carbon
 	//private float 	availableToSpend;
 	//private long 	carbonTraded;
 	//private double  dirtyIndustry;
