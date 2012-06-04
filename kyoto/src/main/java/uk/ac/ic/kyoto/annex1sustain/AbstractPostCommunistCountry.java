@@ -62,8 +62,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
     //================================================================================
 	
 	@EventListener
-	public void updateInternalData(EndOfTimeCycle e)
-	{
+	public void updateInternalData(EndOfTimeCycle e) {
 		updateCounter();
 		addUncommittedTransaction();
 		addCommittedTransaction();
@@ -71,7 +70,6 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	}
 	
 	protected void updateInternalPrice() {
-		
 		internalPrice   = 	calculateMarketPrice() * 
 							calculateEndOfRoundFactor() * 
 							lastYearFactor;
@@ -138,6 +136,10 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
     // Methods called once per year
     //================================================================================
 	
+	/**
+	 * Gets the number of credits available to sell.
+	 * Multiplies it by a constant factor and returns it.
+	 */
 	protected double calculateAvailableCreditsFactor() {
 		double availableCreditsFactor;
 		
@@ -153,6 +155,10 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		return availableCreditsFactor;
 	}
 	
+	/**
+	 * Reads oil and gas prices from file FossilFuelPrices.
+	 * Calculates a gradient of change, and returns an appropriate factor.
+	 */
 	protected double calculateFossilFuelsFactor() {
 		double fossilFuelsFactor;
 		
@@ -173,6 +179,9 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		return fossilFuelsFactor;
 	}
 	
+	/**
+	 * Returns a factor based on the current state of economy.
+	 */
 	protected double calculateMarketFactor() {
 		double marketFactor;
 		
@@ -198,6 +207,13 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		return marketFactor;
 	}
 	
+	/**
+	 * Returns a new target, which is a multiplication of three factors:
+	 * - available credits
+	 * - fossil fuels historical prices
+	 * - current state of the market
+	 * All adjusted with a constant coefficient.
+	 */
 	protected void calculateNewTarget() {
 		long newTarget;
 		
@@ -212,10 +228,10 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			if (newTarget > availableCredits) {
 				newTarget = availableCredits;
 			}
-			else if (newTarget < 0) {
+			/*else if (newTarget < 0) {
 				// Isn't this a bug? Should probably send a warning
 				newTarget = 0;
-			}
+			}*/
 		}
 		catch (Exception e) {
 			logger.warn("Problem when calculating newTarget " + e);
@@ -224,6 +240,10 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		creditsToSellTarget = newTarget;
 	}
 	
+	/**
+	 * Calculates the percentage of credits successfully sold in previous year.
+	 * Returns the factor based on that percentage, which is used to set the price we sell at.
+	 */
 	protected void calculateLastYearFactor() {
 		double lastYearPercentageSold;
 		
@@ -256,6 +276,9 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		}
 	}
 	
+	/**
+	 * Called at the beginning of each year.
+	 */
 	protected void yearlyFunction() {
 		// Calculate the lastYearFactor for the current year
 		calculateLastYearFactor();
