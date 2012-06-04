@@ -9,6 +9,7 @@ import java.util.TreeMap;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
+import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.trade.PublicOffer;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
@@ -46,7 +47,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	protected long  energyOutputCeiling; // As above, limit for the energyOutput
 	protected long	emissionsTarget; // Number of tons of carbon you SHOULD produce
 	protected long 	carbonOffset; // In tons of carbon
-	//private float 	availableToSpend;
+	private float 	availableToSpend; // Note, can NOT be derived from GDP. Initial value can be derived from there, but cash reserves need to be able to lower independently.
 	//private long 	carbonTraded;
 	//private double  dirtyIndustry;
 
@@ -57,7 +58,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 
 	protected Map<Integer, Double> carbonEmissionReports;
 	
-	ParticipantCarbonReportingService reportingService;
+	CarbonReportingService reportingService;
 	
 	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
 	protected Set<PublicOffer> 		offers;
@@ -65,7 +66,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	protected CarbonAbsorptionHandler carbonAbsorptionHandler;
 
 	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
-					double GDPRate, long emissionsTarget, long carbonOffset,
+					double GDPRate, float availableToSpend, long emissionsTarget, long carbonOffset,
 					long energyOutput) {
 
 		//TODO Validate parameters
@@ -78,7 +79,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.GDPRate = GDPRate;
 		this.emissionsTarget = emissionsTarget;
 		this.carbonOffset = carbonOffset;
-	//	this.availableToSpend = availableToSpend; -- replaced with a function since availiable to spend can be derived from GDP
+		this.availableToSpend = availableToSpend; 
 	//	this.carbonTraded = carbonTraded;
 		this.carbonEmissionReports = new HashMap<Integer, Double>();
 		this.energyOutput = energyOutput;
