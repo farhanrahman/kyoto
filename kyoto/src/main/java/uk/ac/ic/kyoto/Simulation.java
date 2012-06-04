@@ -63,7 +63,7 @@ public class Simulation extends InjectedSimulation {
 		AbstractParticipant p = new CanadaAgent(Random.randomUUID(), "Canada", "CND", 10000, 5000, 1000000, 2, 500000, 1000, -200, 10);
 		s.addParticipant(p);
 		
-		AbstractParticipant q = new FakeCanadaAgent(Random.randomUUID(), "Canada", "CND", 10000, 5000, 1000000, 2, 500000, 1000, 200, 10);
+		AbstractParticipant q = new CanadaAgent(Random.randomUUID(), "Canada", "CND", 10000, 5000, 1000000, 2, 500000, 1000, 200, 10);
 		s.addParticipant(q);
 
 	}

@@ -13,10 +13,12 @@ import uk.ac.ic.kyoto.countries.NonParticipant;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.imperial.presage2.core.messaging.Input;
+import uk.ac.imperial.presage2.core.network.Message;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
 import uk.ac.imperial.presage2.core.util.random.Random;
 import uk.ac.imperial.presage2.util.fsm.FSMException;
+import uk.ac.imperial.presage2.util.protocols.Conversation;
 
 public class CanadaAgent extends NonParticipant {
 
@@ -85,6 +87,9 @@ public class CanadaAgent extends NonParticipant {
 				}
 			}
 			this.tradeProtocol.incrementTime();
+			for (Conversation conv: tradeProtocol.getActiveConversations()) {
+				
+			}
 		}
 	}
 }

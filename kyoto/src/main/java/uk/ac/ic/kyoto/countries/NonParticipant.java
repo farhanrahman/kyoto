@@ -7,7 +7,7 @@ import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 public abstract class NonParticipant extends AbstractCountry {
 
 
-	public NonParticipant(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
+	public NonParticipant(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
 			double GDPRate, float availableToSpend, long emissionsTarget, long carbonOffset,
 			long energyOutput) {
 		super(id, name, ISO, landArea, arableLandArea, GDP,
