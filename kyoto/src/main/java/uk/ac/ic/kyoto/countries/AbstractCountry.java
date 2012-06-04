@@ -24,6 +24,7 @@ import uk.ac.ic.kyoto.trade.PublicOffer;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.simulator.Parameter;
+import uk.ac.imperial.presage2.core.util.random.Random;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 /**
@@ -362,4 +363,18 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return carbonTraded;
 	}
 */	
+	
+	public void getMonitored() {
+		int time = SimTime.get().intValue();
+		double latestReport = this.carbonEmissionReports.get(time);
+		double trueCarbon = this.carbonEmission;
+		double random = Random.randomDouble();
+		
+		if (random < Double.MAX_VALUE/2) {
+			if (latestReport != trueCarbon) {
+				//TODO - Insert sanctions here!
+			}
+		}
+		
+	}
 }
