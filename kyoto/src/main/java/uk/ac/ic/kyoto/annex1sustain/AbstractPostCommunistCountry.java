@@ -20,9 +20,9 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	
 	public AbstractPostCommunistCountry(UUID id, String name, String ISO,
 			double landArea, double arableLandArea, double GDP, double GDPRate,
-			long emissionsTarget, long carbonOffset, long energyOutput)
+			float availiableToSpend, long emissionsTarget, long carbonOffset, long energyOutput)
 	{
-		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, emissionsTarget,
+		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, availiableToSpend, emissionsTarget,
 				carbonOffset, energyOutput);
 		// TODO Auto-generated constructor stub
 	}
