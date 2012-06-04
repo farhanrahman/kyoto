@@ -8,10 +8,10 @@ public abstract class NonParticipant extends AbstractCountry {
 
 
 	public NonParticipant(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
-			double GDPRate, long emissionsTarget, long carbonOffset,
+			double GDPRate, float availableToSpend, long emissionsTarget, long carbonOffset,
 			long energyOutput) {
 		super(id, name, ISO, landArea, arableLandArea, GDP,
-				GDPRate, emissionsTarget, carbonOffset,
+				GDPRate, availableToSpend, emissionsTarget, carbonOffset,
 				energyOutput);
 		// TODO Auto-generated constructor stub
 	}
