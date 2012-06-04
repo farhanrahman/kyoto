@@ -1,8 +1,10 @@
 package uk.ac.ic.kyoto.annex1reduce.analysis;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 
 import uk.ac.ic.kyoto.trade.TradeProtocol.Trade;
 
@@ -79,38 +81,11 @@ public class TickHistory{
 		tradeNo++;
 		tradeSum += unitCost;
 		
-//		if (m instanceof TradeMessage){
-//			
-//			if (unitPrice > tradeHigh){
-//				tradeHigh = unitPrice;
-//			} else if (unitPrice < tradeLow){
-//				tradeLow = unitPrice;
-//			}
-//			
-//			tradeNo++;
-//			tradeSum += unitPrice;
-//			
-//		}else if (m instanceof InvestmentMessage) {
-//			
-//			if (unitPrice > investmentHigh){
-//				investmentHigh = unitPrice;
-//			} else if (unitPrice < investmentLow){
-//				investmentLow = unitPrice;
-//			}
-//			
-//			investmentNo++;
-//			investmentSum += unitPrice;
-//			
-//		}else{
-//			//TODO Should be be able to accept Message objects?
-//			throw new Exception("Input arg must extend Message");
-//		}
-		
 		messages.add(m);
 	}
 	
-	public Iterator<Trade> getMessages() {
-		return messages.iterator();
+	public List<Trade> getMessages() {
+		return Collections.unmodifiableList(messages);
 	}
 
 	public int getTradeHigh() {
@@ -131,7 +106,7 @@ public class TickHistory{
 		//return investmentLow;
 	}
 
-	public long getTickId() {
+	public int getTickId() {
 		return tickId;
 	}
 
@@ -142,6 +117,61 @@ public class TickHistory{
 	public float getInvestmentAverage() {
 		throw new UnsupportedOperationException("Method not yet implemented");
 		//return investmentSum/investmentNo;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this){
+			return true;
+		}
+		
+		if (!(obj instanceof TickHistory)){
+			return false;
+		}
+		
+		TickHistory tick = (TickHistory) obj;
+		boolean investmentTest = (tick.investmentHigh == this.investmentHigh) &&
+									(tick.investmentLow == this.investmentLow) &&
+									(tick.investmentNo == this.investmentNo) &&
+									(tick.investmentSum == this.investmentSum);
+		boolean tradeTest = (tick.tradeHigh == this.tradeHigh) &&
+								(tick.tradeLow == this.tradeLow) &&
+								(tick.tradeNo == this.tradeNo) &&
+								(tick.tradeSum == this.tradeSum);
+		boolean messagesTest = tick.messages.equals(this.messages);
+		
+		
+		System.out.println("investmentTest");
+		
+		System.out.println(tick.tradeHigh + " " +this.tradeHigh);
+		System.out.println(tick.tradeLow + " " +this.tradeLow);
+		System.out.println(tick.tradeNo + " " +this.tradeNo);
+		System.out.println(tick.tradeSum + " " +this.tradeSum);
+		
+		//System.out.println("Test:" + investmentTest + tradeTest + messagesTest + (tick.tickId == this.tickId));
+		
+		return investmentTest && tradeTest && messagesTest && (tick.tickId == this.tickId);
+	}
+	
+	@Override
+	public int hashCode() {
+		int result = 73;
+		
+		result = 57 * result + this.investmentHigh;
+		result = 57 * result + this.investmentLow;
+		result = 57 * result + this.investmentNo;
+		result = 57 * result + this.investmentSum;
+		
+		result = 57 * result + this.tradeHigh;
+		result = 57 * result + this.tradeLow;
+		result = 57 * result + this.tradeNo;
+		result = 57 * result + this.tradeSum;
+		
+		result = 57 * result + this.tickId;
+		
+		result = 57 * result + this.messages.hashCode();
+		
+		return result;
 	}
 	
 }

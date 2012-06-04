@@ -1,7 +1,8 @@
 package uk.ac.ic.kyoto.annex1reduce.analysis;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import uk.ac.ic.kyoto.trade.TradeProtocol.Trade;
 
@@ -13,24 +14,15 @@ import uk.ac.ic.kyoto.trade.TradeProtocol.Trade;
 public class SessionHistory {
 	
 	private final int sessionId;
-	
-	private ArrayList<TickHistory> session;
-	private TickHistory tick;
+	private HashMap<Integer, TickHistory> session;
 	
 	public SessionHistory(int sessionId) {
 		this.sessionId = sessionId;
 		init();
 	}
 	
-	/*
-	 * Since the TickHistory constructor requires a current tick,
-	 * its creation is left until a message needs to be added.
-	 * Consequently, tick made to point to null until its first
-	 * creation.
-	 */
 	private void init(){
-		session = new ArrayList<TickHistory>();
-		tick = null;
+		session = new HashMap<Integer, TickHistory>();
 	}
 	
 	/**
@@ -43,24 +35,60 @@ public class SessionHistory {
 	 */
 	public void add(Trade m, int currentTick) throws Exception{
 		
-		if(tick == null){
-			tick = new TickHistory(currentTick);
+		if(session.isEmpty()){
+			System.out.println("test");
+			TickHistory t = new TickHistory(currentTick);
+			t.addMessage(m);
+			System.out.println("xxx");
+			session.put(currentTick, t);
+			System.out.println("BLA");
+		}else{
+			TickHistory t = session.get(currentTick);
+			System.out.println(t.getTickId());
+			if(t.getTickId() != currentTick){
+				t = new TickHistory(currentTick);
+				t.addMessage(m);
+				session.put(currentTick, t);
+			}else{
+				t.addMessage(m);
+				session.put(currentTick, t);
+			}
 		}
-		
-		if (tick.getTickId() != currentTick){
-			session.add(tick);
-			tick = new TickHistory(currentTick);
-		}
-		
-		tick.addMessage(m);
 	}
 	
 	public TickHistory getTick(int tickId){
 		return session.get(tickId);
 	}
 	
-	public Iterator<TickHistory> getSession(){
-		return session.iterator();
+	public Map<Integer, TickHistory> getSession(){
+		return Collections.unmodifiableMap(session);
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this){
+			return true;
+		}
+		
+		if (!(obj instanceof SessionHistory)){
+			return false;
+		}
+		
+		SessionHistory tickHistory = (SessionHistory) obj;
+
+		boolean sessionTest = tickHistory.session.equals(this.session);
+		
+		return sessionTest && (tickHistory.sessionId == this.sessionId);
+	}
+	
+	@Override
+	public int hashCode() {
+		int result = 43;
+		
+		result = 4 * result + this.sessionId;
+		result = 4 * result + this.session.hashCode();
+		
+		return result;
 	}
 	
 }
