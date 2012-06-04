@@ -1,4 +1,4 @@
-package uk.ac.ic.kyoto.cashService;
+package uk.ac.ic.kyoto.services;
 
 import org.apache.log4j.Logger;
 

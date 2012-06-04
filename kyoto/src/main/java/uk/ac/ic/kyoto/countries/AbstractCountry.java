@@ -9,6 +9,7 @@ import java.util.TreeMap;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
+import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.trade.PublicOffer;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
@@ -56,7 +57,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 
 	protected Map<Integer, Double> carbonEmissionReports;
 	
-	ParticipantCarbonReportingService reportingService;
+	CarbonReportingService reportingService;
 	
 	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
 	protected Set<PublicOffer> 		offers;
