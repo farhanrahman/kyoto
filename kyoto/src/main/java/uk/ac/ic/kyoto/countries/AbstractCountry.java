@@ -201,9 +201,29 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			throw new IllegalArgumentException("Specified amount should be positive");
 	}
 	
+	// Investment in Carbon Industry functions
+	
 	protected long calculateCostOfInvestingInCarbonIndustry (long carbon){
-		return carbon;
+		return (long) (carbon * GameConst.CARBON_INVESTMENT_PRICE);
 	}
+	
+	protected long calculateCarbonIndustryGrowth (long cost){
+		return (long) (cost / GameConst.CARBON_INVESTMENT_PRICE);
+	}
+	
+	public void investInCarbonIndustry(long carbon){
+		try {
+			long cost = calculateCostOfInvestingInCarbonIndustry(carbon);
+			carbonOutput += carbon;
+			energyOutput += carbon;
+			availableToSpend -= cost;
+		}
+		catch (Exception e) {
+			// log the exception
+		}
+	}
+	
+	// GDP related functions
 	
 	public Double getCash(){
 		return this.GDP*GameConst.PERCENTAGE_OF_GDP;
