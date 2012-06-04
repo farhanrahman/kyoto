@@ -137,7 +137,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 			/* Initiator FSM */
 			.addState(States.START, StateType.START)
 			.addState(States.TRADE_PROPOSED)
-			.addState(States.RESPONSE_RECEIVED)
+			.addState(States.RESPONSE_RECEIVED, StateType.END)
 			.addState(States.TRADE_ACCEPTED, StateType.END)
 			.addState(States.TRADE_REJECTED, StateType.END)
 			.addState(States.TIMED_OUT, StateType.END);
@@ -149,7 +149,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 			 * Signals intention to trade (either buy or sell).
 			 */
 			.addTransition(Transitions.PROPOSE_TRADE,
-					new EventTypeCondition(ConversationSpawnEvent.class), 
+					new EventTypeCondition(TradeSpawnEvent.class), 
 					States.START,
 					States.TRADE_PROPOSED, 
 					new SpawnAction() {
@@ -177,7 +177,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 					 * Trade proposal has been accepted by someone
 					 */
 				.addTransition(Transitions.ACCEPT_TRADE,
-						new AndCondition(new MessageTypeCondition("ACCEPT"),
+						new AndCondition(new MessageTypeCondition(Transitions.ACCEPT_TRADE.name()),
 								new ConversationCondition()),
 								States.TRADE_PROPOSED, 
 								States.TRADE_ACCEPTED,
@@ -206,7 +206,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 							 * Trade proposal has been rejected by someone else.
 							 */
 							.addTransition(Transitions.REJECT_TRADE,
-									new AndCondition(new MessageTypeCondition("REJECT"),
+									new AndCondition(new MessageTypeCondition(Transitions.REJECT_TRADE.name()),
 											new ConversationCondition()),
 											States.TRADE_PROPOSED,
 											States.TRADE_REJECTED,
@@ -225,9 +225,9 @@ public abstract class TradeProtocol extends FSMProtocol {
 
 									/* Non-initiator FSM */
 									.addTransition(Transitions.RECEIVE_TRADE, 
-											new AndCondition(new MessageTypeCondition("TRADE")),
+											new MessageTypeCondition(Transitions.PROPOSE_TRADE.name()),
 											States.START,
-											States.TRADE_ACCEPTED,
+											States.RESPONSE_RECEIVED,
 
 											new InitialiseConversationAction() {
 
@@ -277,8 +277,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 										}
 									}
 
-											)	
-											.build();
+											);
 
 		} catch (FSMException e) {
 			e.printStackTrace();

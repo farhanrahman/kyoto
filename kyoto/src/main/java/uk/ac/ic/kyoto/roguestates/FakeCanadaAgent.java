@@ -74,7 +74,8 @@ public class FakeCanadaAgent extends NonParticipant {
 		if (this.tradeProtocol != null) {
 			for (NetworkAddress a : this.network.getConnectedNodes()) {
 				try {
-					this.tradeProtocol.offer(a, 10, 5, TradeType.BUY);
+					if(!this.tradeProtocol.getActiveConversations().contains(a))
+						this.tradeProtocol.offer(a, 10, 5, TradeType.BUY);
 				} catch (FSMException e) {
 					logger.warn("Error creating token offer", e);
 				}
