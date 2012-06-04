@@ -14,7 +14,10 @@ import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
 import uk.ac.imperial.presage2.core.environment.ServiceDependencies;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.messaging.Input;
-
+/**
+ * 
+ * @author farhanrahman
+ */
 @ServiceDependencies({CarbonReportingService.class})
 public class SubmitCarbonEmissionReportHandler implements ActionHandler{
 
