@@ -3,11 +3,10 @@ package uk.ac.ic.kyoto.annex1reduce.analysis;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import uk.ac.ic.kyoto.trade.TradeProtocol.Trade;
+
 /**
- * Stores and makes available all given TickHistories for current Session<br>
- * <br>
- * <i>NOTE: This is based on a yet to be implemented TradeMessage and
- * InvestmentMessage classes (which should extend Message).</i> 
+ * Stores and makes available all given TickHistories for current Session
  * 
  * @author cs2309 & ov109
  */
@@ -42,7 +41,7 @@ public class SessionHistory {
 	 * @param currentTick
 	 * @throws Exception 
 	 */
-	public void add(Message m, int currentTick) throws Exception{
+	public void add(Trade m, int currentTick) throws Exception{
 		
 		if(tick == null){
 			tick = new TickHistory(currentTick);

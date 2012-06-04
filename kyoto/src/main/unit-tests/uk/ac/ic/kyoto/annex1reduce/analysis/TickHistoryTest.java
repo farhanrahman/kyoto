@@ -7,150 +7,111 @@ import java.util.Iterator;
 
 import org.junit.Test;
 
+import uk.ac.ic.kyoto.trade.TradeProtocol.Trade;
+import uk.ac.ic.kyoto.trade.TradeType;
+
 public class TickHistoryTest {
 
 	@Test
 	public void testTickHistory() {
 		TickHistory t = new TickHistory(0);
-		assertTrue(t.getInvestmentHigh() == Float.MIN_VALUE);
-		assertTrue(t.getTradeHigh() == Float.MIN_VALUE);
-		assertTrue(t.getInvestmentLow() == Float.MAX_VALUE);
-		assertTrue(t.getTradeLow() == Float.MAX_VALUE);
+		
+		assertTrue(t.getTradeHigh() == Integer.MIN_VALUE);
+		assertTrue(t.getTradeLow() == Integer.MAX_VALUE);
+		
+		//assertTrue(t.getInvestmentLow() == Integer.MAX_VALUE);
+		//assertTrue(t.getInvestmentHigh() == Integer.MIN_VALUE);
+		
 		assertTrue(t.getTickId() == 0);
 	}
 
 	@Test
 	public void testAddMessage() {
 		TickHistory			t	= new TickHistory(0);
-		Message				m1	= new Message(1, 1);
-		TradeMessage		m2	= new TradeMessage(1, 1);
-		InvestmentMessage	m3	= new InvestmentMessage(1, 1);
+		Trade				m1	= new Trade(1, 1, TradeType.BUY);
 		
 		try {
 			t.addMessage(m1);
 		} catch (Exception e) {
 			e.printStackTrace();
-			fail("Exception while adding Message");
+			fail("Exception while adding Trade");
 		}
-		
-		try {
-			t.addMessage(m2);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Exception while adding TradeMessage");
-		}	
-		
-		try {
-			t.addMessage(m3);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Exception while adding InvestmentMessage");
-		}	
 	}
 
 	@Test
 	public void testGetMessages() {
-		TickHistory			t	= new TickHistory(0);
-
-		TradeMessage		m2	= new TradeMessage(1, 1);
-		InvestmentMessage	m3	= new InvestmentMessage(1, 1);
+		TickHistory	t	= new TickHistory(0);
+		
+		Trade		m1	= new Trade(1, 2, TradeType.BUY);
+		Trade		m2	= new Trade(3, 4, TradeType.BUY);
 		
 		try {
+			t.addMessage(m1);
 			t.addMessage(m2);
-			t.addMessage(m3);
 		} catch (Exception e) {
 			fail("Exception while adding messages");
 		}
 		
-		Iterator<Message> i = t.getMessages();
-		assertTrue("Could not get TradeMessage", i.next().equals(m2));
-		assertTrue("Could not get InvestmentMessage", i.next().equals(m3));
+		Iterator<Trade> i = t.getMessages();
+		//TODO This would be better if Trade implemented equals()
+
+		Trade temp = i.next();
+		System.out.println("m1:" + temp.getQuantity() + temp.getUnitCost());
+		assertTrue(temp.getQuantity() == 1);
+		assertTrue(temp.getUnitCost() == 2);
+		
+		temp = i.next();
+		System.out.println("m2:" + temp.getQuantity() + temp.getUnitCost());
+		assertTrue(temp.getQuantity() == 3);
+		assertTrue(temp.getUnitCost() == 4);
+		
+		assertTrue(i.hasNext() == false);
 		
 	}
 
 	@Test
 	public void testGetTradeHigh() {
 		TickHistory			t	= new TickHistory(0);
-
-		TradeMessage		m1	= new TradeMessage(1, 1);		
-		TradeMessage		m2 = new TradeMessage(1, 10);
 		
-		// InvestmentMessage added to ensure it does not alter correct results
-		InvestmentMessage	m3 = new InvestmentMessage(1, 100);
+		Trade				m1	= new Trade(1, 1, TradeType.BUY);
+		Trade				m2	= new Trade(1, 100, TradeType.SELL);
 		
 		try {
 			t.addMessage(m1);
 			t.addMessage(m2);
-			t.addMessage(m3);
 		} catch (Exception e) {
 			fail("Exception while adding messages");
 		}
 		
-		assertTrue("Incorrect TradeHigh value", t.getTradeHigh() == (float) 10);
+		assertTrue("Incorrect TradeHigh value", t.getTradeHigh() == (float) 100);
 		
 	}
 
 	@Test
 	public void testGetTradeLow() {
-		TickHistory			t	= new TickHistory(0);
-
-		TradeMessage		m1	= new TradeMessage(1, 1);
-		TradeMessage		m2	= new TradeMessage(10, 1);
+		TickHistory	t	= new TickHistory(0);
 		
-		// InvestmentMessage added to ensure it does not alter correct results
-		InvestmentMessage	m3	= new InvestmentMessage(100, 1);
+		Trade		m1	= new Trade(1, 2, TradeType.BUY);
+		Trade		m2	= new Trade(1, 100, TradeType.BUY);
 		
 		try {
 			t.addMessage(m1);
 			t.addMessage(m2);
-			t.addMessage(m3);
 		} catch (Exception e) {
 			fail("Exception while adding messages");
 		}
-				
-		assertTrue("Incorrect TradeLow value", t.getTradeLow() == (float) 0.1);
+		
+		assertTrue("Incorrect TradeLow value", t.getTradeLow() == (float) 2);
 	}
 
 	@Test
 	public void testGetInvestmentHigh() {
-		TickHistory			t	= new TickHistory(0);
-
-		InvestmentMessage	m1	= new InvestmentMessage(1, 1);
-		InvestmentMessage	m2 = new InvestmentMessage(1, 10);
-		
-		// TradeMessage added to ensure it does not alter correct results
-		TradeMessage		m3 = new TradeMessage(1, 100);
-		
-		try {
-			t.addMessage(m1);
-			t.addMessage(m2);
-			t.addMessage(m3);
-		} catch (Exception e) {
-			fail("Exception while adding messages");
-		}
-		
-		assertTrue("Incorrect TradeHigh value", t.getInvestmentHigh() == (float) 10);
+		fail("Investment message object not yet implemented: Cannot test.");
 	}
 
 	@Test
 	public void testGetInvestmentLow() {
-		TickHistory			t	= new TickHistory(0);
-		
-		InvestmentMessage	m1	= new InvestmentMessage(1, 1);
-		InvestmentMessage	m2	= new InvestmentMessage(10, 1);
-		
-		// TradeMessage added to ensure it does not alter correct results
-		TradeMessage		m3	= new TradeMessage(100, 1);
-		
-		try {
-			t.addMessage(m1);
-			t.addMessage(m2);
-			t.addMessage(m3);
-		} catch (Exception e) {
-			fail("Exception while adding messages");
-		}
-		
-		assertTrue("Incorrect TradeLow value", t.getInvestmentLow() == (float) 0.1);
+		fail("Investment message object not yet implemented: Cannot test.");
 	}
 
 	@Test
@@ -163,12 +124,9 @@ public class TickHistoryTest {
 	public void testGetTradeAverage() {
 		TickHistory			t	= new TickHistory(0);
 		
-		TradeMessage		m1	= new TradeMessage(1, 4);
-		TradeMessage		m2	= new TradeMessage(1, 5);
-		TradeMessage		m3	= new TradeMessage(1, 6);
-		
-		// InvestmentMessage added to ensure it does not alter correct results
-		InvestmentMessage	m4	= new InvestmentMessage(1, 100);
+		Trade				m1	= new Trade(1, 4, TradeType.BUY);
+		Trade				m2	= new Trade(1, 5, TradeType.BUY);
+		Trade				m3	= new Trade(1, 6, TradeType.BUY);
 		
 		try {
 			t.addMessage(m1);
@@ -183,25 +141,7 @@ public class TickHistoryTest {
 
 	@Test
 	public void testGetInvestmentAverage() {
-		TickHistory			t	= new TickHistory(0);
-		
-		InvestmentMessage	m1	= new InvestmentMessage(1, 4);
-		InvestmentMessage	m2	= new InvestmentMessage(1, 5);
-		InvestmentMessage	m3	= new InvestmentMessage(1, 6);
-		
-		// TradeMessage added to ensure it does not alter correct results
-		TradeMessage		m4	= new TradeMessage(1, 100);
-		
-		try {
-			t.addMessage(m1);
-			t.addMessage(m2);
-			t.addMessage(m3);
-			t.addMessage(m4);
-		} catch (Exception e) {
-			fail("Exception while adding messages");
-		}
-		
-		assertTrue(t.getInvestmentAverage() == (float) 5);
+		fail("Investment message object not yet implemented: Cannot test.");
 	}
 
 }
