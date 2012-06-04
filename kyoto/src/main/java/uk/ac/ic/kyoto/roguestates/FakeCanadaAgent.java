@@ -1,9 +1,6 @@
 package uk.ac.ic.kyoto.roguestates;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -14,13 +11,11 @@ import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
-import uk.ac.imperial.presage2.core.simulator.SimTime;
-import uk.ac.imperial.presage2.core.util.random.Random;
 import uk.ac.imperial.presage2.util.fsm.FSMException;
 
-public class CanadaAgent extends NonParticipant {
+public class FakeCanadaAgent extends NonParticipant {
 
-	public CanadaAgent(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
+	public FakeCanadaAgent(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
 			double GDPRate, float availableToSpend, long emissionsTarget, long carbonOffset,
 			long energyOutput) {
 		super(id, name, ISO, landArea, arableLandArea, GDP,
@@ -45,7 +40,7 @@ public class CanadaAgent extends NonParticipant {
 				@Override
 				protected boolean acceptExchange(NetworkAddress from,
 						Trade trade) {
-					if (carbonOutput - emissionsTarget + carbonOffset > 0) {
+					if (carbonOutput - emissionsTarget + carbonOffset < 0) {
 						return true;
 					}
 					return true;

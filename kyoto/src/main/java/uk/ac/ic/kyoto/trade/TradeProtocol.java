@@ -176,7 +176,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 					 * Transitions: TRADE_PROPOSED -> TRADE_ACCEPTED
 					 * Trade proposal has been accepted by someone
 					 */
-				.addTransition(Transitions.RECEIVE_RESPONSE,
+				.addTransition(Transitions.ACCEPT_TRADE,
 						new AndCondition(new MessageTypeCondition("ACCEPT"),
 								new ConversationCondition()),
 								States.TRADE_PROPOSED, 
@@ -205,7 +205,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 							 * Transitions: TRADE_PROPOSED -> TRADE_REJECTED
 							 * Trade proposal has been rejected by someone else.
 							 */
-							.addTransition(Transitions.RECEIVE_RESPONSE,
+							.addTransition(Transitions.REJECT_TRADE,
 									new AndCondition(new MessageTypeCondition("REJECT"),
 											new ConversationCondition()),
 											States.TRADE_PROPOSED,
