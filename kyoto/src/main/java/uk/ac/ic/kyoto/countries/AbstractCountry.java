@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
 
+import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.trade.PublicOffer;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.imperial.presage2.core.Time;
@@ -168,7 +169,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		
 		double marketStateFactor = 0;
 		
-		Market.EconomyState economyState = Market.getEconomyState();
+		Economy.State economyState = Economy.getEconomyState();
 		
 		switch(economyState) {
 		case GROWTH:

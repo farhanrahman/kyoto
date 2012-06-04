@@ -9,7 +9,7 @@ import java.util.UUID;
 import java.util.List;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
-import uk.ac.ic.kyoto.countries.Market;
+import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
@@ -160,10 +160,10 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		double fossilFuelsFactor;
 		
 		try {
-			double newOilPrice = Market.getOilPrice(currentYear);
-			double oldOilPrice = Market.getOilPrice(currentYear - 1);
-			double newGasPrice = Market.getGasPrice(currentYear);
-			double oldGasPrice = Market.getGasPrice(currentYear - 1);
+			double newOilPrice = Economy.getOilPrice(currentYear);
+			double oldOilPrice = Economy.getOilPrice(currentYear - 1);
+			double newGasPrice = Economy.getGasPrice(currentYear);
+			double oldGasPrice = Economy.getGasPrice(currentYear - 1);
 			double oilGradient = (newOilPrice - oldOilPrice) / oldOilPrice;
 			double gasGradient = (newGasPrice - oldGasPrice) / oldGasPrice;
 				
@@ -180,7 +180,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		double marketFactor;
 		
 		try {
-			Market.EconomyState economyState = Market.getEconomyState();
+			Economy.State economyState = Economy.getEconomyState();
 			
 			switch (economyState) {
 				case GROWTH:
