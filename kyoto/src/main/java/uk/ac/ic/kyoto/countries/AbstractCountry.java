@@ -9,6 +9,7 @@ import java.util.TreeMap;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
+
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
@@ -84,7 +85,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 
 	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
 					double GDPRate, float availableToSpend, long emissionsTarget, long carbonOffset,
-					long energyOutput) {
+					long energyOutput, long carbonOutput) {
 
 		//TODO Validate parameters
 		
@@ -96,8 +97,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.GDPRate = GDPRate;
 		this.emissionsTarget = emissionsTarget;
 		this.carbonOffset = carbonOffset;
-		this.availableToSpend = availableToSpend; 
-	//	this.carbonTraded = carbonTraded;
+		this.availableToSpend = availableToSpend;
+		this.carbonOutput = carbonOutput;
 		this.carbonEmissionReports = new HashMap<Integer, Double>();
 		this.energyOutput = energyOutput;
 	}
@@ -199,6 +200,30 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		else
 			throw new IllegalArgumentException("Specified amount should be positive");
 	}
+	
+	// Investment in Carbon Industry functions
+	
+	protected long calculateCostOfInvestingInCarbonIndustry (long carbon){
+		return (long) (carbon * GameConst.CARBON_INVESTMENT_PRICE);
+	}
+	
+	protected long calculateCarbonIndustryGrowth (long cost){
+		return (long) (cost / GameConst.CARBON_INVESTMENT_PRICE);
+	}
+	
+	public void investInCarbonIndustry(long carbon){
+		try {
+			long cost = calculateCostOfInvestingInCarbonIndustry(carbon);
+			carbonOutput += carbon;
+			energyOutput += carbon;
+			availableToSpend -= cost;
+		}
+		catch (Exception e) {
+			// log the exception
+		}
+	}
+	
+	// GDP related functions
 	
 	public Double getCash(){
 		return this.GDP*GameConst.PERCENTAGE_OF_GDP;
@@ -382,6 +407,17 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return carbonTraded;
 	}
 */	
+	
+	public long getCurrentYear() {
+		// Returns the current year we are in
+		// This should probably be somewhere in the environment, not sure where
+		return 0;
+	}
+	
+	public long calculateCreditsToSell() {
+		// Returns credits that a country has available to sell
+		return 0;
+	}
 	
 	public void getMonitored() {
 		int time = SimTime.get().intValue();
