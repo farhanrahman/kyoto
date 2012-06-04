@@ -1,5 +1,10 @@
 package uk.ac.ic.kyoto.annex1sustain;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.List;
 
@@ -13,6 +18,10 @@ import org.apache.log4j.Logger;
 
 public class AbstractPostCommunistCountry extends AbstractCountry {
 	
+	//================================================================================
+    // PrivateFields
+    //================================================================================
+	
 	protected Logger		logger;
 	protected double 		internalPrice;
 	protected List<Double> 	uncommittedTransactionsCosts;
@@ -21,6 +30,10 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	protected long 			creditsToSell;
 	protected long 			creditsToSellTarget;
 	protected double		lastYearFactor;
+	
+	//================================================================================
+    // Constructors
+    //================================================================================
 	
 	public AbstractPostCommunistCountry(UUID id, String name, String ISO,
 			double landArea, double arableLandArea, double GDP, double GDPRate,
@@ -34,13 +47,19 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		logger = Logger.getLogger(AbstractPostCommunistCountry.class);
 	}
 	
+	//================================================================================
+    // Overridden functions
+    //================================================================================
+	
 	@Override
 	protected void processInput(Input input) {
 		// TODO Auto-generated method stub
 	}
 
 	
-	// Functions called once per tick
+	//================================================================================
+    // Methods called once per tick
+    //================================================================================
 	
 	@EventListener
 	public void updateInternalData(EndOfTimeCycle e)
@@ -59,6 +78,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	}
 
 	protected double calculateMarketPrice() {
+		double marketPrice;
 		double maximumCommittedPrice = 0;
 		double minimumUncommittedPrice = Double.MAX_VALUE;
 		
@@ -74,12 +94,14 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 				if (price < minimumUncommittedPrice)
 					minimumUncommittedPrice = price;
 			}
+			marketPrice = (maximumCommittedPrice + minimumUncommittedPrice) / 2;
 		}
 		catch (Exception e) {
 			logger.warn("Problem calculating marketPrice: " + e);
+			marketPrice = 0;
 		}
 		
-		return (maximumCommittedPrice + minimumUncommittedPrice) / 2;
+		return marketPrice;
 	}
 	
 	protected double calculateEndOfRoundFactor() {
@@ -112,8 +134,9 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		ticksToEndOfRound--;
 	}
 	
-	
-	// Functions called once per year
+	//================================================================================
+    // Methods called once per year
+    //================================================================================
 	
 	protected double calculateAvailableCreditsFactor() {
 		double availableCreditsFactor;
@@ -121,6 +144,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		try {
 			// TODO implement
 			//   Which variable of AbstractCountry represents available credits?
+			availableCreditsFactor = 1;
 		}
 		catch (Exception e) {
 			logger.warn("Problem when calculating availableCreditsFactor " + e);
@@ -131,8 +155,8 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	
 	protected double calculateFossilFuelsFactor() {
 		double fossilFuelsFactor;
-		Map<long,double> oilPriceMap = new HashMap<long,double>();
-		Map<long,double> gasPriceMap = new HashMap<long,double>();
+		Map<Long,Double> oilPriceMap = new HashMap<Long,Double>();
+		Map<Long,Double> gasPriceMap = new HashMap<Long,Double>();
 		String line;
 		String[] entries;
 		long year;
@@ -147,7 +171,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			// Read the values into two maps
 			line = reader.readLine(); // to drop the title line - not really elegant
 			while((line = reader.readLine()) != null) {
-				 entries = data.split(",");
+				 entries = line.split(",");
 				 year = Long.parseLong(entries[0]);
 				 oilPrice = Double.parseDouble(entries[1]);
 				 gasPrice = Double.parseDouble(entries[2]);
@@ -160,7 +184,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			//   TODO currentYear = ...
 			//     How many ticks are in one year?
 			//     Should probably be a separate function
-			
+			currentYear = 1990;
 			// Make sure current and previous year are in the map
 			if (oilPriceMap.containsKey(currentYear) && oilPriceMap.containsKey(currentYear - 1)) {
 				double newOilPrice = oilPriceMap.get(currentYear);
@@ -170,7 +194,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 				double oilGradient = (newOilPrice - oldOilPrice) / oldOilPrice;
 				double gasGradient = (newGasPrice - oldGasPrice) / oldGasPrice;
 				
-				fossilFuelsFactor = FOSSIL_FUEL_PRICE_COEFFICIENT * (oilGradient + gasGradient) / 2;
+				fossilFuelsFactor = Constants.FOSSIL_FUEL_PRICE_COEFFICIENT * (oilGradient + gasGradient) / 2;
 			}
 			else {
 				fossilFuelsFactor = 1;
@@ -215,7 +239,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			// Calculate new target based on three factors
 			newTarget =	(long) 
 						( calculateAvailableCreditsFactor() *
-						  calculateFuelsFactor() *
+						  calculateFossilFuelsFactor() *
 						  calculateMarketFactor() );
 			
 			// Adjust the new target if out of possible range
@@ -223,6 +247,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 				newTarget = availableCredits;
 			}
 			else if (newTarget < 0) {
+				// Isn't this a bug? Should probably send a warning
 				newTarget = 0;
 			}
 		}
@@ -251,7 +276,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			}
 		}
 		catch (ArithmeticException e) {
-			logger.warn("Division by 0 error " + e);
+			logger.warn("Division by 0 error: " + e);
 			lastYearPercentageSold = 0;
 		}
 		
