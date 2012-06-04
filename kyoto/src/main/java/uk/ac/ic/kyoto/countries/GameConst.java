@@ -13,6 +13,10 @@ public final class GameConst {
 	
 	public static final int ECONOMIC_OUTPUT_REDUCTION = 1; // What is that?
 	
+	/**
+	 * The cost of investment in one extra ton of carbon per year
+	 */
+	public static final double CARBON_INVESTMENT_PRICE = 1;
 	
 	/**
 	 * Normalises value of GDP rate increase
