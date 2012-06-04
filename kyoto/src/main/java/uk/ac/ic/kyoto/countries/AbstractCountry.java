@@ -59,7 +59,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 
 	protected Map<Integer, Double> carbonEmissionReports;
 	
-	CarbonReportingService reportingService;
+	ParticipantCarbonReportingService reportingService;
 	
 	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
 	protected Set<PublicOffer> 		offers;
@@ -106,7 +106,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	protected Set<ParticipantSharedState> getSharedState(){
 		Set<ParticipantSharedState> s = super.getSharedState();
-		s.add(ParticipantCarbonReportingService.createSharedState("Report", this.getCarbonEmissionReports(), this.getID()));
+		s.add(ParticipantCarbonReportingService.createSharedState(this.getCarbonEmissionReports(), this.getID()));
 		return s;
 	}
 	
