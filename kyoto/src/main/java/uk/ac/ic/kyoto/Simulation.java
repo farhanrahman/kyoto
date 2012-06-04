@@ -4,17 +4,16 @@ import java.util.HashSet;
 import java.util.Set;
 
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReportHandler;
-
-import com.google.inject.AbstractModule;
-
-import uk.ac.ic.kyoto.carbon.CarbonReportingService;
+import uk.ac.ic.kyoto.services.CarbonReportingService;
+import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.imperial.presage2.core.simulator.InjectedSimulation;
 import uk.ac.imperial.presage2.core.simulator.Parameter;
 import uk.ac.imperial.presage2.core.simulator.Scenario;
 import uk.ac.imperial.presage2.rules.RuleModule;
 import uk.ac.imperial.presage2.util.environment.AbstractEnvironmentModule;
-import uk.ac.imperial.presage2.util.location.MoveHandler;
-import uk.ac.imperial.presage2.util.location.ParticipantLocationService;
+import uk.ac.imperial.presage2.util.network.NetworkModule;
+
+import com.google.inject.AbstractModule;
 
 public class Simulation extends InjectedSimulation {
 	
@@ -37,13 +36,15 @@ public class Simulation extends InjectedSimulation {
 			//.addActionHandler(FooHandler.class)*/
 		
 		modules.add(new AbstractEnvironmentModule()
-			.addActionHandler(MoveHandler.class)
 			.addActionHandler(SubmitCarbonEmissionReportHandler.class)
-			.addParticipantEnvironmentService(ParticipantLocationService.class)
-			.addGlobalEnvironmentService(CarbonReportingService.class));		
+			.addGlobalEnvironmentService(CarbonReportingService.class)
+			.addParticipantEnvironmentService(ParticipantCarbonReportingService.class));		
 	
 		modules.add(new RuleModule());
 			//.addClasspathDrlFile("foo.drl")
+		
+		modules.add(NetworkModule.fullyConnectedNetworkModule().withNodeDiscovery());
+		
 		return modules;
 	}
 

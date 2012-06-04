@@ -1,4 +1,4 @@
-package uk.ac.ic.kyoto.carbon;
+package uk.ac.ic.kyoto.services;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -14,7 +14,10 @@ import uk.ac.imperial.presage2.core.environment.StateTransformer;
 
 import com.google.inject.Inject;
 
-
+/**
+ * 
+ * @author farhanrahman
+ */
 public class CarbonReportingService extends EnvironmentService {
 
 	Logger logger = Logger.getLogger(CarbonReportingService.class);
@@ -31,16 +34,6 @@ public class CarbonReportingService extends EnvironmentService {
 	}
 
 	public void updateReport(final UUID id, final Double carbonEmission, final Time simTime){
-		@SuppressWarnings("unchecked")
-		Map<Integer, Double> s = (Map<Integer,Double>) this.sharedState.get("Report", id);
-		
-		for(Integer key : s.keySet()){
-			logger.info("ATTIME= "+simTime.toString()+" ID= " + id + " Key: " + key + " Value: " + s.get(key) + "\n");
-			//logger.info("ATTIME= "+simTime.toString()+" ID= " + id + " Key: " + 1 + " Value: " + s.get(new IntegerTime(1)) + "\n");
-		}
-		
-		System.out.println();
-		
 		this.sharedState.change("Report", id, new StateTransformer(){
 			@Override
 			public Serializable transform(Serializable state) {
@@ -50,5 +43,14 @@ public class CarbonReportingService extends EnvironmentService {
 				return (Serializable) s;
 			}
 		});
+		
+		/*@SuppressWarnings("unchecked")
+		Map<Integer, Double> s = (Map<Integer,Double>) this.sharedState.get("Report", id);
+		
+		for(Integer key : s.keySet()){
+			logger.info("ATTIME= "+simTime.toString()+" ID= " + id + " Key: " + key + " Value: " + s.get(key) + "\n");
+		}
+		
+		System.out.println();*/		
 	}
 }
