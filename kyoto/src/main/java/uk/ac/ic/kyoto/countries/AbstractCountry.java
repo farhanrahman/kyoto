@@ -38,19 +38,35 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	//TODO Register UUID and country ISO with the environment
 	
-	final protected double landArea;
 	final protected String ISO;		//ISO 3166-1 alpha-3
 	
+	
+	/*
+	 * These variables are related to land area for
+	 * dealing with carbon absorbtion prices
+	 */
+	final protected double landArea;
 	protected double 	arableLandArea;
+	
+	/*
+	 * These variables are related to carbon emissions and 
+	 * calculating 'effective' carbon output
+	 */
+	protected long 	carbonOutput; // In tons of carbon dioxide
+	protected long 	carbonOffset; // In tons of carbon
+	protected long	emissionsTarget; // Number of tons of carbon you SHOULD produce
+	
+	/*
+	 * These variables are related to GDP and
+	 * available funds to spend on carbon trading and industry.
+	 */
 	protected double 	GDP;
 	protected double 	GDPRate;
-	protected long 	carbonOutput; // In tons of carbon dioxide
 	protected long  energyOutput; // In tons of carbon equivalence (how much carbon would be used if the whole energy production was carbon based)
 	protected long  energyOutputCeiling; // As above, limit for the energyOutput
-	protected long	emissionsTarget; // Number of tons of carbon you SHOULD produce
-	protected long 	carbonOffset; // In tons of carbon
 	private float 	availableToSpend; // Note, can NOT be derived from GDP. Initial value can be derived from there, but cash reserves need to be able to lower independently.
-	//private long 	carbonTraded;
+	
+	//private long 	carbonTraded; 
 	//private double  dirtyIndustry;
 
 	/**
@@ -60,7 +76,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 
 	protected Map<Integer, Double> carbonEmissionReports;
 	
-	CarbonReportingService reportingService;
+	ParticipantCarbonReportingService reportingService;
 	
 	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
 	protected Set<PublicOffer> 		offers;
@@ -107,7 +123,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	protected Set<ParticipantSharedState> getSharedState(){
 		Set<ParticipantSharedState> s = super.getSharedState();
-		s.add(ParticipantCarbonReportingService.createSharedState("Report", this.getCarbonEmissionReports(), this.getID()));
+		s.add(ParticipantCarbonReportingService.createSharedState(this.getCarbonEmissionReports(), this.getID()));
 		return s;
 	}
 	
