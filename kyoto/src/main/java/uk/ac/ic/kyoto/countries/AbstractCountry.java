@@ -9,13 +9,10 @@ import java.util.TreeMap;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
-<<<<<<< HEAD
 
 import uk.ac.ic.kyoto.market.Economy;
-=======
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
->>>>>>> development
 import uk.ac.ic.kyoto.trade.PublicOffer;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.imperial.presage2.core.Time;
@@ -84,7 +81,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.GDPRate = GDPRate;
 		this.emissionsTarget = emissionsTarget;
 		this.carbonOffset = carbonOffset;
-		this.availableToSpend = availableToSpend; 
+		this.availableToSpend = availableToSpend;
 	//	this.carbonTraded = carbonTraded;
 		this.carbonEmissionReports = new HashMap<Integer, Double>();
 		this.energyOutput = energyOutput;

@@ -169,7 +169,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			double oldGasPrice = FossilPrices.getGasPrice(currentYear - 1);
 			double oilGradient = (newOilPrice - oldOilPrice) / oldOilPrice;
 			double gasGradient = (newGasPrice - oldGasPrice) / oldGasPrice;
-				
+			
 			fossilFuelsFactor = Constants.FOSSIL_FUEL_PRICE_COEFFICIENT * (oilGradient + gasGradient) / 2;
 		}
 		catch (Exception e) {
