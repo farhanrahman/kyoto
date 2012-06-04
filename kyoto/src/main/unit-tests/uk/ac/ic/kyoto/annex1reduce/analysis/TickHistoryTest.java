@@ -140,6 +140,7 @@ public class TickHistoryTest {
 		TickHistory t1 = new TickHistory(0);
 		TickHistory t2 = new TickHistory(0);
 		TickHistory t3 = new TickHistory(0);
+		TickHistory t4 = new TickHistory(0);
 		
 		Trade		m1	= new Trade(1, 4, TradeType.BUY);
 		Trade		m2	= new Trade(1, 5, TradeType.BUY);
@@ -155,12 +156,29 @@ public class TickHistoryTest {
 			t2.addMessage(m3);
 			
 			t3.addMessage(m1);
+			t3.addMessage(m2);
+			t3.addMessage(m3);
+			
+			t4.addMessage(m1);
 		} catch (Exception e) {
 			fail("Exception while adding messages");
 		}
 		
+		// Reflexive
+		assertTrue(t1.equals(t1));
+		
+		// Symmetric
 		assertTrue(t1.equals(t2));
-		assertTrue(t1.equals(t3) == false);
+		assertTrue(t2.equals(t1));
+		
+		//Transitive
+		assertTrue(t1.equals(t2));
+		assertTrue(t2.equals(t3));
+		assertTrue(t1.equals(t3));
+		
+		//Test Failure
+		assertTrue(t1.equals(t4) == false);
+		assertTrue(t1.equals(null) == false);
 		
 	}
 	

@@ -73,22 +73,22 @@ public abstract class TradeProtocol extends FSMProtocol {
 			return new Trade(this.quantity, this.unitCost, t);
 		}
 		
-//		@Override
-//		//cs2309: Written using Effective Java (Josh Bloch) as reference
-//		public boolean equals(Object obj) {
-//			if (obj == this){
-//				return true;
-//			}
-//			
-//			if (!(obj instanceof Trade)){
-//				return false;
-//			}
-//			
-//			Trade trade = (Trade) obj;
-//			return (trade.quantity == this.quantity) &&
-//					(trade.unitCost == this.unitCost) &&
-//					(trade.type == this.type);
-//		}
+		@Override
+		//cs2309: Written using Effective Java (Josh Bloch) as reference
+		public boolean equals(Object obj) {
+			if (obj == this){
+				return true;
+			}
+			
+			if (!(obj instanceof Trade)){
+				return false;
+			}
+			
+			Trade trade = (Trade) obj;
+			return (trade.quantity == this.quantity) &&
+					(trade.unitCost == this.unitCost) &&
+					(trade.type == this.type);
+		}
 		
 		@Override
 		//cs2309: Written using Effective Java (Josh Bloch) as reference

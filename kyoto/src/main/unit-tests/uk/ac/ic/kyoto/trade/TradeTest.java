@@ -45,11 +45,21 @@ public class TradeTest {
 		Trade t5 = new Trade(0, 2, TradeType.BUY);
 		String s = new String();
 		
+		//Reflexive
+		assertTrue(t1.equals(t1));
+		
+		//Symmetric
 		assertTrue(t1.equals(t2));
+		assertTrue(t2.equals(t1));
+		
+		//Transitive
+		
+		//Test Failure
 		assertTrue(t1.equals(t3) == false);
 		assertTrue(t1.equals(t4) == false);
 		assertTrue(t1.equals(t5) == false);
 		assertTrue(t1.equals(s) == false);
+		assertTrue(t1.equals(null) == false);
 	}
 
 }

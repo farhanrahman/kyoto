@@ -129,9 +129,19 @@ public class SessionHistoryTest {
 			fail("Exception while adding Trades to SessionHistory");
 		}
 		
+		//Reflexive
+		assertTrue(s1.equals(s1));
+		
+		//Symmetric
 		assertTrue(s1.equals(s2));
+		assertTrue(s2.equals(s1));
+		
+		//Transitive
+		
+		//Test Failure
 		assertTrue(s1.equals(s3) == false);
 		assertTrue(s1.equals(s4) == false);
+		assertTrue(s1.equals(null));
 		
 	}
 
