@@ -2,8 +2,6 @@ package uk.ac.ic.kyoto.annex1reduce.analysis;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
 import uk.ac.ic.kyoto.trade.TradeProtocol.Trade;
@@ -139,16 +137,6 @@ public class TickHistory{
 								(tick.tradeNo == this.tradeNo) &&
 								(tick.tradeSum == this.tradeSum);
 		boolean messagesTest = tick.messages.equals(this.messages);
-		
-		
-		System.out.println("investmentTest");
-		
-		System.out.println(tick.tradeHigh + " " +this.tradeHigh);
-		System.out.println(tick.tradeLow + " " +this.tradeLow);
-		System.out.println(tick.tradeNo + " " +this.tradeNo);
-		System.out.println(tick.tradeSum + " " +this.tradeSum);
-		
-		//System.out.println("Test:" + investmentTest + tradeTest + messagesTest + (tick.tickId == this.tickId));
 		
 		return investmentTest && tradeTest && messagesTest && (tick.tickId == this.tickId);
 	}

@@ -14,7 +14,9 @@ import uk.ac.ic.kyoto.trade.TradeProtocol.Trade;
 public class SessionHistory {
 	
 	private final int sessionId;
-	private HashMap<Integer, TickHistory> session;
+	private Map<Integer, TickHistory> session;
+	
+	private int previousTickId;
 	
 	public SessionHistory(int sessionId) {
 		this.sessionId = sessionId;
@@ -36,15 +38,13 @@ public class SessionHistory {
 	public void add(Trade m, int currentTick) throws Exception{
 		
 		if(session.isEmpty()){
-			System.out.println("test");
 			TickHistory t = new TickHistory(currentTick);
 			t.addMessage(m);
-			System.out.println("xxx");
+
 			session.put(currentTick, t);
-			System.out.println("BLA");
 		}else{
-			TickHistory t = session.get(currentTick);
-			System.out.println(t.getTickId());
+			TickHistory t = session.get(previousTickId);
+
 			if(t.getTickId() != currentTick){
 				t = new TickHistory(currentTick);
 				t.addMessage(m);
@@ -54,6 +54,7 @@ public class SessionHistory {
 				session.put(currentTick, t);
 			}
 		}
+		previousTickId = currentTick;
 	}
 	
 	public TickHistory getTick(int tickId){
@@ -78,7 +79,7 @@ public class SessionHistory {
 
 		boolean sessionTest = tickHistory.session.equals(this.session);
 		
-		return sessionTest && (tickHistory.sessionId == this.sessionId);
+		return sessionTest && (tickHistory.sessionId == this.sessionId) && (tickHistory.previousTickId == this.previousTickId);
 	}
 	
 	@Override
@@ -87,6 +88,7 @@ public class SessionHistory {
 		
 		result = 4 * result + this.sessionId;
 		result = 4 * result + this.session.hashCode();
+		result = 4 * result + this.previousTickId;
 		
 		return result;
 	}

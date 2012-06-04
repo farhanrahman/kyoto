@@ -1,8 +1,7 @@
 package uk.ac.ic.kyoto.annex1reduce.analysis;
 
-import static org.junit.Assert.*;
-
-import java.util.Iterator;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
@@ -11,7 +10,7 @@ import uk.ac.ic.kyoto.trade.TradeType;
 
 public class SessionHistoryTest {
 
-	//@Test
+	@Test
 	public void testAdd() {
 		SessionHistory	s	= new SessionHistory(0);
 		
@@ -60,26 +59,47 @@ public class SessionHistoryTest {
 			fail("Exception while adding Trades to TickHistory");
 		}
 		
-		System.out.println("TEST 0");
-		
-		System.out.println(t1.getTradeHigh());
-		System.out.println(s.getSession().get(0).getTradeHigh());
-		
-		assertTrue(s.getTick(0).equals(t1));
-		
-		System.out.println("TEST 1");
-		
+		assertTrue(s.getTick(0).equals(t1));		
 		assertTrue(s.getTick(1).equals(t2));
 		
 	}
 
 	@Test
-	public void testGetSession() {
-		//TODO Add equals method to SessionHistory to enable correct testing
-		fail("Not yet implemented. Requires implementation of equals()");
+	public void testHashCode() {
+		SessionHistory		s1	= new SessionHistory(0);
+		SessionHistory		s2	= new SessionHistory(0);
+		SessionHistory		s3	= new SessionHistory(0);
+		SessionHistory		s4	= new SessionHistory(1);
+		
+		Trade				m1	= new Trade(1, 1, TradeType.BUY);
+		Trade				m2	= new Trade(1, 2, TradeType.BUY);
+		Trade				m3	= new Trade(1, 3, TradeType.BUY);
+		Trade				m4	= new Trade(1, 4, TradeType.BUY);
+		
+		try {
+			s1.add(m1, 0);
+			s1.add(m2, 0);
+			s1.add(m3, 1);
+			s1.add(m4, 1);
+			
+			s2.add(m1, 0);
+			s2.add(m2, 0);
+			s2.add(m3, 1);
+			s2.add(m4, 1);
+			
+			s3.add(m1, 0);
+			s3.add(m2, 0);			
+			
+		} catch (Exception e) {
+			fail("Exception while adding Trades to SessionHistory");
+		}
+		
+		assertTrue(s1.hashCode() == s2.hashCode());
+		assertTrue(s1.hashCode() != s3.hashCode());
+		assertTrue(s1.hashCode() != s4.hashCode());
 	}
 	
-	//@Test
+	@Test
 	public void testEquals(){
 		SessionHistory		s1	= new SessionHistory(0);
 		SessionHistory		s2	= new SessionHistory(0);
