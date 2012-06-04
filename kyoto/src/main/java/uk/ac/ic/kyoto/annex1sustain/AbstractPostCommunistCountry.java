@@ -1,15 +1,11 @@
 package uk.ac.ic.kyoto.annex1sustain;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import java.util.List;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.market.Economy;
+import uk.ac.ic.kyoto.market.FossilPrices;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
@@ -33,6 +29,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	// temporary variables
 	protected Logger		logger;
 	protected long 			currentYear;
+	protected long 			availableCredits;
 	
 	//================================================================================
     // Constructors
@@ -43,7 +40,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			long emissionsTarget, long carbonOffset, long energyOutput)
 	{
 		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, emissionsTarget,
-				carbonOffset, energyOutput);
+				carbonOffset, energyOutput, energyOutput);
 		// TODO Initialize the fields
 		
 		// Initialize logger. Should be done in AbstractCountry
@@ -160,10 +157,10 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		double fossilFuelsFactor;
 		
 		try {
-			double newOilPrice = Economy.getOilPrice(currentYear);
-			double oldOilPrice = Economy.getOilPrice(currentYear - 1);
-			double newGasPrice = Economy.getGasPrice(currentYear);
-			double oldGasPrice = Economy.getGasPrice(currentYear - 1);
+			double newOilPrice = FossilPrices.getOilPrice(currentYear);
+			double oldOilPrice = FossilPrices.getOilPrice(currentYear - 1);
+			double newGasPrice = FossilPrices.getGasPrice(currentYear);
+			double oldGasPrice = FossilPrices.getGasPrice(currentYear - 1);
 			double oilGradient = (newOilPrice - oldOilPrice) / oldOilPrice;
 			double gasGradient = (newGasPrice - oldGasPrice) / oldGasPrice;
 				
