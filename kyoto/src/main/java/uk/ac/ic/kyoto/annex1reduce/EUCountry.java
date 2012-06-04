@@ -13,12 +13,12 @@ import uk.ac.imperial.presage2.core.messaging.Input;
 public class EUCountry extends AbstractCountry {
 	
 	public EUCountry(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
-			double GDPRate, double emissionsTarget, long carbonOffset,
-			float availableToSpend, long carbonTraded) {
+			double GDPRate, long emissionsTarget, long carbonOffset,
+			float economicOutput) {
 		
 		super(id, name, ISO, landArea, arableLandArea, GDP,
 					GDPRate, emissionsTarget, carbonOffset,
-					availableToSpend, carbonTraded);
+					economicOutput);
 		
 		EU.addMemberState(this);
 	}
