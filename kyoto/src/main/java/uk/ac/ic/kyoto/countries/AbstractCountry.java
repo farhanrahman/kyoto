@@ -201,6 +201,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			throw new IllegalArgumentException("Specified amount should be positive");
 	}
 	
+	protected long calculateCostOfInvestingInCarbonIndustry (long carbon){
+		return carbon;
+	}
+	
 	public Double getCash(){
 		return this.GDP*GameConst.PERCENTAGE_OF_GDP;
 	}
