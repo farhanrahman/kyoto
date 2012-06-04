@@ -9,6 +9,7 @@ import java.util.TreeMap;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
+
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
@@ -96,7 +97,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.GDPRate = GDPRate;
 		this.emissionsTarget = emissionsTarget;
 		this.carbonOffset = carbonOffset;
-		this.availableToSpend = availableToSpend; 
+		this.availableToSpend = availableToSpend;
 	//	this.carbonTraded = carbonTraded;
 		this.carbonEmissionReports = new HashMap<Integer, Double>();
 		this.energyOutput = energyOutput;
@@ -198,6 +199,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		}
 		else
 			throw new IllegalArgumentException("Specified amount should be positive");
+	}
+	
+	protected long calculateCostOfInvestingInCarbonIndustry (long carbon){
+		return carbon;
 	}
 	
 	public Double getCash(){
@@ -382,6 +387,17 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return carbonTraded;
 	}
 */	
+	
+	public long getCurrentYear() {
+		// Returns the current year we are in
+		// This should probably be somewhere in the environment, not sure where
+		return 0;
+	}
+	
+	public long calculateCreditsToSell() {
+		// Returns credits that a country has available to sell
+		return 0;
+	}
 	
 	public void getMonitored() {
 		int time = SimTime.get().intValue();
