@@ -160,14 +160,19 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	/**
 	 * Reduces both the energyOutput and carbonOutput of the country
 	 * It can be used to limit carbonOuput without any financial cost
-	 * As the energyOuput goes down, the GDP growth will be limited
+	 * As the energyOuput goes down, the GDP growth goes down too
 	 * 
 	 * @param amount
 	 * 
 	 * Amount of energyOuput that should be reduced
 	 * It has to be positive and lower than the total carbonOuput
 	 */
-	public void reduceEnergyOutput (long amount) throws IllegalArgumentException{
+	
+	//================================================================================
+    // Investing in 
+    //================================================================================
+	
+	protected void reduceEnergyOutput (long amount) throws IllegalArgumentException{
 		if (amount < carbonOutput && amount > 0) {
 			energyOutput -= amount;
 			carbonOutput -= amount;
@@ -175,32 +180,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		else
 			throw new IllegalArgumentException("Specified amount should be > 0 and < carbonOutput");
 	}
-	
-	/**
-	 * Retrieves the energyOutput and carbonOutput of the country
-	 * It can only be used on the energy that was earlier reduced
-	 * There exists a ceiling of total energy for each country
-	 * 
-	 * @param amount
-	 * 
-	 * Amount of energyOuput that should be retrieved
-	 * It has to be positive and not exceed the energyOuputCeiling
-	 */
-	public void retrieveEnergyOutput (long amount) throws IllegalArgumentException{
-		if (amount > 0) {
-			long newEnergyOutput = energyOutput + amount;
-			if(newEnergyOutput <= energyOutputCeiling) {
-				energyOutput = newEnergyOutput;
-				carbonOutput += amount;
-			}
-			else
-				throw new IllegalArgumentException("You aimed to exceed your Energy Ouput limit");
-		}
-		else
-			throw new IllegalArgumentException("Specified amount should be positive");
-	}
-	
-	// Investment in Carbon Industry functions
 	
 	protected long calculateCostOfInvestingInCarbonIndustry (long carbon){
 		return (long) (carbon * GameConst.CARBON_INVESTMENT_PRICE);
@@ -210,7 +189,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return (long) (cost / GameConst.CARBON_INVESTMENT_PRICE);
 	}
 	
-	public void investInCarbonIndustry(long carbon){
+	protected void investInCarbonIndustry(long carbon){
 		try {
 			long cost = calculateCostOfInvestingInCarbonIndustry(carbon);
 			carbonOutput += carbon;
