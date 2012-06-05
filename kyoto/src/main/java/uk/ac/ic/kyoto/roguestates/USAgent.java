@@ -2,6 +2,7 @@ package uk.ac.ic.kyoto.roguestates;
 
 import java.util.UUID;
 
+import uk.ac.ic.kyoto.services.TimeService.EndOfSession;
 import uk.ac.ic.kyoto.services.TimeService.EndOfYear;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.util.random.Random;
@@ -36,6 +37,13 @@ public class USAgent extends NonParticipant {
 		}
 		else {
 			internalEmissionsTarget = carbonOutput;
+		}
+	}
+	
+	@EventListener
+	private void sessionOver(EndOfSession e) {
+		if (carbonOutput <= emissionsTarget) {
+			// Consider joining Kyoto here
 		}
 	}
 	
