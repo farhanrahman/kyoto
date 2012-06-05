@@ -61,10 +61,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * available funds to spend on carbon trading and industry.
 	 */
 	protected double 	GDP;
-	protected double 	GDPRate;
-	protected long  energyOutput; // In tons of carbon equivalence (how much carbon would be used if the whole energy production was carbon based)
-	protected long  energyOutputCeiling; // As above, limit for the energyOutput
-	private float 	availableToSpend; // Note, can NOT be derived from GDP. Initial value can be derived from there, but cash reserves need to be able to lower independently.
+	protected double 	GDPRate;	// The rate in which the DGP changes in a given year. Expressed in %
+	protected long  	energyOutput; // How much Carbon we would use if the whole industry was carbon based. Measured in Tons of Carbon per year
+	private float 		availableToSpend; // Note, can NOT be derived from GDP. Initial value can be derived from there, but cash reserves need to be able to lower independently.
 	
 	//private long 	carbonTraded; 
 	//private double  dirtyIndustry;

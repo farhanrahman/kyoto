@@ -27,9 +27,9 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	protected double		lastYearFactor;
 	
 	// temporary variables
-	protected Logger		logger;
+	private Logger		logger;
 	protected long 			currentYear;
-	protected long 			availableCredits; // it doesn't exist
+	protected long 			availableCredits; // corresponds to carbon offset
 	
 	//================================================================================
     // Constructors
@@ -40,7 +40,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			float availiableToSpend, long emissionsTarget, long carbonOffset, long energyOutput)
 	{
 		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, emissionsTarget,
-				carbonOffset, energyOutput, energyOutput);
+				carbonOffset, energyOutput, energyOutput, energyOutput);
 		// TODO Initialize the fields
 		
 		// Initialize logger. Should be done in AbstractCountry
@@ -59,7 +59,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 
 	
 	//================================================================================
-    // Public methods to update Data
+    // Public methods to update data
     //================================================================================
 	
 	/**
@@ -82,7 +82,8 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 */
 	public void updateYearlyData() {
 		calculateLastYearFactor();
-		calculateNewTarget();
+		calculateNewSellingTarget();
+		logger.info("Internal Yearly Data of Post Communist Country " + this.getName() + " was updated");
 	}
 	
 	//================================================================================
@@ -148,6 +149,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		// TODO implement
 	}
 	
+	// temporary function
 	private void updateCounter() {
 		ticksToEndOfRound--;
 	}
@@ -234,19 +236,19 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 * - current state of the market
 	 * All adjusted with a constant coefficient.
 	 */
-	protected void calculateNewTarget() { // different name?
-		long newTarget;
+	protected void calculateNewSellingTarget() { // different name?
+		long newSellingTarget;
 		
 		try {
 			// Calculate new target based on three factors
-			newTarget =	(long) 
+			newSellingTarget =	(long) 
 						( calculateAvailableCreditsFactor() *
 						  calculateFossilFuelsFactor() *
 						  calculateMarketFactor() );
 			
 			// Adjust the new target if out of possible range
-			if (newTarget > availableCredits) {
-				newTarget = availableCredits;
+			if (newSellingTarget > availableCredits) {
+				newSellingTarget = availableCredits;
 			}
 			/*else if (newTarget < 0) {
 				// Isn't this a bug? Should probably send a warning
@@ -255,9 +257,9 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		}
 		catch (Exception e) {
 			logger.warn("Problem when calculating newTarget " + e);
-			newTarget = creditsToSellTarget;
+			newSellingTarget = creditsToSellTarget;
 		}
-		creditsToSellTarget = newTarget;
+		creditsToSellTarget = newSellingTarget;
 	}
 	
 	/**
