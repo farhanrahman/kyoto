@@ -24,7 +24,7 @@ public final class GameConst {
 	public static final double GROWTH_SCALER = 0.001;
 	
 	/**
-	 * Percentage of GDP availaible to spend on development
+	 * Percentage of GDP available to spend on development
 	 */
 	public static final double PERCENTAGE_OF_GDP = 0.1;
 	

@@ -1,5 +1,6 @@
 package uk.ac.ic.kyoto.services;
 
+import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
 import uk.ac.imperial.presage2.core.event.Event;
@@ -8,53 +9,71 @@ import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 
 public class TimeService extends EnvironmentService {
 
-	int tickcounter=0;
-	int yearyearcounter=0;
-	int sessionyearcounter=0;
-	int sessioncounter=0;
+	private Time tickCounter;
+	private Time yearCounter;
+	private Time sessionCounter;
 	
-	final int ticksinayear=365;
-	final int yearsinasession=10;
+	final static int TICKS_IN_YEAR = 365;
+	final static int YEARS_IN_SESSION = 10;
 	
 	protected TimeService(EnvironmentSharedStateAccess sharedState) {
 		super(sharedState);
-		// TODO Auto-generated constructor stub
 	}
 	
 	@EventListener
-	public void yearEventGenerator (EndOfTimeCycle e) {
-		tickcounter++;
-		if (tickcounter == ticksinayear) {
-				tickcounter=0;
-				yearyearcounter++;
-				EndOfYear y = new EndOfYear(yearyearcounter);	
+	public void updateTickCounter (EndOfTimeCycle e) {
+		tickCounter.increment();
+		if (getCurrentTick() == TICKS_IN_YEAR) {
+			EndOfYear y = new EndOfYear(yearCounter);
 		}
 	}
 	
 	@EventListener
-	public void sessionEventGenerator (EndOfYear e) {
-		sessionyearcounter++;
-		if (sessionyearcounter == yearsinasession) {
-				sessionyearcounter=0;
-				sessioncounter++;
-				EndOfSession s = new EndOfSession(sessioncounter);	
+	public void updateYearCounter (EndOfYear e) {
+		yearCounter.increment();
+		if (yearCounter.intValue() == YEARS_IN_SESSION) {
+			EndOfSession s = new EndOfSession(sessionCounter);	
 		}
 	}
+	
+	@EventListener
+	public void updateSessionCounter (EndOfSession e) {
+		sessionCounter.increment();
+	}
+
+	//================================================================================
+    // Events
+    //================================================================================
 	
 	public class EndOfYear implements Event {
-		final int endedYear;
+		final Time endedYear;
 		
-		EndOfYear(int endedYear) {
-			this.endedYear = endedYear;
+		EndOfYear(Time yearCounter) {
+			this.endedYear = yearCounter;
 		}
 	}
 	
 	public class EndOfSession implements Event {
-		final int endedSession;
+		final Time endedSession;
 		
-		EndOfSession(int endedSession) {
+		EndOfSession(Time endedSession) {
 			this.endedSession = endedSession;
 		}
 	}
-
+	
+	//================================================================================
+    // Public getters
+    //================================================================================
+	
+	public int getCurrentTick() {
+		return tickCounter.intValue() - yearCounter.intValue() * TICKS_IN_YEAR;
+	}
+	
+	public int getCurrentYear() {
+		return yearCounter.intValue() - sessionCounter.intValue() * YEARS_IN_SESSION;
+	}
+	
+	public int getCurrentSession() {
+		return sessionCounter.intValue();
+	}
 }
