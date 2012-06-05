@@ -435,7 +435,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	/**
-	 * Method used for monitoring. Is called every randomly by the Monitor agent
+	 * Method used for monitoring. Is called randomly by the Monitor agent
 	 */
 	
 	public void getMonitored() {
