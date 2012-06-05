@@ -12,6 +12,8 @@ public class USAgent extends NonParticipant {
 	private int yearMod4 = 0;
 	
 	private boolean democratElected=true;
+	
+	private long internalEmissionsTarget=(long) (carbonOutput*0.95);
 
 	public USAgent(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
 			double GDPRate, float availableToSpend, long emissionsTarget, long carbonOffset,
@@ -28,6 +30,12 @@ public class USAgent extends NonParticipant {
 		if (yearMod4 == 4) {
 			yearMod4 = 0;
 			election();
+		}
+		if (democratElected) {
+			internalEmissionsTarget = (long) (carbonOutput*0.95);
+		}
+		else {
+			internalEmissionsTarget = carbonOutput;
 		}
 	}
 	
