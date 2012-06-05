@@ -451,6 +451,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	public void getMonitored() {
 		double latestReport = this.carbonEmissionReports.get(SimTime.get().intValue());
 		double trueCarbon = this.carbonEmission;
+		// shouldn't these two be long values? comparing doubles isn't safe i think
 		
 		if (latestReport != trueCarbon) {
 				//TODO - Insert sanctions here!

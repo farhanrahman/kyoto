@@ -74,16 +74,17 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		updateUncommittedTransactions();
 		updateCommittedTransactions();
 		updateInternalPrice();
-		logger.info("Internal Data of Post Communist Country " + this.getName() + " was updated");
+		logger.info("Internal Data of Post-Communist Country " + this.getName() + " was updated");
+		makeInvestments();
 	}
 	
 	/**
 	 * Called at the beginning of each year.
 	 */
-	public void updateYearlyData() {
+	public void updateYearlyData(EndOfYearCycle e) { // just a temporary parameter
 		calculateLastYearFactor();
 		calculateNewSellingTarget();
-		logger.info("Internal Yearly Data of Post Communist Country " + this.getName() + " was updated");
+		logger.info("Internal Yearly Data of Post-Communist Country " + this.getName() + " was updated");
 	}
 	
 	//================================================================================
@@ -152,6 +153,45 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	// temporary function
 	private void updateCounter() {
 		ticksToEndOfRound--;
+	}
+	
+	private void carbonAbsorptionInvestment () {
+		CarbonAbsorptionHandler handler = new CarbonAbsorptionHandler();
+		
+		long investmentCost = handler.getCost(Constants.INVESTMENT_AMOUNT);
+		long potentialProfit = Constants.INVESTMENT_AMOUNT * internalPrice;
+		
+		if (potentialProfit > investmentCost) {
+			handler.invest(investmentCost);
+			logger.info("Post-Communist Country " + this.getName() + " invested " + String.valueOf(investmentCost) + " in carbon absorption");
+			// We don't check if we have enough money and land, as there are no functions for it.
+			//  While the former is checked by the handler function, the latter is not - should be implemented.
+			//  Should we react if we don't have enough of either?
+		}
+	}
+	
+	private void carbonReductionInvestment () {
+		CarbonReductionHandler handler = new CarbonReductionHandler();
+		
+		long investmentCost = handler.getCost(Constants.INVESTMENT_AMOUNT);
+		long potentialProfit = Constants.INVESTMENT_AMOUNT * internalPrice;
+		
+		if (potentialProfit > investmentCost) {
+			handler.invest(investmentCost);
+			logger.info("Post-Communist Country " + this.getName() + " invested " + String.valueOf(investmentCost) + " in carbon reduction");
+			// Same problem as in carbonAbsorptionInvestment
+		}
+	}
+	
+	private void otherCountriesInvestment () {
+		// TODO implement
+		//   There are no handlers for investing in other countries yet
+	}
+	
+	private void makeInvestments() {
+		carbonAbsorptionInvestment();
+		carbonReductionInvestment();
+		otherCountriesInvestment();
 	}
 	
 	//================================================================================
