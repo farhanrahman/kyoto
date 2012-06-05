@@ -268,70 +268,53 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		GDPRate = GDPRate + marketStateFactor + (GameConst.GROWTH_SCALER*(energyOutput))/GDP;
 	}
 	
-	private final class CarbonReductionHandler{
-		
-		final Map<Long, Double> investTable = new TreeMap<Long, Double>();
-//		final ArrayList<Long> investTable = new ArrayList<Long>();
-		
-		public CarbonReductionHandler() {
-			for (double i=0.00; i <= 1.00; i += 0.01) {
-				investTable.put(GameConst.CARBON_REDUCTION_COEFF*Math.round((i/Math.exp(-(1-i)))), i);
-			}
-		}
+	protected final class CarbonReductionHandler{
 		
 		/**
 		 * Returns the cost of investment required to
-		 * reduce dirty industry.
+		 * reduce dirty industry by a specified amount of tons of carbon.
 		 * 
-		 * @param percentage
+		 * @param carbonOuputChange
 		 * 
-		 * Percentage is of your dirty industry.
-		 * Eg. If you have 30% dirty industry, reducing
-		 * by 10% will bring you down to 27%.
-		 * (Because 10% of 30 is 3)
 		 */
-		public final double getCost(double percentage){
-			return GameConst.CARBON_REDUCTION_COEFF*(percentage/Math.exp(-(1-percentage)));
+		public final double getCost(double carbonOuputChange){
+			double cost;
+			
+			cost = GameConst.CARBON_REDUCTION_COEFF * carbonOuputChange / energyOutput;
+			
+			return cost;
 		}
 		
 		/**
-		 * Returns percentage reduction of dirty industry
-		 * for a given investment.
+		 * Returns the reduction of carbon output
+		 * for a specified cost of investment.
 		 * 
 		 * @param currency
 		 * 
-		 * Investment is an amount, say $10,000,000.
-		 * The return value is the percentage of your
-		 * carbon output that will be reduced.
-		 * Eg. If it returns 10%, you will go from
-		 * 100 tons to 90 tons.
 		 */
-		public final double getPercentage(long investment) throws IllegalArgumentException{
-			//TODO Improve
-			for (Entry<Long, Double> el : investTable.entrySet()) {
-				if (el.getKey() > investment) {
-					return (double)el.getValue();
-				}
-			}
-			throw new IllegalArgumentException("Out of bounds: no record in the table");
+		public final double getCarbonOutputChange(long cost) {
+			double carbonOutputChange;
+			
+			carbonOutputChange = energyOutput * cost / GameConst.CARBON_REDUCTION_COEFF;
+			
+			return carbonOutputChange;
 		}
 		
 		/**
-		 * Executes carbon reduction investment.</br>
-		 * 
-		 * On success, will reduce GDP and dirtyIndustry.</br>
-		 * On failure, will throw Exception.</br>
+		 * Executes carbon reduction investment.
+		 * On success, will reduce Carbon Output of a country keeping the Energy Output constant
+		 * On failure, will throw Exception.
 		 * 
 		 * @param investment
 		 * @throws Exception
 		 */
 		public final void invest(long investment) throws Exception{
-			if(investment < availableToSpend){
+			if (investment < availableToSpend){
 				availableToSpend -= investment;
-				carbonOutput -= (getPercentage(investment) * carbonOutput);
-			}else{
-				//TODO Use better exception
-				throw new Exception("Investment is greater than available GDP");
+				carbonOutput -= getCarbonOutputChange(investment);
+			}
+			else {
+				throw new Exception("Investment is greated than available cash to spend");
 			}
 		}
 	}
@@ -408,7 +391,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 								
 			}else{
 				//TODO Use better exception
-				throw new Exception("Investment is greated than available GDP");
+				throw new Exception("Investment is greated than available cash to spend");
 			}
 		}
 	}
