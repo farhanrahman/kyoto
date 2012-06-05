@@ -381,8 +381,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		 * @param investment
 		 * @throws Exception
 		 */
-		public void execute(double investment) throws Exception{
-			if(investment <= GDP){
+		public void invest(double investment) throws Exception{
+			if(investment <= availableToSpend){
 				//TODO Implement reduction in GDP
 				//TODO Implement change in CO2 emissions/arable land
 				//Stub for submitting reports
@@ -395,6 +395,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				}catch(ActionHandlingException e){
 					logger.warn("Error trying to submit report");
 				}*/
+				
+				availableToSpend -= investment;
+				long newOffset = getCarbonOffset(investment);
+				carbonOffset += newOffset;
+				arableLandArea -= newOffset/GameConst.FOREST_CARBON_OFFSET;
 								
 			}else{
 				//TODO Use better exception
