@@ -173,17 +173,23 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return new Double(carbonEmission);
 	}
 	
+
+	
+	//================================================================================
+    // Energy Output Control functions
+    //================================================================================
+	
 	/**
 	 * Reduces both the energyOutput and carbonOutput of the country
 	 * It can be used to limit carbonOuput without any financial cost
-	 * As the energyOuput goes down, the GDP growth will be limited
+	 * As the energyOuput goes down, the GDP growth goes down too
 	 * 
 	 * @param amount
 	 * 
 	 * Amount of energyOuput that should be reduced
 	 * It has to be positive and lower than the total carbonOuput
 	 */
-	public void reduceEnergyOutput (long amount) throws IllegalArgumentException{
+	protected void reduceEnergyOutput (long amount) throws IllegalArgumentException{
 		if (amount < carbonOutput && amount > 0) {
 			energyOutput -= amount;
 			carbonOutput -= amount;
@@ -193,45 +199,44 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	/**
-	 * Retrieves the energyOutput and carbonOutput of the country
-	 * It can only be used on the energy that was earlier reduced
-	 * There exists a ceiling of total energy for each country
-	 * 
-	 * @param amount
-	 * 
-	 * Amount of energyOuput that should be retrieved
-	 * It has to be positive and not exceed the energyOuputCeiling
+	 * Calculates the cost of investing in carbon industry
+	 * @param carbon
+	 * The expected increase in carbon output
+	 * @return
+	 * The cost for the country
 	 */
-	public void retrieveEnergyOutput (long amount) throws IllegalArgumentException{
-		if (amount > 0) {
-			long newEnergyOutput = energyOutput + amount;
-			if(newEnergyOutput <= energyOutputCeiling) {
-				energyOutput = newEnergyOutput;
-				carbonOutput += amount;
-			}
-			else
-				throw new IllegalArgumentException("You aimed to exceed your Energy Ouput limit");
-		}
-		else
-			throw new IllegalArgumentException("Specified amount should be positive");
-	}
-	
-	// Investment in Carbon Industry functions
-	
 	protected long calculateCostOfInvestingInCarbonIndustry (long carbon){
 		return (long) (carbon * GameConst.CARBON_INVESTMENT_PRICE);
 	}
 	
+	/**
+	 * Calculates the increase of carbon output
+	 * @param cost
+	 * The amount of money to be spent on carbon industry growth
+	 * @return
+	 * The increase of carbon output
+	 */
 	protected long calculateCarbonIndustryGrowth (long cost){
 		return (long) (cost / GameConst.CARBON_INVESTMENT_PRICE);
 	}
 	
-	public void investInCarbonIndustry(long carbon){
+	/**
+	 * Invests in carbon industry.
+	 * Carbon output and energy output of the country go up
+	 * @param carbon
+	 * The increase of the carbon output that will be achieved.
+	 */
+	protected void investInCarbonIndustry(long carbon){
 		try {
 			long cost = calculateCostOfInvestingInCarbonIndustry(carbon);
-			carbonOutput += carbon;
-			energyOutput += carbon;
-			availableToSpend -= cost;
+			if (cost > availableToSpend) {
+				carbonOutput += carbon;
+				energyOutput += carbon;
+				availableToSpend -= cost;
+			}
+			else {
+				// log that there is not enough money
+			}
 		}
 		catch (Exception e) {
 			// log the exception
