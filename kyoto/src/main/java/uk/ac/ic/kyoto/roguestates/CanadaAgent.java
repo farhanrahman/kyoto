@@ -1,9 +1,13 @@
 package uk.ac.ic.kyoto.roguestates;
 
+import java.util.Iterator;
+import java.util.Set;
 import java.util.UUID;
 
-import uk.ac.ic.kyoto.countries.NonParticipant;
+import com.mongodb.MongoException.Network;
+
 import uk.ac.ic.kyoto.trade.TradeProtocol;
+import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.util.fsm.FSMException;
@@ -12,10 +16,10 @@ public class CanadaAgent extends NonParticipant {
 
 	public CanadaAgent(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
 			double GDPRate, float availableToSpend, long emissionsTarget, long carbonOffset,
-			long energyOutput) {
+			long energyOutput, long carbonOutput) {
 		super(id, name, ISO, landArea, arableLandArea, GDP,
 				GDPRate, availableToSpend, emissionsTarget, carbonOffset,
-				energyOutput);
+				energyOutput, carbonOutput);
 		// TODO Auto-generated constructor stub
 	}
 
@@ -28,6 +32,7 @@ public class CanadaAgent extends NonParticipant {
 	@Override
 	public void initialise() {
 		super.initialise();
+		carbonOutput = 80;
 		try {
 			tradeProtocol = new TradeProtocol(getID(), authkey, environment, network) {
 				@Override
@@ -36,7 +41,7 @@ public class CanadaAgent extends NonParticipant {
 					if (carbonOutput - emissionsTarget + carbonOffset > 0) {
 						return true;
 					}
-					return false;
+					return true;
 				}
 			};
 		} catch (FSMException e) {
@@ -47,7 +52,19 @@ public class CanadaAgent extends NonParticipant {
 	
 	@Override
 	public void execute() {
-		// TODO Auto-generated method stub
+		super.execute();
+		Set<NetworkAddress> nodes = network.getConnectedNodes();
+//		Iterator i = nodes.iterator();
+//		while (i.hasNext()) {
+//			(NetworkAddress)i.
+//		}
+		for (NetworkAddress i: nodes) {
+			try {
+				tradeProtocol.offer(i, 10, 5, TradeType.BUY);
+			} catch (FSMException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 }

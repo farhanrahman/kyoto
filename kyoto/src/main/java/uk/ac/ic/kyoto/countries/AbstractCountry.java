@@ -9,7 +9,9 @@ import java.util.TreeMap;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
+
 import uk.ac.ic.kyoto.market.Economy;
+import uk.ac.ic.kyoto.monitor.Monitor;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.trade.PublicOffer;
@@ -37,19 +39,34 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	//TODO Register UUID and country ISO with the environment
 	
-	final protected double landArea;
 	final protected String ISO;		//ISO 3166-1 alpha-3
 	
+	
+	/*
+	 * These variables are related to land area for
+	 * dealing with carbon absorbtion prices
+	 */
+	final protected double landArea;
 	protected double 	arableLandArea;
-	protected double 	GDP;
-	protected double 	GDPRate;
+	
+	/*
+	 * These variables are related to carbon emissions and 
+	 * calculating 'effective' carbon output
+	 */
 	protected long 	carbonOutput; // In tons of carbon dioxide
-	protected long  energyOutput; // In tons of carbon equivalence (how much carbon would be used if the whole energy production was carbon based)
-	protected long  energyOutputCeiling; // As above, limit for the energyOutput
-	protected long	emissionsTarget; // Number of tons of carbon you SHOULD produce
 	protected long 	carbonOffset; // In tons of carbon
-	private float 	availableToSpend; // Note, can NOT be derived from GDP. Initial value can be derived from there, but cash reserves need to be able to lower independently.
-	//private long 	carbonTraded;
+	protected long	emissionsTarget; // Number of tons of carbon you SHOULD produce
+	
+	/*
+	 * These variables are related to GDP and
+	 * available funds to spend on carbon trading and industry.
+	 */
+	protected double 	GDP;
+	protected double 	GDPRate;	// The rate in which the DGP changes in a given year. Expressed in %
+	protected long  	energyOutput; // How much Carbon we would use if the whole industry was carbon based. Measured in Tons of Carbon per year
+	private float 		availableToSpend; // Note, can NOT be derived from GDP. Initial value can be derived from there, but cash reserves need to be able to lower independently.
+	
+	//private long 	carbonTraded; 
 	//private double  dirtyIndustry;
 
 	/**
@@ -68,7 +85,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 
 	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
 					double GDPRate, float availableToSpend, long emissionsTarget, long carbonOffset,
-					long energyOutput) {
+					long energyOutput, long carbonOutput) {
 
 		//TODO Validate parameters
 		
@@ -80,8 +97,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.GDPRate = GDPRate;
 		this.emissionsTarget = emissionsTarget;
 		this.carbonOffset = carbonOffset;
-		this.availableToSpend = availableToSpend; 
-	//	this.carbonTraded = carbonTraded;
+		this.availableToSpend = availableToSpend;
+		this.carbonOutput = carbonOutput;
 		this.carbonEmissionReports = new HashMap<Integer, Double>();
 		this.energyOutput = energyOutput;
 	}
@@ -93,6 +110,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	public void initialise(){
 		super.initialise();
 		
+		// Add the country to the monitor agent
+		Monitor.addMemberState(this);
+		
 		carbonAbsorptionHandler = new CarbonAbsorptionHandler();
 		carbonReductionHandler = new CarbonReductionHandler();
 		try {
@@ -102,6 +122,18 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			e.printStackTrace();
 		}
 		
+	}
+	
+	@Override
+	public void execute() {
+		super.execute();
+		
+		// Give a tax to Monitor agent for monitoring every year
+		if (SimTime.get().intValue() % 100 == 0) {
+			//TODO: Check values if correct
+			Monitor.taxForMonitor(GDP*2/100); // Take 2% of GDP for monitoring
+			GDP -= GDP*2/100;	// Subtract taxed amount from GDP
+		}
 	}
 	
 	protected Set<ParticipantSharedState> getSharedState(){
@@ -141,17 +173,23 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return new Double(carbonEmission);
 	}
 	
+
+	
+	//================================================================================
+    // Energy Output Control functions
+    //================================================================================
+	
 	/**
 	 * Reduces both the energyOutput and carbonOutput of the country
 	 * It can be used to limit carbonOuput without any financial cost
-	 * As the energyOuput goes down, the GDP growth will be limited
+	 * As the energyOuput goes down, the GDP growth goes down too
 	 * 
 	 * @param amount
 	 * 
 	 * Amount of energyOuput that should be reduced
 	 * It has to be positive and lower than the total carbonOuput
 	 */
-	public void reduceEnergyOutput (long amount) throws IllegalArgumentException{
+	protected void reduceEnergyOutput (long amount) throws IllegalArgumentException{
 		if (amount < carbonOutput && amount > 0) {
 			energyOutput -= amount;
 			carbonOutput -= amount;
@@ -161,28 +199,51 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	/**
-	 * Retrieves the energyOutput and carbonOutput of the country
-	 * It can only be used on the energy that was earlier reduced
-	 * There exists a ceiling of total energy for each country
-	 * 
-	 * @param amount
-	 * 
-	 * Amount of energyOuput that should be retrieved
-	 * It has to be positive and not exceed the energyOuputCeiling
+	 * Calculates the cost of investing in carbon industry
+	 * @param carbon
+	 * The expected increase in carbon output
+	 * @return
+	 * The cost for the country
 	 */
-	public void retrieveEnergyOutput (long amount) throws IllegalArgumentException{
-		if (amount > 0) {
-			long newEnergyOutput = energyOutput + amount;
-			if(newEnergyOutput <= energyOutputCeiling) {
-				energyOutput = newEnergyOutput;
-				carbonOutput += amount;
-			}
-			else
-				throw new IllegalArgumentException("You aimed to exceed your Energy Ouput limit");
-		}
-		else
-			throw new IllegalArgumentException("Specified amount should be positive");
+	protected long calculateCostOfInvestingInCarbonIndustry (long carbon){
+		return (long) (carbon * GameConst.CARBON_INVESTMENT_PRICE);
 	}
+	
+	/**
+	 * Calculates the increase of carbon output
+	 * @param cost
+	 * The amount of money to be spent on carbon industry growth
+	 * @return
+	 * The increase of carbon output
+	 */
+	protected long calculateCarbonIndustryGrowth (long cost){
+		return (long) (cost / GameConst.CARBON_INVESTMENT_PRICE);
+	}
+	
+	/**
+	 * Invests in carbon industry.
+	 * Carbon output and energy output of the country go up
+	 * @param carbon
+	 * The increase of the carbon output that will be achieved.
+	 */
+	protected void investInCarbonIndustry(long carbon){
+		try {
+			long cost = calculateCostOfInvestingInCarbonIndustry(carbon);
+			if (cost > availableToSpend) {
+				carbonOutput += carbon;
+				energyOutput += carbon;
+				availableToSpend -= cost;
+			}
+			else {
+				// log that there is not enough money
+			}
+		}
+		catch (Exception e) {
+			// log the exception
+		}
+	}
+	
+	// GDP related functions
 	
 	public Double getCash(){
 		return this.GDP*GameConst.PERCENTAGE_OF_GDP;
@@ -265,8 +326,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		 * @throws Exception
 		 */
 		public final void invest(long investment) throws Exception{
-			if(investment < GDP){
-				GDP -= investment;
+			if(investment < availableToSpend){
+				availableToSpend -= investment;
 				carbonOutput -= (getPercentage(investment) * carbonOutput);
 			}else{
 				//TODO Use better exception
@@ -283,9 +344,16 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		 * 
 		 * @param carbonCredits
 		 */
-		public double getCost(long carbonCredits){
-			//TODO Implementation
-			throw new UnsupportedOperationException();
+		public double getCost(long carbonOffset){
+			double neededLand = carbonOffset / GameConst.FOREST_CARBON_OFFSET;
+			long noBlocks = (long) (neededLand / GameConst.FOREST_BLOCK_SIZE);
+			long totalCost = 0;
+			double tempLandArea = arableLandArea;
+			for (int i=0; i < noBlocks; i++) {
+				totalCost += getBlockCost(tempLandArea);
+				tempLandArea -= GameConst.FOREST_BLOCK_SIZE;
+			}
+			return totalCost;
 		}
 		
 		/**
@@ -294,9 +362,19 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		 * 
 		 * @param investment
 		 */
-		public long getCarbonCredits(double investment){
-			//TODO Implementation
-			throw new UnsupportedOperationException();
+		public long getCarbonOffset(double investment){
+			long totalCost=0;
+			double tempArableLandArea=arableLandArea;
+			while (totalCost < investment && tempArableLandArea > GameConst.FOREST_BLOCK_SIZE) {
+				totalCost += getBlockCost(tempArableLandArea);
+				tempArableLandArea -= GameConst.FOREST_BLOCK_SIZE;
+			}
+			return (long) (GameConst.FOREST_CARBON_OFFSET*(arableLandArea-tempArableLandArea));
+		}
+		
+		private long getBlockCost(double landArea) {
+			double proportion = GameConst.FOREST_BLOCK_SIZE/landArea;
+			return (long) (proportion * GameConst.CARBON_ABSORPTION_COEFF);
 		}
 		
 		/**
@@ -308,8 +386,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		 * @param investment
 		 * @throws Exception
 		 */
-		public void execute(double investment) throws Exception{
-			if(investment <= GDP){
+		public void invest(double investment) throws Exception{
+			if(investment <= availableToSpend){
 				//TODO Implement reduction in GDP
 				//TODO Implement change in CO2 emissions/arable land
 				//Stub for submitting reports
@@ -322,6 +400,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				}catch(ActionHandlingException e){
 					logger.warn("Error trying to submit report");
 				}*/
+				
+				availableToSpend -= investment;
+				long newOffset = getCarbonOffset(investment);
+				carbonOffset += newOffset;
+				arableLandArea -= newOffset/GameConst.FOREST_CARBON_OFFSET;
 								
 			}else{
 				//TODO Use better exception
@@ -367,17 +450,27 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 */	
 	
+	public long getCurrentYear() {
+		// Returns the current year we are in
+		// This should probably be somewhere in the environment, not sure where
+		return 0;
+	}
+	
+	public long calculateCreditsToSell() {
+		// Returns credits that a country has available to sell
+		return 0;
+	}
+	
+	/**
+	 * Method used for monitoring. Is called randomly by the Monitor agent
+	 */
+	
 	public void getMonitored() {
-		int time = SimTime.get().intValue();
-		double latestReport = this.carbonEmissionReports.get(time);
+		double latestReport = this.carbonEmissionReports.get(SimTime.get().intValue());
 		double trueCarbon = this.carbonEmission;
-		double random = Random.randomDouble();
 		
-		if (random < Double.MAX_VALUE/2) {
-			if (latestReport != trueCarbon) {
+		if (latestReport != trueCarbon) {
 				//TODO - Insert sanctions here!
-			}
 		}
-		
 	}
 }

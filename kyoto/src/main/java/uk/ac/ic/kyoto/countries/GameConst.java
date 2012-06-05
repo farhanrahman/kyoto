@@ -11,8 +11,12 @@ public final class GameConst {
 	public static final double STABLE_MARKET_CHANCE = 0.8;
 	public static final double RECESSION_MARKET_CHANCE = 0.1;
 	
-	public static final int ECONOMIC_OUTPUT_REDUCTION = 1;
+	public static final int ECONOMIC_OUTPUT_REDUCTION = 1; // What is that?
 	
+	/**
+	 * The cost of investment in one extra ton of carbon per year
+	 */
+	public static final double CARBON_INVESTMENT_PRICE = 1;
 	
 	/**
 	 * Normalises value of GDP rate increase
@@ -34,6 +38,15 @@ public final class GameConst {
 	 */
 	public static long CARBON_ABSORPTION_COEFF = 1;
 	
+	/**
+	 * Size of a block of arable land
+	 */
+	public static long FOREST_BLOCK_SIZE = 100;
+	
+	/**
+	 * Amount of carbon (in tons) that you offset with a single unit of forest
+	 */
+	public static long FOREST_CARBON_OFFSET = 10;
 	
 	//Country Config Template
 	

@@ -27,9 +27,9 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	protected double		lastYearFactor;
 	
 	// temporary variables
-	protected Logger		logger;
+	private Logger		logger;
 	protected long 			currentYear;
-	protected long 			availableCredits;
+	protected long 			availableCredits; // corresponds to carbon offset
 	
 	//================================================================================
     // Constructors
@@ -37,14 +37,15 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	
 	public AbstractPostCommunistCountry(UUID id, String name, String ISO,
 			double landArea, double arableLandArea, double GDP, double GDPRate,
-			long emissionsTarget, long carbonOffset, long energyOutput)
+			float availiableToSpend, long emissionsTarget, long carbonOffset, long energyOutput)
 	{
 		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, emissionsTarget,
-				carbonOffset, energyOutput, energyOutput);
+				carbonOffset, energyOutput, energyOutput, energyOutput);
 		// TODO Initialize the fields
 		
 		// Initialize logger. Should be done in AbstractCountry
 		logger = Logger.getLogger(AbstractPostCommunistCountry.class);
+
 	}
 	
 	//================================================================================
@@ -58,26 +59,44 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 
 	
 	//================================================================================
-    // Methods called once per tick
+    // Public methods to update data
     //================================================================================
 	
+	/**
+	 * Updates the internal data that is supposed to change every tick
+	 *  
+	 * @param e
+	 * The event that is called every simulation tick
+	 */
 	@EventListener
-	public void updateInternalData(EndOfTimeCycle e)
-	{
+	public void updateTickData(EndOfTimeCycle e) {
 		updateCounter();
-		addUncommittedTransaction();
-		addCommittedTransaction();
+		updateUncommittedTransactions();
+		updateCommittedTransactions();
 		updateInternalPrice();
+		logger.info("Internal Data of Post Communist Country " + this.getName() + " was updated");
 	}
 	
-	protected void updateInternalPrice() {
-		
+	/**
+	 * Called at the beginning of each year.
+	 */
+	public void updateYearlyData() {
+		calculateLastYearFactor();
+		calculateNewSellingTarget();
+		logger.info("Internal Yearly Data of Post Communist Country " + this.getName() + " was updated");
+	}
+	
+	//================================================================================
+    // Private functions called every tick
+    //================================================================================
+	
+	private void updateInternalPrice() {
 		internalPrice   = 	calculateMarketPrice() * 
 							calculateEndOfRoundFactor() * 
 							lastYearFactor;
 	}
 
-	protected double calculateMarketPrice() {
+	private double calculateMarketPrice() {
 		double marketPrice;
 		double maximumCommittedPrice = 0;
 		double minimumUncommittedPrice = Double.MAX_VALUE;
@@ -104,7 +123,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		return marketPrice;
 	}
 	
-	protected double calculateEndOfRoundFactor() {
+	private double calculateEndOfRoundFactor() {
 		double endOfRoundFactor = 1;
 		try {
 			if(ticksToEndOfRound < Constants.END_OF_ROUND_MINIMUM_NUMBER_OF_TICKS)
@@ -122,23 +141,28 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		return endOfRoundFactor;
 	}
 	
-	protected void addUncommittedTransaction() {
+	private void updateUncommittedTransactions() {
 		// TODO implement
 	}
 	
-	protected void addCommittedTransaction() {
+	private void updateCommittedTransactions() {
 		// TODO implement
 	}
 	
-	protected void updateCounter() {
+	// temporary function
+	private void updateCounter() {
 		ticksToEndOfRound--;
 	}
 	
 	//================================================================================
-    // Methods called once per year
+    // Private functions called every year
     //================================================================================
 	
-	protected double calculateAvailableCreditsFactor() {
+	/**
+	 * Gets the number of credits available to sell.
+	 * Multiplies it by a constant factor and returns it.
+	 */
+	private double calculateAvailableCreditsFactor() {
 		double availableCreditsFactor;
 		
 		try {
@@ -153,7 +177,11 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		return availableCreditsFactor;
 	}
 	
-	protected double calculateFossilFuelsFactor() {
+	/**
+	 * Gets oil and gas prices from Market data.
+	 * Calculates a gradient of change, and returns an appropriate factor.
+	 */
+	private double calculateFossilFuelsFactor() {
 		double fossilFuelsFactor;
 		
 		try {
@@ -163,7 +191,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			double oldGasPrice = FossilPrices.getGasPrice(currentYear - 1);
 			double oilGradient = (newOilPrice - oldOilPrice) / oldOilPrice;
 			double gasGradient = (newGasPrice - oldGasPrice) / oldGasPrice;
-				
+			
 			fossilFuelsFactor = Constants.FOSSIL_FUEL_PRICE_COEFFICIENT * (oilGradient + gasGradient) / 2;
 		}
 		catch (Exception e) {
@@ -173,7 +201,10 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		return fossilFuelsFactor;
 	}
 	
-	protected double calculateMarketFactor() {
+	/**
+	 * Returns a factor based on the current state of economy.
+	 */
+	private double calculateMarketFactor() {
 		double marketFactor;
 		
 		try {
@@ -198,33 +229,44 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		return marketFactor;
 	}
 	
-	protected void calculateNewTarget() {
-		long newTarget;
+	/**
+	 * Returns a new target, which is a multiplication of three factors:
+	 * - available credits
+	 * - fossil fuels historical prices
+	 * - current state of the market
+	 * All adjusted with a constant coefficient.
+	 */
+	protected void calculateNewSellingTarget() { // different name?
+		long newSellingTarget;
 		
 		try {
 			// Calculate new target based on three factors
-			newTarget =	(long) 
+			newSellingTarget =	(long) 
 						( calculateAvailableCreditsFactor() *
 						  calculateFossilFuelsFactor() *
 						  calculateMarketFactor() );
 			
 			// Adjust the new target if out of possible range
-			if (newTarget > availableCredits) {
-				newTarget = availableCredits;
+			if (newSellingTarget > availableCredits) {
+				newSellingTarget = availableCredits;
 			}
-			else if (newTarget < 0) {
+			/*else if (newTarget < 0) {
 				// Isn't this a bug? Should probably send a warning
 				newTarget = 0;
-			}
+			}*/
 		}
 		catch (Exception e) {
 			logger.warn("Problem when calculating newTarget " + e);
-			newTarget = creditsToSellTarget;
+			newSellingTarget = creditsToSellTarget;
 		}
-		creditsToSellTarget = newTarget;
+		creditsToSellTarget = newSellingTarget;
 	}
 	
-	protected void calculateLastYearFactor() {
+	/**
+	 * Calculates the percentage of credits successfully sold in previous year.
+	 * Returns the factor based on that percentage, which is used to set the price we sell at.
+	 */
+	private void calculateLastYearFactor() {
 		double lastYearPercentageSold;
 		
 		try {
@@ -256,11 +298,5 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		}
 	}
 	
-	protected void yearlyFunction() {
-		// Calculate the lastYearFactor for the current year
-		calculateLastYearFactor();
-		
-		// Calculate the new target
-		calculateNewTarget();
-	}
+
 }
