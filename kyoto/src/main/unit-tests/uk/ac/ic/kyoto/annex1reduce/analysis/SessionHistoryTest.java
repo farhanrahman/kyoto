@@ -141,7 +141,7 @@ public class SessionHistoryTest {
 		//Test Failure
 		assertTrue(s1.equals(s3) == false);
 		assertTrue(s1.equals(s4) == false);
-		assertTrue(s1.equals(null));
+		assertTrue(s1.equals(null) == false);
 		
 	}
 

@@ -1,8 +1,8 @@
 package uk.ac.ic.kyoto.annex1reduce.analysis;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import uk.ac.ic.kyoto.trade.TradeProtocol.Trade;
 
@@ -14,17 +14,15 @@ import uk.ac.ic.kyoto.trade.TradeProtocol.Trade;
 public class SessionHistory {
 	
 	private final int sessionId;
-	private Map<Integer, TickHistory> session;
-	
-	private int previousTickId;
-	
+	private TreeMap<Integer, TickHistory> session;
+		
 	public SessionHistory(int sessionId) {
 		this.sessionId = sessionId;
 		init();
 	}
 	
 	private void init(){
-		session = new HashMap<Integer, TickHistory>();
+		session = new TreeMap<Integer, TickHistory>();
 	}
 	
 	/**
@@ -43,7 +41,8 @@ public class SessionHistory {
 
 			session.put(currentTick, t);
 		}else{
-			TickHistory t = session.get(previousTickId);
+			//TickHistory t = session.get(previousTickId);
+			TickHistory t = session.lastEntry().getValue();
 
 			if(t.getTickId() != currentTick){
 				t = new TickHistory(currentTick);
@@ -54,7 +53,6 @@ public class SessionHistory {
 				session.put(currentTick, t);
 			}
 		}
-		previousTickId = currentTick;
 	}
 	
 	public TickHistory getTick(int tickId){
@@ -79,7 +77,7 @@ public class SessionHistory {
 
 		boolean sessionTest = tickHistory.session.equals(this.session);
 		
-		return sessionTest && (tickHistory.sessionId == this.sessionId) && (tickHistory.previousTickId == this.previousTickId);
+		return sessionTest && (tickHistory.sessionId == this.sessionId);
 	}
 	
 	@Override
@@ -88,7 +86,6 @@ public class SessionHistory {
 		
 		result = 4 * result + this.sessionId;
 		result = 4 * result + this.session.hashCode();
-		result = 4 * result + this.previousTickId;
 		
 		return result;
 	}
