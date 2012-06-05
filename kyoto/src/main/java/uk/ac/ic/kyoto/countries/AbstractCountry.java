@@ -11,6 +11,7 @@ import java.util.UUID;
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
 
 import uk.ac.ic.kyoto.market.Economy;
+import uk.ac.ic.kyoto.monitor.Monitor;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.trade.PublicOffer;
@@ -61,10 +62,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * available funds to spend on carbon trading and industry.
 	 */
 	protected double 	GDP;
-	protected double 	GDPRate;
-	protected long  energyOutput; // In tons of carbon equivalence (how much carbon would be used if the whole energy production was carbon based)
-	protected long  energyOutputCeiling; // As above, limit for the energyOutput
-	private float 	availableToSpend; // Note, can NOT be derived from GDP. Initial value can be derived from there, but cash reserves need to be able to lower independently.
+	protected double 	GDPRate;	// The rate in which the DGP changes in a given year. Expressed in %
+	protected long  	energyOutput; // How much Carbon we would use if the whole industry was carbon based. Measured in Tons of Carbon per year
+	private float 		availableToSpend; // Note, can NOT be derived from GDP. Initial value can be derived from there, but cash reserves need to be able to lower independently.
 	
 	//private long 	carbonTraded; 
 	//private double  dirtyIndustry;
@@ -110,6 +110,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	public void initialise(){
 		super.initialise();
 		
+		// Add the country to the monitor agent
+		Monitor.addMemberState(this);
+		
 		carbonAbsorptionHandler = new CarbonAbsorptionHandler();
 		carbonReductionHandler = new CarbonReductionHandler();
 		try {
@@ -119,6 +122,18 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			e.printStackTrace();
 		}
 		
+	}
+	
+	@Override
+	public void execute() {
+		super.execute();
+		
+		// Give a tax to Monitor agent for monitoring every year
+		if (SimTime.get().intValue() % 100 == 0) {
+			//TODO: Check values if correct
+			Monitor.taxForMonitor(GDP*2/100); // Take 2% of GDP for monitoring
+			GDP -= GDP*2/100;	// Subtract taxed amount from GDP
+		}
 	}
 	
 	protected Set<ParticipantSharedState> getSharedState(){
@@ -419,17 +434,16 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return 0;
 	}
 	
+	/**
+	 * Method used for monitoring. Is called randomly by the Monitor agent
+	 */
+	
 	public void getMonitored() {
-		int time = SimTime.get().intValue();
-		double latestReport = this.carbonEmissionReports.get(time);
+		double latestReport = this.carbonEmissionReports.get(SimTime.get().intValue());
 		double trueCarbon = this.carbonEmission;
-		double random = Random.randomDouble();
 		
-		if (random < Double.MAX_VALUE/2) {
-			if (latestReport != trueCarbon) {
+		if (latestReport != trueCarbon) {
 				//TODO - Insert sanctions here!
-			}
 		}
-		
 	}
 }
