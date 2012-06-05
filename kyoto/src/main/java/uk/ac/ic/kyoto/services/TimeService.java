@@ -24,20 +24,20 @@ public class TimeService extends EnvironmentService {
 	public void updateTickCounter (EndOfTimeCycle e) {
 		tickCounter.increment();
 		if (getCurrentTick() == TICKS_IN_YEAR) {
-			EndOfYear y = new EndOfYear(yearCounter);
+			EndOfYearCycle y = new EndOfYearCycle(yearCounter);
 		}
 	}
 	
 	@EventListener
-	public void updateYearCounter (EndOfYear e) {
+	public void updateYearCounter (EndOfYearCycle e) {
 		yearCounter.increment();
 		if (yearCounter.intValue() == YEARS_IN_SESSION) {
-			EndOfSession s = new EndOfSession(sessionCounter);	
+			EndOfSessionCycle s = new EndOfSessionCycle(sessionCounter);	
 		}
 	}
 	
 	@EventListener
-	public void updateSessionCounter (EndOfSession e) {
+	public void updateSessionCounter (EndOfSessionCycle e) {
 		sessionCounter.increment();
 	}
 
@@ -45,18 +45,18 @@ public class TimeService extends EnvironmentService {
     // Events
     //================================================================================
 	
-	public class EndOfYear implements Event {
+	public class EndOfYearCycle implements Event {
 		final Time endedYear;
 		
-		EndOfYear(Time yearCounter) {
+		EndOfYearCycle(Time yearCounter) {
 			this.endedYear = yearCounter;
 		}
 	}
 	
-	public class EndOfSession implements Event {
+	public class EndOfSessionCycle implements Event {
 		final Time endedSession;
 		
-		EndOfSession(Time endedSession) {
+		EndOfSessionCycle(Time endedSession) {
 			this.endedSession = endedSession;
 		}
 	}

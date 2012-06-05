@@ -6,6 +6,7 @@ import java.util.List;
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.market.FossilPrices;
+import uk.ac.ic.kyoto.services.TimeService.EndOfYearCycle;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
@@ -18,7 +19,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
     // PrivateFields
     //================================================================================
 	
-	protected double 		internalPrice;
+	protected long	 		internalPrice;
 	protected List<Double> 	uncommittedTransactionsCosts;
 	protected List<Double> 	committedTransactionsCosts;
 	protected long 			ticksToEndOfRound;
@@ -81,7 +82,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	/**
 	 * Called at the beginning of each year.
 	 */
-	public void updateYearlyData(EndOfYearCycle e) { // just a temporary parameter
+	public void updateYearlyData(EndOfYearCycle e) {
 		calculateLastYearFactor();
 		calculateNewSellingTarget();
 		logger.info("Internal Yearly Data of Post-Communist Country " + this.getName() + " was updated");
@@ -92,9 +93,12 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
     //================================================================================
 	
 	private void updateInternalPrice() {
-		internalPrice   = 	calculateMarketPrice() * 
+		internalPrice   = 	(long)
+							(
+							calculateMarketPrice() * 
 							calculateEndOfRoundFactor() * 
-							lastYearFactor;
+							lastYearFactor
+							);
 	}
 
 	private double calculateMarketPrice() {
@@ -156,13 +160,11 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	}
 	
 	private void carbonAbsorptionInvestment () {
-		CarbonAbsorptionHandler handler = new CarbonAbsorptionHandler();
-		
-		long investmentCost = handler.getCost(Constants.INVESTMENT_AMOUNT);
+		long investmentCost = carbonAbsorptionHandler.getCost(Constants.INVESTMENT_AMOUNT);
 		long potentialProfit = Constants.INVESTMENT_AMOUNT * internalPrice;
 		
 		if (potentialProfit > investmentCost) {
-			handler.invest(investmentCost);
+			carbonAbsorptionHandler.invest(investmentCost);
 			logger.info("Post-Communist Country " + this.getName() + " invested " + String.valueOf(investmentCost) + " in carbon absorption");
 			// We don't check if we have enough money and land, as there are no functions for it.
 			//  While the former is checked by the handler function, the latter is not - should be implemented.
@@ -171,13 +173,11 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	}
 	
 	private void carbonReductionInvestment () {
-		CarbonReductionHandler handler = new CarbonReductionHandler();
-		
-		long investmentCost = handler.getCost(Constants.INVESTMENT_AMOUNT);
+		long investmentCost = carbonReductionHandler.getCost(Constants.INVESTMENT_AMOUNT);
 		long potentialProfit = Constants.INVESTMENT_AMOUNT * internalPrice;
 		
 		if (potentialProfit > investmentCost) {
-			handler.invest(investmentCost);
+			carbonReductionHandler.invest(investmentCost);
 			logger.info("Post-Communist Country " + this.getName() + " invested " + String.valueOf(investmentCost) + " in carbon reduction");
 			// Same problem as in carbonAbsorptionInvestment
 		}
