@@ -44,7 +44,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	/*
 	 * These variables are related to land area for
-	 * dealing with carbon absorbtion prices
+	 * dealing with carbon absorption prices
 	 */
 	final protected double landArea;
 	protected double 	arableLandArea;
@@ -64,7 +64,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	protected double 	GDP;
 	protected double 	GDPRate;	// The rate in which the DGP changes in a given year. Expressed in %
 	protected long  	energyOutput; // How much Carbon we would use if the whole industry was carbon based. Measured in Tons of Carbon per year
-	private float 		availableToSpend; // Note, can NOT be derived from GDP. Initial value can be derived from there, but cash reserves need to be able to lower independently.
+	protected long 		availableToSpend; // Note, can NOT be derived from GDP. Initial value can be derived from there, but cash reserves need to be able to lower independently.
 	
 	//private long 	carbonTraded; 
 	//private double  dirtyIndustry;
@@ -84,7 +84,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	protected CarbonAbsorptionHandler carbonAbsorptionHandler;
 
 	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
-					double GDPRate, float availableToSpend, long emissionsTarget, long carbonOffset,
+					double GDPRate, long availableToSpend, long emissionsTarget, long carbonOffset,
 					long energyOutput, long carbonOutput) {
 
 		//TODO Validate parameters
@@ -277,10 +277,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		 * @param carbonOuputChange
 		 * 
 		 */
-		public final double getCost(double carbonOuputChange){
-			double cost;
+		public final long getCost(double carbonOuputChange){
+			long cost;
 			
-			cost = GameConst.CARBON_REDUCTION_COEFF * carbonOuputChange / energyOutput;
+			cost = (long) (GameConst.CARBON_REDUCTION_COEFF * carbonOuputChange / energyOutput);
 			
 			return cost;
 		}
@@ -319,7 +319,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		}
 	}
 	
-	private final class CarbonAbsorptionHandler{
+	protected final class CarbonAbsorptionHandler{
 		
 		/**
 		 * Returns the cost of investment required to
@@ -327,7 +327,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		 * 
 		 * @param carbonCredits
 		 */
-		public double getCost(long carbonOffset){
+		public long getCost(long carbonOffset){
 			double neededLand = carbonOffset / GameConst.FOREST_CARBON_OFFSET;
 			long noBlocks = (long) (neededLand / GameConst.FOREST_BLOCK_SIZE);
 			long totalCost = 0;
