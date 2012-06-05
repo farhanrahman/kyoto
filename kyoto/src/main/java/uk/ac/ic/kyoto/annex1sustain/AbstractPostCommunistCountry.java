@@ -37,7 +37,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	
 	public AbstractPostCommunistCountry(UUID id, String name, String ISO,
 			double landArea, double arableLandArea, double GDP, double GDPRate,
-			long emissionsTarget, long carbonOffset, long energyOutput)
+			float availiableToSpend, long emissionsTarget, long carbonOffset, long energyOutput)
 	{
 		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, emissionsTarget,
 				carbonOffset, energyOutput, energyOutput);
@@ -45,6 +45,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		
 		// Initialize logger. Should be done in AbstractCountry
 		logger = Logger.getLogger(AbstractPostCommunistCountry.class);
+
 	}
 	
 	//================================================================================

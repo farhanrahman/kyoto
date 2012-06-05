@@ -85,7 +85,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 
 	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
 					double GDPRate, float availableToSpend, long emissionsTarget, long carbonOffset,
-					long energyOutput) {
+					long energyOutput, long carbonOutput) {
 
 		//TODO Validate parameters
 		
@@ -98,7 +98,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.emissionsTarget = emissionsTarget;
 		this.carbonOffset = carbonOffset;
 		this.availableToSpend = availableToSpend;
-	//	this.carbonTraded = carbonTraded;
+		this.carbonOutput = carbonOutput;
 		this.carbonEmissionReports = new HashMap<Integer, Double>();
 		this.energyOutput = energyOutput;
 	}
