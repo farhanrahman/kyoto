@@ -166,13 +166,11 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		double availableCreditsFactor;
 		
 		try {
-			// TODO implement
-			//   Which variable of AbstractCountry represents available credits?
-			availableCreditsFactor = 1;
+			availableCreditsFactor = carbonOffset * Constants.SELL_AMOUNT_COEFFICIENT;
 		}
 		catch (Exception e) {
 			logger.warn("Problem when calculating availableCreditsFactor " + e);
-			availableCreditsFactor = 1; // This "default" value will actually need to be set to all available credits
+			availableCreditsFactor = carbonOffset;
 		}
 		return availableCreditsFactor;
 	}
@@ -236,7 +234,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 * - current state of the market
 	 * All adjusted with a constant coefficient.
 	 */
-	protected void calculateNewSellingTarget() { // different name?
+	protected void calculateNewSellingTarget() {
 		long newSellingTarget;
 		
 		try {
@@ -250,10 +248,6 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			if (newSellingTarget > availableCredits) {
 				newSellingTarget = availableCredits;
 			}
-			/*else if (newTarget < 0) {
-				// Isn't this a bug? Should probably send a warning
-				newTarget = 0;
-			}*/
 		}
 		catch (Exception e) {
 			logger.warn("Problem when calculating newTarget " + e);
