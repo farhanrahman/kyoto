@@ -38,6 +38,15 @@ public final class GameConst {
 	 */
 	public static long CARBON_ABSORPTION_COEFF = 1;
 	
+	/**
+	 * Size of a block of arable land
+	 */
+	public static long FOREST_BLOCK_SIZE = 100;
+	
+	/**
+	 * Amount of carbon (in tons) that you offset with a single unit of forest
+	 */
+	public static long FOREST_CARBON_OFFSET = 10;
 	
 	//Country Config Template
 	

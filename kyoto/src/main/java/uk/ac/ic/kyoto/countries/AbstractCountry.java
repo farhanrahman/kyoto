@@ -306,8 +306,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		 * @throws Exception
 		 */
 		public final void invest(long investment) throws Exception{
-			if(investment < GDP){
-				GDP -= investment;
+			if(investment < availableToSpend){
+				availableToSpend -= investment;
 				carbonOutput -= (getPercentage(investment) * carbonOutput);
 			}else{
 				//TODO Use better exception
@@ -324,9 +324,16 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		 * 
 		 * @param carbonCredits
 		 */
-		public double getCost(long carbonCredits){
-			//TODO Implementation
-			throw new UnsupportedOperationException();
+		public double getCost(long carbonOffset){
+			double neededLand = carbonOffset / GameConst.FOREST_CARBON_OFFSET;
+			long noBlocks = (long) (neededLand / GameConst.FOREST_BLOCK_SIZE);
+			long totalCost = 0;
+			double tempLandArea = arableLandArea;
+			for (int i=0; i < noBlocks; i++) {
+				totalCost += getBlockCost(tempLandArea);
+				tempLandArea -= GameConst.FOREST_BLOCK_SIZE;
+			}
+			return totalCost;
 		}
 		
 		/**
@@ -335,9 +342,19 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		 * 
 		 * @param investment
 		 */
-		public long getCarbonCredits(double investment){
-			//TODO Implementation
-			throw new UnsupportedOperationException();
+		public long getCarbonOffset(double investment){
+			long totalCost=0;
+			double tempArableLandArea=arableLandArea;
+			while (totalCost < investment && tempArableLandArea > GameConst.FOREST_BLOCK_SIZE) {
+				totalCost += getBlockCost(tempArableLandArea);
+				tempArableLandArea -= GameConst.FOREST_BLOCK_SIZE;
+			}
+			return (long) (GameConst.FOREST_CARBON_OFFSET*(arableLandArea-tempArableLandArea));
+		}
+		
+		private long getBlockCost(double landArea) {
+			double proportion = GameConst.FOREST_BLOCK_SIZE/landArea;
+			return (long) (proportion * GameConst.CARBON_ABSORPTION_COEFF);
 		}
 		
 		/**
