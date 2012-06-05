@@ -2,6 +2,9 @@ package uk.ac.ic.kyoto.annex1reduce;
 
 import java.util.UUID;
 
+import alice.tuprolog.InvalidTheoryException;
+import alice.tuprolog.Prolog;
+
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.imperial.presage2.core.messaging.Input;
 
@@ -12,6 +15,8 @@ import uk.ac.imperial.presage2.core.messaging.Input;
  */
 public class EUCountry extends AbstractCountry {
 	
+	final Prolog engine;
+	
 	public EUCountry(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
 			double GDPRate, float availiableToSpend, long emissionsTarget, long carbonOffset,
 			long energyOutput, long carbonOutput) {
@@ -21,6 +26,14 @@ public class EUCountry extends AbstractCountry {
 					energyOutput, carbonOutput);
 		
 		EU.addMemberState(this);
+		
+		engine = new Prolog();
+		
+		try {
+			engine.setTheory(EUBehaviours.getTheory(name));
+		}catch (InvalidTheoryException e) {
+		}
+		
 	}
 
 	/**
@@ -30,6 +43,17 @@ public class EUCountry extends AbstractCountry {
 	@Override
 	protected void processInput(Input input) {
 		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void execute() {
+		super.execute();
+		
+		//TODO perform analysis
+		
+		//TODO call prolog functions
+		
 		
 	}
 
