@@ -71,26 +71,6 @@ public abstract class TradeProtocol extends FSMProtocol {
 		public String toString() {
 			return "Trade: "+quantity+" @ "+unitCost; 
 		}
-
-		public boolean equals(Trade t){
-			if(this == t) {
-				return true;
-			} else if (	this.quantity == t.getQuantity() && 
-						this.unitCost == t.getUnitCost() && 
-						this.type == t.getType()) {
-				return true;
-			} else if (	this.quantity == -t.getQuantity() &&
-						this.unitCost == t.getUnitCost() && 
-						this.type == t.reverse().getType()){
-				return true;
-			} else if ( this.quantity == t.getQuantity() &&
-						this.unitCost == -t.getUnitCost() &&
-						this.type == t.reverse().getType()){
-				return true;
-			} else {
-				return false;
-			}
-		}
 		
 		public Trade reverse(){
 			TradeType t = this.type.equals(TradeType.BUY)?TradeType.SELL:TradeType.BUY;
