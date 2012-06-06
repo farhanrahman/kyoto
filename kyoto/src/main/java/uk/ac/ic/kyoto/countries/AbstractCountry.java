@@ -11,7 +11,6 @@ import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.monitor.Monitor;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.TimeService.EndOfYearCycle;
-import uk.ac.ic.kyoto.trade.PublicOffer;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
@@ -30,7 +29,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	//TODO Register UUID and country ISO with the environment
 	
 	final protected String ISO;		//ISO 3166-1 alpha-3
-	
 	
 	/*
 	 * These variables are related to land area for
@@ -67,7 +65,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	ParticipantCarbonReportingService reportingService;
 	
 	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
-	protected Set<PublicOffer> 		offers;
 	protected CarbonReductionHandler 	carbonReductionHandler;
 	protected CarbonAbsorptionHandler carbonAbsorptionHandler;
 
