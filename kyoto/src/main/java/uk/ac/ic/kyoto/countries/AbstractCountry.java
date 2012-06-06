@@ -23,7 +23,7 @@ import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 /**
  * 
- * @author cs2309
+ * @author cs2309, Adam, Sam, Stuart, Chris
  */
 public abstract class AbstractCountry extends AbstractParticipant {
 	
@@ -119,8 +119,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		// Give a tax to Monitor agent for monitoring every year
 		if (SimTime.get().intValue() % 100 == 0) {
 			//TODO: Check values if correct
-			Monitor.taxForMonitor(GDP*2/100); // Take 2% of GDP for monitoring
-			GDP -= GDP*2/100;	// Subtract taxed amount from GDP
+			Monitor.taxForMonitor(GDP*GameConst.MONITOR_COST_PERCENTAGE); // Take 2% of GDP for monitoring
+			GDP -= GDP*GameConst.MONITOR_COST_PERCENTAGE;	// Subtract taxed amount from GDP
 		}
 	}
 	
