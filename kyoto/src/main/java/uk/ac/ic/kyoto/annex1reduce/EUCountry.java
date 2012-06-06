@@ -21,7 +21,7 @@ public class EUCountry extends AbstractCountry {
 	final private Prolog engine;
 	
 	public EUCountry(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
-			double GDPRate, float availiableToSpend, long emissionsTarget, long carbonOffset,
+			double GDPRate, long availiableToSpend, long emissionsTarget, long carbonOffset,
 			long energyOutput, long carbonOutput) {
 		
 		super(id, name, ISO, landArea, arableLandArea, GDP,
@@ -91,4 +91,17 @@ public class EUCountry extends AbstractCountry {
 		return output;
 		
 	}
+
+	@Override
+	public void YearlyFunction() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void SessionFunction() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
