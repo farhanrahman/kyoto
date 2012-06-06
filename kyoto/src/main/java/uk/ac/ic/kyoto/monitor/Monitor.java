@@ -1,13 +1,17 @@
 package uk.ac.ic.kyoto.monitor;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Map;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.GameConst;
+import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
+import uk.ac.imperial.presage2.core.simulator.SimTime;
 import uk.ac.imperial.presage2.core.util.random.Random;
 
 /**
@@ -31,9 +35,18 @@ public class Monitor extends EnvironmentService {
 		if (Random.randomInt() % 30 == 0 && cash >= GameConst.MONITORING_PRICE) {
 			cash -= GameConst.MONITORING_PRICE;
 			for (AbstractCountry a : memberStates) {
-				a.getMonitored();
+				long realCarbonOutput = a.getMonitored();
+				Serializable state = sharedState.get(CarbonReportingService.name, a.getID());
+				Map<Integer, Double> reports = (Map<Integer, Double>)state;
+				if (realCarbonOutput != reports.get(SimTime.get().intValue())) {
+					Sanction(a);
+				}
 			}
 		}
+	}
+	
+	private void Sanction(AbstractCountry sanctionee) {
+		// TODO implementation
 	}
 	
 	/**

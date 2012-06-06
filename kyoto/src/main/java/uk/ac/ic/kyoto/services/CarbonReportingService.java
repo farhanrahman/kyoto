@@ -22,6 +22,8 @@ public class CarbonReportingService extends EnvironmentService {
 
 	Logger logger = Logger.getLogger(CarbonReportingService.class);
 	
+	public static String name = "Report";
+	
 	
 	@Inject
 	protected CarbonReportingService(EnvironmentSharedStateAccess sharedState) {
