@@ -11,14 +11,11 @@ import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.monitor.Monitor;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.TimeService;
-import uk.ac.ic.kyoto.services.TimeService.EndOfYearCycle;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
-import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
-import uk.ac.imperial.presage2.core.simulator.SimTime;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 /**
@@ -60,13 +57,15 @@ public abstract class AbstractCountry extends AbstractParticipant {
 
 	protected Map<Integer, Long> carbonEmissionReports;
 	
-	ParticipantCarbonReportingService reportingService;
+	ParticipantCarbonReportingService reportingService; // TODO add visibility
 	Monitor monitor;
 	
 	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
 	protected CarbonReductionHandler 	carbonReductionHandler;
 	protected CarbonAbsorptionHandler carbonAbsorptionHandler;
 
+	protected Logger logger;
+	
 	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
 					double GDPRate, long availableToSpend, long emissionsTarget, long carbonOffset,
 					long energyOutput, long carbonOutput) {
@@ -85,6 +84,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.carbonOutput = carbonOutput;
 		this.carbonEmissionReports = new HashMap<Integer, Long>();
 		this.energyOutput = energyOutput;
+		
+		// Create an instance of a logger
+		logger = Logger.getLogger(name);
 	}
 	
 	@Override
@@ -111,7 +113,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			System.out.println("Unable to reach emission reporting service.");
 			e.printStackTrace();
 		}
-		
 	}
 	
 	public abstract void YearlyFunction();
