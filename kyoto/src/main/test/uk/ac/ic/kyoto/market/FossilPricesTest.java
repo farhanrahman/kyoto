@@ -20,6 +20,8 @@ import org.junit.Test;
  * */
 
 public class FossilPricesTest {
+	
+	FossilPrices testObject = new FossilPrices(null);
 
 	private static final String FOSSIL_FUEL_PRICES_PATH = "src/main/resources/FossilFuelPrices.csv";
 	private static final long START_YEAR = 1990;
@@ -28,7 +30,7 @@ public class FossilPricesTest {
 	NumberFormat twoDecimals = new DecimalFormat("#0.00");
 
 	@Test
-	public void TestFossilPrices() throws Exception {
+	public void testFossilPrices() throws Exception {
 		File file = new File(FOSSIL_FUEL_PRICES_PATH); // path?
 		BufferedReader reader = new BufferedReader(new FileReader(file));
 
@@ -38,8 +40,8 @@ public class FossilPricesTest {
 		for (long year = START_YEAR; year <= END_YEAR; year++) {
 			line = reader.readLine();
 			assertTrue(line.equals(year + ","
-					+ twoDecimals.format(FossilPrices.getOilPrice(year)) + ","
-					+ twoDecimals.format(FossilPrices.getGasPrice(year))));
+					+ twoDecimals.format(testObject.getOilPrice(year)) + ","
+					+ twoDecimals.format(testObject.getGasPrice(year))));
 		}
 		reader.close();
 	}
