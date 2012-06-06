@@ -11,7 +11,6 @@ import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.monitor.Monitor;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.TimeService.EndOfYearCycle;
-import uk.ac.ic.kyoto.trade.PublicOffer;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
@@ -30,7 +29,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	//TODO Register UUID and country ISO with the environment
 	
 	final protected String ISO;		//ISO 3166-1 alpha-3
-	
 	
 	/*
 	 * These variables are related to land area for
@@ -67,7 +65,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	ParticipantCarbonReportingService reportingService;
 	
 	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
-	protected Set<PublicOffer> 		offers;
 	protected CarbonReductionHandler 	carbonReductionHandler;
 	protected CarbonAbsorptionHandler carbonAbsorptionHandler;
 
@@ -154,8 +151,18 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * @return
 	 */
 	public Double reportCarbonEmission(Time t){
-		//TODO add code to calculate whether to submit true or false report (cheat)
-		//Once calculations done, update the report owned by this agent
+		
+		// This  is an example of how reporting your carbon output is structured
+		/*try{
+		Time t = SimTime.get();
+		AbstractCountry.this.environment.act(new SubmitCarbonEmissionReport(
+					AbstractCountry.this.reportCarbonEmission(t), t), 
+					AbstractCountry.this.getID(), 
+					AbstractCountry.this.authkey);
+	}catch(ActionHandlingException e){
+		logger.warn("Error trying to submit report");
+	}*/
+		
 		this.addToReports(t, carbonOutput);
 		return new Double(carbonOutput);
 	}
@@ -361,15 +368,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				//TODO Implement reduction in GDP
 				//TODO Implement change in CO2 emissions/arable land
 				//Stub for submitting reports
-				/*try{
-					Time t = SimTime.get();
-					AbstractCountry.this.environment.act(new SubmitCarbonEmissionReport(
-								AbstractCountry.this.reportCarbonEmission(t), t), 
-								AbstractCountry.this.getID(), 
-								AbstractCountry.this.authkey);
-				}catch(ActionHandlingException e){
-					logger.warn("Error trying to submit report");
-				}*/
 				
 				availableToSpend -= investment;
 				long newOffset = getCarbonOffset(investment);
