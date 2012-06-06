@@ -22,6 +22,8 @@ public class CarbonReportingService extends EnvironmentService {
 
 	Logger logger = Logger.getLogger(CarbonReportingService.class);
 	
+	public static String name = "Report";
+	
 	
 	@Inject
 	protected CarbonReportingService(EnvironmentSharedStateAccess sharedState) {
@@ -34,7 +36,7 @@ public class CarbonReportingService extends EnvironmentService {
 	}
 
 	public void updateReport(final UUID id, final Double carbonEmission, final Time simTime){
-		this.sharedState.change("Report", id, new StateTransformer(){
+		this.sharedState.change(name, id, new StateTransformer(){
 			@Override
 			public Serializable transform(Serializable state) {
 				@SuppressWarnings("unchecked")

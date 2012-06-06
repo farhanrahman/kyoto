@@ -9,7 +9,7 @@ import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 import uk.ac.imperial.presage2.core.simulator.Parameter;
 
 /** 
- * @author sc1109 & azyzio
+ * @author sc1109 & azyzio & Stuart
  */
 public class TimeService extends EnvironmentService {
 
@@ -27,6 +27,7 @@ public class TimeService extends EnvironmentService {
 	protected TimeService(EnvironmentSharedStateAccess sharedState) {
 		super(sharedState);
 	}
+	
 	
 	@EventListener
 	public void updateTickCounter (EndOfTimeCycle e) {

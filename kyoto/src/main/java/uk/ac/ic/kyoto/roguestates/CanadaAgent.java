@@ -59,7 +59,7 @@ public class CanadaAgent extends NonParticipant {
 				}
 			};
 		} catch (FSMException e) {
-			// TODO Auto-generated catch block
+			logger.warn(e.getMessage(), e);
 			e.printStackTrace();
 		}
 	}
