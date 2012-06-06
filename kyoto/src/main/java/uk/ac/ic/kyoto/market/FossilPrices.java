@@ -7,35 +7,36 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.log4j.Logger;
 
+import uk.ac.imperial.presage2.core.environment.EnvironmentService;
+import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
+
 /**
  * 
  * @author Adam Zysko
  */
 
-
-public class FossilPrices
+public class FossilPrices extends EnvironmentService
 {
-	private static final String FOSSIL_FUEL_PRICES_PATH = "src/main/resources/FossilFuelPrices.csv";
-	
-	private static Logger logger = Logger.getLogger(FossilPrices.class);
-	
-	private static Map<Long,Double> oilPriceMap = new HashMap<Long,Double>();
-	private static Map<Long,Double> gasPriceMap = new HashMap<Long,Double>();
-	
-	// Static initializer
-	static
-	{
+	protected FossilPrices(EnvironmentSharedStateAccess sharedState) {
+		super(sharedState);
 		initializeGasAndOilMaps();
 	}
 	
-	private static void initializeGasAndOilMaps()
+	private final String FOSSIL_FUEL_PRICES_PATH = "src/main/resources/FossilFuelPrices.csv";
+	
+	private Logger logger = Logger.getLogger(FossilPrices.class);
+	
+	private Map<Long,Double> oilPriceMap = new HashMap<Long,Double>();
+	private Map<Long,Double> gasPriceMap = new HashMap<Long,Double>();
+	
+	private void initializeGasAndOilMaps()
 	{
 		String[] entries;
 		long year;
 		double oilPrice;
 		double gasPrice;
 		try {
-			File file = new File(FOSSIL_FUEL_PRICES_PATH); // path?
+			File file = new File(FOSSIL_FUEL_PRICES_PATH);
 			BufferedReader reader  = new BufferedReader(new FileReader(file));
 			
 			// Read the values into two maps
@@ -57,7 +58,7 @@ public class FossilPrices
 		}
 	}
 	
-	public static double getOilPrice(long year)	{
+	public double getOilPrice(long year)	{
 		double oilPrice;
 		try {
 			if (oilPriceMap.containsKey(year))
@@ -72,7 +73,7 @@ public class FossilPrices
 		return oilPrice;
 	}
 	
-	public static double getGasPrice(long year)	{
+	public double getGasPrice(long year)	{
 		double gasPrice;
 		try {
 			if (gasPriceMap.containsKey(year))

@@ -11,8 +11,6 @@ import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
  * 
  * @author Adam Zysko
  */
-
-
 public class Economy extends EnvironmentService
 {
 	protected Economy(EnvironmentSharedStateAccess sharedState) {

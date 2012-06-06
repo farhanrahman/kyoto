@@ -6,6 +6,7 @@ import java.util.List;
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.market.FossilPrices;
+import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
@@ -55,7 +56,17 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		// TODO Auto-generated method stub
 	}
 
-	
+	@Override
+	public void YearlyFunction() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void SessionFunction() {
+		// TODO Auto-generated method stub
+		
+	}
 	//================================================================================
     // Public methods to update data
     //================================================================================
@@ -220,14 +231,28 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		double fossilFuelsFactor;
 		
 		try {
-			double newOilPrice = FossilPrices.getOilPrice(currentYear);
-			double oldOilPrice = FossilPrices.getOilPrice(currentYear - 1);
-			double newGasPrice = FossilPrices.getGasPrice(currentYear);
-			double oldGasPrice = FossilPrices.getGasPrice(currentYear - 1);
-			double oilGradient = (newOilPrice - oldOilPrice) / oldOilPrice;
-			double gasGradient = (newGasPrice - oldGasPrice) / oldGasPrice;
+			FossilPrices fossilPrices = getEnvironmentService(FossilPrices.class);
 			
-			fossilFuelsFactor = Constants.FOSSIL_FUEL_PRICE_COEFFICIENT * (oilGradient + gasGradient) / 2;
+			// get the data from the FossilPrices Service
+			double newOilPrice = fossilPrices.getOilPrice(currentYear);
+			double oldOilPrice = fossilPrices.getOilPrice(currentYear - 1);
+			double newGasPrice = fossilPrices.getGasPrice(currentYear);
+			double oldGasPrice = fossilPrices.getGasPrice(currentYear - 1);
+			
+			// if the data is relevant, calculate the gradients and the coefficient
+			if ((newOilPrice != 0) && (oldOilPrice != 0) && (newGasPrice != 0) && (oldGasPrice != 0) ) {
+				double oilGradient = (newOilPrice - oldOilPrice) / oldOilPrice;
+				double gasGradient = (newGasPrice - oldGasPrice) / oldGasPrice;
+				fossilFuelsFactor = Constants.FOSSIL_FUEL_PRICE_COEFFICIENT * (oilGradient + gasGradient) / 2;
+			}
+			
+			// if the data is irrelevant, coefficient becomes irrelevant.
+			else
+				fossilFuelsFactor = 1;
+		}
+		catch (UnavailableServiceException e) {
+			logger.warn("Unable to reach the fossil fuel service: " + e);
+			fossilFuelsFactor = 1;
 		}
 		catch (Exception e) {
 			logger.warn("Problem when calculating fossilFuelsFactor " + e);
@@ -328,18 +353,4 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			lastYearFactor = 1;
 		}
 	}
-
-	@Override
-	public void YearlyFunction() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void SessionFunction() {
-		// TODO Auto-generated method stub
-		
-	}
-	
-
 }
