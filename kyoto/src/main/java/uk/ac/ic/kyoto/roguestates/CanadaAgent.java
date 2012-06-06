@@ -34,6 +34,18 @@ public class CanadaAgent extends NonParticipant {
 	}
 	
 	@Override
+	public void YearlyFunction() {
+		// TODO Auto-generated method stub
+	}
+	
+	@Override
+	public void SessionFunction() {
+		if (carbonOutput - carbonOffset > emissionsTarget) {
+			// leave Kyoto here
+		}
+	}
+	
+	@Override
 	public void initialise() {
 		super.initialise();
 		carbonOutput = 80;
@@ -54,13 +66,6 @@ public class CanadaAgent extends NonParticipant {
 		}
 		
 		logger = Logger.getLogger(CanadaAgent.class);
-	}
-	
-	@EventListener
-	private void SessionEnd(EndOfSessionCycle e) {
-		if (carbonOutput - carbonOffset > emissionsTarget) {
-			// leave Kyoto here
-		}
 	}
 	
 	@Override

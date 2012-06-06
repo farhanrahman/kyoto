@@ -10,8 +10,8 @@ import org.apache.log4j.Logger;
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.monitor.Monitor;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
+import uk.ac.ic.kyoto.services.TimeService;
 import uk.ac.ic.kyoto.services.TimeService.EndOfYearCycle;
-import uk.ac.ic.kyoto.trade.PublicOffer;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
@@ -23,14 +23,13 @@ import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 /**
  * 
- * @author cs2309
+ * @author cs2309, Adam, Sam, Stuart, Chris
  */
 public abstract class AbstractCountry extends AbstractParticipant {
 	
 	//TODO Register UUID and country ISO with the environment
 	
 	final protected String ISO;		//ISO 3166-1 alpha-3
-	
 	
 	/*
 	 * These variables are related to land area for
@@ -56,9 +55,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	protected long  	energyOutput; // How much Carbon we would use if the whole industry was carbon based. Measured in Tons of Carbon per year
 	protected long 		availableToSpend; // Note, can NOT be derived from GDP. Initial value can be derived from there, but cash reserves need to be able to lower independently.
 	
-	// Logging class, must be instantiated by derived classes
-	protected Logger logger;
-	
 	//private long 	carbonTraded; 
 	//private double  dirtyIndustry;
 
@@ -67,7 +63,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	ParticipantCarbonReportingService reportingService;
 	
 	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
-	protected Set<PublicOffer> 		offers;
 	protected CarbonReductionHandler 	carbonReductionHandler;
 	protected CarbonAbsorptionHandler carbonAbsorptionHandler;
 
@@ -100,27 +95,45 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		
 		// Add the country to the monitor agent
 		Monitor.addMemberState(this);
+		// TODO modify monitor so it's dealing with an instance, not static methods
 		
 		carbonAbsorptionHandler = new CarbonAbsorptionHandler();
 		carbonReductionHandler = new CarbonReductionHandler();
 		try {
 			this.reportingService = this.getEnvironmentService(ParticipantCarbonReportingService.class);
 		} catch (UnavailableServiceException e) {
-			// TODO Auto-generated catch block
+			System.out.println("Unable to reach emission reporting service.");
 			e.printStackTrace();
 		}
 		
 	}
 	
+	public abstract void YearlyFunction();
+	
+	public abstract void SessionFunction();
+	
 	@Override
 	public void execute() {
 		super.execute();
-		
+		try {
+			TimeService timeService = getEnvironmentService(TimeService.class);
+			if (timeService.getCurrentTick() % 365 == 0) {
+				YearlyFunction();
+			}
+			if (timeService.getCurrentTick() % 3650 == 0) {
+				SessionFunction();
+			}
+		} catch (UnavailableServiceException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	@EventListener
+	public void yearly(EndOfYearCycle e) {
 		// Give a tax to Monitor agent for monitoring every year
 		if (SimTime.get().intValue() % 100 == 0) {
-			//TODO: Check values if correct
-			Monitor.taxForMonitor(GDP*2/100); // Take 2% of GDP for monitoring
-			GDP -= GDP*2/100;	// Subtract taxed amount from GDP
+			Monitor.taxForMonitor(GDP*GameConst.MONITOR_COST_PERCENTAGE); // Take 2% of GDP for monitoring
+			GDP -= GDP*GameConst.MONITOR_COST_PERCENTAGE;	// Subtract taxed amount from GDP
 		}
 	}
 	
@@ -154,8 +167,18 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * @return
 	 */
 	public Double reportCarbonEmission(Time t){
-		//TODO add code to calculate whether to submit true or false report (cheat)
-		//Once calculations done, update the report owned by this agent
+		
+		// This  is an example of how reporting your carbon output is structured
+		/*try{
+		Time t = SimTime.get();
+		AbstractCountry.this.environment.act(new SubmitCarbonEmissionReport(
+					AbstractCountry.this.reportCarbonEmission(t), t), 
+					AbstractCountry.this.getID(), 
+					AbstractCountry.this.authkey);
+		}catch(ActionHandlingException e){
+			logger.warn("Error trying to submit report");
+		}*/
+		
 		this.addToReports(t, carbonOutput);
 		return new Double(carbonOutput);
 	}
@@ -222,11 +245,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				availableToSpend -= cost;
 			}
 			else {
-				// log that there is not enough money
+				// TODO log that there is not enough money
 			}
 		}
 		catch (Exception e) {
-			// log the exception
+			// TODO log the exception
 		}
 	}
 	
@@ -237,8 +260,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	@EventListener
 	public void calculateGDPRate(EndOfYearCycle e){
-		//TODO Make work, adjust economicOutput
-		
 		double marketStateFactor = 0;
 		
 		Economy.State economyState = Economy.getEconomyState();
@@ -261,13 +282,13 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		 * Returns the cost of investment required to
 		 * reduce dirty industry by a specified amount of tons of carbon.
 		 * 
-		 * @param carbonOuputChange
-		 * 
+		 * @param carbonOutputChange
+		 * @return cost of reducing carbon by said amount
 		 */
-		public final long getCost(double carbonOuputChange){
+		public final long getCost(double carbonOutputChange){
 			long cost;
 			
-			cost = (long) (GameConst.CARBON_REDUCTION_COEFF * carbonOuputChange / energyOutput);
+			cost = (long) (GameConst.CARBON_REDUCTION_COEFF * carbonOutputChange / energyOutput);
 			
 			return cost;
 		}
@@ -277,7 +298,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		 * for a specified cost of investment.
 		 * 
 		 * @param currency
-		 * 
+		 * @return the change in carbon output from said cost
 		 */
 		public final double getCarbonOutputChange(long cost) {
 			double carbonOutputChange;
@@ -310,9 +331,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		
 		/**
 		 * Returns the cost of investment required to
-		 * obtain a given number of carbon credits.
+		 * obtain a given number of carbon.
 		 * 
-		 * @param carbonCredits
+		 * @param carbonOffset
 		 */
 		public long getCost(long carbonOffset){
 			double neededLand = carbonOffset / GameConst.FOREST_CARBON_OFFSET;
@@ -361,15 +382,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				//TODO Implement reduction in GDP
 				//TODO Implement change in CO2 emissions/arable land
 				//Stub for submitting reports
-				/*try{
-					Time t = SimTime.get();
-					AbstractCountry.this.environment.act(new SubmitCarbonEmissionReport(
-								AbstractCountry.this.reportCarbonEmission(t), t), 
-								AbstractCountry.this.getID(), 
-								AbstractCountry.this.authkey);
-				}catch(ActionHandlingException e){
-					logger.warn("Error trying to submit report");
-				}*/
 				
 				availableToSpend -= investment;
 				long newOffset = getCarbonOffset(investment);
@@ -414,11 +426,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	/**
 	 * Method used for monitoring. Is called randomly by the Monitor agent
 	 */
-	
 	public void getMonitored() {
-		double latestReport = this.carbonEmissionReports.get(SimTime.get().intValue());
-		double trueCarbon = this.carbonOutput;
-		// shouldn't these two be long values? comparing doubles isn't safe i think
+		long latestReport = this.carbonEmissionReports.get(SimTime.get().intValue());
+		long trueCarbon = this.carbonOutput;
 		
 		if (latestReport != trueCarbon) {
 				//TODO - Insert sanctions here!
