@@ -155,6 +155,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				SessionFunction();
 			}
 		} catch (UnavailableServiceException e) {
+			logger.warn(e.getMessage(), e);
 			e.printStackTrace();
 		}
 	}
@@ -438,7 +439,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	/**
 	 * Method used for monitoring. Is called randomly by the Monitor agent
 	 */
-	public void getMonitored() {
+	public final void getMonitored() {
 		long latestReport = this.carbonEmissionReports.get(SimTime.get().intValue());
 		long trueCarbon = this.carbonOutput;
 		
