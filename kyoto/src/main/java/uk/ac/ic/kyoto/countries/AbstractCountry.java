@@ -35,8 +35,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * These variables are related to land area for
 	 * dealing with carbon absorption prices
 	 */
-	final protected double landArea;
-	protected double 	arableLandArea;
+	final protected double 	landArea;
+	protected double 		arableLandArea;
 	
 	/*
 	 * These variables are related to carbon emissions and 
@@ -55,15 +55,13 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	protected long  	energyOutput; // How much Carbon we would use if the whole industry was carbon based. Measured in Tons of Carbon per year
 	protected long 		availableToSpend; // Note, can NOT be derived from GDP. Initial value can be derived from there, but cash reserves need to be able to lower independently.
 	
-	// Logging class, must be instantiated by derived classes
-	protected Logger logger;
-	
 	//private long 	carbonTraded; 
 	//private double  dirtyIndustry;
 
 	protected Map<Integer, Long> carbonEmissionReports;
 	
 	ParticipantCarbonReportingService reportingService;
+	Monitor monitor;
 	
 	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
 	protected CarbonReductionHandler 	carbonReductionHandler;
@@ -96,9 +94,14 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	public void initialise(){
 		super.initialise();
 		
-		// Add the country to the monitor agent
-		Monitor.addMemberState(this);
-		// TODO modify monitor so it's dealing with an instance, not static methods
+		// Add the country to the monitor service
+		try {
+			this.monitor = this.getEnvironmentService(Monitor.class);
+			this.monitor.addMemberState(this);
+		} catch (UnavailableServiceException e1) {
+			System.out.println("Unable to reach monitor service.");
+			e1.printStackTrace();
+		}
 		
 		carbonAbsorptionHandler = new CarbonAbsorptionHandler();
 		carbonReductionHandler = new CarbonReductionHandler();
@@ -115,15 +118,40 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	public abstract void SessionFunction();
 	
+	private void GDPRate() {
+		double marketStateFactor = 0;
+		
+		Economy economy;
+		try {
+			economy = getEnvironmentService(Economy.class);
+		
+		switch(economy.getEconomyState()) {
+		case GROWTH:
+			marketStateFactor = GameConst.GROWTH_MARKET_STATE;
+		case STABLE:
+			marketStateFactor = GameConst.STABLE_MARKET_STATE;
+		case RECESSION:
+			marketStateFactor = GameConst.RECESSION_MARKET_STATE;
+		}
+		
+		GDPRate = GDPRate + marketStateFactor + (GameConst.GROWTH_SCALER*(energyOutput))/GDP;
+		} catch (UnavailableServiceException e) {
+			System.out.println("Unable to reach economy service.");
+			e.printStackTrace();
+		}
+	}
+	
 	@Override
 	public void execute() {
 		super.execute();
 		try {
 			TimeService timeService = getEnvironmentService(TimeService.class);
-			if (timeService.getCurrentTick() % 365 == 0) {
+			if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
 				YearlyFunction();
+				MonitorTax();
+				GDPRate();
 			}
-			if (timeService.getCurrentTick() % 3650 == 0) {
+			if (timeService.getCurrentYear() % timeService.getYearsInSession() == 0) {
 				SessionFunction();
 			}
 		} catch (UnavailableServiceException e) {
@@ -131,13 +159,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		}
 	}
 	
-	@EventListener
-	public void yearly(EndOfYearCycle e) {
+
+	public void MonitorTax() {
 		// Give a tax to Monitor agent for monitoring every year
-		if (SimTime.get().intValue() % 100 == 0) {
-			Monitor.taxForMonitor(GDP*GameConst.MONITOR_COST_PERCENTAGE); // Take 2% of GDP for monitoring
-			GDP -= GDP*GameConst.MONITOR_COST_PERCENTAGE;	// Subtract taxed amount from GDP
-		}
+		this.monitor.taxForMonitor(availableToSpend*GameConst.MONITOR_COST_PERCENTAGE); // Take % of money for monitoring
+		availableToSpend -= availableToSpend*GameConst.MONITOR_COST_PERCENTAGE;
 	}
 	
 	protected Set<ParticipantSharedState> getSharedState(){
@@ -260,23 +286,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	public Double getCash(){
 		return this.GDP*GameConst.PERCENTAGE_OF_GDP;
-	}
-	@EventListener
-	public void calculateGDPRate(EndOfYearCycle e){
-		double marketStateFactor = 0;
-		
-		Economy.State economyState = Economy.getEconomyState();
-		
-		switch(economyState) {
-		case GROWTH:
-			marketStateFactor = GameConst.GROWTH_MARKET_STATE;
-		case STABLE:
-			marketStateFactor = GameConst.STABLE_MARKET_STATE;
-		case RECESSION:
-			marketStateFactor = GameConst.RECESSION_MARKET_STATE;
-		}
-		
-		GDPRate = GDPRate + marketStateFactor + (GameConst.GROWTH_SCALER*(energyOutput))/GDP;
 	}
 	
 	protected final class CarbonReductionHandler{

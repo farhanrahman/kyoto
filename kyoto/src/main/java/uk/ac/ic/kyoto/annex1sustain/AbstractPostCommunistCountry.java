@@ -6,7 +6,6 @@ import java.util.List;
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.market.FossilPrices;
-import uk.ac.ic.kyoto.services.TimeService.EndOfYearCycle;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
@@ -82,7 +81,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	/**
 	 * Called at the beginning of each year.
 	 */
-	public void updateYearlyData(EndOfYearCycle e) {
+	public void updateYearlyData() {
 		calculateLastYearFactor();
 		calculateNewSellingTarget();
 		logger.info("Internal Yearly Data of Post-Communist Country " + this.getName() + " was updated");
@@ -164,7 +163,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		long potentialProfit = Constants.INVESTMENT_AMOUNT * internalPrice;
 		
 		if (potentialProfit > investmentCost) {
-			carbonAbsorptionHandler.invest(investmentCost);
+			//carbonAbsorptionHandler.invest(investmentCost);
 			logger.info("Post-Communist Country " + this.getName() + " invested " + String.valueOf(investmentCost) + " in carbon absorption");
 			// We don't check if we have enough money and land, as there are no functions for it.
 			//  While the former is checked by the handler function, the latter is not - should be implemented.
@@ -177,7 +176,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		long potentialProfit = Constants.INVESTMENT_AMOUNT * internalPrice;
 		
 		if (potentialProfit > investmentCost) {
-			carbonReductionHandler.invest(investmentCost);
+			//carbonReductionHandler.invest(investmentCost);
 			logger.info("Post-Communist Country " + this.getName() + " invested " + String.valueOf(investmentCost) + " in carbon reduction");
 			// Same problem as in carbonAbsorptionInvestment
 		}
@@ -246,9 +245,9 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		double marketFactor;
 		
 		try {
-			Economy.State economyState = Economy.getEconomyState();
+			Economy economy = getEnvironmentService(Economy.class);
 			
-			switch (economyState) {
+			switch (economy.getEconomyState()) {
 				case GROWTH:
 					marketFactor = 1 + Constants.MARKET_STATE_COEFFICIENT;
 					break;
@@ -330,6 +329,18 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			logger.warn("Problem when calculating lastYearFactor " + e);
 			lastYearFactor = 1;
 		}
+	}
+
+	@Override
+	public void YearlyFunction() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void SessionFunction() {
+		// TODO Auto-generated method stub
+		
 	}
 	
 
