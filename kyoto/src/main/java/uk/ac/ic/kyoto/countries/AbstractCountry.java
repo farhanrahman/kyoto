@@ -112,10 +112,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	@Override
 	public void execute() {
 		super.execute();
-		
+	}
+	
+	@EventListener
+	public void yearly(EndOfYearCycle e) {
 		// Give a tax to Monitor agent for monitoring every year
 		if (SimTime.get().intValue() % 100 == 0) {
-			//TODO: Check values if correct
 			Monitor.taxForMonitor(GDP*GameConst.MONITOR_COST_PERCENTAGE); // Take 2% of GDP for monitoring
 			GDP -= GDP*GameConst.MONITOR_COST_PERCENTAGE;	// Subtract taxed amount from GDP
 		}
