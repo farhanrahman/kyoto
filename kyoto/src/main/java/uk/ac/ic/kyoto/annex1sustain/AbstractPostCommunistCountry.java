@@ -28,7 +28,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	protected double		lastYearFactor;
 	
 	// temporary variables
-	private Logger		logger;
+	private Logger		logger = Logger.getLogger(AbstractPostCommunistCountry.class);
 	protected long 			currentYear;
 	protected long 			availableCredits; // corresponds to carbon offset
 	
@@ -44,8 +44,6 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 				carbonOffset, energyOutput, energyOutput, energyOutput);
 		// TODO Initialize the fields
 		
-		// Initialize logger. Should be done in AbstractCountry
-		logger = Logger.getLogger(AbstractPostCommunistCountry.class);
 
 	}
 	
@@ -164,7 +162,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		long potentialProfit = Constants.INVESTMENT_AMOUNT * internalPrice;
 		
 		if (potentialProfit > investmentCost) {
-			carbonAbsorptionHandler.invest(investmentCost);
+			//carbonAbsorptionHandler.invest(investmentCost);
 			logger.info("Post-Communist Country " + this.getName() + " invested " + String.valueOf(investmentCost) + " in carbon absorption");
 			// We don't check if we have enough money and land, as there are no functions for it.
 			//  While the former is checked by the handler function, the latter is not - should be implemented.
@@ -177,7 +175,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		long potentialProfit = Constants.INVESTMENT_AMOUNT * internalPrice;
 		
 		if (potentialProfit > investmentCost) {
-			carbonReductionHandler.invest(investmentCost);
+			//carbonReductionHandler.invest(investmentCost);
 			logger.info("Post-Communist Country " + this.getName() + " invested " + String.valueOf(investmentCost) + " in carbon reduction");
 			// Same problem as in carbonAbsorptionInvestment
 		}
