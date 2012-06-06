@@ -97,13 +97,14 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		
 		// Add the country to the monitor agent
 		Monitor.addMemberState(this);
+		// TODO modify monitor so it's dealing with an instance, not static methods
 		
 		carbonAbsorptionHandler = new CarbonAbsorptionHandler();
 		carbonReductionHandler = new CarbonReductionHandler();
 		try {
 			this.reportingService = this.getEnvironmentService(ParticipantCarbonReportingService.class);
 		} catch (UnavailableServiceException e) {
-			// TODO Auto-generated catch block
+			System.out.println("Unable to reach emission reporting service.");
 			e.printStackTrace();
 		}
 		
@@ -161,9 +162,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 					AbstractCountry.this.reportCarbonEmission(t), t), 
 					AbstractCountry.this.getID(), 
 					AbstractCountry.this.authkey);
-	}catch(ActionHandlingException e){
-		logger.warn("Error trying to submit report");
-	}*/
+		}catch(ActionHandlingException e){
+			logger.warn("Error trying to submit report");
+		}*/
 		
 		this.addToReports(t, carbonOutput);
 		return new Double(carbonOutput);
@@ -231,11 +232,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				availableToSpend -= cost;
 			}
 			else {
-				// log that there is not enough money
+				// TODO log that there is not enough money
 			}
 		}
 		catch (Exception e) {
-			// log the exception
+			// TODO log the exception
 		}
 	}
 	
@@ -246,8 +247,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	@EventListener
 	public void calculateGDPRate(EndOfYearCycle e){
-		//TODO Make work, adjust economicOutput
-		
 		double marketStateFactor = 0;
 		
 		Economy.State economyState = Economy.getEconomyState();
@@ -270,13 +269,13 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		 * Returns the cost of investment required to
 		 * reduce dirty industry by a specified amount of tons of carbon.
 		 * 
-		 * @param carbonOuputChange
-		 * 
+		 * @param carbonOutputChange
+		 * @return cost of reducing carbon by said amount
 		 */
-		public final long getCost(double carbonOuputChange){
+		public final long getCost(double carbonOutputChange){
 			long cost;
 			
-			cost = (long) (GameConst.CARBON_REDUCTION_COEFF * carbonOuputChange / energyOutput);
+			cost = (long) (GameConst.CARBON_REDUCTION_COEFF * carbonOutputChange / energyOutput);
 			
 			return cost;
 		}
@@ -286,7 +285,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		 * for a specified cost of investment.
 		 * 
 		 * @param currency
-		 * 
+		 * @return the change in carbon output from said cost
 		 */
 		public final double getCarbonOutputChange(long cost) {
 			double carbonOutputChange;
@@ -414,11 +413,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	/**
 	 * Method used for monitoring. Is called randomly by the Monitor agent
 	 */
-	
 	public void getMonitored() {
-		double latestReport = this.carbonEmissionReports.get(SimTime.get().intValue());
-		double trueCarbon = this.carbonOutput;
-		// shouldn't these two be long values? comparing doubles isn't safe i think
+		long latestReport = this.carbonEmissionReports.get(SimTime.get().intValue());
+		long trueCarbon = this.carbonOutput;
 		
 		if (latestReport != trueCarbon) {
 				//TODO - Insert sanctions here!
