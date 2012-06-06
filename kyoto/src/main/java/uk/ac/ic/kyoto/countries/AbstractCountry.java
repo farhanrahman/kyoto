@@ -435,6 +435,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	public long getAvailableToSpend() {
 		return availableToSpend;
 	}
+	
+	public void setEmissionsTarget(long emissionsTarget) {
+		this.emissionsTarget = emissionsTarget;
+	}
 
 	/**
 	 * Method used for monitoring. Is called randomly by the Monitor agent

@@ -16,7 +16,7 @@ import uk.ac.imperial.presage2.core.util.random.Random;
 
 /**
  * Monitoring service
- * @author ov109
+ * @author ov109, Stuart
  *
  */
 public class Monitor extends EnvironmentService {
@@ -46,7 +46,7 @@ public class Monitor extends EnvironmentService {
 	}
 	
 	private void Sanction(AbstractCountry sanctionee) {
-		// TODO implementation
+		// TODO implementation of sanctions for cheating
 	}
 	
 	/**

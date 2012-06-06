@@ -16,7 +16,7 @@ import com.google.inject.Inject;
 
 /**
  * 
- * @author farhanrahman
+ * @author farhanrahman, Stuart
  */
 public class CarbonReportingService extends EnvironmentService {
 
