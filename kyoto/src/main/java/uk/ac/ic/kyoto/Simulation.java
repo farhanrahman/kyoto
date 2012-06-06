@@ -8,6 +8,7 @@ import uk.ac.ic.kyoto.roguestates.CanadaAgent;
 import uk.ac.ic.kyoto.roguestates.FakeCanadaAgent;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
+import uk.ac.ic.kyoto.trade.TradeTokenModule;
 import uk.ac.imperial.presage2.core.simulator.InjectedSimulation;
 import uk.ac.imperial.presage2.core.simulator.Parameter;
 import uk.ac.imperial.presage2.core.simulator.Scenario;
@@ -47,8 +48,10 @@ public class Simulation extends InjectedSimulation {
 		modules.add(new AbstractEnvironmentModule()
 			.addActionHandler(SubmitCarbonEmissionReportHandler.class)
 			.addGlobalEnvironmentService(CarbonReportingService.class)
-			.addParticipantEnvironmentService(ParticipantCarbonReportingService.class));		
+			.addParticipantEnvironmentService(ParticipantCarbonReportingService.class));
 	
+		modules.add(new TradeTokenModule());
+		
 		//*modules.add(new RuleModule());
 			//.addClasspathDrlFile("foo.drl")*/
 		

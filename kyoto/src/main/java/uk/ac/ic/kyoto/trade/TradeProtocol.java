@@ -2,6 +2,13 @@ package uk.ac.ic.kyoto.trade;
 
 import java.util.UUID;
 import org.apache.log4j.Logger;
+
+import com.google.inject.Guice;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
+
 import uk.ac.ic.kyoto.countries.TradeAction;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.ActionHandlingException;
@@ -39,72 +46,14 @@ import uk.ac.imperial.presage2.util.protocols.SpawnAction;
  *
  */
 public abstract class TradeProtocol extends FSMProtocol {
-
-	public final static class Trade{
-		final int quantity;
-		final int unitCost;
-		final TradeType type;
-
-		public Trade(int quantity, int unitCost, TradeType type) {
-			this.quantity = quantity;
-			this.unitCost = unitCost;
-			this.type = type;
-		}
-
-		public int getQuantity() {
-			return quantity;
-		}
-
-		public int getUnitCost() {
-			return unitCost;
-		}
-
-		public int getTotalCost() {
-			return unitCost * quantity;
-		}
-		
-		public TradeType getType(){
-			return this.type;
-		}
-
-		@Override
-		public String toString() {
-			return "Trade: "+quantity+" @ "+unitCost; 
-		}
-
-		public boolean equals(Trade t){
-			if(this == t) {
-				return true;
-			} else if (	this.quantity == t.getQuantity() && 
-						this.unitCost == t.getUnitCost() && 
-						this.type == t.getType()) {
-				return true;
-			} else if (	this.quantity == -t.getQuantity() &&
-						this.unitCost == t.getUnitCost() && 
-						this.type == t.reverse().getType()){
-				return true;
-			} else if ( this.quantity == t.getQuantity() &&
-						this.unitCost == -t.getUnitCost() &&
-						this.type == t.reverse().getType()){
-				return true;
-			} else {
-				return false;
-			}
-		}
-		
-		public Trade reverse(){
-			TradeType t = this.type.equals(TradeType.BUY)?TradeType.SELL:TradeType.BUY;
-			return new Trade(this.quantity, this.unitCost, t);
-		}
-
-	}
-
-
 	private final UUID id;
 	private final UUID authkey;
 	protected final EnvironmentConnector environment;
 	private final Logger logger;
 
+	@Inject protected TradeTokenFactory tradeFactory;
+	protected TradeToken tradeToken;
+	
 	enum States {
 		START, TRADE_PROPOSED, RESPONSE_RECEIVED, TRADE_RECEIVED, TRADE_ACCEPTED, TRADE_REJECTED,
 		//PROPOSITION_PUBLISHED, OFFERS_RECEIVED, OFFER_ACCEPTED, 
@@ -119,6 +68,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 		TIMEOUT, ERROR
 	}
 
+	@Inject
 	public TradeProtocol(final UUID id, final UUID authkey, 
 			final EnvironmentConnector environment, NetworkAdaptor network)
 					throws FSMException {
@@ -131,6 +81,18 @@ public abstract class TradeProtocol extends FSMProtocol {
 
 		logger = Logger.getLogger(TradeProtocol.class.getName() + ", " + id);
 
+		Injector injector = Guice.createInjector(new TradeTokenModule());
+		this.tradeFactory = injector.getInstance(TradeTokenFactory.class);
+		this.tradeToken = this.tradeFactory.get();
+		
+		if(this.tradeFactory == null){
+			logger.warn("HUGE PROBLEM");
+		}
+		
+		for(int i = 0; i < 10; i++){
+			logger.info(this.tradeToken.getToken());
+		}
+		
 		try {
 			this.description
 

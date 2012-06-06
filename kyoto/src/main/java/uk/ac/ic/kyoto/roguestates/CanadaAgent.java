@@ -11,6 +11,7 @@ import com.mongodb.MongoException.Network;
 
 import uk.ac.ic.kyoto.countries.NonParticipant;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
+import uk.ac.ic.kyoto.trade.Trade;
 import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.network.Message;
