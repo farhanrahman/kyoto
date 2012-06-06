@@ -76,7 +76,6 @@ public abstract class TradeProtocol extends FSMProtocol {
 		RESPOND_TO_TRADE
 	}
 
-	@Inject
 	public TradeProtocol(final UUID id, final UUID authkey, 
 			final EnvironmentConnector environment, NetworkAdaptor network)
 					throws FSMException {

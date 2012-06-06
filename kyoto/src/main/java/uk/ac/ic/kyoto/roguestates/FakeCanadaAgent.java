@@ -77,7 +77,7 @@ public class FakeCanadaAgent extends NonParticipant {
 //		}
 //		
 		
-		if(counter == -1){
+		if(counter > 0){
 			int quantity = 10;
 			int unitCost = 2;
 			Trade trade = new Trade(quantity, unitCost, TradeType.SELL, authkey);
