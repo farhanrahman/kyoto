@@ -13,7 +13,7 @@ import uk.ac.imperial.presage2.core.messaging.Input;
 public class EUCountry extends AbstractCountry {
 	
 	public EUCountry(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
-			double GDPRate, float availiableToSpend, long emissionsTarget, long carbonOffset,
+			double GDPRate, long availiableToSpend, long emissionsTarget, long carbonOffset,
 			long energyOutput, long carbonOutput) {
 		
 		super(id, name, ISO, landArea, arableLandArea, GDP,
@@ -29,6 +29,18 @@ public class EUCountry extends AbstractCountry {
 	 */
 	@Override
 	protected void processInput(Input input) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void YearlyFunction() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void SessionFunction() {
 		// TODO Auto-generated method stub
 		
 	}

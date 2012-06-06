@@ -18,7 +18,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
     // PrivateFields
     //================================================================================
 	
-	protected double 		internalPrice;
+	protected long	 		internalPrice;
 	protected List<Double> 	uncommittedTransactionsCosts;
 	protected List<Double> 	committedTransactionsCosts;
 	protected long 			ticksToEndOfRound;
@@ -37,7 +37,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	
 	public AbstractPostCommunistCountry(UUID id, String name, String ISO,
 			double landArea, double arableLandArea, double GDP, double GDPRate,
-			float availiableToSpend, long emissionsTarget, long carbonOffset, long energyOutput)
+			long availiableToSpend, long emissionsTarget, long carbonOffset, long energyOutput)
 	{
 		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, emissionsTarget,
 				carbonOffset, energyOutput, energyOutput, energyOutput);
@@ -74,7 +74,8 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		updateUncommittedTransactions();
 		updateCommittedTransactions();
 		updateInternalPrice();
-		logger.info("Internal Data of Post Communist Country " + this.getName() + " was updated");
+		logger.info("Internal Data of Post-Communist Country " + this.getName() + " was updated");
+		makeInvestments();
 	}
 	
 	/**
@@ -83,7 +84,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	public void updateYearlyData() {
 		calculateLastYearFactor();
 		calculateNewSellingTarget();
-		logger.info("Internal Yearly Data of Post Communist Country " + this.getName() + " was updated");
+		logger.info("Internal Yearly Data of Post-Communist Country " + this.getName() + " was updated");
 	}
 	
 	//================================================================================
@@ -91,9 +92,12 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
     //================================================================================
 	
 	private void updateInternalPrice() {
-		internalPrice   = 	calculateMarketPrice() * 
+		internalPrice   = 	(long)
+							(
+							calculateMarketPrice() * 
 							calculateEndOfRoundFactor() * 
-							lastYearFactor;
+							lastYearFactor
+							);
 	}
 
 	private double calculateMarketPrice() {
@@ -152,6 +156,41 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	// temporary function
 	private void updateCounter() {
 		ticksToEndOfRound--;
+	}
+	
+	private void carbonAbsorptionInvestment () {
+		long investmentCost = carbonAbsorptionHandler.getCost(Constants.INVESTMENT_AMOUNT);
+		long potentialProfit = Constants.INVESTMENT_AMOUNT * internalPrice;
+		
+		if (potentialProfit > investmentCost) {
+			//carbonAbsorptionHandler.invest(investmentCost);
+			logger.info("Post-Communist Country " + this.getName() + " invested " + String.valueOf(investmentCost) + " in carbon absorption");
+			// We don't check if we have enough money and land, as there are no functions for it.
+			//  While the former is checked by the handler function, the latter is not - should be implemented.
+			//  Should we react if we don't have enough of either?
+		}
+	}
+	
+	private void carbonReductionInvestment () {
+		long investmentCost = carbonReductionHandler.getCost(Constants.INVESTMENT_AMOUNT);
+		long potentialProfit = Constants.INVESTMENT_AMOUNT * internalPrice;
+		
+		if (potentialProfit > investmentCost) {
+			//carbonReductionHandler.invest(investmentCost);
+			logger.info("Post-Communist Country " + this.getName() + " invested " + String.valueOf(investmentCost) + " in carbon reduction");
+			// Same problem as in carbonAbsorptionInvestment
+		}
+	}
+	
+	private void otherCountriesInvestment () {
+		// TODO implement
+		//   There are no handlers for investing in other countries yet
+	}
+	
+	private void makeInvestments() {
+		carbonAbsorptionInvestment();
+		carbonReductionInvestment();
+		otherCountriesInvestment();
 	}
 	
 	//================================================================================
@@ -290,6 +329,18 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			logger.warn("Problem when calculating lastYearFactor " + e);
 			lastYearFactor = 1;
 		}
+	}
+
+	@Override
+	public void YearlyFunction() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void SessionFunction() {
+		// TODO Auto-generated method stub
+		
 	}
 	
 

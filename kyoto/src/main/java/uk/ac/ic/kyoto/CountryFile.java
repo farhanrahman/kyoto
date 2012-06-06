@@ -6,10 +6,18 @@ public class CountryFile {
 	
 	Agent agent;
 	
+	//================================================================================
+    // Private fields
+    //================================================================================
+	
 	private double	emissionTarget;
 	private long 	carbonOffset;
 	private float 	availableToSpend;
 	private long 	carbonTraded;
+	
+	//================================================================================
+    // Constructor
+    //================================================================================
 
 	public CountryFile(Agent agent, double emissionsTarget, long carbonOffset,
 					float availableToSpend, long carbonTraded) {
@@ -21,6 +29,10 @@ public class CountryFile {
 		this.availableToSpend = availableToSpend;
 		this.carbonTraded = carbonTraded;		
 	}
+	
+	//================================================================================
+    // Getters
+    //================================================================================
 
 	public Agent getAgent() {
 		return agent;
@@ -41,6 +53,10 @@ public class CountryFile {
 	public long getCarbonTraded() {
 		return carbonTraded;
 	}
+	
+	//================================================================================
+    // Setters
+    //================================================================================
 
 	public void setEmissionTarget(double emissionTarget) {
 		this.emissionTarget = emissionTarget;
@@ -57,6 +73,10 @@ public class CountryFile {
 	public void setCarbonTraded(long carbonTraded) {
 		this.carbonTraded = carbonTraded;
 	}
+	
+	//================================================================================
+    // Overridden Public methods
+    //================================================================================
 	
 	@Override
 	public boolean equals(Object obj) {
