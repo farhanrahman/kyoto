@@ -12,7 +12,6 @@ import uk.ac.imperial.presage2.core.util.random.Random;
 public class Monitor extends EnvironmentService {
 
 	final private ArrayList<AbstractCountry> memberStates = new ArrayList<AbstractCountry>();
-	private final double MONITORING_PRICE = 0; //Decide on a price for monitoring
 	private double cash;
 	
 	public Monitor(EnvironmentSharedStateAccess sharedState) {
@@ -22,7 +21,7 @@ public class Monitor extends EnvironmentService {
 /*	// Generate a randomInt and if divisible by 30 then monitor all countries.
 	// TODO monitor only individual countries.
 	if (Random.randomInt() % 30 == 0 && cash >= MONITORING_PRICE) {
-		cash -= MONITORING_PRICE;
+		cash -= GameConst.MONITORING_PRICE;
 		for (AbstractCountry a : memberStates) {
 			a.getMonitored();
 		}
