@@ -7,7 +7,7 @@ public class USAgent extends NonParticipant {
 
 
 	public USAgent(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
-			double GDPRate, float availableToSpend, long emissionsTarget, long carbonOffset,
+			double GDPRate, long availableToSpend, long emissionsTarget, long carbonOffset,
 			long energyOutput, long carbonOutput){
 		super(id, name, ISO, landArea, arableLandArea, GDP,
 				GDPRate, availableToSpend, emissionsTarget, carbonOffset,
