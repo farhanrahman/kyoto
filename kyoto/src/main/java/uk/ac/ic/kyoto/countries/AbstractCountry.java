@@ -1,37 +1,24 @@
 package uk.ac.ic.kyoto.countries;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
 
-import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
-
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.monitor.Monitor;
-import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.TimeService.EndOfYearCycle;
 import uk.ac.ic.kyoto.trade.PublicOffer;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.imperial.presage2.core.Time;
-import uk.ac.imperial.presage2.core.environment.ActionHandlingException;
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
-import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
-import uk.ac.ic.kyoto.trade.PublicOffer;
-import uk.ac.imperial.presage2.core.event.EventListener;
-import uk.ac.imperial.presage2.core.messaging.Input;
-import uk.ac.imperial.presage2.core.simulator.Parameter;
-import uk.ac.imperial.presage2.core.util.random.Random;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 /**
