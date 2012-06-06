@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 
+import org.apache.log4j.Logger;
+
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
 
 import uk.ac.ic.kyoto.market.Economy;
@@ -66,6 +68,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	protected double 	GDPRate;	// The rate in which the DGP changes in a given year. Expressed in %
 	protected long  	energyOutput; // How much Carbon we would use if the whole industry was carbon based. Measured in Tons of Carbon per year
 	protected long 		availableToSpend; // Note, can NOT be derived from GDP. Initial value can be derived from there, but cash reserves need to be able to lower independently.
+	
+	// Logging class, must be instantiated by derived classes
+	protected Logger logger;
 	
 	//private long 	carbonTraded; 
 	//private double  dirtyIndustry;
