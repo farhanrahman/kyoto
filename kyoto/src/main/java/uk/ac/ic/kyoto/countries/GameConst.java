@@ -11,7 +11,8 @@ public final class GameConst {
 	public static final double STABLE_MARKET_CHANCE = 0.8;
 	public static final double RECESSION_MARKET_CHANCE = 0.1;
 	
-	public static final int ECONOMIC_OUTPUT_REDUCTION = 1; // What is that?
+	@Deprecated
+	public static final int ECONOMIC_OUTPUT_REDUCTION = 1; // Deprecated constant
 	
 	/**
 	 * The cost of investment in one extra ton of carbon per year
@@ -48,6 +49,14 @@ public final class GameConst {
 	 */
 	public static long FOREST_CARBON_OFFSET = 10;
 	
-	//Country Config Template
+	/**
+	 * Percentage of GDP that is levied from availiableToSpend for monitoring
+	 */
+	public static double MONITOR_COST_PERCENTAGE = 0.005;
 	
+	/**
+	 * Percentage of GDP taken from country if they fail to meet their targets.  
+	 * Increases in linear amounts for each transgression.
+	 */
+	public static double SANCTION_RATE = 0.05;
 }

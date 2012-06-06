@@ -7,6 +7,9 @@ import uk.ac.imperial.presage2.core.event.Event;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 
+/** 
+ * @author sc1109 & azyzio
+ */
 public class TimeService extends EnvironmentService {
 
 	private Time tickCounter;

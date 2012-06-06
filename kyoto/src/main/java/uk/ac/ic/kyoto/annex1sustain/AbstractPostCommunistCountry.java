@@ -6,7 +6,6 @@ import java.util.List;
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.market.FossilPrices;
-import uk.ac.ic.kyoto.services.TimeService.EndOfYearCycle;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
@@ -38,7 +37,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	
 	public AbstractPostCommunistCountry(UUID id, String name, String ISO,
 			double landArea, double arableLandArea, double GDP, double GDPRate,
-			float availiableToSpend, long emissionsTarget, long carbonOffset, long energyOutput)
+			long availiableToSpend, long emissionsTarget, long carbonOffset, long energyOutput)
 	{
 		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, emissionsTarget,
 				carbonOffset, energyOutput, energyOutput, energyOutput);
@@ -80,7 +79,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	/**
 	 * Called at the beginning of each year.
 	 */
-	public void updateYearlyData(EndOfYearCycle e) {
+	public void updateYearlyData() {
 		calculateLastYearFactor();
 		calculateNewSellingTarget();
 		logger.info("Internal Yearly Data of Post-Communist Country " + this.getName() + " was updated");
@@ -328,6 +327,18 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			logger.warn("Problem when calculating lastYearFactor " + e);
 			lastYearFactor = 1;
 		}
+	}
+
+	@Override
+	public void YearlyFunction() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void SessionFunction() {
+		// TODO Auto-generated method stub
+		
 	}
 	
 
