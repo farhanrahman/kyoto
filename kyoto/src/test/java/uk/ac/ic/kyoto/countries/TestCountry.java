@@ -11,9 +11,14 @@ public class TestCountry extends AbstractCountry {
 			double arableLandArea, double GDP, double GDPRate,
 			long availableToSpend, long emissionsTarget, long carbonOffset,
 			long energyOutput, long carbonOutput) {
+			
 			super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, availableToSpend,
 			emissionsTarget, carbonOffset, energyOutput, carbonOutput);
+			
+			this.carbonAbsorptionHandler = new CarbonAbsorptionHandler();
+			this.carbonReductionHandler = new CarbonReductionHandler();
 	}
+
 
 	@Override
 	protected void processInput(Input input) {
