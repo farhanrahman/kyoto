@@ -64,8 +64,6 @@ public class CanadaAgent extends NonParticipant {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		logger = Logger.getLogger(CanadaAgent.class);
 	}
 	
 	@Override
