@@ -33,4 +33,16 @@ public class EUCountry extends AbstractCountry {
 		
 	}
 
+	@Override
+	public void YearlyFunction() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void SessionFunction() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

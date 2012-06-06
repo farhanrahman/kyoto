@@ -83,7 +83,6 @@ public class USAgent extends NonParticipant {
 	@Override
 	public void initialise() {
 		super.initialise();
-		logger = Logger.getLogger(USAgent.class);
 	}
 	
 	@Override
