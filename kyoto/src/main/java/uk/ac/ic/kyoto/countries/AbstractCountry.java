@@ -99,8 +99,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			this.monitor = this.getEnvironmentService(Monitor.class);
 			this.monitor.addMemberState(this);
 		} catch (UnavailableServiceException e1) {
+			System.out.println("Unable to reach monitor service.");
 			e1.printStackTrace();
-			this.monitor = null;
 		}
 		
 		carbonAbsorptionHandler = new CarbonAbsorptionHandler();
@@ -136,14 +136,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 
-	public void MonitorTax() throws UnavailableServiceException {
-		if (this.monitor != null) {
-			// Give a tax to Monitor agent for monitoring every year
-			this.monitor.taxForMonitor(availableToSpend*GameConst.MONITOR_COST_PERCENTAGE); // Take % of money for monitoring
-			availableToSpend -= availableToSpend*GameConst.MONITOR_COST_PERCENTAGE;
-		} else {
-			throw new UnavailableServiceException(Monitor.class);
-		}
+	public void MonitorTax() {
+		// Give a tax to Monitor agent for monitoring every year
+		this.monitor.taxForMonitor(availableToSpend*GameConst.MONITOR_COST_PERCENTAGE); // Take % of money for monitoring
+		availableToSpend -= availableToSpend*GameConst.MONITOR_COST_PERCENTAGE;
 	}
 	
 	protected Set<ParticipantSharedState> getSharedState(){
