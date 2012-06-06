@@ -2,6 +2,9 @@
  * 
  */
 package uk.ac.ic.kyoto.trade;
+
+import java.util.UUID;
+
 /**
  * @author cmd08
  *
@@ -10,11 +13,13 @@ public class Trade{
 	final int quantity;
 	final int unitCost;
 	final TradeType type;
+	final UUID tradeID;
 
-	public Trade(int quantity, int unitCost, TradeType type) {
+	public Trade(int quantity, int unitCost, TradeType type, UUID tradeID) {
 		this.quantity = quantity;
 		this.unitCost = unitCost;
 		this.type = type;
+		this.tradeID = tradeID;
 	}
 
 	public int getQuantity() {
@@ -60,7 +65,7 @@ public class Trade{
 	
 	public Trade reverse(){
 		TradeType t = this.type.equals(TradeType.BUY)?TradeType.SELL:TradeType.BUY;
-		return new Trade(this.quantity, this.unitCost, t);
+		return new Trade(this.quantity, this.unitCost, t,this.tradeID);
 	}
 
 }

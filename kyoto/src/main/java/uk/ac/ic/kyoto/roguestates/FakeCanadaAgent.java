@@ -7,11 +7,15 @@ import java.util.UUID;
 import com.mongodb.MongoException.Network;
 
 import uk.ac.ic.kyoto.countries.NonParticipant;
+import uk.ac.ic.kyoto.trade.TradeMessage;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.ic.kyoto.trade.Trade;
 import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.imperial.presage2.core.messaging.Input;
+import uk.ac.imperial.presage2.core.messaging.Performative;
+import uk.ac.imperial.presage2.core.network.MulticastMessage;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
+import uk.ac.imperial.presage2.core.simulator.SimTime;
 import uk.ac.imperial.presage2.util.fsm.FSMException;
 
 public class FakeCanadaAgent extends NonParticipant {
@@ -53,6 +57,8 @@ public class FakeCanadaAgent extends NonParticipant {
 		}
 	}
 	
+	private int counter = 0;
+	
 	@Override
 	public void execute() {
 		super.execute();
@@ -70,7 +76,24 @@ public class FakeCanadaAgent extends NonParticipant {
 //			}
 //		}
 //		
-//		this.tradeProtocol.incrementTime();
+		
+		if(counter == -1){
+			int quantity = 10;
+			int unitCost = 2;
+			Trade trade = new Trade(quantity, unitCost, TradeType.SELL, authkey);
+			this.network.sendMessage(
+					new MulticastMessage<Object>(
+							Performative.PROPOSE, 
+							"TRADE", 
+							SimTime.get(), 
+							network.getAddress(), 
+							trade
+					)
+				);
+			counter++;
+		}
+		
+		/*this.tradeProtocol.incrementTime();
 		
 		if (this.tradeProtocol != null) {
 			for (NetworkAddress a : this.network.getConnectedNodes()) {
@@ -82,6 +105,6 @@ public class FakeCanadaAgent extends NonParticipant {
 				}
 			}
 			this.tradeProtocol.incrementTime();
-		}
+		}*/
 	}
 }

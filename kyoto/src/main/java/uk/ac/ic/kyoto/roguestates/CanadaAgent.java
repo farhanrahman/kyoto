@@ -77,7 +77,7 @@ public class CanadaAgent extends NonParticipant {
 //			}
 //		}
 //		
-//		this.tradeProtocol.incrementTime();
+		/*this.tradeProtocol.incrementTime();
 		
 		if (this.tradeProtocol != null) {
 			for (NetworkAddress a : this.network.getConnectedNodes()) {
@@ -91,6 +91,22 @@ public class CanadaAgent extends NonParticipant {
 			for (Conversation conv: tradeProtocol.getActiveConversations()) {
 				
 			}
+		}*/
+		this.tradeProtocol.incrementTime();
+		//logger.info("Message: " + this.network.getMessages());
+		//this.enqueueInput(this.network.getMessages());
+		
+		if (this.tradeProtocol != null) {
+			for (NetworkAddress a : this.network.getConnectedNodes()) {
+				try {
+					if(!this.tradeProtocol.getActiveConversations().contains(a))
+						this.tradeProtocol.offer(a, 10, 5, TradeType.BUY);
+				} catch (FSMException e) {
+					logger.warn("Error creating token offer", e);
+				}
+			}
+			this.tradeProtocol.incrementTime();
 		}
+		
 	}
 }

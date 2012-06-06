@@ -2,9 +2,10 @@ package uk.ac.ic.kyoto.countries;
 
 import java.util.Set;
 import java.util.UUID;
+
+import uk.ac.ic.kyoto.trade.Trade;
 import uk.ac.ic.kyoto.trade.TradeMessage;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
-import uk.ac.ic.kyoto.trade.TradeProtocol.Trade;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.messaging.Performative;
 import uk.ac.imperial.presage2.core.network.Message;
@@ -55,7 +56,8 @@ public class TestAgent extends AbstractParticipant {
 	protected void processInput(Input in) {
 		// TODO Auto-generated method stub
 		if (in instanceof Message){
-			Message m = (Message) in;
+			@SuppressWarnings("unchecked")
+			Message<Trade> m = (Message<Trade>) in;
 			if(m.getType().equalsIgnoreCase("Trade")){
 				Trade t = (Trade) m.getData();
 				//Update our knowledgebase
