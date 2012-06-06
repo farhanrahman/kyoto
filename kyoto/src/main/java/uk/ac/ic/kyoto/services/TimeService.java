@@ -28,6 +28,7 @@ public class TimeService extends EnvironmentService {
 		super(sharedState);
 	}
 	
+	
 	@EventListener
 	public void updateTickCounter (EndOfTimeCycle e) {
 		tickCounter.increment();
