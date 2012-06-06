@@ -14,6 +14,7 @@ import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.monitor.Monitor;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
+import uk.ac.ic.kyoto.services.TimeService.EndOfYear;
 import uk.ac.ic.kyoto.trade.PublicOffer;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.imperial.presage2.core.Time;
@@ -249,7 +250,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return this.GDP*GameConst.PERCENTAGE_OF_GDP;
 	}
 	@EventListener
-	public void calculateGDPRate(EndOfTimeCycle e){
+	public void calculateGDPRate(EndOfYear e){
 		//TODO Make work, adjust economicOutput
 		
 		double marketStateFactor = 0;
