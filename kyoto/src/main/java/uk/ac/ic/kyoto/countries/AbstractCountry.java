@@ -35,8 +35,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * These variables are related to land area for
 	 * dealing with carbon absorption prices
 	 */
-	final protected double landArea;
-	protected double 	arableLandArea;
+	final protected double 	landArea;
+	protected double 		arableLandArea;
 	
 	/*
 	 * These variables are related to carbon emissions and 
@@ -61,6 +61,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	protected Map<Integer, Long> carbonEmissionReports;
 	
 	ParticipantCarbonReportingService reportingService;
+	Monitor monitor;
 	
 	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
 	protected CarbonReductionHandler 	carbonReductionHandler;
@@ -93,9 +94,14 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	public void initialise(){
 		super.initialise();
 		
-		// Add the country to the monitor agent
-		Monitor.addMemberState(this);
-		// TODO modify monitor so it's dealing with an instance, not static methods
+		// Add the country to the monitor service
+		try {
+			this.monitor = this.getEnvironmentService(Monitor.class);
+			this.monitor.addMemberState(this);
+		} catch (UnavailableServiceException e1) {
+			e1.printStackTrace();
+			this.monitor = null;
+		}
 		
 		carbonAbsorptionHandler = new CarbonAbsorptionHandler();
 		carbonReductionHandler = new CarbonReductionHandler();
@@ -130,10 +136,14 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 
-	public void MonitorTax() {
-		// Give a tax to Monitor agent for monitoring every year
-		Monitor.taxForMonitor(GDP*GameConst.MONITOR_COST_PERCENTAGE); // Take % of GDP for monitoring
-		GDP -= GDP*GameConst.MONITOR_COST_PERCENTAGE;	// Subtract taxed amount from GDP
+	public void MonitorTax() throws UnavailableServiceException {
+		if (this.monitor != null) {
+			// Give a tax to Monitor agent for monitoring every year
+			this.monitor.taxForMonitor(availableToSpend*GameConst.MONITOR_COST_PERCENTAGE); // Take % of money for monitoring
+			availableToSpend -= availableToSpend*GameConst.MONITOR_COST_PERCENTAGE;
+		} else {
+			throw new UnavailableServiceException(Monitor.class);
+		}
 	}
 	
 	protected Set<ParticipantSharedState> getSharedState(){
