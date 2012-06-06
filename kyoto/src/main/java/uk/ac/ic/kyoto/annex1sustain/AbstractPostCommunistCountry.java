@@ -6,6 +6,7 @@ import java.util.List;
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.market.FossilPrices;
+import uk.ac.ic.kyoto.services.TimeService.EndOfYearCycle;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
@@ -18,7 +19,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
     // PrivateFields
     //================================================================================
 	
-	protected double 		internalPrice;
+	protected long	 		internalPrice;
 	protected List<Double> 	uncommittedTransactionsCosts;
 	protected List<Double> 	committedTransactionsCosts;
 	protected long 			ticksToEndOfRound;
@@ -74,16 +75,17 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		updateUncommittedTransactions();
 		updateCommittedTransactions();
 		updateInternalPrice();
-		logger.info("Internal Data of Post Communist Country " + this.getName() + " was updated");
+		logger.info("Internal Data of Post-Communist Country " + this.getName() + " was updated");
+		makeInvestments();
 	}
 	
 	/**
 	 * Called at the beginning of each year.
 	 */
-	public void updateYearlyData() {
+	public void updateYearlyData(EndOfYearCycle e) {
 		calculateLastYearFactor();
 		calculateNewSellingTarget();
-		logger.info("Internal Yearly Data of Post Communist Country " + this.getName() + " was updated");
+		logger.info("Internal Yearly Data of Post-Communist Country " + this.getName() + " was updated");
 	}
 	
 	//================================================================================
@@ -91,9 +93,12 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
     //================================================================================
 	
 	private void updateInternalPrice() {
-		internalPrice   = 	calculateMarketPrice() * 
+		internalPrice   = 	(long)
+							(
+							calculateMarketPrice() * 
 							calculateEndOfRoundFactor() * 
-							lastYearFactor;
+							lastYearFactor
+							);
 	}
 
 	private double calculateMarketPrice() {
@@ -154,6 +159,41 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		ticksToEndOfRound--;
 	}
 	
+	private void carbonAbsorptionInvestment () {
+		long investmentCost = carbonAbsorptionHandler.getCost(Constants.INVESTMENT_AMOUNT);
+		long potentialProfit = Constants.INVESTMENT_AMOUNT * internalPrice;
+		
+		if (potentialProfit > investmentCost) {
+			carbonAbsorptionHandler.invest(investmentCost);
+			logger.info("Post-Communist Country " + this.getName() + " invested " + String.valueOf(investmentCost) + " in carbon absorption");
+			// We don't check if we have enough money and land, as there are no functions for it.
+			//  While the former is checked by the handler function, the latter is not - should be implemented.
+			//  Should we react if we don't have enough of either?
+		}
+	}
+	
+	private void carbonReductionInvestment () {
+		long investmentCost = carbonReductionHandler.getCost(Constants.INVESTMENT_AMOUNT);
+		long potentialProfit = Constants.INVESTMENT_AMOUNT * internalPrice;
+		
+		if (potentialProfit > investmentCost) {
+			carbonReductionHandler.invest(investmentCost);
+			logger.info("Post-Communist Country " + this.getName() + " invested " + String.valueOf(investmentCost) + " in carbon reduction");
+			// Same problem as in carbonAbsorptionInvestment
+		}
+	}
+	
+	private void otherCountriesInvestment () {
+		// TODO implement
+		//   There are no handlers for investing in other countries yet
+	}
+	
+	private void makeInvestments() {
+		carbonAbsorptionInvestment();
+		carbonReductionInvestment();
+		otherCountriesInvestment();
+	}
+	
 	//================================================================================
     // Private functions called every year
     //================================================================================
@@ -166,13 +206,11 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		double availableCreditsFactor;
 		
 		try {
-			// TODO implement
-			//   Which variable of AbstractCountry represents available credits?
-			availableCreditsFactor = 1;
+			availableCreditsFactor = carbonOffset * Constants.SELL_AMOUNT_COEFFICIENT;
 		}
 		catch (Exception e) {
 			logger.warn("Problem when calculating availableCreditsFactor " + e);
-			availableCreditsFactor = 1; // This "default" value will actually need to be set to all available credits
+			availableCreditsFactor = carbonOffset;
 		}
 		return availableCreditsFactor;
 	}
@@ -236,7 +274,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 * - current state of the market
 	 * All adjusted with a constant coefficient.
 	 */
-	protected void calculateNewSellingTarget() { // different name?
+	protected void calculateNewSellingTarget() {
 		long newSellingTarget;
 		
 		try {
@@ -250,10 +288,6 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			if (newSellingTarget > availableCredits) {
 				newSellingTarget = availableCredits;
 			}
-			/*else if (newTarget < 0) {
-				// Isn't this a bug? Should probably send a warning
-				newTarget = 0;
-			}*/
 		}
 		catch (Exception e) {
 			logger.warn("Problem when calculating newTarget " + e);
