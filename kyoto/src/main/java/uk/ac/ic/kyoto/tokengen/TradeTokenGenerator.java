@@ -20,7 +20,9 @@ public class TradeTokenGenerator implements TradeToken {
 	 */
 	@Override
 	public UUID getToken() {
-		TradeTokenGenerator.tradeID = Random.randomUUID();
+		synchronized(TradeTokenGenerator.tradeID){
+			TradeTokenGenerator.tradeID = Random.randomUUID();
+		}
 		return TradeTokenGenerator.tradeID;
 	}
 }
