@@ -8,10 +8,8 @@ import org.apache.log4j.Logger;
 
 import com.mongodb.MongoException.Network;
 
-import uk.ac.ic.kyoto.services.TimeService.EndOfSessionCycle;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.ic.kyoto.trade.TradeType;
-import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.util.fsm.FSMException;
