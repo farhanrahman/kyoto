@@ -1,0 +1,41 @@
+<class-diagram version="1.0.9" icons="true" always-add-relationships="true" generalizations="true" realizations="true" 
+  associations="true" dependencies="true" nesting-relationships="true">  
+  <class id="1" corner="BOTTOM_RIGHT" language="java" name="uk.ac.ic.kyoto.services.TimeService.EndOfYear" 
+    project="kyoto" file="/kyoto/src/main/java/uk/ac/ic/kyoto/services/TimeService.java" binary="false">    
+    <position height="92" width="120" x="-13" y="297"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="2" corner="BOTTOM_RIGHT" language="java" name="uk.ac.ic.kyoto.services.TimeService" project="kyoto" 
+    file="/kyoto/src/main/java/uk/ac/ic/kyoto/services/TimeService.java" binary="false">    
+    <position height="262" width="282" x="3" y="-5"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="3" corner="BOTTOM_RIGHT" language="java" name="uk.ac.ic.kyoto.services.TimeService.EndOfSession" 
+    project="kyoto" file="/kyoto/src/main/java/uk/ac/ic/kyoto/services/TimeService.java" binary="false">    
+    <position height="92" width="138" x="147" y="297"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <nesting id="4">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="1"/>  
+  </nesting>  
+  <nesting id="5">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="3"/>  
+  </nesting>  
+  <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+    visibility="true">    
+    <attributes public="true" package="true" protected="true" private="true"/>    
+    <operations public="true" package="true" protected="true" private="true"/>  
+  </classifier-display>  
+  <association-display labels="true" multiplicity="true"/>
+</class-diagram>

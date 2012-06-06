@@ -2,6 +2,12 @@ package uk.ac.ic.kyoto;
 
 import uk.ac.imperial.presage2.rules.facts.Agent;
 
+/**
+ * May no longer be needed. Consult Sam before deletion
+ * 
+ * @author sam
+ */
+@Deprecated
 public class CountryFile {
 	
 	Agent agent;
@@ -80,24 +86,32 @@ public class CountryFile {
 	
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) {
+		if (obj == this){
 			return true;
 		}
-		if (obj == null) {
+		
+		if (!(obj instanceof CountryFile)){
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		CountryFile other = (CountryFile) obj;
-		if (agent == null) {
-			if (other.agent != null) {
-				return false;
-			}
-		} else if (!agent.equals(other.agent)) {
-			return false;
-		}
-		return true;
+		
+		CountryFile c = (CountryFile) obj;
+		
+		return ((this.agent.equals(c.agent)) && (this.availableToSpend == c.availableToSpend)
+				&& (this.carbonOffset == c.carbonOffset) && (this.carbonTraded == c.carbonTraded)
+				&& (this.emissionTarget == c.emissionTarget));
+	}
+	
+	@Override
+	public int hashCode() {
+		int result = 635;
+		
+		result = 3 * result + this.agent.hashCode();
+		result = (int) (3 * result + this.availableToSpend);
+		result = (int) (3 * result + this.carbonOffset);
+		result = (int) (3 * result + this.carbonTraded);
+		result = (int) (3 * result + this.emissionTarget);
+		
+		return result;
 	}
 
 	@Override

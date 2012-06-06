@@ -15,7 +15,7 @@ import org.apache.log4j.Logger;
 
 public class FossilPrices
 {
-	private static final String FOSSIL_FUEL_PRICES_PATH = "FossilFuelPrices.csv";
+	private static final String FOSSIL_FUEL_PRICES_PATH = "src/main/resources/FossilFuelPrices.csv";
 	
 	private static Logger logger = Logger.getLogger(FossilPrices.class);
 	

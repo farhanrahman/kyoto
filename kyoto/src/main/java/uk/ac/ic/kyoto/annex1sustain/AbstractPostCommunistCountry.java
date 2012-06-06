@@ -243,9 +243,9 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		double marketFactor;
 		
 		try {
-			Economy.State economyState = Economy.getEconomyState();
+			Economy economy = getEnvironmentService(Economy.class);
 			
-			switch (economyState) {
+			switch (economy.getEconomyState()) {
 				case GROWTH:
 					marketFactor = 1 + Constants.MARKET_STATE_COEFFICIENT;
 					break;

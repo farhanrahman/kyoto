@@ -1,65 +1,52 @@
 package uk.ac.ic.kyoto.monitor;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.UUID;
+import java.util.Map;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
-import uk.ac.ic.kyoto.trade.TradeProtocol;
-import uk.ac.imperial.presage2.core.messaging.Input;
-import uk.ac.imperial.presage2.core.network.NetworkAddress;
+import uk.ac.ic.kyoto.countries.GameConst;
+import uk.ac.ic.kyoto.services.CarbonReportingService;
+import uk.ac.imperial.presage2.core.environment.EnvironmentService;
+import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
+import uk.ac.imperial.presage2.core.event.EventListener;
+import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
+import uk.ac.imperial.presage2.core.simulator.SimTime;
 import uk.ac.imperial.presage2.core.util.random.Random;
-import uk.ac.imperial.presage2.util.fsm.FSMException;
-import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
-public class Monitor extends AbstractParticipant {
+/**
+ * Monitoring service
+ * @author ov109
+ *
+ */
+public class Monitor extends EnvironmentService {
 
-	static final private ArrayList<AbstractCountry> memberStates = new ArrayList<AbstractCountry>();
-	private static final double MONITORING_PRICE = 0; //Decide on a price for monitoring
-	private TradeProtocol tradeProtocol;
-	static private double cash;
+	private ArrayList<AbstractCountry> memberStates = new ArrayList<AbstractCountry>();
+	private double cash = 0;
 	
-	public Monitor(UUID id, String name) {
-		super(id, name);
+	public Monitor(EnvironmentSharedStateAccess sharedState) {
+		super(sharedState);
 	}
 	
-	@Override 
-	public void initialise() {
-		super.initialise();
-		try {
-			 tradeProtocol = new TradeProtocol(getID(), authkey, environment, network) {
-				@Override
-				protected boolean acceptExchange(NetworkAddress from, Trade trade) {
-					// TODO Auto-generated method stub
-					return false;
-				}
-			};
-		} catch (FSMException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-	/**
-	 * Called at every new tick in the simulation - define Monitor behaviour here
-	 */
-	@Override
-	public void execute() {
-		super.execute();
-		
+	@EventListener
+	public void monitorCountries (EndOfTimeCycle e) {
 		// Generate a randomInt and if divisible by 30 then monitor all countries.
 		// TODO monitor only individual countries.
-		if (Random.randomInt() % 30 == 0 && cash >= MONITORING_PRICE) {
-			cash -= MONITORING_PRICE;
+		if (Random.randomInt() % 30 == 0 && cash >= GameConst.MONITORING_PRICE) {
+			cash -= GameConst.MONITORING_PRICE;
 			for (AbstractCountry a : memberStates) {
-				a.getMonitored();
+				long realCarbonOutput = a.getMonitored();
+				Serializable state = sharedState.get(CarbonReportingService.name, a.getID());
+				Map<Integer, Double> reports = (Map<Integer, Double>)state;
+				if (realCarbonOutput != reports.get(SimTime.get().intValue())) {
+					Sanction(a);
+				}
 			}
 		}
 	}
 	
-	@Override
-	protected void processInput(Input in) {
-		// TODO Auto-generated method stub
-		// Keep empty!
+	private void Sanction(AbstractCountry sanctionee) {
+		// TODO implementation
 	}
 	
 	/**
@@ -67,7 +54,7 @@ public class Monitor extends AbstractParticipant {
 	 * credits, etc.
 	 * @param state 
 	 */
-	static public void addMemberState(AbstractCountry state) {
+	public void addMemberState(AbstractCountry state) {
 		memberStates.add(state);
 	}
 	
@@ -75,8 +62,8 @@ public class Monitor extends AbstractParticipant {
 	 * Give a pre-determined amount for monitoring
 	 * @param tax
 	 */
-	// TODO: synchronised??
-	static synchronized public void taxForMonitor (double tax) {
+	// TODO: synchronised?? (to avoid data sharing issue)
+	synchronized public void taxForMonitor (double tax) {
 		cash += tax;
 	}
 
