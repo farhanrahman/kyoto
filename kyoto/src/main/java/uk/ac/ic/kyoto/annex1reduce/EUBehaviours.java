@@ -16,7 +16,7 @@ abstract class EUBehaviours {
 	
 	final private static Theory DEFAULT_EU_BEHAVIOUR = loadDefaultBehaviour();
 	
-	
+	final private static String DEFAULT_THEORY_PATH = "src/main/resources/prolog/";
 
 	public static Theory getTheory(final String name) {
 
@@ -27,7 +27,7 @@ abstract class EUBehaviours {
 		Theory t = null;
 		
 		try {
-			t = new Theory(new FileInputStream("/prolog/EUBehaviour/testtheory.pl"));
+			t = new Theory(new FileInputStream(DEFAULT_THEORY_PATH + "testtheory.pl"));
 		} catch (FileNotFoundException e) {
 		} catch (IOException e) {
 		}

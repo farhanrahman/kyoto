@@ -32,6 +32,8 @@ public class EUCountry extends AbstractCountry {
 		try {
 			engine.setTheory(EUBehaviours.getTheory(name));
 		}catch (InvalidTheoryException e) {
+			System.out.println("The prolog theory for " + name + " is invalid. Please correct it and try again.");
+			
 		}
 		
 	}
