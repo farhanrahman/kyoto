@@ -2,7 +2,6 @@ package uk.ac.ic.kyoto.annex1reduce;
 
 import java.util.UUID;
 
-import alice.tuprolog.InvalidTheoryException;
 import alice.tuprolog.Prolog;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
@@ -27,15 +26,10 @@ public class EUCountry extends AbstractCountry {
 		
 		EU.addMemberState(this);
 		
-		engine = new Prolog();
+		engine = EUBehaviours.getEngine(name);
 		
-		try {
-			engine.setTheory(EUBehaviours.getTheory(name));
-		}catch (InvalidTheoryException e) {
-			System.out.println("The prolog theory for " + name + " is invalid. Please correct it and try again.");
-			
-		}
-		
+		System.out.println("test2");
+
 	}
 
 	/**
