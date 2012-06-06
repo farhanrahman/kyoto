@@ -405,10 +405,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return GDPRate;
 	}
 
-/*	public double getDirtyIndustry() {
-		return dirtyIndustry;
-	}
-*/
 	public double getEmissionTarget() {
 		return emissionsTarget;
 	}
@@ -416,16 +412,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	public long getCarbonOffset() {
 		return carbonOffset;
 	}
-/*
-	public float getAvailableToSpend() {
+
+	public long getAvailableToSpend() {
 		return availableToSpend;
 	}
 
-	public long getCarbonTraded() {
-		return carbonTraded;
-	}
-*/	
-	
 	/**
 	 * Method used for monitoring. Is called randomly by the Monitor agent
 	 */
