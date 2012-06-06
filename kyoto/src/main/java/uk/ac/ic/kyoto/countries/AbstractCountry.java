@@ -123,11 +123,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		super.execute();
 		try {
 			TimeService timeService = getEnvironmentService(TimeService.class);
-			if (timeService.getCurrentTick() % 365 == 0) {
+			if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
 				YearlyFunction();
 				MonitorTax();
 			}
-			if (timeService.getCurrentTick() % 3650 == 0) {
+			if (timeService.getCurrentYear() % timeService.getYearsInSession() == 0) {
 				SessionFunction();
 			}
 		} catch (UnavailableServiceException e) {
