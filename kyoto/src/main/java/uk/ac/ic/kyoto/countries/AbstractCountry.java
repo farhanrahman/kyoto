@@ -119,6 +119,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			TimeService timeService = getEnvironmentService(TimeService.class);
 			if (timeService.getCurrentTick() % 365 == 0) {
 				YearlyFunction();
+				MonitorTax();
 			}
 			if (timeService.getCurrentTick() % 3650 == 0) {
 				SessionFunction();
@@ -128,8 +129,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		}
 	}
 	
-	@EventListener
-	public void yearly(EndOfYearCycle e) {
+
+	public void MonitorTax() {
 		// Give a tax to Monitor agent for monitoring every year
 		Monitor.taxForMonitor(GDP*GameConst.MONITOR_COST_PERCENTAGE); // Take % of GDP for monitoring
 		GDP -= GDP*GameConst.MONITOR_COST_PERCENTAGE;	// Subtract taxed amount from GDP
