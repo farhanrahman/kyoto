@@ -11,8 +11,10 @@ import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 
-import org.apache.log4j.Logger;
-
+/**
+ * 
+ * @author Adam, Piotr
+ */
 public class AbstractPostCommunistCountry extends AbstractCountry {
 	
 	//================================================================================
@@ -22,14 +24,14 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	protected long	 		internalPrice;
 	protected List<Double> 	uncommittedTransactionsCosts;
 	protected List<Double> 	committedTransactionsCosts;
-	protected long 			ticksToEndOfRound;
 	protected long 			creditsToSell;
 	protected long 			creditsToSellTarget;
 	protected double		lastYearFactor;
 	
 	// temporary variables
-	private Logger		logger = Logger.getLogger(AbstractPostCommunistCountry.class);
+	// TODO use the variables from AbstractCountry
 	protected long 			currentYear;
+	protected long 			ticksToEndOfRound;
 	protected long 			availableCredits; // corresponds to carbon offset
 	
 	//================================================================================
@@ -44,7 +46,6 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 				carbonOffset, energyOutput, energyOutput, energyOutput);
 		// TODO Initialize the fields
 		
-
 	}
 	
 	//================================================================================
@@ -58,15 +59,16 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 
 	@Override
 	public void YearlyFunction() {
-		// TODO Auto-generated method stub
-		
+		calculateLastYearFactor();
+		calculateNewSellingTarget();
+		logger.info("Internal Yearly Data of Post-Communist Country " + this.getName() + " was updated");
 	}
 
 	@Override
 	public void SessionFunction() {
-		// TODO Auto-generated method stub
 		
 	}
+	
 	//================================================================================
     // Public methods to update data
     //================================================================================
@@ -85,15 +87,6 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		updateInternalPrice();
 		logger.info("Internal Data of Post-Communist Country " + this.getName() + " was updated");
 		makeInvestments();
-	}
-	
-	/**
-	 * Called at the beginning of each year.
-	 */
-	public void updateYearlyData() {
-		calculateLastYearFactor();
-		calculateNewSellingTarget();
-		logger.info("Internal Yearly Data of Post-Communist Country " + this.getName() + " was updated");
 	}
 	
 	//================================================================================
@@ -162,7 +155,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		// TODO implement
 	}
 	
-	// temporary function
+	// TODO implement it in another way
 	private void updateCounter() {
 		ticksToEndOfRound--;
 	}
