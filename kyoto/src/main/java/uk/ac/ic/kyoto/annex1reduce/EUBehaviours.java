@@ -9,12 +9,15 @@ import alice.tuprolog.Prolog;
 import alice.tuprolog.Theory;
 
 /**
- * Abstract static class which will return Prolog theories and behaviour constants for EU countries.
+ * Uninstantiable final static class which will return Prolog theories and behaviour constants for EU countries.
  * Package protected.
  * @author Nik
  *
  */
-abstract class EUBehaviours {
+final class EUBehaviours {
+	
+	private EUBehaviours() {
+	}
 	
 	final private static String DEFAULT_THEORY_PATH = "src/main/resources/prolog/EUBehaviour/";
 	
@@ -25,8 +28,6 @@ abstract class EUBehaviours {
 		
 		
 		Prolog engine = new Prolog();
-		
-		System.out.println("test");
 
 		//TODO make this return something other than the default theory
 

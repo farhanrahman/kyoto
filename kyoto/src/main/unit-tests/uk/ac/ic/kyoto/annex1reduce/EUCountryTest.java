@@ -1,18 +1,25 @@
 package uk.ac.ic.kyoto.annex1reduce;
 
 import static org.junit.Assert.*;
+import org.junit.*;
 
 import java.util.UUID;
 
-import org.junit.Test;
-
 public class EUCountryTest {
 
-	@Test
-	public void testEUCountry() {
-//		fail("Not yet implemented");
-		EUCountry test  = new EUCountry(UUID.randomUUID(),"JunitTest", "JUT",
+	static private EUCountry test;
+	
+	@BeforeClass
+	public static void initEUCountry() {
+		System.out.println("Initialising EUCountry");
+		test  = new EUCountry(UUID.randomUUID(),"JunitTest", "JUT",
 				100, 50, 1000, 10000, 100000, 100, 10, 10, 10);
+		test.initialise();
+	}
+	
+	@Test
+	public void testexecute() {
+		test.execute();
 	}
 
 }
