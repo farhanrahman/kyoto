@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import com.mongodb.MongoException.Network;
 
-import uk.ac.ic.kyoto.services.TimeService.EndOfSession;
+import uk.ac.ic.kyoto.services.TimeService.EndOfSessionCycle;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.imperial.presage2.core.event.EventListener;
@@ -53,7 +53,7 @@ public class CanadaAgent extends NonParticipant {
 	}
 	
 	@EventListener
-	private void SessionEnd(EndOfSession e) {
+	private void SessionEnd(EndOfSessionCycle e) {
 		if (carbonOutput - carbonOffset > emissionsTarget) {
 			// leave Kyoto here
 		}
