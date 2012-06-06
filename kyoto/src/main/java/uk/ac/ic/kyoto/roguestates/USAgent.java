@@ -4,8 +4,10 @@ import java.util.UUID;
 
 import org.apache.log4j.Logger;
 
+import uk.ac.ic.kyoto.services.TimeService;
 import uk.ac.ic.kyoto.services.TimeService.EndOfSessionCycle;
 import uk.ac.ic.kyoto.services.TimeService.EndOfYearCycle;
+import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.util.random.Random;
 
@@ -42,8 +44,27 @@ public class USAgent extends NonParticipant {
 		}
 	}
 	
-	@EventListener
-	private void sessionOver(EndOfSessionCycle e) {
+	@Override
+	public void YearlyFunction() {
+		try {
+			TimeService timeService = getEnvironmentService(TimeService.class);
+			if (timeService.getCurrentYear() % 4 == 0) {
+				election();
+			}
+		} catch (UnavailableServiceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if (democratElected) {
+			internalEmissionsTarget = (long) (carbonOutput*0.95);
+		}
+		else {
+			internalEmissionsTarget = carbonOutput;
+		}
+	}
+	
+	@Override
+	public void SessionFunction() {
 		if (carbonOutput <= emissionsTarget) {
 			// Consider joining Kyoto here
 		}

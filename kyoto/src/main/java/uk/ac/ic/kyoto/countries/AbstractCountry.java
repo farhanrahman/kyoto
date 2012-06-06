@@ -55,9 +55,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	protected long  	energyOutput; // How much Carbon we would use if the whole industry was carbon based. Measured in Tons of Carbon per year
 	protected long 		availableToSpend; // Note, can NOT be derived from GDP. Initial value can be derived from there, but cash reserves need to be able to lower independently.
 	
-	// Logging class, must be instantiated by derived classes
-	protected Logger logger;
-	
 	//private long 	carbonTraded; 
 	//private double  dirtyIndustry;
 
