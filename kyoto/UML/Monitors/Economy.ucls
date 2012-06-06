@@ -1,0 +1,37 @@
+<class-diagram version="1.0.9" icons="true" always-add-relationships="true" generalizations="true" realizations="true" 
+  associations="true" dependencies="true" nesting-relationships="true">  
+  <class id="1" corner="BOTTOM_RIGHT" language="java" name="uk.ac.ic.kyoto.market.Economy" project="kyoto" 
+    file="/kyoto/src/main/java/uk/ac/ic/kyoto/market/Economy.java" binary="false">    
+    <position height="177" width="180" x="139" y="52"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <enumeration id="2" corner="BOTTOM_RIGHT" language="java" name="uk.ac.ic.kyoto.market.Economy.State" project="kyoto" 
+    file="/kyoto/src/main/java/uk/ac/ic/kyoto/market/Economy.java" binary="false">    
+    <position height="126" width="144" x="139" y="269"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </enumeration>  
+  <association id="3">    
+    <end type="SOURCE" refId="1" navigable="false">      
+      <attribute id="4" name="currentEconomyState"/>      
+      <multiplicity id="5" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="2" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <nesting id="6">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="2"/>  
+  </nesting>  
+  <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+    visibility="true">    
+    <attributes public="true" package="true" protected="true" private="true"/>    
+    <operations public="true" package="true" protected="true" private="true"/>  
+  </classifier-display>  
+  <association-display labels="true" multiplicity="true"/>
+</class-diagram>

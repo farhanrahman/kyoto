@@ -119,6 +119,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			TimeService timeService = getEnvironmentService(TimeService.class);
 			if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
 				YearlyFunction();
+				MonitorTax();
 			}
 			if (timeService.getCurrentYear() % timeService.getYearsInSession() == 0) {
 				SessionFunction();
@@ -128,13 +129,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		}
 	}
 	
-	@EventListener
-	public void yearly(EndOfYearCycle e) {
+
+	public void MonitorTax() {
 		// Give a tax to Monitor agent for monitoring every year
-		if (SimTime.get().intValue() % 100 == 0) {
-			Monitor.taxForMonitor(GDP*GameConst.MONITOR_COST_PERCENTAGE); // Take 2% of GDP for monitoring
-			GDP -= GDP*GameConst.MONITOR_COST_PERCENTAGE;	// Subtract taxed amount from GDP
-		}
+		Monitor.taxForMonitor(GDP*GameConst.MONITOR_COST_PERCENTAGE); // Take % of GDP for monitoring
+		GDP -= GDP*GameConst.MONITOR_COST_PERCENTAGE;	// Subtract taxed amount from GDP
 	}
 	
 	protected Set<ParticipantSharedState> getSharedState(){
