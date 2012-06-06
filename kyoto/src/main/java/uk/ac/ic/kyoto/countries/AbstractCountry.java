@@ -1,49 +1,34 @@
 package uk.ac.ic.kyoto.countries;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
 
-import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
-
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.monitor.Monitor;
-import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.TimeService.EndOfYearCycle;
-import uk.ac.ic.kyoto.trade.PublicOffer;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.imperial.presage2.core.Time;
-import uk.ac.imperial.presage2.core.environment.ActionHandlingException;
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
-import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
-import uk.ac.ic.kyoto.trade.PublicOffer;
-import uk.ac.imperial.presage2.core.event.EventListener;
-import uk.ac.imperial.presage2.core.messaging.Input;
-import uk.ac.imperial.presage2.core.simulator.Parameter;
-import uk.ac.imperial.presage2.core.util.random.Random;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 /**
  * 
- * @author cs2309
+ * @author cs2309, Adam, Sam, Stuart, Chris
  */
 public abstract class AbstractCountry extends AbstractParticipant {
 	
 	//TODO Register UUID and country ISO with the environment
 	
 	final protected String ISO;		//ISO 3166-1 alpha-3
-	
 	
 	/*
 	 * These variables are related to land area for
@@ -75,17 +60,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	//private long 	carbonTraded; 
 	//private double  dirtyIndustry;
 
-	/**
-	 * carbonEmission and carbonEmissionReports added
-	 */
-	protected double carbonEmission = 10.0;  //Farhan test
-
-	protected Map<Integer, Double> carbonEmissionReports;
+	protected Map<Integer, Long> carbonEmissionReports;
 	
 	ParticipantCarbonReportingService reportingService;
 	
 	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
-	protected Set<PublicOffer> 		offers;
 	protected CarbonReductionHandler 	carbonReductionHandler;
 	protected CarbonAbsorptionHandler carbonAbsorptionHandler;
 
@@ -105,7 +84,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.carbonOffset = carbonOffset;
 		this.availableToSpend = availableToSpend;
 		this.carbonOutput = carbonOutput;
-		this.carbonEmissionReports = new HashMap<Integer, Double>();
+		this.carbonEmissionReports = new HashMap<Integer, Long>();
 		this.energyOutput = energyOutput;
 	}
 	
@@ -133,12 +112,14 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	@Override
 	public void execute() {
 		super.execute();
-		
+	}
+	
+	@EventListener
+	public void yearly(EndOfYearCycle e) {
 		// Give a tax to Monitor agent for monitoring every year
 		if (SimTime.get().intValue() % 100 == 0) {
-			//TODO: Check values if correct
-			Monitor.taxForMonitor(GDP*2/100); // Take 2% of GDP for monitoring
-			GDP -= GDP*2/100;	// Subtract taxed amount from GDP
+			Monitor.taxForMonitor(GDP*GameConst.MONITOR_COST_PERCENTAGE); // Take 2% of GDP for monitoring
+			GDP -= GDP*GameConst.MONITOR_COST_PERCENTAGE;	// Subtract taxed amount from GDP
 		}
 	}
 	
@@ -148,7 +129,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return s;
 	}
 	
-	public Map<Integer,Double> getCarbonEmissionReports(){
+	public Map<Integer,Long> getCarbonEmissionReports(){
 		return this.carbonEmissionReports;
 	}
 	
@@ -158,7 +139,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * @param emission
 	 * @return
 	 */
-	private Map<Integer,Double> addToReports(Time simTime, Double emission){
+	private Map<Integer,Long> addToReports(Time simTime, Long emission){
 		this.carbonEmissionReports.put(simTime.intValue(), emission);
 		return this.carbonEmissionReports;
 	}
@@ -172,11 +153,20 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * @return
 	 */
 	public Double reportCarbonEmission(Time t){
-		//TODO add code to calculate whether to submit true or false report (cheat)
-		//Once calculations done, update the report owned by this agent
-		carbonEmission++; //Default code now just increments it
-		this.addToReports(t, carbonEmission);
-		return new Double(carbonEmission);
+		
+		// This  is an example of how reporting your carbon output is structured
+		/*try{
+		Time t = SimTime.get();
+		AbstractCountry.this.environment.act(new SubmitCarbonEmissionReport(
+					AbstractCountry.this.reportCarbonEmission(t), t), 
+					AbstractCountry.this.getID(), 
+					AbstractCountry.this.authkey);
+	}catch(ActionHandlingException e){
+		logger.warn("Error trying to submit report");
+	}*/
+		
+		this.addToReports(t, carbonOutput);
+		return new Double(carbonOutput);
 	}
 	
 
@@ -380,15 +370,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				//TODO Implement reduction in GDP
 				//TODO Implement change in CO2 emissions/arable land
 				//Stub for submitting reports
-				/*try{
-					Time t = SimTime.get();
-					AbstractCountry.this.environment.act(new SubmitCarbonEmissionReport(
-								AbstractCountry.this.reportCarbonEmission(t), t), 
-								AbstractCountry.this.getID(), 
-								AbstractCountry.this.authkey);
-				}catch(ActionHandlingException e){
-					logger.warn("Error trying to submit report");
-				}*/
 				
 				availableToSpend -= investment;
 				long newOffset = getCarbonOffset(investment);
@@ -418,10 +399,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return GDPRate;
 	}
 
-/*	public double getDirtyIndustry() {
-		return dirtyIndustry;
-	}
-*/
 	public double getEmissionTarget() {
 		return emissionsTarget;
 	}
@@ -429,34 +406,18 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	public long getCarbonOffset() {
 		return carbonOffset;
 	}
-/*
-	public float getAvailableToSpend() {
+
+	public long getAvailableToSpend() {
 		return availableToSpend;
 	}
 
-	public long getCarbonTraded() {
-		return carbonTraded;
-	}
-*/	
-	
-	public long getCurrentYear() {
-		// Returns the current year we are in
-		// This should probably be somewhere in the environment, not sure where
-		return 0;
-	}
-	
-	public long calculateCreditsToSell() {
-		// Returns credits that a country has available to sell
-		return 0;
-	}
-	
 	/**
 	 * Method used for monitoring. Is called randomly by the Monitor agent
 	 */
 	
 	public void getMonitored() {
 		double latestReport = this.carbonEmissionReports.get(SimTime.get().intValue());
-		double trueCarbon = this.carbonEmission;
+		double trueCarbon = this.carbonOutput;
 		// shouldn't these two be long values? comparing doubles isn't safe i think
 		
 		if (latestReport != trueCarbon) {
