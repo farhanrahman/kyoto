@@ -8,10 +8,7 @@ import uk.ac.ic.kyoto.trade.TradeProtocol.Trade;
 
 /**
  * Stores all messages (trade and investment), and automagically
- * computes high, low & average.<br>
- * <br>
- * <i>NOTE: This is based on a yet to be implemented TradeMessage and
- * InvestmentMessage classes (which should extend Message).</i>
+ * computes high, low & average.
  * 
  * @author cs2309 & ovg109
  */
