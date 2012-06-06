@@ -112,6 +112,29 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	public abstract void SessionFunction();
 	
+	private void GDPRate() {
+		double marketStateFactor = 0;
+		
+		Economy economy;
+		try {
+			economy = getEnvironmentService(Economy.class);
+		
+		switch(economy.getEconomyState()) {
+		case GROWTH:
+			marketStateFactor = GameConst.GROWTH_MARKET_STATE;
+		case STABLE:
+			marketStateFactor = GameConst.STABLE_MARKET_STATE;
+		case RECESSION:
+			marketStateFactor = GameConst.RECESSION_MARKET_STATE;
+		}
+		
+		GDPRate = GDPRate + marketStateFactor + (GameConst.GROWTH_SCALER*(energyOutput))/GDP;
+		} catch (UnavailableServiceException e) {
+			System.out.println("Unable to reach economy service.");
+			e.printStackTrace();
+		}
+	}
+	
 	@Override
 	public void execute() {
 		super.execute();
@@ -120,6 +143,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
 				YearlyFunction();
 				MonitorTax();
+				GDPRate();
 			}
 			if (timeService.getCurrentYear() % timeService.getYearsInSession() == 0) {
 				SessionFunction();
@@ -256,23 +280,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	public Double getCash(){
 		return this.GDP*GameConst.PERCENTAGE_OF_GDP;
-	}
-	@EventListener
-	public void calculateGDPRate(EndOfYearCycle e){
-		double marketStateFactor = 0;
-		
-		Economy.State economyState = Economy.getEconomyState();
-		
-		switch(economyState) {
-		case GROWTH:
-			marketStateFactor = GameConst.GROWTH_MARKET_STATE;
-		case STABLE:
-			marketStateFactor = GameConst.STABLE_MARKET_STATE;
-		case RECESSION:
-			marketStateFactor = GameConst.RECESSION_MARKET_STATE;
-		}
-		
-		GDPRate = GDPRate + marketStateFactor + (GameConst.GROWTH_SCALER*(energyOutput))/GDP;
 	}
 	
 	protected final class CarbonReductionHandler{
