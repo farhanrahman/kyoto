@@ -71,30 +71,46 @@ public abstract class TradeProtocol extends FSMProtocol {
 		public String toString() {
 			return "Trade: "+quantity+" @ "+unitCost; 
 		}
-
-		public boolean equals(Trade t){
-			if(this == t) {
-				return true;
-			} else if (	this.quantity == t.getQuantity() && 
-						this.unitCost == t.getUnitCost() && 
-						this.type == t.getType()) {
-				return true;
-			} else if (	this.quantity == -t.getQuantity() &&
-						this.unitCost == t.getUnitCost() && 
-						this.type == t.reverse().getType()){
-				return true;
-			} else if ( this.quantity == t.getQuantity() &&
-						this.unitCost == -t.getUnitCost() &&
-						this.type == t.reverse().getType()){
-				return true;
-			} else {
-				return false;
-			}
-		}
 		
 		public Trade reverse(){
 			TradeType t = this.type.equals(TradeType.BUY)?TradeType.SELL:TradeType.BUY;
 			return new Trade(this.quantity, this.unitCost, t);
+		}
+		
+		@Override
+		//cs2309: Written using Effective Java (Josh Bloch) as reference
+		public boolean equals(Object obj) {
+			if (obj == this){
+				return true;
+			}
+			
+			if (!(obj instanceof Trade)){
+				return false;
+			}
+			
+			Trade trade = (Trade) obj;
+			return (trade.quantity == this.quantity) &&
+					(trade.unitCost == this.unitCost) &&
+					(trade.type == this.type);
+		}
+		
+		@Override
+		//cs2309: Written using Effective Java (Josh Bloch) as reference
+		public int hashCode() {
+			int result = 42;
+			result = 69 * result + this.quantity;
+			result = 69 * result + this.unitCost;
+			
+			switch (this.type) {
+			case BUY:
+				result = 69 * result + 1;
+				break;
+			case SELL:
+				result = 69 * result + 2;
+				break;
+			}
+			
+			return result;
 		}
 
 	}
