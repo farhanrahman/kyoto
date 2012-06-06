@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.monitor.Monitor;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
+import uk.ac.ic.kyoto.services.TimeService;
 import uk.ac.ic.kyoto.services.TimeService.EndOfYearCycle;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.imperial.presage2.core.Time;
@@ -110,9 +111,24 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		
 	}
 	
+	public abstract void YearlyFunction();
+	
+	public abstract void SessionFunction();
+	
 	@Override
 	public void execute() {
 		super.execute();
+		try {
+			TimeService timeService = getEnvironmentService(TimeService.class);
+			if (timeService.getCurrentTick() % 365 == 0) {
+				YearlyFunction();
+			}
+			if (timeService.getCurrentTick() % 3650 == 0) {
+				SessionFunction();
+			}
+		} catch (UnavailableServiceException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@EventListener
@@ -318,9 +334,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		
 		/**
 		 * Returns the cost of investment required to
-		 * obtain a given number of carbon credits.
+		 * obtain a given number of carbon.
 		 * 
-		 * @param carbonCredits
+		 * @param carbonOffset
 		 */
 		public long getCost(long carbonOffset){
 			double neededLand = carbonOffset / GameConst.FOREST_CARBON_OFFSET;
