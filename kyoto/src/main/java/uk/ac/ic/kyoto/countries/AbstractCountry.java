@@ -62,12 +62,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	//private long 	carbonTraded; 
 	//private double  dirtyIndustry;
 
-	/**
-	 * carbonEmission and carbonEmissionReports added
-	 */
-	protected double carbonEmission = 10.0;  //Farhan test
-
-	protected Map<Integer, Double> carbonEmissionReports;
+	protected Map<Integer, Long> carbonEmissionReports;
 	
 	ParticipantCarbonReportingService reportingService;
 	
@@ -92,7 +87,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.carbonOffset = carbonOffset;
 		this.availableToSpend = availableToSpend;
 		this.carbonOutput = carbonOutput;
-		this.carbonEmissionReports = new HashMap<Integer, Double>();
+		this.carbonEmissionReports = new HashMap<Integer, Long>();
 		this.energyOutput = energyOutput;
 	}
 	
@@ -135,7 +130,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return s;
 	}
 	
-	public Map<Integer,Double> getCarbonEmissionReports(){
+	public Map<Integer,Long> getCarbonEmissionReports(){
 		return this.carbonEmissionReports;
 	}
 	
@@ -145,7 +140,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * @param emission
 	 * @return
 	 */
-	private Map<Integer,Double> addToReports(Time simTime, Double emission){
+	private Map<Integer,Long> addToReports(Time simTime, Long emission){
 		this.carbonEmissionReports.put(simTime.intValue(), emission);
 		return this.carbonEmissionReports;
 	}
@@ -161,9 +156,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	public Double reportCarbonEmission(Time t){
 		//TODO add code to calculate whether to submit true or false report (cheat)
 		//Once calculations done, update the report owned by this agent
-		carbonEmission++; //Default code now just increments it
-		this.addToReports(t, carbonEmission);
-		return new Double(carbonEmission);
+		this.addToReports(t, carbonOutput);
+		return new Double(carbonOutput);
 	}
 	
 
@@ -423,7 +417,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	public void getMonitored() {
 		double latestReport = this.carbonEmissionReports.get(SimTime.get().intValue());
-		double trueCarbon = this.carbonEmission;
+		double trueCarbon = this.carbonOutput;
 		// shouldn't these two be long values? comparing doubles isn't safe i think
 		
 		if (latestReport != trueCarbon) {
