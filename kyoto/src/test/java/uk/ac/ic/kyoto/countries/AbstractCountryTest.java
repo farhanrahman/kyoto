@@ -14,6 +14,9 @@ public class AbstractCountryTest {
 		
 		TestCountry tester = new TestCountry(randomID, "Poland", "ISO", 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000);
 		
-		assertTrue(tester.getCash() == 1000*1000*GameConst.PERCENTAGE_OF_GDP);
+		System.out.println(tester.getCash());
+		System.out.println(1000*GameConst.PERCENTAGE_OF_GDP);
+		assertTrue(tester.getCash() == 1000*GameConst.PERCENTAGE_OF_GDP);
+		
 	}
 }
