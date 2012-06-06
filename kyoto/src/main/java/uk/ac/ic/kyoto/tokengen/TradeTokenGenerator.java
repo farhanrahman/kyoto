@@ -14,7 +14,7 @@ import uk.ac.imperial.presage2.core.util.random.Random;
  */
 public class TradeTokenGenerator implements TradeToken {
 
-	private static UUID tradeID = null;
+	private static UUID tradeID = Random.randomUUID();
 	/* (non-Javadoc)
 	 * @see uk.ac.ic.kyoto.trade.TradeToken#getToken()
 	 */
