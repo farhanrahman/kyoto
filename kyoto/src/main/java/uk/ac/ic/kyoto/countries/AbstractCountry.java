@@ -426,17 +426,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 */	
 	
-	public long getCurrentYear() {
-		// Returns the current year we are in
-		// This should probably be somewhere in the environment, not sure where
-		return 0;
-	}
-	
-	public long calculateCreditsToSell() {
-		// Returns credits that a country has available to sell
-		return 0;
-	}
-	
 	/**
 	 * Method used for monitoring. Is called randomly by the Monitor agent
 	 */
