@@ -318,9 +318,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		
 		/**
 		 * Returns the cost of investment required to
-		 * obtain a given number of carbon credits.
+		 * obtain a given number of carbon.
 		 * 
-		 * @param carbonCredits
+		 * @param carbonOffset
 		 */
 		public long getCost(long carbonOffset){
 			double neededLand = carbonOffset / GameConst.FOREST_CARBON_OFFSET;
