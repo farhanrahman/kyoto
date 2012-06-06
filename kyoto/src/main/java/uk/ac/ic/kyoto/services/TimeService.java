@@ -7,6 +7,12 @@ import uk.ac.imperial.presage2.core.event.Event;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 
+/**
+ * Stores all messages (trade and investment), and automagically
+ * computes high, low & average.
+ * 
+ * @author sc1109 & azyzio
+ */
 public class TimeService extends EnvironmentService {
 
 	private Time tickCounter;
