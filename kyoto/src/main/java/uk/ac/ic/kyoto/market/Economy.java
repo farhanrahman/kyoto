@@ -39,28 +39,22 @@ public class Economy extends EnvironmentService
 	 */
 	public void updateEconomyState()
 	{
-		try
-		{
-			/** Generate a random number between 0 and 99*/
-			Random randGenerator = new Random();
-			int randomNumber = randGenerator.nextInt(100);
-			
-			/** Change the currentEconomyState according to the rules */
-			if (randomNumber < growthNumberLimit)
-				currentEconomyState = State.GROWTH;
-			else if (randomNumber < stableNumberLimit)
-				currentEconomyState = State.STABLE;
-			else if (randomNumber < recessionNumberLimit)
-				currentEconomyState = State.RECESSION;
-			else
-				logger.warn("Generated random number is out of bounds");
-			
-			/** Log the change in economy state */
-			logger.info("The new state of economy is " + currentEconomyState.toString());
-		}
-		catch (Exception e){
-			logger.warn(e);
-		}
+		/** Generate a random number between 0 and 99*/
+		Random randGenerator = new Random();
+		int randomNumber = randGenerator.nextInt(100);
+		
+		/** Change the currentEconomyState according to the rules */
+		if (randomNumber < growthNumberLimit)
+			currentEconomyState = State.GROWTH;
+		else if (randomNumber < stableNumberLimit)
+			currentEconomyState = State.STABLE;
+		else if (randomNumber < recessionNumberLimit)
+			currentEconomyState = State.RECESSION;
+		else
+			logger.warn("Generated random number is out of bounds");
+		
+		/** Log the change in economy state */
+		logger.info("The new state of economy is " + currentEconomyState.toString());
 	}
 	
 	public State getEconomyState() {
