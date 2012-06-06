@@ -4,6 +4,8 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.log4j.Logger;
+
 import com.mongodb.MongoException.Network;
 
 import uk.ac.ic.kyoto.services.TimeService.EndOfSessionCycle;
@@ -50,6 +52,8 @@ public class CanadaAgent extends NonParticipant {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		logger = Logger.getLogger(CanadaAgent.class);
 	}
 	
 	@EventListener

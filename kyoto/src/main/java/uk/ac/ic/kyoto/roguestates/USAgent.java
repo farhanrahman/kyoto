@@ -2,6 +2,8 @@ package uk.ac.ic.kyoto.roguestates;
 
 import java.util.UUID;
 
+import org.apache.log4j.Logger;
+
 import uk.ac.ic.kyoto.services.TimeService.EndOfSessionCycle;
 import uk.ac.ic.kyoto.services.TimeService.EndOfYearCycle;
 import uk.ac.imperial.presage2.core.event.EventListener;
@@ -55,6 +57,12 @@ public class USAgent extends NonParticipant {
 		else {
 			democratElected = false;
 		}
+	}
+	
+	@Override
+	public void initialise() {
+		super.initialise();
+		logger = Logger.getLogger(USAgent.class);
 	}
 	
 	@Override
