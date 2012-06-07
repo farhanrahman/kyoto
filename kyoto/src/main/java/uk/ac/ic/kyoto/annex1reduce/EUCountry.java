@@ -9,6 +9,8 @@ import alice.tuprolog.SolveInfo;
 import alice.tuprolog.UnknownVarException;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
+import uk.ac.ic.kyoto.monitor.Monitor;
+import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.messaging.Input;
 
 /**
@@ -19,6 +21,7 @@ import uk.ac.imperial.presage2.core.messaging.Input;
 public class EUCountry extends AbstractCountry {
 	
 	final private Prolog engine;
+	private EU eu;
 	
 	public EUCountry(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
 			double GDPRate, long availiableToSpend, long emissionsTarget, long carbonOffset,
@@ -27,13 +30,24 @@ public class EUCountry extends AbstractCountry {
 		super(id, name, ISO, landArea, arableLandArea, GDP,
 					GDPRate, availiableToSpend, emissionsTarget, carbonOffset,
 					energyOutput, carbonOutput);
-		
-		// TODO
-//		EU.addMemberState(this);
-		
+
 		engine = EUBehaviours.getEngine(name);
 	}
 
+	@Override
+	public void initialise(){
+		super.initialise();
+		
+		// Add the country to the EU service
+		try {
+			this.eu = this.getEnvironmentService(EU.class);
+			this.eu.addMemberState(this);
+		} catch (UnavailableServiceException e) {
+			System.out.println("Unable to reach EU service.");
+			e.printStackTrace();
+		}
+	}
+	
 	/**
 	 * Take an input and process the data.
 	 */
