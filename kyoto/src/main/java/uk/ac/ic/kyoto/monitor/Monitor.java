@@ -2,7 +2,9 @@ package uk.ac.ic.kyoto.monitor;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.GameConst;
@@ -11,18 +13,29 @@ import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
+import uk.ac.imperial.presage2.core.simulator.Parameter;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
 import uk.ac.imperial.presage2.core.util.random.Random;
 
 /**
  * Monitoring service
- * @author ov109, Stuart
+ * @author ov109, Stuart, sc1109
  *
  */
 public class Monitor extends EnvironmentService {
 
 	private ArrayList<AbstractCountry> memberStates = new ArrayList<AbstractCountry>();
 	private double cash = 0;
+	
+	private Map<AbstractCountry, Integer> sinBin;
+	
+	//percentage increase in target i.e. 1.05 for 5%
+	@Parameter(name="target_penalty")
+	int target_penalty;
+	
+	//percentage decrease in cash i.e. 0.95 for 5%
+	@Parameter(name="cash_penalty")
+	int cash_penalty;
 	
 	public Monitor(EnvironmentSharedStateAccess sharedState) {
 		super(sharedState);
@@ -47,6 +60,20 @@ public class Monitor extends EnvironmentService {
 	
 	private void Sanction(AbstractCountry sanctionee) {
 		// TODO implementation of sanctions for cheating
+		
+		//sanctionee added to sinBin/increase sinCount
+		int sinCount=1;
+		if (sinBin.containsKey(sanctionee)) {
+			sinCount = sinBin.get(sanctionee) + 1;
+		}
+		sinBin.put(sanctionee, sinCount);
+		
+		//5% higher target regardless of number of sins (compound)
+		// TODO Should this apply straight away or from next session?
+		sanctionee.setEmissionsTarget((long) (sanctionee.getEmissionsTarget()*target_penalty));
+		
+		//linearly increasing fine - first time free, 5% more for each time after
+		sanctionee.setAvailableToSpend(sanctionee.getID(), (long) (sanctionee.getAvailableToSpend()*(sinCount-1)*cash_penalty));
 	}
 	
 	/**
