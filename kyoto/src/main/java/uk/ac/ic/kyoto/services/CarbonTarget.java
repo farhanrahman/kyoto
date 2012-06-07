@@ -10,7 +10,7 @@ import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
 import uk.ac.imperial.presage2.core.event.EventListener;
 
 /*
- * Environment service for setting of carbon targets. Queried by countries via an action.git 
+ * Environment service for setting of carbon targets. Queried by countries via an action.
  * 
  * Formula:
  * 
@@ -53,7 +53,7 @@ public class CarbonTarget extends EnvironmentService {
 		
 		// Load country data
 		UUID country = req.getParticipantID();
-		int data1990 = 0; 
+		long data1990 = 0; 
 		
 		// Get target
 		int target = generateSessionTarget(country, data1990, 0);
@@ -82,7 +82,6 @@ public class CarbonTarget extends EnvironmentService {
 	 */
 	private int generateSessionTarget(UUID country, int data1990, int Session)
 	{
-		
 		return 0;
 		
 	}
