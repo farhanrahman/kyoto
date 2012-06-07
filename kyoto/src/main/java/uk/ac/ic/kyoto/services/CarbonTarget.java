@@ -1,12 +1,12 @@
 package uk.ac.ic.kyoto.services;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.services.TimeService.EndOfSessionCycle;
 import uk.ac.imperial.presage2.core.environment.EnvironmentRegistrationRequest;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
-import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
 import uk.ac.imperial.presage2.core.event.EventListener;
 
 /*
@@ -35,9 +35,11 @@ import uk.ac.imperial.presage2.core.event.EventListener;
 
 public class CarbonTarget extends EnvironmentService {
 
+	private ArrayList<UUID> countries= new ArrayList<UUID>();
+	private int session = 0;
+	
 	protected CarbonTarget(EnvironmentSharedStateAccess sharedState) {
 		super(sharedState);
-		// TODO Auto-generated constructor stub
 	}
 
 	/*
@@ -48,17 +50,19 @@ public class CarbonTarget extends EnvironmentService {
 	 */
 	@Override
 	public void registerParticipant(EnvironmentRegistrationRequest req) {
-		// TODO Auto-generated method stub
 		super.registerParticipant(req);
 		
 		// Load country data
 		UUID country = req.getParticipantID();
-		long data1990 = 0; 
+		
+		// Maintain list of registered participants for this service
+		this.countries.add(country);
 		
 		// Get target
-		int target = generateSessionTarget(country, data1990, 0);
-		
+		long target = generateSessionTarget(country, 0);
+				
 		// Save target to shared state
+		sharedState.create("EmissionsTarget", country, target);
 	}
 	
 	/*
@@ -69,18 +73,24 @@ public class CarbonTarget extends EnvironmentService {
 	@EventListener
 	public void updateSessionTarget(EndOfSessionCycle e)
 	{
-		// Loop through participants
+		// Increment session
+		session++;
 		
-		// Generate new target
-		
-		// Save target to shared state
-
+		// Loop through countries updating targets
+		for (UUID country : countries) {
+			
+			// Generate new emissions target
+			long newTarget = generateSessionTarget(country, session);
+			
+			// Save target to shared state
+			sharedState.change("EmissionsTarget", country, newTarget);
+		}
 	}
 	
 	/*
 	 * Generates end of session target (binding) from 1990 data
 	 */
-	private int generateSessionTarget(UUID country, int data1990, int Session)
+	private int generateSessionTarget(UUID country, int Session)
 	{
 		return 0;
 		
@@ -94,5 +104,10 @@ public class CarbonTarget extends EnvironmentService {
 		return 0;
 		
 	}	
+	
+	public long queryTarget(UUID country) {
+		 Long state = (Long) sharedState.get("EmissionsTarget", country);
+		return state.longValue();
+	}
 	
 }

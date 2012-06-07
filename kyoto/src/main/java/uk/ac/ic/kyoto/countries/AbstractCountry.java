@@ -109,7 +109,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		// Add the country to the monitor service
 		try {
 			this.monitor = this.getEnvironmentService(Monitor.class);
-			this.monitor.addMemberState(this.id, this);
+			this.monitor.addMemberState(this);
 		} catch (UnavailableServiceException e1) {
 			System.out.println("Unable to reach monitor service.");
 			e1.printStackTrace();
@@ -149,9 +149,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		try {
 			// TODO make sure that the proper getters are used
 			TimeService timeService = getEnvironmentService(TimeService.class);
+			
 			if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
 				YearlyFunction();
 				MonitorTax();
+				checkTargets(); //did the countries meet their targets?
 				updateGDPRate();
 			}
 			if (timeService.getCurrentYear() % timeService.getYearsInSession() == 0) {
@@ -182,6 +184,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 //				//TODO - Insert sanctions here!
 //		}
 		return carbonOutput;
+	}
+	
+	public void checkTargets() {
+		this.monitor.checkTargets();
 	}
 	
 	protected Set<ParticipantSharedState> getSharedState(){

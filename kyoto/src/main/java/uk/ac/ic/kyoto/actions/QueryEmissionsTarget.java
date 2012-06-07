@@ -1,7 +1,5 @@
 package uk.ac.ic.kyoto.actions;
 
-import java.util.UUID;
-
 import uk.ac.imperial.presage2.core.Action;
 
 /*

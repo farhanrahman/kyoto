@@ -52,14 +52,21 @@ public class Monitor extends EnvironmentService {
 				Serializable state = sharedState.get(CarbonReportingService.name, a.getID());
 				Map<Integer, Double> reports = (Map<Integer, Double>)state;
 				if (realCarbonOutput != reports.get(SimTime.get().intValue())) {
-					Sanction(a);
-				}
+					cheatSanction(a);
+				}				
 			}
 		}
 	}
 	
-	private void Sanction(AbstractCountry sanctionee) {
-		// TODO implementation of sanctions for cheating
+	//compare real output to target and sanction if not met
+	public void checkTargets () {
+		for (AbstractCountry a : memberStates) {
+			long realCarbonOutput = a.getMonitored();
+			//TODO - Like above but using jonny's CarbonTargetService?
+			}
+	}
+	
+	private void cheatSanction(AbstractCountry sanctionee) {
 		
 		//sanctionee added to sinBin/increase sinCount
 		int sinCount=1;
@@ -68,12 +75,16 @@ public class Monitor extends EnvironmentService {
 		}
 		sinBin.put(sanctionee, sinCount);
 		
+		//linearly increasing fine - first time free, 5% more for each time after
+		sanctionee.setAvailableToSpend(sanctionee.getID(), (long) (sanctionee.getAvailableToSpend()-sanctionee.getGDP()*(sinCount-1)*cash_penalty));
+	}
+	
+	//sanction for not meeting targets
+	private void targetSanction(AbstractCountry sanctionee) {
+		
 		//5% higher target regardless of number of sins (compound)
 		// TODO Should this apply straight away or from next session?
 		//sanctionee.setEmissionsTarget((long) (sanctionee.getEmissionsTarget()*target_penalty));  TODO: Decide on this penalty
-		
-		//linearly increasing fine - first time free, 5% more for each time after
-		sanctionee.setAvailableToSpend(sanctionee.getID(), (long) (sanctionee.getAvailableToSpend()*(sinCount-1)*cash_penalty));
 	}
 	
 	/**
