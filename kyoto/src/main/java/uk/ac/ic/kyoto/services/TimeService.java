@@ -6,9 +6,10 @@ import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
 import uk.ac.imperial.presage2.core.event.Event;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
+import uk.ac.imperial.presage2.core.simulator.Parameter;
 
 /** 
- * @author sc1109 & azyzio
+ * @author sc1109 & azyzio & Stuart
  */
 public class TimeService extends EnvironmentService {
 
@@ -16,17 +17,22 @@ public class TimeService extends EnvironmentService {
 	private Time yearCounter;
 	private Time sessionCounter;
 	
-	final static int TICKS_IN_YEAR = 365;
-	final static int YEARS_IN_SESSION = 10;
+	@Parameter(name="ticksInYear")
+	int ticksInYear;
+	
+	@Parameter(name="yearsInSession")
+	int yearsInSession;
+	
 	
 	protected TimeService(EnvironmentSharedStateAccess sharedState) {
 		super(sharedState);
 	}
 	
+	
 	@EventListener
 	public void updateTickCounter (EndOfTimeCycle e) {
 		tickCounter.increment();
-		if (getCurrentTick() == TICKS_IN_YEAR) {
+		if (getCurrentTick() == ticksInYear) {
 			EndOfYearCycle y = new EndOfYearCycle(yearCounter);
 		}
 	}
@@ -34,7 +40,7 @@ public class TimeService extends EnvironmentService {
 	@EventListener
 	public void updateYearCounter (EndOfYearCycle e) {
 		yearCounter.increment();
-		if (yearCounter.intValue() == YEARS_IN_SESSION) {
+		if (yearCounter.intValue() == yearsInSession) {
 			EndOfSessionCycle s = new EndOfSessionCycle(sessionCounter);	
 		}
 	}
@@ -69,14 +75,22 @@ public class TimeService extends EnvironmentService {
     //================================================================================
 	
 	public int getCurrentTick() {
-		return tickCounter.intValue() - yearCounter.intValue() * TICKS_IN_YEAR;
+		return tickCounter.intValue() - yearCounter.intValue() * ticksInYear;
 	}
 	
 	public int getCurrentYear() {
-		return yearCounter.intValue() - sessionCounter.intValue() * YEARS_IN_SESSION;
+		return yearCounter.intValue() - sessionCounter.intValue() * yearsInSession;
 	}
 	
 	public int getCurrentSession() {
 		return sessionCounter.intValue();
+	}
+	
+	public int getTicksInYear() {
+		return ticksInYear;
+	}
+	
+	public int getYearsInSession() {
+		return yearsInSession;
 	}
 }
