@@ -9,28 +9,28 @@ import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
 import uk.ac.imperial.presage2.core.event.EventListener;
 
-/*
- * Environment service for setting of carbon targets. Queried by countries via an action.
- * 
- * Formula:
- * 
- * 	Assuming 5% drop per session
- * 	total1990Emission = sum(existing countries’ emissions in 1990)
- * 
- * 	for each country {
- * 		firstSessionTarget = 1990emission*(1 - 5%)
- * 		yearTarget = 1990emission *(1 - (yearNumber % sessionLength)*(5% / sessionLength)) 
- * 		proportionOfWorldEmissions = 1990emission / total1990Emission
- * 	}
- * 
- * 	endofSessionEmissions = sum(all reported emissions at end of session)
- * 	
- *  for each country {
- *  	nextSessionTarget = (proportionOfWorldEmissions * endofSessionEmissions)*(1 - 5%)
- * 		nextYearTarget = (proportionOfWorldEmissions * endofSessionEmissions)*(1 - (yearNumber % sessionLength)*(5% / sessionLength)) 
- *  }
- * 
- *  Author: Jonathan Ely
+/**
+ * <p>Environment service for setting of carbon targets. Queried by countries via an action.git</p><br>
+ * <p>
+ * Formula:<br>
+ * <br>
+ * 	Assuming 5% drop per session<br>
+ * 	total1990Emission = sum(existing countries’ emissions in 1990)<br>
+ * <br>
+ * 	for each country {<br>
+ * 		firstSessionTarget = 1990emission*(1 - 5%)<br>
+ * 		yearTarget = 1990emission *(1 - (yearNumber % sessionLength)*(5% / sessionLength))<br>
+ * 		proportionOfWorldEmissions = 1990emission / total1990Emission<br>
+ * 	}<br>
+ * <br>
+ * 	endofSessionEmissions = sum(all reported emissions at end of session)<br>
+ * 	<br>
+ *  for each country {<br>
+ *  	nextSessionTarget = (proportionOfWorldEmissions * endofSessionEmissions)*(1 - 5%)<br>
+ * 		nextYearTarget = (proportionOfWorldEmissions * endofSessionEmissions)*(1 - (yearNumber % sessionLength)*(5% / sessionLength)) <br>
+ *  }<br>
+ * </p>
+ *  @author Jonathan Ely
  */
 
 public class CarbonTarget extends EnvironmentService {
