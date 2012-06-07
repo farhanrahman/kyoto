@@ -15,8 +15,8 @@ public class TestCountry extends AbstractCountry {
 			super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, availableToSpend,
 			emissionsTarget, carbonOffset, energyOutput, carbonOutput);
 			
-			this.carbonAbsorptionHandler = new CarbonAbsorptionHandler();
-			this.carbonReductionHandler = new CarbonReductionHandler();
+			this.carbonAbsorptionHandler = new CarbonAbsorptionHandler(this);
+			this.carbonReductionHandler = new CarbonReductionHandler(this);
 	}
 
 
