@@ -65,8 +65,9 @@ public class Simulation extends InjectedSimulation {
 		 * I.e 1 row per country, with "type" field defining what annex
 		 * Which contains all the country agent init data
 		   
-		   1) Load all rows from simulations->countries via regular mongo load method
-		   
+		   1) Find out which simulation ID has been requested to run
+		   2) Load all rows from simulations[ID]->countries via regular mongo load method
+		   3) Loop each row to init correct agent :)
 		 	foreach (countries as country) {
 		    
 			UUID pid = Random.randomUUID();
