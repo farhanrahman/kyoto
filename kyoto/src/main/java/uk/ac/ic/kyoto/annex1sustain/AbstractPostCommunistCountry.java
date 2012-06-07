@@ -22,8 +22,9 @@ import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
  */
 public class AbstractPostCommunistCountry extends AbstractCountry {
 	
+	
 	//================================================================================
-    // PrivateFields
+    // Private Fields
     //================================================================================
 	
 	// TODO add comments
@@ -35,7 +36,8 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	protected long			absorptionInvestmentTarget;		//
 	protected long			reductionInvestmentTarget;		//
 	protected double		lastYearFactor;					// wtf is factor?
-		
+	
+	
 	//================================================================================
     // Constructors
     //================================================================================
@@ -68,14 +70,21 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	protected void processInput(Input input) {
 		// TODO Auto-generated method stub
 	}
-
+	
+	/**
+	 * Function called at the end of each year.
+	 * - Updates the internal variables.
+	 */
 	@Override
 	public void YearlyFunction() {
 		calculateLastYearFactor();
 		calculateNewSellingTarget();
 		logger.info("Internal Yearly Data of Post-Communist Country " + this.getName() + " was updated");
 	}
-
+	
+	/**
+	 * Function called at the end of each session.
+	 */
 	@Override
 	public void SessionFunction() {
 		
@@ -87,8 +96,10 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
     //================================================================================
 	
 	/**
-	 * Updates the internal data that is supposed to change every tick
-	 *  
+	 * Function called at the end of each tick.
+	 * - Updates the internal variables.
+	 * - Decides on and initiates investments
+	 * 
 	 * @param e
 	 * The event that is called every simulation tick
 	 */
@@ -103,9 +114,15 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	
 	
 	//================================================================================
-    // Private functions called every tick
+    // Tick update function
     //================================================================================
 	
+	/**
+	 * Calculates a new internal price, which is a multiplication of three factors:
+	 * - average market price of credits
+	 * - time until the end of session
+	 * - meeting the sales target from previous year
+	 */
 	private void updateInternalPrice() {
 		internalPrice   = 	(long)
 							(
@@ -114,7 +131,10 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 							lastYearFactor
 							);
 	}
-
+	
+	/**
+	 * Calculates market price basing on the internal log of successful and unsuccessful transactions.
+	 */
 	private double calculateMarketPrice() {
 		double marketPrice;
 		double maximumCommittedPrice = 0;
@@ -142,6 +162,10 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		return marketPrice;
 	}
 	
+	/**
+	 * Calculates the factor representing how far we are in the session.
+	 * The less ticks till the end, the cheaper we sell.
+	 */
 	private double calculateEndOfRoundFactor() {
 		double endOfRoundFactor = 1;
 		try {
@@ -164,10 +188,16 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		return endOfRoundFactor;
 	}
 	
+	/**
+	 * Stores unsuccessful transactions from last X ticks in a map.
+	 */
 	private void updateUncommittedTransactions() {
 		// TODO implement
 	}
 	
+	/**
+	 * Stores successful transactions from last X ticks in a map.
+	 */
 	private void updateCommittedTransactions() {
 		// TODO implement
 	}
@@ -307,7 +337,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	
 	
 	//================================================================================
-    // Private functions called every year
+    // Yearly update functions
     //================================================================================
 	
 	/**
