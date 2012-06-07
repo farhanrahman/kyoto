@@ -70,6 +70,12 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	protected void processInput(Input input) {
 	}
 	
+
+	@Override
+	protected void behaviour() {
+		
+	}
+	
 	//================================================================================
     // Periodic functions
     //================================================================================
