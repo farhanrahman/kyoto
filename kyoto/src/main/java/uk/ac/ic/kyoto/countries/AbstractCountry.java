@@ -151,12 +151,14 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			TimeService timeService = getEnvironmentService(TimeService.class);
 			
 			if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
-				YearlyFunction();
 				MonitorTax();
 				checkTargets(); //did the countries meet their targets?
 				updateGDPRate();
+				updateCarbonOffsetYearly();
+				YearlyFunction();
 			}
 			if (timeService.getCurrentYear() % timeService.getYearsInSession() == 0) {
+				resetCarbonOffset();
 				SessionFunction();
 			}
 		} catch (UnavailableServiceException e) {
@@ -189,6 +191,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return carbonOutput;
 	}
 	
+	// This functionality may be taken over by the carbonOffsetUpdate
 	public void checkTargets() {
 		this.monitor.checkTargets();
 	}
@@ -243,7 +246,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
     // Private methods
     //================================================================================
 	
-	private void updateGDPRate() {
+	private final void updateGDPRate() {
 		double marketStateFactor = 0;
 		
 		Economy economy;
@@ -264,6 +267,24 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			System.out.println("Unable to reach economy service.");
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Adjusts the amount of CarbonOffset depending on the last years usage
+	 */
+	private final void updateCarbonOffsetYearly() {
+		// Check if the emissionTarget for this year was met
+		if (emissionsTarget + carbonOffset - carbonOutput > 0)
+			// Add / Subtract from carbonOffset depending on this year's usage
+			carbonOffset += (emissionsTarget - carbonOutput);
+		else {
+			// Possibly the report to the Monitor can be sent
+		}
+	}
+	
+	private final void resetCarbonOffset() {
+		carbonOffset = 0;
+		// TODO adjust the CarbonOutput so that the forests build through Carbon Absorbtion are being counted.
 	}
 	
 	//================================================================================
