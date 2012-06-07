@@ -25,7 +25,7 @@ import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 public abstract class AbstractCountry extends AbstractParticipant {
 	
 	//TODO Register UUID and country ISO with the environment
-	
+
 	final protected String ISO;		//ISO 3166-1 alpha-3
 	
 	/*
@@ -143,7 +143,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	@Override
-	public void execute() {
+	final public void execute() {
 		super.execute();
 		try {
 			TimeService timeService = getEnvironmentService(TimeService.class);
@@ -159,7 +159,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			logger.warn(e.getMessage(), e);
 			e.printStackTrace();
 		}
+		behaviour();
 	}
+	
+	abstract protected void behaviour();
 	
 
 	public void MonitorTax() {
