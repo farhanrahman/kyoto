@@ -62,7 +62,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
 	protected CarbonReductionHandler 	carbonReductionHandler;
-	protected CarbonAbsorptionHandler carbonAbsorptionHandler;
+	protected CarbonAbsorptionHandler 	carbonAbsorptionHandler;
 
 	protected Logger logger;
 	
@@ -105,8 +105,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			e1.printStackTrace();
 		}
 		
-		carbonAbsorptionHandler = new CarbonAbsorptionHandler();
-		carbonReductionHandler = new CarbonReductionHandler();
+		carbonAbsorptionHandler = new CarbonAbsorptionHandler(this);
+		carbonReductionHandler = new CarbonReductionHandler(this);
 		try {
 			this.reportingService = this.getEnvironmentService(ParticipantCarbonReportingService.class);
 		} catch (UnavailableServiceException e) {
@@ -217,75 +217,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return new Double(carbonOutput);
 	}
 	
-
-	
-	//================================================================================
-    // Energy Output Control functions
-    //================================================================================
-	
-	/**
-	 * Reduces both the energyOutput and carbonOutput of the country
-	 * It can be used to limit carbonOuput without any financial cost
-	 * As the energyOuput goes down, the GDP growth goes down too
-	 * 
-	 * @param amount
-	 * 
-	 * Amount of energyOuput that should be reduced
-	 * It has to be positive and lower than the total carbonOuput
-	 */
-	protected void reduceEnergyOutput (long amount) throws IllegalArgumentException{
-		if (amount < carbonOutput && amount > 0) {
-			energyOutput -= amount;
-			carbonOutput -= amount;
-		}
-		else
-			throw new IllegalArgumentException("Specified amount should be > 0 and < carbonOutput");
-	}
-	
-	/**
-	 * Calculates the cost of investing in carbon industry
-	 * @param carbon
-	 * The expected increase in carbon output
-	 * @return
-	 * The cost for the country
-	 */
-	protected long calculateCostOfInvestingInCarbonIndustry (long carbon){
-		return (long) (carbon * GameConst.CARBON_INVESTMENT_PRICE);
-	}
-	
-	/**
-	 * Calculates the increase of carbon output
-	 * @param cost
-	 * The amount of money to be spent on carbon industry growth
-	 * @return
-	 * The increase of carbon output
-	 */
-	protected long calculateCarbonIndustryGrowth (long cost){
-		return (long) (cost / GameConst.CARBON_INVESTMENT_PRICE);
-	}
-	
-	/**
-	 * Invests in carbon industry.
-	 * Carbon output and energy output of the country go up
-	 * @param carbon
-	 * The increase of the carbon output that will be achieved.
-	 */
-	protected void investInCarbonIndustry(long carbon){
-		try {
-			long cost = calculateCostOfInvestingInCarbonIndustry(carbon);
-			if (cost > availableToSpend) {
-				carbonOutput += carbon;
-				energyOutput += carbon;
-				availableToSpend -= cost;
-			}
-			else {
-				// TODO log that there is not enough money
-			}
-		}
-		catch (Exception e) {
-			// TODO log the exception
-		}
-	}
 	
 	// GDP related functions
 	
@@ -293,125 +224,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return this.GDP*GameConst.PERCENTAGE_OF_GDP;
 	}
 	
-	protected final class CarbonReductionHandler{
-		
-		/**
-		 * Returns the cost of investment required to
-		 * reduce dirty industry by a specified amount of tons of carbon.
-		 * 
-		 * @param carbonOutputChange
-		 * @return cost of reducing carbon by said amount
-		 */
-		public final long getCost(double carbonOutputChange){
-			long cost;
-			
-			cost = (long) (GameConst.CARBON_REDUCTION_COEFF * carbonOutputChange / energyOutput);
-			
-			return cost;
-		}
-		
-		/**
-		 * Returns the reduction of carbon output
-		 * for a specified cost of investment.
-		 * 
-		 * @param currency
-		 * @return the change in carbon output from said cost
-		 */
-		public final double getCarbonOutputChange(long cost) {
-			double carbonOutputChange;
-			
-			carbonOutputChange = energyOutput * cost / GameConst.CARBON_REDUCTION_COEFF;
-			
-			return carbonOutputChange;
-		}
-		
-		/**
-		 * Executes carbon reduction investment.
-		 * On success, will reduce Carbon Output of a country keeping the Energy Output constant
-		 * On failure, will throw Exception.
-		 * 
-		 * @param investment
-		 * @throws Exception
-		 */
-		public final void invest(long investment) throws Exception{
-			if (investment < availableToSpend){
-				availableToSpend -= investment;
-				carbonOutput -= getCarbonOutputChange(investment);
-			}
-			else {
-				throw new Exception("Investment is greated than available cash to spend");
-			}
-		}
-	}
-	
-	protected final class CarbonAbsorptionHandler{
-		
-		/**
-		 * Returns the cost of investment required to
-		 * obtain a given number of carbon.
-		 * 
-		 * @param carbonOffset
-		 */
-		public long getCost(long carbonOffset){
-			double neededLand = carbonOffset / GameConst.FOREST_CARBON_OFFSET;
-			long noBlocks = (long) (neededLand / GameConst.FOREST_BLOCK_SIZE);
-			long totalCost = 0;
-			double tempLandArea = arableLandArea;
-			for (int i=0; i < noBlocks; i++) {
-				totalCost += getBlockCost(tempLandArea);
-				tempLandArea -= GameConst.FOREST_BLOCK_SIZE;
-			}
-			return totalCost;
-		}
-		
-		/**
-		 * Returns number of carbon credits earned for a 
-		 * given investment.
-		 * 
-		 * @param investment
-		 */
-		public long getCarbonOffset(double investment){
-			long totalCost=0;
-			double tempArableLandArea=arableLandArea;
-			while (totalCost < investment && tempArableLandArea > GameConst.FOREST_BLOCK_SIZE) {
-				totalCost += getBlockCost(tempArableLandArea);
-				tempArableLandArea -= GameConst.FOREST_BLOCK_SIZE;
-			}
-			return (long) (GameConst.FOREST_CARBON_OFFSET*(arableLandArea-tempArableLandArea));
-		}
-		
-		private long getBlockCost(double landArea) {
-			double proportion = GameConst.FOREST_BLOCK_SIZE/landArea;
-			return (long) (proportion * GameConst.CARBON_ABSORPTION_COEFF);
-		}
-		
-		/**
-		 * Executes carbon absorption investment</br>
-		 * 
-		 * On success, will reduce GDP and increase.</br>
-		 * On failure, will throw Exception.</br>
-		 * 
-		 * @param investment
-		 * @throws Exception
-		 */
-		public void invest(double investment) throws Exception{
-			if(investment <= availableToSpend){
-				//TODO Implement reduction in GDP
-				//TODO Implement change in CO2 emissions/arable land
-				//Stub for submitting reports
-				
-				availableToSpend -= investment;
-				long newOffset = getCarbonOffset(investment);
-				carbonOffset += newOffset;
-				arableLandArea -= newOffset/GameConst.FOREST_CARBON_OFFSET;
-								
-			}else{
-				//TODO Use better exception
-				throw new Exception("Investment is greated than available cash to spend");
-			}
-		}
-	}
-
 	public double getLandArea() {
 		return landArea;
 	}
