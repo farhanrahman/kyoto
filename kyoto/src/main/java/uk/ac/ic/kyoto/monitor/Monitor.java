@@ -2,9 +2,7 @@ package uk.ac.ic.kyoto.monitor;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.GameConst;
@@ -52,12 +50,14 @@ public class Monitor extends EnvironmentService {
 				Serializable state = sharedState.get(CarbonReportingService.name, a.getID());
 				Map<Integer, Double> reports = (Map<Integer, Double>)state;
 				if (realCarbonOutput != reports.get(SimTime.get().intValue())) {
+
 					cheatSanction(a);
-				}				
+				}
 			}
 		}
 	}
 	
+
 	//compare real output to target and sanction if not met
 	public void checkTargets () {
 		for (AbstractCountry a : memberStates) {
@@ -85,6 +85,7 @@ public class Monitor extends EnvironmentService {
 		//5% higher target regardless of number of sins (compound)
 		// TODO Should this apply straight away or from next session?
 		//sanctionee.setEmissionsTarget((long) (sanctionee.getEmissionsTarget()*target_penalty));  TODO: Decide on this penalty
+
 	}
 	
 	/**

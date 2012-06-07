@@ -1,0 +1,1 @@
+basicTest(test,testPassed).
