@@ -43,8 +43,7 @@ public class EUCountry extends AbstractCountry {
 	}
 	
 	@Override
-	public void execute() {
-		super.execute();
+	protected void behaviour() {
 		
 		//TODO perform analysis
 		
