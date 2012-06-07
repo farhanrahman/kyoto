@@ -48,7 +48,6 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, emissionsTarget,
 				carbonOffset, energyOutput, energyOutput, energyOutput);
 		
-		// TODO make sure the initialisation is fine
 		this.internalPrice = Long.MAX_VALUE;
 		this.uncommittedTransactionsCosts = new ArrayList<Double>();
 		this.committedTransactionsCosts = new ArrayList<Double>();
@@ -69,7 +68,6 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 */
 	@Override
 	protected void processInput(Input input) {
-		// TODO Auto-generated method stub
 	}
 	
 	//================================================================================
