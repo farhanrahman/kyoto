@@ -34,6 +34,8 @@ import uk.ac.imperial.presage2.util.protocols.TimeoutCondition;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
 /**
  * 
  * More sure about this: taken from https://github.com/Presage/HelloWorld/blob/master/src/main/java/uk/ac/imperial/presage2/helloworld/HelloWorldProtocol.java
@@ -50,7 +52,6 @@ public abstract class TradeProtocol extends FSMProtocol {
 	protected final EnvironmentConnector environment;
 	private final Logger logger;
 
-	@Inject protected TradeTokenFactory tradeFactory;
 	protected TradeToken tradeToken;
 	
 	public enum ResponderReplies{
@@ -88,17 +89,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 
 		logger = Logger.getLogger(TradeProtocol.class.getName() + ", " + id);
 
-		Injector injector = Guice.createInjector(new TradeTokenModule());
-		this.tradeFactory = injector.getInstance(TradeTokenFactory.class);
-		this.tradeToken = this.tradeFactory.get();
-		
-		if(this.tradeFactory == null){
-			logger.warn("HUGE PROBLEM");
-		}
-		
-		/*for(int i = 0; i < 10; i++){
-			logger.info(this.tradeToken.getToken());
-		}*/
+		this.tradeToken = TradeTokenFactory.get();
 		
 		try {
 			this.description
@@ -252,7 +243,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 
 
 	}
-
+	
 	class TradeSpawnEvent extends ConversationSpawnEvent {
 
 		final Trade trade;

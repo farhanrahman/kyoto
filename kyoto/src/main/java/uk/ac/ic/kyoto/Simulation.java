@@ -49,8 +49,6 @@ public class Simulation extends InjectedSimulation {
 			.addActionHandler(SubmitCarbonEmissionReportHandler.class)
 			.addGlobalEnvironmentService(CarbonReportingService.class)
 			.addParticipantEnvironmentService(ParticipantCarbonReportingService.class));
-	
-		modules.add(new TradeTokenModule());
 		
 		//*modules.add(new RuleModule());
 			//.addClasspathDrlFile("foo.drl")*/

@@ -1,14 +1,16 @@
 /**
  * 
  */
-package uk.ac.ic.kyoto.trade;
+package java.uk.ac.ic.kyoto.trade;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
-import uk.ac.ic.kyoto.trade.TradeProtocol.Trade;
-import uk.ac.imperial.presage2.core.network.NetworkAddress;
-import uk.ac.imperial.presage2.util.fsm.FSMException;
 
+import uk.ac.ic.kyoto.trade.TradeProtocol;
+import uk.ac.ic.kyoto.trade.TradeType;
+import uk.ac.ic.kyoto.trade.Trade;
 /**
  * @author cmd08
  *
