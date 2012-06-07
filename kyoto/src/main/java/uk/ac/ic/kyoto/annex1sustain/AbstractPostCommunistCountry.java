@@ -27,15 +27,14 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
     // Private Fields
     //================================================================================
 	
-	// TODO add comments
-	protected long	 		internalPrice;					//
-	protected List<Double> 	uncommittedTransactionsCosts;	//
-	protected List<Double> 	committedTransactionsCosts;		//
-	protected long 			creditsToSell;					//
-	protected long 			creditsToSellTarget;			//
-	protected long			absorptionInvestmentTarget;		//
-	protected long			reductionInvestmentTarget;		//
-	protected double		lastYearFactor;					// wtf is factor?
+	protected long	 		internalPrice;					// The price of a single carbon credit that we estimate we will be able to successfully sell at
+	protected List<Double> 	uncommittedTransactionsCosts;	// List of transactions and their prices that were advertised but not completed
+	protected List<Double> 	committedTransactionsCosts;		// List of transactions and their prices that were completed
+	protected long 			creditsToSellTarget;			// Total amount of credits we aim to sell in current year
+	protected long 			creditsToSell;					// Credits left for sale from the current sell target
+	protected long			absorptionInvestmentTarget;		// The amount (in carbon) of a single carbon absorption investment considered this tick  
+	protected long			reductionInvestmentTarget;		// The amount (in carbon) of a single carbon reduction investment considered this tick 
+	protected double		lastYearFactor;					// Coefficient reflecting the percentage of credit sales target that was met, adjusted by a constant
 	
 	
 	//================================================================================
@@ -44,7 +43,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	
 	public AbstractPostCommunistCountry(UUID id, String name, String ISO,
 			double landArea, double arableLandArea, double GDP, double GDPRate,
-			long availiableToSpend, long emissionsTarget, long carbonOffset, long energyOutput)
+			long availiableToSpend, long emissionsTarget, long carbonOffset, long energyOutput, long carbonOutput)
 	{
 		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, emissionsTarget,
 				carbonOffset, energyOutput, energyOutput, energyOutput);
@@ -57,18 +56,41 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		this.creditsToSellTarget = 0;
 		this.absorptionInvestmentTarget = Constants.MINIMAL_INVESTMENT;
 		this.reductionInvestmentTarget = Constants.MINIMAL_INVESTMENT;
-		this.lastYearFactor = 1;
-		
+		this.lastYearFactor = 1;	
 	}
 	
 	
 	//================================================================================
-    // Overridden functions
+    // Input function
     //================================================================================
 	
+	/**
+	 * Function processing input (what is this?)
+	 */
 	@Override
 	protected void processInput(Input input) {
 		// TODO Auto-generated method stub
+	}
+	
+	//================================================================================
+    // Periodic functions
+    //================================================================================
+	
+	/**
+	 * Function called at the end of each tick.
+	 * - Updates the internal variables.
+	 * - Decides on and initiates investments
+	 * 
+	 * @param e
+	 * The event that is called every simulation tick
+	 */
+	@EventListener
+	public void TickFunction(EndOfTimeCycle e) {
+		updateUncommittedTransactions();
+		updateCommittedTransactions();
+		updateInternalPrice();
+		logger.info("Internal Data of Post-Communist Country " + this.getName() + " was updated");
+		makeInvestments();
 	}
 	
 	/**
@@ -87,29 +109,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 */
 	@Override
 	public void SessionFunction() {
-		
-	}
-	
-	
-	//================================================================================
-    // Public methods to update data
-    //================================================================================
-	
-	/**
-	 * Function called at the end of each tick.
-	 * - Updates the internal variables.
-	 * - Decides on and initiates investments
-	 * 
-	 * @param e
-	 * The event that is called every simulation tick
-	 */
-	@EventListener
-	public void updateTickData(EndOfTimeCycle e) {
-		updateUncommittedTransactions();
-		updateCommittedTransactions();
-		updateInternalPrice();
-		logger.info("Internal Data of Post-Communist Country " + this.getName() + " was updated");
-		makeInvestments();
+		// TODO implement
 	}
 	
 	
@@ -189,14 +189,14 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	}
 	
 	/**
-	 * Stores unsuccessful transactions from last X ticks in a map.
+	 * Stores unsuccessful transactions from last X ticks in a list.
 	 */
 	private void updateUncommittedTransactions() {
 		// TODO implement
 	}
 	
 	/**
-	 * Stores successful transactions from last X ticks in a map.
+	 * Stores successful transactions from last X ticks in a list.
 	 */
 	private void updateCommittedTransactions() {
 		// TODO implement
@@ -278,7 +278,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			logger.info("Post-Communist Country " + this.getName() + " has insufficient land for carbon absorption");
 		}
 		catch (Exception e) {
-			logger.warn("Problem investing in carbon absorption");
+			logger.warn("Problem investing in carbon absorption: " + e);
 		}
 	}
 	
@@ -313,7 +313,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			logger.info("Post-Communist Country " + this.getName() + " has insufficient carbon output for carbon reduction");
 		}
 		catch (Exception e) {
-			logger.warn("Problem investing in carbon reduction");
+			logger.warn("Problem investing in carbon reduction: " + e);
 		}
 	}
 	
