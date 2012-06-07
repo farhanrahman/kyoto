@@ -1,14 +1,18 @@
 package uk.ac.ic.kyoto.countries;
 
-class EnergyUsageHandler {
-	private final AbstractCountry abstractCountry;
+/**
+ * 
+ * @author Adam
+ */
+public final class EnergyUsageHandler {
+	private final AbstractCountry country;
 
 	/**Create instance of EnergyUsageHandler
 	 * @param abstractCountry
 	 * Specify on which country will the handler operate
 	 */
 	EnergyUsageHandler(AbstractCountry abstractCountry) {
-		this.abstractCountry = abstractCountry;
+		this.country = abstractCountry;
 		
 	}
 	
@@ -23,9 +27,9 @@ class EnergyUsageHandler {
 	 * It has to be positive and lower than the total carbonOuput
 	 */
 	protected void reduceEnergyOutput (long amount) throws IllegalArgumentException{
-		if (amount < this.abstractCountry.carbonOutput && amount > 0) {
-			this.abstractCountry.energyOutput -= amount;
-			this.abstractCountry.carbonOutput -= amount;
+		if (amount < this.country.carbonOutput && amount > 0) {
+			this.country.energyOutput -= amount;
+			this.country.carbonOutput -= amount;
 		}
 		else
 			throw new IllegalArgumentException("Specified amount should be > 0 and < carbonOutput");
@@ -59,20 +63,16 @@ class EnergyUsageHandler {
 	 * @param carbon
 	 * The increase of the carbon output that will be achieved.
 	 */
-	protected void investInCarbonIndustry(long carbon){
-		try {
-			long cost = calculateCostOfInvestingInCarbonIndustry(carbon);
-			if (cost > this.abstractCountry.availableToSpend) {
-				this.abstractCountry.carbonOutput += carbon;
-				this.abstractCountry.energyOutput += carbon;
-				this.abstractCountry.availableToSpend -= cost;
-			}
-			else {
-				// TODO log that there is not enough money
-			}
+	protected void investInCarbonIndustry(long carbon) throws Exception{
+
+		long cost = calculateCostOfInvestingInCarbonIndustry(carbon);
+		if (cost > this.country.availableToSpend) {
+			this.country.carbonOutput += carbon;
+			this.country.energyOutput += carbon;
+			this.country.availableToSpend -= cost;
 		}
-		catch (Exception e) {
-			// TODO log the exception
+		else {
+			throw new Exception("Investment is greater than available cash to spend");
 		}
 	}
 }
