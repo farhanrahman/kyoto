@@ -66,6 +66,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 
 	protected Logger logger;
 	
+	private UUID id;
+	
 	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
 					double GDPRate, long availableToSpend, long emissionsTarget, long carbonOffset,
 					long energyOutput, long carbonOutput) {
@@ -73,6 +75,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		//TODO Validate parameters
 		
 		super(id, name);
+		
+		
+		this.id = id;
 		this.landArea = landArea;
 		this.ISO = ISO;
 		this.arableLandArea = arableLandArea;
@@ -99,7 +104,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		// Add the country to the monitor service
 		try {
 			this.monitor = this.getEnvironmentService(Monitor.class);
-			this.monitor.addMemberState(this);
+			this.monitor.addMemberState(this.id, this);
 		} catch (UnavailableServiceException e1) {
 			System.out.println("Unable to reach monitor service.");
 			e1.printStackTrace();
@@ -237,7 +242,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return GDPRate;
 	}
 
-	public double getEmissionTarget() {
+	public long getEmissionsTarget() {
 		return emissionsTarget;
 	}
 
@@ -251,6 +256,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	public void setEmissionsTarget(long emissionsTarget) {
 		this.emissionsTarget = emissionsTarget;
+	}
+	
+	public void setAvailableToSpend(UUID id, long availableToSpend) {
+		if (this.id==id) {
+			this.availableToSpend = availableToSpend;
+		}
 	}
 
 	/**
