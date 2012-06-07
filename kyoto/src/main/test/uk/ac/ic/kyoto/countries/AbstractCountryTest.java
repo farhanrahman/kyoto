@@ -7,7 +7,8 @@ import uk.ac.imperial.presage2.core.util.random.Random;
 
 public class AbstractCountryTest {
 	
-	private TestCountry tester;
+	// private TestCountry tester;
+	// The line above is useless
 	
 	@Test
 	public void getCashTest()
@@ -17,7 +18,8 @@ public class AbstractCountryTest {
 		TestCountry tester = new TestCountry(randomID, "Poland", "ISO", 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000);
 
 		assertTrue(tester.getCash() == 1000*GameConst.PERCENTAGE_OF_GDP);
-		assertTrue(tester.calculateCostOfInvestingInCarbonIndustry(10) == 10 * GameConst.CARBON_INVESTMENT_PRICE );
+		//assertTrue(tester.calculateCostOfInvestingInCarbonIndustry(10) == 10 * GameConst.CARBON_INVESTMENT_PRICE );
+		//The line above is deprecated - this method is now in EnergyUsageHandler.java
 	}
 	
 	//@Test
