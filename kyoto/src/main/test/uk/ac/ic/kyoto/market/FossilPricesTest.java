@@ -12,15 +12,18 @@ import org.junit.Test;
 
 /** @author Nicolas Khadivi */
 
-/** This test unit takes the same file as FossilPrices as an input.
- * 	Then, it retrieves the data that was parsed by FossilPrices via the getters.
- * 	It reformats this data that was obtained via getters, in CSV form (adding commas etc.)
- * 	Finally, it compares the contents of the file, to those of the reformatted String line-by-line.
- * 	Thus, it tests the file parsing, the storing of data into variables, and the getters.
+/**
+ * This test unit takes the same file as FossilPrices as an input. Then, it
+ * retrieves the data that was parsed by FossilPrices via the getters. It
+ * reformats this data that was obtained via getters, in CSV form (adding commas
+ * etc.).
+ * Finally, it compares the contents of the file, to those of the
+ * reformatted String line-by-line. Thus, it tests the file parsing, the storing
+ * of data into variables, and the getters.
  * */
 
 public class FossilPricesTest {
-	
+
 	FossilPrices testObject = new FossilPrices(null);
 
 	private static final String FOSSIL_FUEL_PRICES_PATH = "src/main/resources/FossilFuelPrices.csv";
@@ -31,11 +34,10 @@ public class FossilPricesTest {
 
 	@Test
 	public void testFossilPrices() throws Exception {
-		File file = new File(FOSSIL_FUEL_PRICES_PATH); // path?
+		File file = new File(FOSSIL_FUEL_PRICES_PATH);
 		BufferedReader reader = new BufferedReader(new FileReader(file));
 
-		String line = reader.readLine();
-//		assertTrue(line.equals("Year,Oil $/bbl,Gas $/1000f^2"));
+		String line = reader.readLine(); // drop title line
 
 		for (long year = START_YEAR; year <= END_YEAR; year++) {
 			line = reader.readLine();
