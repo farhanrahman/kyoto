@@ -36,6 +36,7 @@ import uk.ac.imperial.presage2.core.event.EventListener;
 public class CarbonTarget extends EnvironmentService {
 
 	private ArrayList<UUID> countries= new ArrayList<UUID>();
+	private int session = 0;
 	
 	protected CarbonTarget(EnvironmentSharedStateAccess sharedState) {
 		super(sharedState);
@@ -53,13 +54,12 @@ public class CarbonTarget extends EnvironmentService {
 		
 		// Load country data
 		UUID country = req.getParticipantID();
-		long data1990 = 0; 
 		
 		// Maintain list of registered participants for this service
 		this.countries.add(country);
 		
 		// Get target
-		long target = generateSessionTarget(country, data1990, 0);
+		long target = generateSessionTarget(country, 0);
 				
 		// Save target to shared state
 		sharedState.create("EmissionsTarget", country, target);
@@ -73,15 +73,14 @@ public class CarbonTarget extends EnvironmentService {
 	@EventListener
 	public void updateSessionTarget(EndOfSessionCycle e)
 	{
+		// Increment session
+		session++;
+		
 		// Loop through countries updating targets
 		for (UUID country : countries) {
-		
-			// Get necessary data
-			long data1990 = 0;
-			int session = 1;
 			
 			// Generate new emissions target
-			long newTarget = generateSessionTarget(country, data1990, session);
+			long newTarget = generateSessionTarget(country, session);
 			
 			// Save target to shared state
 			sharedState.change("EmissionsTarget", country, newTarget);
@@ -91,7 +90,7 @@ public class CarbonTarget extends EnvironmentService {
 	/*
 	 * Generates end of session target (binding) from 1990 data
 	 */
-	private int generateSessionTarget(UUID country, long data1990, int Session)
+	private int generateSessionTarget(UUID country, int Session)
 	{
 		return 0;
 		
