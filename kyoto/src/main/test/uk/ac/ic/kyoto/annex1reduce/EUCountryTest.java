@@ -5,6 +5,11 @@ import org.junit.*;
 
 import java.util.UUID;
 
+/**
+ * Tests Prolog integration
+ * @author Nik
+ *
+ */
 public class EUCountryTest {
 
 	static private EUCountry test;
@@ -14,12 +19,11 @@ public class EUCountryTest {
 		System.out.println("Initialising EUCountry");
 		test  = new EUCountry(UUID.randomUUID(),"JunitTest", "JUT",
 				100, 50, 1000, 10000, 100000, 100, 10, 10, 10);
-		test.initialise();
 	}
 	
 	@Test
-	public void testexecute() {
-		test.execute();
+	public void testbehaviour() {
+		test.behaviour();
 	}
 
 }

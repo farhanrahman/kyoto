@@ -28,7 +28,8 @@ public class EUCountry extends AbstractCountry {
 					GDPRate, availiableToSpend, emissionsTarget, carbonOffset,
 					energyOutput, carbonOutput);
 		
-		EU.addMemberState(this);
+		// TODO
+//		EU.addMemberState(this);
 		
 		engine = EUBehaviours.getEngine(name);
 	}

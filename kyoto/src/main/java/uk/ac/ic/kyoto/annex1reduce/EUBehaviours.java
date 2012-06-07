@@ -16,8 +16,7 @@ import alice.tuprolog.Theory;
  */
 final class EUBehaviours {
 	
-	private EUBehaviours() {
-	}
+	private EUBehaviours() {}
 	
 	final private static String DEFAULT_THEORY_PATH = "src/main/resources/prolog/EUBehaviour/";
 	
