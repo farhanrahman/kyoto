@@ -5,6 +5,9 @@ import java.util.UUID;
 import java.util.List;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
+import uk.ac.ic.kyoto.countries.NotEnoughCarbonOutputException;
+import uk.ac.ic.kyoto.countries.NotEnoughCashException;
+import uk.ac.ic.kyoto.countries.NotEnoughLandException;
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.market.FossilPrices;
 import uk.ac.ic.kyoto.services.TimeService;
@@ -29,6 +32,8 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	protected List<Double> 	committedTransactionsCosts;		//
 	protected long 			creditsToSell;					//
 	protected long 			creditsToSellTarget;			//
+	protected long			absorptionInvestmentTarget;		//
+	protected long			reductionInvestmentTarget;		//
 	protected double		lastYearFactor;					// wtf is factor?
 		
 	//================================================================================
@@ -48,6 +53,8 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		this.committedTransactionsCosts = new ArrayList<Double>();
 		this.creditsToSell = 0;
 		this.creditsToSellTarget = 0;
+		this.absorptionInvestmentTarget = Constants.MINIMAL_INVESTMENT;
+		this.reductionInvestmentTarget = Constants.MINIMAL_INVESTMENT;
 		this.lastYearFactor = 1;
 		
 	}
@@ -162,29 +169,93 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		// TODO implement
 	}
 	
+	private void increaseAbsorptionInvestmentTarget() {
+		absorptionInvestmentTarget = (long) (absorptionInvestmentTarget * Constants.INVESTMENT_SCALING);
+		if (absorptionInvestmentTarget > Constants.MAXIMAL_INVESTMENT) {
+			absorptionInvestmentTarget = Constants.MAXIMAL_INVESTMENT;
+		}
+	}
+	
+	private void decreaseAbsorptionInvestmentTarget() {
+		absorptionInvestmentTarget = (long) (absorptionInvestmentTarget / Constants.INVESTMENT_SCALING);
+		if (absorptionInvestmentTarget < Constants.MINIMAL_INVESTMENT) {
+			absorptionInvestmentTarget = Constants.MINIMAL_INVESTMENT;
+		}
+	}
+	
+	private void increaseReductionInvestmentTarget() {
+		reductionInvestmentTarget = (long) (reductionInvestmentTarget * Constants.INVESTMENT_SCALING);
+		if (reductionInvestmentTarget > Constants.MAXIMAL_INVESTMENT) {
+			reductionInvestmentTarget = Constants.MAXIMAL_INVESTMENT;
+		}
+	}
+	
+	private void decreaseReductionInvestmentTarget() {
+		reductionInvestmentTarget = (long) (reductionInvestmentTarget / Constants.INVESTMENT_SCALING);
+		if (reductionInvestmentTarget < Constants.MINIMAL_INVESTMENT) {
+			reductionInvestmentTarget = Constants.MINIMAL_INVESTMENT;
+		}
+	}
+	
 	private void carbonAbsorptionInvestment () {
-		long investmentCost = carbonAbsorptionHandler.getCost(Constants.INVESTMENT_AMOUNT);
-		long potentialProfit = Constants.INVESTMENT_AMOUNT * internalPrice;
+		long investmentCost;
+		long potentialProfit;
 		
-		if (potentialProfit > investmentCost) {
-			// TODO add exception handling
-			//carbonAbsorptionHandler.invest(investmentCost);
-			logger.info("Post-Communist Country " + this.getName() + " invested " + String.valueOf(investmentCost) + " in carbon absorption");
-			// We don't check if we have enough money and land, as there are no functions for it.
-			//  While the former is checked by the handler function, the latter is not - should be implemented.
-			//  Should we react if we don't have enough of either?
+		try {
+			investmentCost = carbonAbsorptionHandler.getCost(Constants.MINIMAL_INVESTMENT);
+			potentialProfit = Constants.MINIMAL_INVESTMENT * internalPrice;
+			
+			if (potentialProfit > investmentCost) {
+				carbonAbsorptionHandler.invest(investmentCost);
+				increaseAbsorptionInvestmentTarget();
+				logger.info("Post-Communist Country " + this.getName() + " invested " + String.valueOf(investmentCost) + " in carbon absorption");
+			}
+			else {
+				decreaseAbsorptionInvestmentTarget();
+				logger.info("Post-Communist Country " + this.getName() + " deemed carbon absorption not profitable");
+			}
+		}
+		catch (NotEnoughCashException e) {
+			decreaseAbsorptionInvestmentTarget();
+			logger.info("Post-Communist Country " + this.getName() + " has insufficient funds for carbon absorption");
+		}
+		catch (NotEnoughLandException e) {
+			decreaseAbsorptionInvestmentTarget();
+			logger.info("Post-Communist Country " + this.getName() + " has insufficient land for carbon absorption");
+		}
+		catch (Exception e) {
+			logger.warn("Problem investing in carbon absorption");
 		}
 	}
 	
 	private void carbonReductionInvestment () {
-		long investmentCost = carbonReductionHandler.getCost(Constants.INVESTMENT_AMOUNT);
-		long potentialProfit = Constants.INVESTMENT_AMOUNT * internalPrice;
+		long investmentCost;
+		long potentialProfit;
 		
-		if (potentialProfit > investmentCost) {
-			// TODO add exception handling
-			//carbonReductionHandler.invest(investmentCost);
-			logger.info("Post-Communist Country " + this.getName() + " invested " + String.valueOf(investmentCost) + " in carbon reduction");
-			// Same problem as in carbonAbsorptionInvestment
+		try {
+			investmentCost = carbonReductionHandler.getCost(Constants.MINIMAL_INVESTMENT);
+			potentialProfit = Constants.MINIMAL_INVESTMENT * internalPrice;
+			
+			if (potentialProfit > investmentCost) {
+				carbonReductionHandler.invest(investmentCost);
+				increaseReductionInvestmentTarget();
+				logger.info("Post-Communist Country " + this.getName() + " invested " + String.valueOf(investmentCost) + " in carbon reduction");
+			}
+			else {
+				decreaseReductionInvestmentTarget();
+				logger.info("Post-Communist Country " + this.getName() + " deemed carbon reduction not profitable");
+			}
+		}
+		catch (NotEnoughCashException e) {
+			decreaseReductionInvestmentTarget();
+			logger.info("Post-Communist Country " + this.getName() + " has insufficient funds for carbon reduction");
+		}
+		catch (NotEnoughCarbonOutputException e) {
+			decreaseReductionInvestmentTarget();
+			logger.info("Post-Communist Country " + this.getName() + " has insufficient carbon output for carbon reduction");
+		}
+		catch (Exception e) {
+			logger.warn("Problem investing in carbon reduction");
 		}
 	}
 	
