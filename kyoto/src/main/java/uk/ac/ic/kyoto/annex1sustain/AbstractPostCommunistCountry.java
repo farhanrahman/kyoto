@@ -6,6 +6,7 @@ import java.util.List;
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.market.FossilPrices;
+import uk.ac.ic.kyoto.services.TimeService;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
@@ -21,18 +22,17 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
     // PrivateFields
     //================================================================================
 	
+	// TODO add comments
 	protected long	 		internalPrice;
 	protected List<Double> 	uncommittedTransactionsCosts;
 	protected List<Double> 	committedTransactionsCosts;
 	protected long 			creditsToSell;
 	protected long 			creditsToSellTarget;
-	protected double		lastYearFactor;
+	protected double		lastYearFactor; // wtf is factor?
 	
 	// temporary variables
 	// TODO use the variables from AbstractCountry
-	protected long 			currentYear;
-	protected long 			ticksToEndOfRound;
-	protected long 			availableCredits; // corresponds to carbon offset
+	//protected long 			ticksToEndOfRound;
 	
 	//================================================================================
     // Constructors
@@ -81,7 +81,6 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 */
 	@EventListener
 	public void updateTickData(EndOfTimeCycle e) {
-		updateCounter();
 		updateUncommittedTransactions();
 		updateCommittedTransactions();
 		updateInternalPrice();
@@ -132,6 +131,10 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	private double calculateEndOfRoundFactor() {
 		double endOfRoundFactor = 1;
 		try {
+			// get ticksToEndOfRound from Time service
+			TimeService timeService = getEnvironmentService(TimeService.class);
+			int ticksToEndOfRound = timeService.getTicksInYear() - timeService.getCurrentTick();
+			
 			if(ticksToEndOfRound < Constants.END_OF_ROUND_MINIMUM_NUMBER_OF_TICKS)
 				endOfRoundFactor = 	Constants.END_OF_ROUND_FACTOR_SLOPE *
 									(
@@ -153,11 +156,6 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	
 	private void updateCommittedTransactions() {
 		// TODO implement
-	}
-	
-	// TODO implement it in another way
-	private void updateCounter() {
-		ticksToEndOfRound--;
 	}
 	
 	private void carbonAbsorptionInvestment () {
@@ -223,10 +221,14 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	private double calculateFossilFuelsFactor() {
 		double fossilFuelsFactor;
 		
-		try {
-			FossilPrices fossilPrices = getEnvironmentService(FossilPrices.class);
+		try {			
+			
+			// get current year from the Time service
+			TimeService timeService = getEnvironmentService(TimeService.class);
+			int currentYear = timeService.getCurrentYear();
 			
 			// get the data from the FossilPrices Service
+			FossilPrices fossilPrices = getEnvironmentService(FossilPrices.class);
 			double newOilPrice = fossilPrices.getOilPrice(currentYear);
 			double oldOilPrice = fossilPrices.getOilPrice(currentYear - 1);
 			double newGasPrice = fossilPrices.getGasPrice(currentYear);
@@ -300,8 +302,8 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 						  calculateMarketFactor() );
 			
 			// Adjust the new target if out of possible range
-			if (newSellingTarget > availableCredits) {
-				newSellingTarget = availableCredits;
+			if (newSellingTarget > carbonOffset) {
+				newSellingTarget = carbonOffset;
 			}
 		}
 		catch (Exception e) {

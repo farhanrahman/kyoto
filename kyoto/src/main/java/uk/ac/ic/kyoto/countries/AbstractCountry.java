@@ -147,6 +147,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	public void execute() {
 		super.execute();
 		try {
+			// TODO make sure that the proper getters are used
 			TimeService timeService = getEnvironmentService(TimeService.class);
 			if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
 				YearlyFunction();
