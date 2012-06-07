@@ -95,8 +95,13 @@ public class CarbonTarget extends EnvironmentService {
 	 */
 	private int generateSessionTarget(UUID country, int Session)
 	{
-		return 0;
+		/*
+		 * TO BE IMPLEMENTED
+		 * 
+		 * Data needs to be loaded from somewhere. MongoDB?
+		 */
 		
+		return 0;
 	}
 	
 	/*
@@ -104,8 +109,10 @@ public class CarbonTarget extends EnvironmentService {
 	 */
 	private int generateYearTarget()
 	{
+		/*
+		 * TO BE IMPLEMENTED
+		 */
 		return 0;
-		
 	}	
 	
 	public long queryTarget(UUID country) {
