@@ -20,7 +20,7 @@ public final class Constants {
 	
 	// Constants to determine when to invest
 	public static final long MINIMAL_INVESTMENT = 1;
-	public static final long MAXIMAL_INVESTMENT = 1;
-	public static final double INVESTMENT_SCALING = 1;
+	public static final long MAXIMAL_INVESTMENT = 16;
+	public static final double INVESTMENT_SCALING = 2;
 
 }
