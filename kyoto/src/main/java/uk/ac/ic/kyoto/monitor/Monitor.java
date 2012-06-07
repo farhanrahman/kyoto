@@ -39,13 +39,13 @@ public class Monitor extends EnvironmentService {
 				Serializable state = sharedState.get(CarbonReportingService.name, a.getID());
 				Map<Integer, Double> reports = (Map<Integer, Double>)state;
 				if (realCarbonOutput != reports.get(SimTime.get().intValue())) {
-					Sanction(a);
+					sanction(a);
 				}
 			}
 		}
 	}
 	
-	private void Sanction(AbstractCountry sanctionee) {
+	private void sanction(AbstractCountry sanctionee) {
 		// TODO implementation of sanctions for cheating
 	}
 	
