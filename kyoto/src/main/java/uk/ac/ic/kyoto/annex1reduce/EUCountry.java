@@ -30,7 +30,7 @@ public class EUCountry extends AbstractCountry {
 		super(id, name, ISO, landArea, arableLandArea, GDP,
 					GDPRate, availiableToSpend, emissionsTarget, carbonOffset,
 					energyOutput, carbonOutput);
-		
+
 		engine = EUBehaviours.getEngine(name);
 	}
 
