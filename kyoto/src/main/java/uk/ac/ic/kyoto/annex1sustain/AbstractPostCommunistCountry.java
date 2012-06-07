@@ -1,5 +1,6 @@
 package uk.ac.ic.kyoto.annex1sustain;
 
+import java.util.ArrayList;
 import java.util.UUID;
 import java.util.List;
 
@@ -23,17 +24,13 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
     //================================================================================
 	
 	// TODO add comments
-	protected long	 		internalPrice;
-	protected List<Double> 	uncommittedTransactionsCosts;
-	protected List<Double> 	committedTransactionsCosts;
-	protected long 			creditsToSell;
-	protected long 			creditsToSellTarget;
-	protected double		lastYearFactor; // wtf is factor?
-	
-	// temporary variables
-	// TODO use the variables from AbstractCountry
-	//protected long 			ticksToEndOfRound;
-	
+	protected long	 		internalPrice;					//
+	protected List<Double> 	uncommittedTransactionsCosts;	//
+	protected List<Double> 	committedTransactionsCosts;		//
+	protected long 			creditsToSell;					//
+	protected long 			creditsToSellTarget;			//
+	protected double		lastYearFactor;					// wtf is factor?
+		
 	//================================================================================
     // Constructors
     //================================================================================
@@ -44,7 +41,14 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	{
 		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, emissionsTarget,
 				carbonOffset, energyOutput, energyOutput, energyOutput);
-		// TODO Initialize the fields
+		
+		// TODO make sure the initialisation is fine
+		this.internalPrice = Long.MAX_VALUE;
+		this.uncommittedTransactionsCosts = new ArrayList<Double>();
+		this.committedTransactionsCosts = new ArrayList<Double>();
+		this.creditsToSell = 0;
+		this.creditsToSellTarget = 0;
+		this.lastYearFactor = 1;
 		
 	}
 	
@@ -163,6 +167,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		long potentialProfit = Constants.INVESTMENT_AMOUNT * internalPrice;
 		
 		if (potentialProfit > investmentCost) {
+			// TODO add exception handling
 			//carbonAbsorptionHandler.invest(investmentCost);
 			logger.info("Post-Communist Country " + this.getName() + " invested " + String.valueOf(investmentCost) + " in carbon absorption");
 			// We don't check if we have enough money and land, as there are no functions for it.
@@ -176,6 +181,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		long potentialProfit = Constants.INVESTMENT_AMOUNT * internalPrice;
 		
 		if (potentialProfit > investmentCost) {
+			// TODO add exception handling
 			//carbonReductionHandler.invest(investmentCost);
 			logger.info("Post-Communist Country " + this.getName() + " invested " + String.valueOf(investmentCost) + " in carbon reduction");
 			// Same problem as in carbonAbsorptionInvestment
