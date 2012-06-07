@@ -59,6 +59,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		
 	}
 	
+	
 	//================================================================================
     // Overridden functions
     //================================================================================
@@ -80,6 +81,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		
 	}
 	
+	
 	//================================================================================
     // Public methods to update data
     //================================================================================
@@ -98,6 +100,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		logger.info("Internal Data of Post-Communist Country " + this.getName() + " was updated");
 		makeInvestments();
 	}
+	
 	
 	//================================================================================
     // Private functions called every tick
@@ -169,6 +172,14 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		// TODO implement
 	}
 	
+	
+	//================================================================================
+    // Investment functions
+    //================================================================================
+	
+	/**
+	 * Increases the new carbon absorption investment target. Adjusts it if out of limits.
+	 */
 	private void increaseAbsorptionInvestmentTarget() {
 		absorptionInvestmentTarget = (long) (absorptionInvestmentTarget * Constants.INVESTMENT_SCALING);
 		if (absorptionInvestmentTarget > Constants.MAXIMAL_INVESTMENT) {
@@ -176,6 +187,9 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		}
 	}
 	
+	/**
+	 * Decreases the new carbon absorption investment target. Adjusts it if out of limits.
+	 */
 	private void decreaseAbsorptionInvestmentTarget() {
 		absorptionInvestmentTarget = (long) (absorptionInvestmentTarget / Constants.INVESTMENT_SCALING);
 		if (absorptionInvestmentTarget < Constants.MINIMAL_INVESTMENT) {
@@ -183,6 +197,9 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		}
 	}
 	
+	/**
+	 * Increases the new carbon reduction investment target. Adjusts it if out of limits.
+	 */
 	private void increaseReductionInvestmentTarget() {
 		reductionInvestmentTarget = (long) (reductionInvestmentTarget * Constants.INVESTMENT_SCALING);
 		if (reductionInvestmentTarget > Constants.MAXIMAL_INVESTMENT) {
@@ -190,6 +207,9 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		}
 	}
 	
+	/**
+	 * Decreases the new carbon reduction investment target. Adjusts it if out of limits.
+	 */
 	private void decreaseReductionInvestmentTarget() {
 		reductionInvestmentTarget = (long) (reductionInvestmentTarget / Constants.INVESTMENT_SCALING);
 		if (reductionInvestmentTarget < Constants.MINIMAL_INVESTMENT) {
@@ -197,6 +217,10 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		}
 	}
 	
+	/**
+	 * Calculates if potential profit made by selling acquired credits outweighs the cost of investment in carbon absorption.
+	 * If so, tries to invest. Increases the next investment target on success, decreases on failure.
+	 */
 	private void carbonAbsorptionInvestment () {
 		long investmentCost;
 		long potentialProfit;
@@ -228,6 +252,10 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		}
 	}
 	
+	/**
+	 * Calculates if potential profit made by selling acquired credits outweighs the cost of investment in carbon reduction.
+	 * If so, tries to invest. Increases the next investment target on success, decreases on failure.
+	 */
 	private void carbonReductionInvestment () {
 		long investmentCost;
 		long potentialProfit;
@@ -259,20 +287,57 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		}
 	}
 	
+	/**
+	 * Calculates if potential profit made by selling acquired credits outweighs the cost of investment in other countries.
+	 * If so, tries to invest. Increases the next investment target on success, decreases on failure.
+	 */
 	private void otherCountriesInvestment () {
 		// TODO implement
 		//   There are no handlers for investing in other countries yet
 	}
 	
+	/**
+	 * Calls all the investment functions.
+	 */
 	private void makeInvestments() {
 		carbonAbsorptionInvestment();
 		carbonReductionInvestment();
 		otherCountriesInvestment();
 	}
 	
+	
 	//================================================================================
     // Private functions called every year
     //================================================================================
+	
+	/**
+	 * Returns a new target, which is a multiplication of three factors:
+	 * - available credits
+	 * - fossil fuels historical prices
+	 * - current state of the market
+	 * All adjusted with a constant coefficient.
+	 */
+	protected void calculateNewSellingTarget() {
+		long newSellingTarget;
+		
+		try {
+			// Calculate new target based on three factors
+			newSellingTarget =	(long) 
+						( calculateAvailableCreditsFactor() *
+						  calculateFossilFuelsFactor() *
+						  calculateMarketFactor() );
+			
+			// Adjust the new target if out of possible range
+			if (newSellingTarget > carbonOffset) {
+				newSellingTarget = carbonOffset;
+			}
+		}
+		catch (Exception e) {
+			logger.warn("Problem when calculating newTarget " + e);
+			newSellingTarget = creditsToSellTarget;
+		}
+		creditsToSellTarget = newSellingTarget;
+	}
 	
 	/**
 	 * Gets the number of credits available to sell.
@@ -359,35 +424,6 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			marketFactor = 1;
 		}
 		return marketFactor;
-	}
-	
-	/**
-	 * Returns a new target, which is a multiplication of three factors:
-	 * - available credits
-	 * - fossil fuels historical prices
-	 * - current state of the market
-	 * All adjusted with a constant coefficient.
-	 */
-	protected void calculateNewSellingTarget() {
-		long newSellingTarget;
-		
-		try {
-			// Calculate new target based on three factors
-			newSellingTarget =	(long) 
-						( calculateAvailableCreditsFactor() *
-						  calculateFossilFuelsFactor() *
-						  calculateMarketFactor() );
-			
-			// Adjust the new target if out of possible range
-			if (newSellingTarget > carbonOffset) {
-				newSellingTarget = carbonOffset;
-			}
-		}
-		catch (Exception e) {
-			logger.warn("Problem when calculating newTarget " + e);
-			newSellingTarget = creditsToSellTarget;
-		}
-		creditsToSellTarget = newSellingTarget;
 	}
 	
 	/**
