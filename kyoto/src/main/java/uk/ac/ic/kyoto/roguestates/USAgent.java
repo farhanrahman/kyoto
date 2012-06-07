@@ -93,7 +93,7 @@ public class USAgent extends NonParticipant {
 	@Override
 	public void execute() {
 		// TODO Auto-generated method stub
-		
+		super.execute();
 	}
 
 }

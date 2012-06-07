@@ -59,4 +59,9 @@ public final class GameConst {
 	 * Increases in linear amounts for each transgression.
 	 */
 	public static double SANCTION_RATE = 0.05;
+	
+	/**
+	 * Price for each monitor
+	 */
+	public static double MONITORING_PRICE = 5000;
 }
