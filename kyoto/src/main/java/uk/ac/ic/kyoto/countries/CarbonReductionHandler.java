@@ -6,7 +6,7 @@ package uk.ac.ic.kyoto.countries;
  */
 public final class CarbonReductionHandler{
 	
-	private final AbstractCountry abstractCountry;
+	private final AbstractCountry country;
 
 	/**
 	 * Create instance of CarbonReductionHandler
@@ -14,7 +14,7 @@ public final class CarbonReductionHandler{
 	 * Specify on which country will the handler operate
 	 */
 	CarbonReductionHandler(AbstractCountry abstractCountry) {
-		this.abstractCountry = abstractCountry;
+		this.country = abstractCountry;
 	}
 
 	/**
@@ -26,9 +26,13 @@ public final class CarbonReductionHandler{
 	 */
 	public final long getCost(double carbonOutputChange){
 		long cost;
-		
-		cost = (long) (GameConst.CARBON_REDUCTION_COEFF * carbonOutputChange / this.abstractCountry.energyOutput);
-		
+		try {
+			cost = (long) (GameConst.CARBON_REDUCTION_COEFF * carbonOutputChange / this.country.energyOutput);
+		}
+		catch (ArithmeticException e) {
+			country.logger.warn("Division by 0 error: " + e);
+			cost = Long.MAX_VALUE;
+		}
 		return cost;
 	}
 	
@@ -41,9 +45,9 @@ public final class CarbonReductionHandler{
 	 */
 	public final double getCarbonOutputChange(long cost) {
 		double carbonOutputChange;
-		
-		carbonOutputChange = this.abstractCountry.energyOutput * cost / GameConst.CARBON_REDUCTION_COEFF;
-		
+
+		carbonOutputChange = this.country.energyOutput * cost / GameConst.CARBON_REDUCTION_COEFF;
+
 		return carbonOutputChange;
 	}
 	
@@ -56,9 +60,9 @@ public final class CarbonReductionHandler{
 	 * @throws Exception
 	 */
 	public final void invest(long investment) throws Exception{
-		if (investment < this.abstractCountry.availableToSpend){
-			this.abstractCountry.availableToSpend -= investment;
-			this.abstractCountry.carbonOutput -= getCarbonOutputChange(investment);
+		if (investment <= this.country.availableToSpend){
+			this.country.availableToSpend -= investment;
+			this.country.carbonOutput -= getCarbonOutputChange(investment);
 		}
 		else {
 			throw new Exception("Investment is greater than available cash to spend");
