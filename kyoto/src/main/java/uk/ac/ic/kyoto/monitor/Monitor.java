@@ -70,7 +70,7 @@ public class Monitor extends EnvironmentService {
 		
 		//5% higher target regardless of number of sins (compound)
 		// TODO Should this apply straight away or from next session?
-		sanctionee.setEmissionsTarget((long) (sanctionee.getEmissionsTarget()*target_penalty));
+		//sanctionee.setEmissionsTarget((long) (sanctionee.getEmissionsTarget()*target_penalty));  TODO: Decide on this penalty
 		
 		//linearly increasing fine - first time free, 5% more for each time after
 		sanctionee.setAvailableToSpend(sanctionee.getID(), (long) (sanctionee.getAvailableToSpend()*(sinCount-1)*cash_penalty));
