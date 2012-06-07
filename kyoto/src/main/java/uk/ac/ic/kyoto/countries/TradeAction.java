@@ -1,7 +1,6 @@
 package uk.ac.ic.kyoto.countries;
 
 import java.util.UUID;
-
 import uk.ac.ic.kyoto.trade.Trade;
 import uk.ac.imperial.presage2.core.Action;
 import uk.ac.imperial.presage2.core.Time;
@@ -26,10 +25,10 @@ public class TradeAction implements Action {
 	
 	@Override
 	public String toString() {
-		return "Trade occurred";
+		return "Trade occurred at: " + time.intValue() + " between "+ initiator + " and " + receiver;
 	}
 
-	public Trade getT() {
+	public Trade getTrade() {
 		return t;
 	}
 	
@@ -44,6 +43,5 @@ public class TradeAction implements Action {
 	public UUID getReceiver() {
 		return receiver;
 	}
-	
 
 }
