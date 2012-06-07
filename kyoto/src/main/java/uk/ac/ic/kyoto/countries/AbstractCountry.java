@@ -144,7 +144,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
     //================================================================================
 	
 	@Override
-	public void execute() {
+	final public void execute() {
 		super.execute();
 		try {
 			// TODO make sure that the proper getters are used
@@ -163,7 +163,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			logger.warn(e.getMessage(), e);
 			e.printStackTrace();
 		}
+		behaviour();
 	}
+	
+	abstract protected void behaviour();
 	
 
 	public void MonitorTax() {
