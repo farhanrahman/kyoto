@@ -24,7 +24,9 @@ import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
  */
 public abstract class AbstractCountry extends AbstractParticipant {
 	
-	//TODO Register UUID and country ISO with the environment
+	//================================================================================
+    // Definitions of Parameters of a Country
+    //================================================================================
 	
 	final protected String ISO;		//ISO 3166-1 alpha-3
 	
@@ -32,39 +34,46 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * These variables are related to land area for
 	 * dealing with carbon absorption prices
 	 */
-	final protected double 	landArea;
-	protected double 		arableLandArea;
+	final protected double 		landArea;
+	protected 		double 		arableLandArea;
 	
 	/*
 	 * These variables are related to carbon emissions and 
 	 * calculating 'effective' carbon output
 	 */
-	protected long 	carbonOutput; // In tons of carbon dioxide
-	protected long 	carbonOffset; // In tons of carbon
-	protected long	emissionsTarget; // Number of tons of carbon you SHOULD produce
+	protected 		long 		carbonOutput;		// Tons of CO2 produced every year
+	protected 		long 		carbonOffset; 		// Tons of CO2 that the country acquired (by trading or energy absorption)
+	protected 		long		emissionsTarget;	// Number of tons of carbon you SHOULD produce
 	
 	/*
 	 * These variables are related to GDP and
 	 * available funds to spend on carbon trading and industry.
 	 */
-	protected double 	GDP;
-	protected double 	GDPRate;	// The rate in which the DGP changes in a given year. Expressed in %
-	protected long  	energyOutput; // How much Carbon we would use if the whole industry was carbon based. Measured in Tons of Carbon per year
-	protected long 		availableToSpend; // Note, can NOT be derived from GDP. Initial value can be derived from there, but cash reserves need to be able to lower independently.
+	protected 		double 		GDP;				// GDP of the country in millions of dollars. Changes every year
+	protected 		double 		GDPRate;			// The rate in which the GDP changes in a given year. Expressed in %
+	protected 		long  		energyOutput;		// How much Carbon we would use if the whole industry was carbon based. Measured in Tons of Carbon per year
+	protected 		long 		availableToSpend;	// Measure of cash available to the country in millions of dollars. Note, can NOT be derived from GDP. Initial value can be derived from there, but cash reserves need to be able to lower independently.
 	
-	//private long 	carbonTraded; 
-	//private double  dirtyIndustry;
-
-	protected Map<Integer, Long> carbonEmissionReports;
+	
+	protected 		Map<Integer, Long> carbonEmissionReports;
 	
 	ParticipantCarbonReportingService reportingService; // TODO add visibility
 	Monitor monitor;
 	
 	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
+	
+	/*
+	 * Handlers for different actions that can be performed by the country
+	 */
 	protected CarbonReductionHandler 	carbonReductionHandler;
 	protected CarbonAbsorptionHandler 	carbonAbsorptionHandler;
+	protected EnergyUsageHandler		energyUsageHandler;
 
 	protected Logger logger;
+	
+	//================================================================================
+    // Constructors and Initializers
+    //================================================================================
 	
 	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
 					double GDPRate, long availableToSpend, long emissionsTarget, long carbonOffset,
@@ -86,11 +95,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.energyOutput = energyOutput;
 		
 		// Create an instance of a logger
-		logger = Logger.getLogger(name);
+		logger = Logger.getLogger(name); // can we do it in constructor?
 	}
-	
-	@Override
-	abstract protected void processInput(Input input);
 	
 	@Override
 	public void initialise(){
@@ -104,9 +110,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			System.out.println("Unable to reach monitor service.");
 			e1.printStackTrace();
 		}
-		
+		// Initialize the Action Handlers
 		carbonAbsorptionHandler = new CarbonAbsorptionHandler(this);
 		carbonReductionHandler = new CarbonReductionHandler(this);
+		energyUsageHandler = new EnergyUsageHandler(this);
+		
+		// Connect to the Reporting Service
 		try {
 			this.reportingService = this.getEnvironmentService(ParticipantCarbonReportingService.class);
 		} catch (UnavailableServiceException e) {
@@ -115,32 +124,20 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		}
 	}
 	
+	//================================================================================
+    // Definitions of Abstract methods
+    //================================================================================
+	
+	@Override
+	protected abstract void processInput(Input input);
+	
 	public abstract void YearlyFunction();
 	
 	public abstract void SessionFunction();
 	
-	private void GDPRate() {
-		double marketStateFactor = 0;
-		
-		Economy economy;
-		try {
-			economy = getEnvironmentService(Economy.class);
-		
-		switch(economy.getEconomyState()) {
-		case GROWTH:
-			marketStateFactor = GameConst.GROWTH_MARKET_STATE;
-		case STABLE:
-			marketStateFactor = GameConst.STABLE_MARKET_STATE;
-		case RECESSION:
-			marketStateFactor = GameConst.RECESSION_MARKET_STATE;
-		}
-		
-		GDPRate = GDPRate + marketStateFactor + (GameConst.GROWTH_SCALER*(energyOutput))/GDP;
-		} catch (UnavailableServiceException e) {
-			System.out.println("Unable to reach economy service.");
-			e.printStackTrace();
-		}
-	}
+	//================================================================================
+    // Public methods
+    //================================================================================
 	
 	@Override
 	public void execute() {
@@ -150,7 +147,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
 				YearlyFunction();
 				MonitorTax();
-				GDPRate();
+				updateGDPRate();
 			}
 			if (timeService.getCurrentYear() % timeService.getYearsInSession() == 0) {
 				SessionFunction();
@@ -166,6 +163,20 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		// Give a tax to Monitor agent for monitoring every year
 		this.monitor.taxForMonitor(availableToSpend*GameConst.MONITOR_COST_PERCENTAGE); // Take % of money for monitoring
 		availableToSpend -= availableToSpend*GameConst.MONITOR_COST_PERCENTAGE;
+	}
+
+	/**
+	 * Method used for monitoring. Is called randomly by the Monitor agent
+	 * @return 
+	 */
+	public final long getMonitored() {
+//		long latestReport = this.carbonEmissionReports.get(SimTime.get().intValue());
+//		long trueCarbon = this.carbonOutput;
+//		
+//		if (latestReport != trueCarbon) {
+//				//TODO - Insert sanctions here!
+//		}
+		return carbonOutput;
 	}
 	
 	protected Set<ParticipantSharedState> getSharedState(){
@@ -214,8 +225,36 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return new Double(carbonOutput);
 	}
 	
+	//================================================================================
+    // Private methods
+    //================================================================================
 	
-	// GDP related functions
+	private void updateGDPRate() {
+		double marketStateFactor = 0;
+		
+		Economy economy;
+		try {
+			economy = getEnvironmentService(Economy.class);
+		
+		switch(economy.getEconomyState()) {
+		case GROWTH:
+			marketStateFactor = GameConst.GROWTH_MARKET_STATE;
+		case STABLE:
+			marketStateFactor = GameConst.STABLE_MARKET_STATE;
+		case RECESSION:
+			marketStateFactor = GameConst.RECESSION_MARKET_STATE;
+		}
+		
+		GDPRate = GDPRate + marketStateFactor + (GameConst.GROWTH_SCALER*(energyOutput))/GDP;
+		} catch (UnavailableServiceException e) {
+			System.out.println("Unable to reach economy service.");
+			e.printStackTrace();
+		}
+	}
+	
+	//================================================================================
+    // Public getters
+    //================================================================================
 	
 	public Double getCash(){
 		return this.GDP*GameConst.PERCENTAGE_OF_GDP;
@@ -251,19 +290,5 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	public void setEmissionsTarget(long emissionsTarget) {
 		this.emissionsTarget = emissionsTarget;
-	}
-
-	/**
-	 * Method used for monitoring. Is called randomly by the Monitor agent
-	 * @return 
-	 */
-	public final long getMonitored() {
-//		long latestReport = this.carbonEmissionReports.get(SimTime.get().intValue());
-//		long trueCarbon = this.carbonOutput;
-//		
-//		if (latestReport != trueCarbon) {
-//				//TODO - Insert sanctions here!
-//		}
-		return carbonOutput;
 	}
 }
