@@ -72,7 +72,7 @@ public final class EnergyUsageHandler {
 			this.country.availableToSpend -= cost;
 		}
 		else {
-			throw new Exception("Investment is greater than available cash to spend");
+			throw new NotEnoughCashException();
 		}
 	}
 }

@@ -86,11 +86,11 @@ public final class CarbonAbsorptionHandler{
 				country.arableLandArea -= arableAreaUsed;
 			}
 			else {
-				throw new Exception("Not enough arable land for the investment");
+				throw new NotEnoughLandException();
 			}
 		}
 		else {
-			throw new Exception("Investment is greater than available cash to spend");
+			throw new NotEnoughCashException();
 		}
 	}
 }
