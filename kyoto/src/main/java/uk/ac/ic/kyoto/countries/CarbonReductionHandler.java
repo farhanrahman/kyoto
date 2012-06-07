@@ -65,7 +65,7 @@ public final class CarbonReductionHandler{
 			this.country.carbonOutput -= getCarbonOutputChange(investment);
 		}
 		else {
-			throw new Exception("Investment is greater than available cash to spend");
+			throw new NotEnoughCashException();
 		}
 	}
 }
