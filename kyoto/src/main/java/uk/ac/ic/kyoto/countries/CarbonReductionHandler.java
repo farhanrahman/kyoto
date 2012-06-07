@@ -60,9 +60,17 @@ public final class CarbonReductionHandler{
 	 * @throws Exception
 	 */
 	public final void invest(long investment) throws Exception{
+		// calculate the decrease in carbon output
+		double carbonOutputChange = getCarbonOutputChange(investment);
+		
 		if (investment <= this.country.availableToSpend){
-			this.country.availableToSpend -= investment;
-			this.country.carbonOutput -= getCarbonOutputChange(investment);
+			if (carbonOutputChange <= this.country.carbonOutput) {
+				this.country.availableToSpend -= investment;
+				this.country.carbonOutput -= carbonOutputChange;
+			}
+			else {
+				throw new NotEnoughCarbonOutputException();
+			}
 		}
 		else {
 			throw new NotEnoughCashException();

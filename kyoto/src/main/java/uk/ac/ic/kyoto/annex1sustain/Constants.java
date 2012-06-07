@@ -19,7 +19,8 @@ public final class Constants {
 	public static final double SELL_AMOUNT_COEFFICIENT = 1;
 	
 	// Constants to determine when to invest
-	public static final long INVESTMENT_AMOUNT = 1;
-	public static final long DECISION_COEFFICIENT = 1;
+	public static final long MINIMAL_INVESTMENT = 1;
+	public static final long MAXIMAL_INVESTMENT = 1;
+	public static final double INVESTMENT_SCALING = 1;
 
 }
