@@ -15,7 +15,7 @@ public class AnalysisUtils {
 	}
 	
 	/**
-	 * 
+	 * Returns the average unit price for the given session
 	 * @param session
 	 * @param type
 	 * @return
@@ -40,14 +40,15 @@ public class AnalysisUtils {
 	}
 	
 	/**
-	 * 
-	 * @param N
+	 * Returns a Range object with the high and low values for the range<br/>
+	 * endTick &#8805; Range &#8804; startTick
 	 * @param startTick
+	 * @param endTick
 	 * @param sessions
 	 * @param type
 	 * @return
 	 */
-	public final static Range nPointRange(int N, int startTick, SessionHistory[] sessions, TradeType type){
+	public final static Range range(int startTick, int endTick, SessionHistory[] sessions, TradeType type){
 		SortedMap<Integer, TickHistory> history = new TreeMap<Integer, TickHistory>();
 		
 		long low = Long.MAX_VALUE;
@@ -59,54 +60,49 @@ public class AnalysisUtils {
 		
 		System.out.print("Size before: " + history.size());
 		
-		history = history.headMap(startTick);
+		history = history.headMap(startTick+1);
+		history = history.tailMap(endTick);
 		
 		System.out.println(" after: " + history.size());
 		
-		int topKey =history.lastKey();
-		
-		for (int i = 0; i < N; i++) {
-			TickHistory temp = history.get(history.lastKey());
+		for (Entry<Integer, TickHistory> tickEntry : history.entrySet()) {
+			TickHistory tick = tickEntry.getValue();
+			
+			System.out.println(tickEntry.getKey());
 			
 			if (type == TradeType.TRADE) {
-				if (temp.getTradeHigh() > high) {
-					high = temp.getTradeHigh();
+				if (tick.getTradeHigh() > high) {
+					high = tick.getTradeHigh();
 				}
 				
-				if (temp.getTradeLow() < low) {
-					low = temp.getTradeLow();
+				if (tick.getTradeLow() < low) {
+					low = tick.getTradeLow();
 				}
 			}else if (type == TradeType.INVESTMENT) {
-				if (temp.getInvestmentHigh() > high) {
-					high = temp.getInvestmentHigh();
+				if (tick.getInvestmentHigh() > high) {
+					high = tick.getInvestmentHigh();
 				}
 				
-				if (temp.getInvestmentLow() < low) {
-					low = temp.getInvestmentLow();
+				if (tick.getInvestmentLow() < low) {
+					low = tick.getInvestmentLow();
 				}
 			}
-			
-			System.out.println("Processing tick " + (topKey-i));
-			
-			history.remove(history.lastKey());
 		}
 		
-		return new Range(type, N, low, high);
-	}
-	
-	enum StdDevType {
-		POPULATION, SAMPLE
+		return new Range(type, startTick, endTick, low, high);
 	}
 	
 	public static class Range{
 		public final TradeType type;
-		public final int N;
+		public final int startTick;
+		public final int endTick;
 		public final long low;
 		public final long high;
 		
-		public Range(TradeType type, int N, long low, long high) {
+		public Range(TradeType type, int startTick, int endTick, long low, long high) {
 			this.type = type;
-			this.N = N;
+			this.startTick = startTick;
+			this.endTick = endTick;
 			this.low = low;
 			this.high = high;
 		}
