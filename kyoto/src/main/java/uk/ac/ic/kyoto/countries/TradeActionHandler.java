@@ -32,7 +32,7 @@ public class TradeActionHandler implements ActionHandler{
 		if(action instanceof TradeAction){
 			TradeAction a = (TradeAction) action;
 			synchronized(tas){
-				this.tas.executeTrade(a.getT(), a.getTime(), a.getInitiator(), a.getReceiver() );
+				this.tas.executeTrade(a.getOffer(), a.getTime(), a.getInitiator(), a.getReceiver() );
 			}
 			return null;
 		}

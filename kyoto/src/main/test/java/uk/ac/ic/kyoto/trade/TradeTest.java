@@ -6,10 +6,11 @@ package java.uk.ac.ic.kyoto.trade;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import java.util.UUID;
+
 import org.junit.Test;
+
+import uk.ac.ic.kyoto.trade.Offer;
 import uk.ac.ic.kyoto.trade.TradeType;
-import uk.ac.ic.kyoto.trade.Trade;
 
 public class TradeTest {
 
@@ -18,9 +19,8 @@ public class TradeTest {
 		/* Test the Trade class first*/
 		int quantity = 10;
 		int unitCost = 10;
-		UUID id = UUID.randomUUID();
-		Trade buy = new Trade(quantity, unitCost, TradeType.BUY, id);
-		Trade sell = new Trade(quantity, unitCost, TradeType.SELL, id);
+		Offer buy = new Offer(quantity, unitCost, TradeType.BUY);
+		Offer sell = new Offer(quantity, unitCost, TradeType.SELL);
 		/* sanity check: are these actually the same instances!? */
 		assertFalse(sell == buy);
 

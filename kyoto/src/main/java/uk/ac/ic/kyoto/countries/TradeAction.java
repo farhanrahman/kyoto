@@ -1,8 +1,7 @@
 package uk.ac.ic.kyoto.countries;
 
 import java.util.UUID;
-import uk.ac.ic.kyoto.tokengen.Token;
-import uk.ac.ic.kyoto.tokengen.SingletonProvider;
+
 import uk.ac.ic.kyoto.trade.Offer;
 import uk.ac.imperial.presage2.core.Action;
 import uk.ac.imperial.presage2.core.Time;
@@ -16,7 +15,6 @@ public class TradeAction implements Action {
 	final private Time time;
 	final private UUID initiator;
 	final private UUID receiver;
-	final private UUID token;
 	
 	public TradeAction(Offer offer, Time time, UUID initiator, UUID receiver) {
 		super();
@@ -24,7 +22,6 @@ public class TradeAction implements Action {
 		this.time = time;
 		this.initiator = initiator;
 		this.receiver = receiver;
-		this.token = SingletonProvider.get().getToken();
 	}
 	
 	@Override

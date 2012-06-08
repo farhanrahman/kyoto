@@ -2,84 +2,89 @@ package uk.ac.ic.kyoto.countries;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.UUID;
 
+import org.apache.log4j.Logger;
+
+import uk.ac.ic.kyoto.market.Economy;
+import uk.ac.ic.kyoto.monitor.Monitor;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
-import uk.ac.ic.kyoto.trade.PublicOffer;
+import uk.ac.ic.kyoto.services.TimeService;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
-import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
-import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
-import uk.ac.imperial.presage2.core.simulator.SimTime;
-import uk.ac.imperial.presage2.core.util.random.Random;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 /**
  * 
- * @author cs2309
+ * @author cs2309, Adam, Sam, Stuart, Chris
  */
 public abstract class AbstractCountry extends AbstractParticipant {
 	
-	//TODO Register UUID and country ISO with the environment
+	//================================================================================
+    // Definitions of Parameters of a Country
+    //================================================================================
 	
-	final protected String ISO;		//ISO 3166-1 alpha-3
+	final protected String 		ISO;		//ISO 3166-1 alpha-3
+	private 		UUID 		id;
 	
-	
+	// TODO Change visibility of fields
 	/*
 	 * These variables are related to land area for
-	 * dealing with carbon absorbtion prices
+	 * dealing with carbon absorption prices
 	 */
-	final protected double landArea;
-	protected double 	arableLandArea;
+	final protected double 		landArea;
+	protected 		double 		arableLandArea;
 	
 	/*
 	 * These variables are related to carbon emissions and 
 	 * calculating 'effective' carbon output
 	 */
-	protected long 	carbonOutput; // In tons of carbon dioxide
-	protected long 	carbonOffset; // In tons of carbon
-	protected long	emissionsTarget; // Number of tons of carbon you SHOULD produce
+	protected 		long 		carbonOutput;		// Tons of CO2 produced every year
+	protected 		long 		carbonOffset; 		// Tons of CO2 that the country acquired (by trading or energy absorption)
+	protected 		long		emissionsTarget;	// Number of tons of carbon you SHOULD produce
 	
 	/*
 	 * These variables are related to GDP and
 	 * available funds to spend on carbon trading and industry.
 	 */
-	protected double 	GDP;
-	protected double 	GDPRate;
-	protected long  energyOutput; // In tons of carbon equivalence (how much carbon would be used if the whole energy production was carbon based)
-	protected long  energyOutputCeiling; // As above, limit for the energyOutput
-	private float 	availableToSpend; // Note, can NOT be derived from GDP. Initial value can be derived from there, but cash reserves need to be able to lower independently.
+	protected 		double 		GDP;				// GDP of the country in millions of dollars. Changes every year
+	protected 		double 		GDPRate;			// The rate in which the GDP changes in a given year. Expressed in %
+	protected 		long  		energyOutput;		// How much Carbon we would use if the whole industry was carbon based. Measured in Tons of Carbon per year
+	protected 		long 		availableToSpend;	// Measure of cash available to the country in millions of dollars. Note, can NOT be derived from GDP. Initial value can be derived from there, but cash reserves need to be able to lower independently.
 	
-	//private long 	carbonTraded; 
-	//private double  dirtyIndustry;
-
-	/**
-	 * carbonEmission and carbonEmissionReports added
-	 */
-	protected double carbonEmission = 10.0;  //Farhan test
-
-	protected Map<Integer, Double> carbonEmissionReports;
 	
-	ParticipantCarbonReportingService reportingService;
+	protected 		Map<Integer, Long> carbonEmissionReports;
+	
+	ParticipantCarbonReportingService reportingService; // TODO add visibility
+	private Monitor monitor;
 	
 	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
-	protected Set<PublicOffer> 		offers;
+	
+	/*
+	 * Handlers for different actions that can be performed by the country
+	 */
 	protected CarbonReductionHandler 	carbonReductionHandler;
-	protected CarbonAbsorptionHandler carbonAbsorptionHandler;
-
+	protected CarbonAbsorptionHandler 	carbonAbsorptionHandler;
+	protected EnergyUsageHandler		energyUsageHandler;
+	
+	//================================================================================
+    // Constructors and Initializers
+    //================================================================================
+	
 	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
-					double GDPRate, float availableToSpend, long emissionsTarget, long carbonOffset,
-					long energyOutput) {
+					double GDPRate, long availableToSpend, long emissionsTarget, long carbonOffset,
+					long energyOutput, long carbonOutput) {
 
 		//TODO Validate parameters
 		
 		super(id, name);
+		
+		
+		this.id = id;
 		this.landArea = landArea;
 		this.ISO = ISO;
 		this.arableLandArea = arableLandArea;
@@ -87,28 +92,113 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.GDPRate = GDPRate;
 		this.emissionsTarget = emissionsTarget;
 		this.carbonOffset = carbonOffset;
-		this.availableToSpend = availableToSpend; 
-	//	this.carbonTraded = carbonTraded;
-		this.carbonEmissionReports = new HashMap<Integer, Double>();
+		this.availableToSpend = availableToSpend;
+		this.carbonOutput = carbonOutput;
+		this.carbonEmissionReports = new HashMap<Integer, Long>();
 		this.energyOutput = energyOutput;
+		
 	}
 	
 	@Override
-	abstract protected void processInput(Input input);
-	
-	@Override
-	public void initialise(){
+	final public void initialise(){
 		super.initialise();
 		
-		carbonAbsorptionHandler = new CarbonAbsorptionHandler();
-		carbonReductionHandler = new CarbonReductionHandler();
+		// Add the country to the monitor service
+		try {
+			this.monitor = this.getEnvironmentService(Monitor.class);
+			this.monitor.addMemberState(this);
+		} catch (UnavailableServiceException e1) {
+			System.out.println("Unable to reach monitor service.");
+			e1.printStackTrace();
+		}
+		// Initialize the Action Handlers DO THEY HAVE TO BE INSTANTIATED ALL THE TIME?
+		carbonAbsorptionHandler = new CarbonAbsorptionHandler(this);
+		carbonReductionHandler = new CarbonReductionHandler(this);
+		energyUsageHandler = new EnergyUsageHandler(this);
+		
+		// Connect to the Reporting Service
 		try {
 			this.reportingService = this.getEnvironmentService(ParticipantCarbonReportingService.class);
 		} catch (UnavailableServiceException e) {
-			// TODO Auto-generated catch block
+			System.out.println("Unable to reach emission reporting service.");
 			e.printStackTrace();
 		}
 		
+		calculateATS();
+		initialiseCountry();
+	}
+	
+	//================================================================================
+    // Definitions of Abstract methods
+    //================================================================================
+	
+	@Override
+	protected abstract void processInput(Input input);
+	
+	public abstract void YearlyFunction();
+	
+	public abstract void SessionFunction();
+	
+	abstract protected void initialiseCountry();
+	
+	//================================================================================
+    // Public methods
+    //================================================================================
+	
+	@Override
+	final public void execute() {
+		super.execute();
+		try {
+			// TODO make sure that the proper getters are used
+			TimeService timeService = getEnvironmentService(TimeService.class);
+			
+			if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
+				calculateATS();
+				MonitorTax();
+				checkTargets(); //did the countries meet their targets?
+				updateGDP();
+				updateGDPRate();
+				updateCarbonOffsetYearly();
+				YearlyFunction();
+			}
+			if (timeService.getCurrentYear() % timeService.getYearsInSession() == 0) {
+				resetCarbonOffset();
+				SessionFunction();
+			}
+		} catch (UnavailableServiceException e) {
+			logger.warn(e.getMessage(), e);
+			e.printStackTrace();
+		}
+		behaviour();
+	}
+	
+	/**
+	 * All individual country behaviour should occur here
+	 */
+	abstract protected void behaviour();
+	
+	
+	/**
+	 * Taxes individual percentage part of their GDP to pay for the monitor
+	 */
+	public void MonitorTax() {
+		// Give a tax to Monitor agent for monitoring every year
+		this.monitor.applyTaxation(GDP*GameConst.MONITOR_COST_PERCENTAGE); // Take % of GDP for monitoring
+		availableToSpend -= GDP*GameConst.MONITOR_COST_PERCENTAGE;
+	}
+
+	/**
+	 * Method used for monitoring. It is called by the Monitor
+	 * @return
+	 * Real Carbon Output of a country
+	 */
+	public final long getMonitored() {
+		return carbonOutput;
+	}
+	
+	// This functionality may be taken over by the carbonOffsetUpdate
+	public void checkTargets() {
+		//this.monitor.checkTargets();
 	}
 	
 	protected Set<ParticipantSharedState> getSharedState(){
@@ -117,7 +207,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return s;
 	}
 	
-	public Map<Integer,Double> getCarbonEmissionReports(){
+	public Map<Integer,Long> getCarbonEmissionReports(){
 		return this.carbonEmissionReports;
 	}
 	
@@ -127,7 +217,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * @param emission
 	 * @return
 	 */
-	private Map<Integer,Double> addToReports(Time simTime, Double emission){
+	private Map<Integer,Long> addToReports(Time simTime, Long emission){
 		this.carbonEmissionReports.put(simTime.intValue(), emission);
 		return this.carbonEmissionReports;
 	}
@@ -141,202 +231,94 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * @return
 	 */
 	public Double reportCarbonEmission(Time t){
-		//TODO add code to calculate whether to submit true or false report (cheat)
-		//Once calculations done, update the report owned by this agent
-		carbonEmission++; //Default code now just increments it
-		this.addToReports(t, carbonEmission);
-		return new Double(carbonEmission);
-	}
-	
-	/**
-	 * Reduces both the energyOutput and carbonOutput of the country
-	 * It can be used to limit carbonOuput without any financial cost
-	 * As the energyOuput goes down, the GDP growth will be limited
-	 * 
-	 * @param amount
-	 * 
-	 * Amount of energyOuput that should be reduced
-	 * It has to be positive and lower than the total carbonOuput
-	 */
-	public void reduceEnergyOutput (long amount) throws IllegalArgumentException{
-		if (amount < carbonOutput && amount > 0) {
-			energyOutput -= amount;
-			carbonOutput -= amount;
-		}
-		else
-			throw new IllegalArgumentException("Specified amount should be > 0 and < carbonOutput");
-	}
-	
-	/**
-	 * Retrieves the energyOutput and carbonOutput of the country
-	 * It can only be used on the energy that was earlier reduced
-	 * There exists a ceiling of total energy for each country
-	 * 
-	 * @param amount
-	 * 
-	 * Amount of energyOuput that should be retrieved
-	 * It has to be positive and not exceed the energyOuputCeiling
-	 */
-	public void retrieveEnergyOutput (long amount) throws IllegalArgumentException{
-		if (amount > 0) {
-			long newEnergyOutput = energyOutput + amount;
-			if(newEnergyOutput <= energyOutputCeiling) {
-				energyOutput = newEnergyOutput;
-				carbonOutput += amount;
-			}
-			else
-				throw new IllegalArgumentException("You aimed to exceed your Energy Ouput limit");
-		}
-		else
-			throw new IllegalArgumentException("Specified amount should be positive");
-	}
-	
-	public Double getCash(){
-		return this.GDP*GameConst.PERCENTAGE_OF_GDP;
-	}
-	@EventListener
-	public void calculateGDPRate(EndOfTimeCycle e){
-		//TODO Make work, adjust economicOutput
 		
+		// This  is an example of how reporting your carbon output is structured
+		/*try{
+		Time t = SimTime.get();
+		AbstractCountry.this.environment.act(new SubmitCarbonEmissionReport(
+					AbstractCountry.this.reportCarbonEmission(t), t), 
+					AbstractCountry.this.getID(), 
+					AbstractCountry.this.authkey);
+		}catch(ActionHandlingException e){
+			logger.warn("Error trying to submit report");
+		}*/
+		
+		this.addToReports(t, carbonOutput);
+		return new Double(carbonOutput);
+	}
+	
+	//================================================================================
+    // Private methods
+    //================================================================================
+	
+	/**
+	 * Calculates GDP rate for the next year
+	 * @author Adam, ct
+	 */
+	private final void updateGDPRate() {
 		double marketStateFactor = 0;
 		
-		/*Economy.State economyState = Economy.getEconomyState();
+		Economy economy;
+		try {
+			economy = getEnvironmentService(Economy.class);
 		
-		switch(economyState) {
+		switch(economy.getEconomyState()) {
 		case GROWTH:
 			marketStateFactor = GameConst.GROWTH_MARKET_STATE;
 		case STABLE:
 			marketStateFactor = GameConst.STABLE_MARKET_STATE;
 		case RECESSION:
 			marketStateFactor = GameConst.RECESSION_MARKET_STATE;
-		}*/
+		}
 		
 		GDPRate = GDPRate + marketStateFactor + (GameConst.GROWTH_SCALER*(energyOutput))/GDP;
-	}
-	
-	private final class CarbonReductionHandler{
-		
-		final Map<Long, Double> investTable = new TreeMap<Long, Double>();
-//		final ArrayList<Long> investTable = new ArrayList<Long>();
-		
-		public CarbonReductionHandler() {
-			for (double i=0.00; i <= 1.00; i += 0.01) {
-				investTable.put(GameConst.CARBON_REDUCTION_COEFF*Math.round((i/Math.exp(-(1-i)))), i);
-			}
-		}
-		
-		/**
-		 * Returns the cost of investment required to
-		 * reduce dirty industry.
-		 * 
-		 * @param percentage
-		 * 
-		 * Percentage is of your dirty industry.
-		 * Eg. If you have 30% dirty industry, reducing
-		 * by 10% will bring you down to 27%.
-		 * (Because 10% of 30 is 3)
-		 */
-		public final double getCost(double percentage){
-			return GameConst.CARBON_REDUCTION_COEFF*(percentage/Math.exp(-(1-percentage)));
-		}
-		
-		/**
-		 * Returns percentage reduction of dirty industry
-		 * for a given investment.
-		 * 
-		 * @param currency
-		 * 
-		 * Investment is an amount, say $10,000,000.
-		 * The return value is the percentage of your
-		 * carbon output that will be reduced.
-		 * Eg. If it returns 10%, you will go from
-		 * 100 tons to 90 tons.
-		 */
-		public final double getPercentage(long investment) throws IllegalArgumentException{
-			//TODO Improve
-			for (Entry<Long, Double> el : investTable.entrySet()) {
-				if (el.getKey() > investment) {
-					return (double)el.getValue();
-				}
-			}
-			throw new IllegalArgumentException("Out of bounds: no record in the table");
-		}
-		
-		/**
-		 * Executes carbon reduction investment.</br>
-		 * 
-		 * On success, will reduce GDP and dirtyIndustry.</br>
-		 * On failure, will throw Exception.</br>
-		 * 
-		 * @param investment
-		 * @throws Exception
-		 */
-		public final void invest(long investment) throws Exception{
-			if(investment < GDP){
-				GDP -= investment;
-				carbonOutput -= (getPercentage(investment) * carbonOutput);
-			}else{
-				//TODO Use better exception
-				throw new Exception("Investment is greater than available GDP");
-			}
+		} catch (UnavailableServiceException e) {
+			System.out.println("Unable to reach economy service.");
+			e.printStackTrace();
 		}
 	}
 	
-	private final class CarbonAbsorptionHandler{
-		
-		/**
-		 * Returns the cost of investment required to
-		 * obtain a given number of carbon credits.
-		 * 
-		 * @param carbonCredits
-		 */
-		public double getCost(long carbonCredits){
-			//TODO Implementation
-			throw new UnsupportedOperationException();
-		}
-		
-		/**
-		 * Returns number of carbon credits earned for a 
-		 * given investment.
-		 * 
-		 * @param investment
-		 */
-		public long getCarbonCredits(double investment){
-			//TODO Implementation
-			throw new UnsupportedOperationException();
-		}
-		
-		/**
-		 * Executes carbon absorption investment</br>
-		 * 
-		 * On success, will reduce GDP and increase.</br>
-		 * On failure, will throw Exception.</br>
-		 * 
-		 * @param investment
-		 * @throws Exception
-		 */
-		public void execute(double investment) throws Exception{
-			if(investment <= GDP){
-				//TODO Implement reduction in GDP
-				//TODO Implement change in CO2 emissions/arable land
-				//Stub for submitting reports
-				/*try{
-					Time t = SimTime.get();
-					AbstractCountry.this.environment.act(new SubmitCarbonEmissionReport(
-								AbstractCountry.this.reportCarbonEmission(t), t), 
-								AbstractCountry.this.getID(), 
-								AbstractCountry.this.authkey);
-				}catch(ActionHandlingException e){
-					logger.warn("Error trying to submit report");
-				}*/
-								
-			}else{
-				//TODO Use better exception
-				throw new Exception("Investment is greated than available GDP");
-			}
+	/**
+	 * Updates GDP using GDPRate for the past year
+	 * @author sc1109
+	 */
+	private final void updateGDP() {
+		GDP = GDP + GDP * GDPRate;
+	}
+	
+	/**
+	 * Calculate available to spend for the next year as an extra 1% of GDP
+	 */
+	private final void calculateATS() {
+		availableToSpend = Math.round(availableToSpend * GameConst.PERCENTAGE_OF_GDP);
+	}
+	
+	/**
+	 * Adjusts the amount of CarbonOffset depending on the last years usage
+	 */
+	private final void updateCarbonOffsetYearly() {
+		// Check if the emissionTarget for this year was met
+		if (emissionsTarget + carbonOffset - carbonOutput > 0)
+			// Add / Subtract from carbonOffset depending on this year's usage
+			carbonOffset += (emissionsTarget - carbonOutput);
+		else {
+			// Possibly the report to the Monitor can be sent
 		}
 	}
-
+	
+	private final void resetCarbonOffset() {
+		carbonOffset = 0;
+		// TODO adjust the CarbonOutput so that the forests build through Carbon Absorbtion are being counted.
+	}
+	
+	//================================================================================
+    // Public getters
+    //================================================================================
+	
+	public Double getCash(){
+		return this.GDP*GameConst.PERCENTAGE_OF_GDP;
+	}
+	
 	public double getLandArea() {
 		return landArea;
 	}
@@ -353,38 +335,24 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return GDPRate;
 	}
 
-/*	public double getDirtyIndustry() {
-		return dirtyIndustry;
-	}
-*/
-	public double getEmissionTarget() {
+	public long getEmissionsTarget() {
 		return emissionsTarget;
 	}
 
 	public long getCarbonOffset() {
 		return carbonOffset;
 	}
-/*
-	public float getAvailableToSpend() {
+
+	public long getAvailableToSpend() {
 		return availableToSpend;
 	}
-
-	public long getCarbonTraded() {
-		return carbonTraded;
-	}
-*/	
 	
-	public void getMonitored() {
-		int time = SimTime.get().intValue();
-		double latestReport = this.carbonEmissionReports.get(time);
-		double trueCarbon = this.carbonEmission;
-		double random = Random.randomDouble();
-		
-		if (random < Double.MAX_VALUE/2) {
-			if (latestReport != trueCarbon) {
-				//TODO - Insert sanctions here!
-			}
-		}
-		
+	public void setEmissionsTarget(long emissionsTarget) {
+		this.emissionsTarget = emissionsTarget;
 	}
+	
+	public void setAvailableToSpend(long availableToSpend) {
+		this.availableToSpend = availableToSpend;
+	}
+
 }

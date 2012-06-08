@@ -2,14 +2,28 @@ package uk.ac.ic.kyoto;
 
 import uk.ac.imperial.presage2.rules.facts.Agent;
 
+/**
+ * May no longer be needed. Consult Sam before deletion
+ * 
+ * @author sam
+ */
+@Deprecated
 public class CountryFile {
 	
 	Agent agent;
+	
+	//================================================================================
+    // Private fields
+    //================================================================================
 	
 	private double	emissionTarget;
 	private long 	carbonOffset;
 	private float 	availableToSpend;
 	private long 	carbonTraded;
+	
+	//================================================================================
+    // Constructor
+    //================================================================================
 
 	public CountryFile(Agent agent, double emissionsTarget, long carbonOffset,
 					float availableToSpend, long carbonTraded) {
@@ -21,6 +35,10 @@ public class CountryFile {
 		this.availableToSpend = availableToSpend;
 		this.carbonTraded = carbonTraded;		
 	}
+	
+	//================================================================================
+    // Getters
+    //================================================================================
 
 	public Agent getAgent() {
 		return agent;
@@ -41,6 +59,10 @@ public class CountryFile {
 	public long getCarbonTraded() {
 		return carbonTraded;
 	}
+	
+	//================================================================================
+    // Setters
+    //================================================================================
 
 	public void setEmissionTarget(double emissionTarget) {
 		this.emissionTarget = emissionTarget;
@@ -58,26 +80,38 @@ public class CountryFile {
 		this.carbonTraded = carbonTraded;
 	}
 	
+	//================================================================================
+    // Overridden Public methods
+    //================================================================================
+	
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) {
+		if (obj == this){
 			return true;
 		}
-		if (obj == null) {
+		
+		if (!(obj instanceof CountryFile)){
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		CountryFile other = (CountryFile) obj;
-		if (agent == null) {
-			if (other.agent != null) {
-				return false;
-			}
-		} else if (!agent.equals(other.agent)) {
-			return false;
-		}
-		return true;
+		
+		CountryFile c = (CountryFile) obj;
+		
+		return ((this.agent.equals(c.agent)) && (this.availableToSpend == c.availableToSpend)
+				&& (this.carbonOffset == c.carbonOffset) && (this.carbonTraded == c.carbonTraded)
+				&& (this.emissionTarget == c.emissionTarget));
+	}
+	
+	@Override
+	public int hashCode() {
+		int result = 635;
+		
+		result = 3 * result + this.agent.hashCode();
+		result = (int) (3 * result + this.availableToSpend);
+		result = (int) (3 * result + this.carbonOffset);
+		result = (int) (3 * result + this.carbonTraded);
+		result = (int) (3 * result + this.emissionTarget);
+		
+		return result;
 	}
 
 	@Override

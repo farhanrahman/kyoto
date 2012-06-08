@@ -9,8 +9,8 @@ import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.messaging.Performative;
+import uk.ac.imperial.presage2.core.network.BroadcastMessage;
 import uk.ac.imperial.presage2.core.network.Message;
-import uk.ac.imperial.presage2.core.network.MulticastMessage;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
 import uk.ac.imperial.presage2.util.fsm.FSMException;
@@ -60,7 +60,7 @@ public class TestAgent extends AbstractParticipant {
 			@SuppressWarnings("unchecked")
 			Message<Offer> m = (Message<Offer>) in;
 			if(m.getType().equalsIgnoreCase("Trade")){
-				Offer t = (Offer) m.getData();
+				//Offer t = (Offer) m.getData();
 				//Update our knowledgebase
 				//trades.add(t);
 				

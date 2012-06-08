@@ -16,11 +16,13 @@ import com.google.inject.Inject;
 
 /**
  * 
- * @author farhanrahman
+ * @author farhanrahman, Stuart
  */
 public class CarbonReportingService extends EnvironmentService {
 
 	Logger logger = Logger.getLogger(CarbonReportingService.class);
+	
+	public static String name = "Report";
 	
 	
 	@Inject
@@ -34,7 +36,7 @@ public class CarbonReportingService extends EnvironmentService {
 	}
 
 	public void updateReport(final UUID id, final Double carbonEmission, final Time simTime){
-		this.sharedState.change("Report", id, new StateTransformer(){
+		this.sharedState.change(name, id, new StateTransformer(){
 			@Override
 			public Serializable transform(Serializable state) {
 				@SuppressWarnings("unchecked")
@@ -51,6 +53,12 @@ public class CarbonReportingService extends EnvironmentService {
 			logger.info("ATTIME= "+simTime.toString()+" ID= " + id + " Key: " + key + " Value: " + s.get(key) + "\n");
 		}
 		
-		System.out.println();*/		
+		System.out.println();*/
+	}
+	
+	// TODO implement
+	public double getReport(UUID id, Time simTime) {
+		double report = 0;
+		return report;
 	}
 }

@@ -36,12 +36,8 @@ import uk.ac.imperial.presage2.util.protocols.SpawnAction;
 import uk.ac.imperial.presage2.util.protocols.TimeoutCondition;
 /**
  * 
- * More sure about this: taken from https://github.com/Presage/HelloWorld/blob/master/src/main/java/uk/ac/imperial/presage2/helloworld/HelloWorldProtocol.java
- * https://github.com/sammacbeth/ColouredTrls/blob/master/src/main/java/uk/ac/imperial/colrdtrls/protocols/TokenExchangeProtocol.java
  * 
- * This is just a really simple implementation where one party can only ever accept a trade
- * 
- * @author cmd08 and farhanrahman and azyio
+ * @author cmd08 and farhanrahman and azyzio
  *
  */
 public abstract class TradeProtocol extends FSMProtocol {
@@ -51,16 +47,16 @@ public abstract class TradeProtocol extends FSMProtocol {
 	private final Logger logger;
 
 	private Token tradeToken;
-	
+
 	private TradeHistory tradeHistory;
-	
+
 	public enum ResponderReplies{
 		ACCEPT,REJECT,WAIT
 	};
-	
+
 	enum States {
 		START, //Common start state
-		
+
 		/*Initiator States*/
 		TRADE_PROPOSED,
 		TIMED_OUT, //Timed out state for initiator
@@ -73,7 +69,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 		TIMEOUT,
 		TRADE_ACCEPTED,
 		TRADE_REJECTED,
-		
+
 		/*Responder transitions*/
 		RESPOND_TO_TRADE
 	}
@@ -91,17 +87,17 @@ public abstract class TradeProtocol extends FSMProtocol {
 		logger = Logger.getLogger(TradeProtocol.class.getName() + ", " + id);
 
 		this.tradeToken = SingletonProvider.getToken();
-		
+
 		this.tradeHistory = SingletonProvider.getTradeHistory();
-		
+
 		if(this.tradeToken == null){
 			logger.warn("Huge problem");
 		}
-		
+
 		if(this.tradeHistory == null){
 			logger.warn("Huge problem");
 		}
-		
+
 		try {
 			this.description
 			.addState(States.START, StateType.START)
@@ -109,7 +105,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 			.addState(States.TRADE_DONE, StateType.END)
 			.addState(States.TIMED_OUT, StateType.END);
 
-			
+
 			/* Initiator FSM */
 			this.description
 			/*
@@ -155,7 +151,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 									FSMConversation conv, Transition transition) {
 								// TODO Change the carbon credits of initiator
 								logger.info("Trade was accepted");
-								
+
 							}
 			})
 			.addTransition(Transitions.TRADE_REJECTED,
@@ -185,13 +181,13 @@ public abstract class TradeProtocol extends FSMProtocol {
 								Transition transition) {
 								logger.warn("Initiator timed out");
 						}
-				
+
 			});
-			
-			
-			
+
+
+
 			/*Responder FSM*/
-			
+
 					/*
 					 * Transitions: START -> TRADE_DONE
 					 * Message received by agent who sent the multicast message
@@ -256,7 +252,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 
 
 	}
-	
+
 	/**
 	 * canHandle method overriden in order
 	 * to force this class to handle Message
@@ -283,7 +279,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 			return false;
 		}		
 	}
-	
+
 	class TradeSpawnEvent extends ConversationSpawnEvent {
 
 		final OfferMessage offerMessage;
@@ -313,7 +309,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 			throws FSMException {
 		this.spawnAsInititor(new TradeSpawnEvent(to, quantity, unitPrice, type));
 	}
-	
+
 	protected abstract boolean acceptExchange(NetworkAddress from,
 			Offer trade);
 
@@ -325,4 +321,3 @@ public abstract class TradeProtocol extends FSMProtocol {
 		return authkey;
 	}
 }
-
