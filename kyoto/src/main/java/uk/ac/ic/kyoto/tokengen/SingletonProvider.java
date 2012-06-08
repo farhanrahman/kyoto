@@ -12,6 +12,11 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 
 /**
+ * Factory that provides
+ * Singletons Token and TradeHistory
+ * implementations. Need to change
+ * the function name getToken() as
+ * Token also has a getToken() function
  * @author farhanrahman
  *
  */
