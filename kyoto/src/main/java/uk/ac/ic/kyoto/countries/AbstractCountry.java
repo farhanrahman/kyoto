@@ -5,8 +5,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.log4j.Logger;
-
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.monitor.Monitor;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
@@ -29,7 +27,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
     //================================================================================
 	
 	final protected String 		ISO;		//ISO 3166-1 alpha-3
-	private 		UUID 		id;
 	
 	// TODO Change visibility of fields
 	/*
@@ -83,8 +80,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		
 		super(id, name);
 		
-		
-		this.id = id;
 		this.landArea = landArea;
 		this.ISO = ISO;
 		this.arableLandArea = arableLandArea;
@@ -124,7 +119,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			e.printStackTrace();
 		}
 		
-		calculateATS();
+		initialiseAvailableToSpend();
 		initialiseCountry();
 	}
 	
@@ -153,7 +148,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			TimeService timeService = getEnvironmentService(TimeService.class);
 			
 			if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
-				calculateATS();
+				initialiseAvailableToSpend();
 				MonitorTax();
 				checkTargets(); //did the countries meet their targets?
 				updateGDP();
@@ -289,7 +284,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	/**
 	 * Calculate available to spend for the next year as an extra 1% of GDP
 	 */
-	private final void calculateATS() {
+	private final void initialiseAvailableToSpend() {
 		availableToSpend = Math.round(availableToSpend * GameConst.PERCENTAGE_OF_GDP);
 	}
 	
