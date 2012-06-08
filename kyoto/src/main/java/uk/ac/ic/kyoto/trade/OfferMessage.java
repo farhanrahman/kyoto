@@ -14,13 +14,24 @@ import java.util.UUID;
  */
 public class OfferMessage {
 	private final Offer offer;
+	private final UUID tradeID;
 	
 	public OfferMessage(Offer offer){
 		this.offer = offer;
+		this.tradeID = null;
+	}
+	
+	public OfferMessage(Offer offer, UUID id){
+		this.offer = offer;
+		this.tradeID = id;
 	}
 
 	public Offer getOffer() {
 		return offer;
+	}
+
+	public UUID getTradeID() {
+		return tradeID;
 	}
 	
 }

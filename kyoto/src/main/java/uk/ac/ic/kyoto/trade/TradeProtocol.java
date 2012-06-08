@@ -7,7 +7,8 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 
 import uk.ac.ic.kyoto.tokengen.Token;
-import uk.ac.ic.kyoto.tokengen.TokenGenProvider;
+import uk.ac.ic.kyoto.tokengen.SingletonProvider;
+import uk.ac.ic.kyoto.tradehistory.TradeHistory;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.EnvironmentConnector;
 import uk.ac.imperial.presage2.core.messaging.Input;
@@ -49,7 +50,9 @@ public abstract class TradeProtocol extends FSMProtocol {
 	protected final EnvironmentConnector environment;
 	private final Logger logger;
 
-	protected Token tradeToken;
+	private Token tradeToken;
+	
+	private TradeHistory tradeHistory;
 	
 	public enum ResponderReplies{
 		ACCEPT,REJECT,WAIT
@@ -87,9 +90,15 @@ public abstract class TradeProtocol extends FSMProtocol {
 
 		logger = Logger.getLogger(TradeProtocol.class.getName() + ", " + id);
 
-		this.tradeToken = TokenGenProvider.get();
+		this.tradeToken = SingletonProvider.getToken();
+		
+		this.tradeHistory = SingletonProvider.getTradeHistory();
 		
 		if(this.tradeToken == null){
+			logger.warn("Huge problem");
+		}
+		
+		if(this.tradeHistory == null){
 			logger.warn("Huge problem");
 		}
 		
@@ -144,7 +153,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 							@Override
 							public void processMessage(Message<?> message,
 									FSMConversation conv, Transition transition) {
-								// TODO Add Trade Action to confirm the Trade
+								// TODO Change the carbon credits of initiator
 								logger.info("Trade was accepted");
 								
 							}
@@ -160,7 +169,6 @@ public abstract class TradeProtocol extends FSMProtocol {
 							@Override
 							public void execute(Object event, Object entity,
 									Transition transition) {
-								//Perform Trade action required?
 								logger.info("Trade was rejected");
 							}
 			})			
@@ -199,10 +207,11 @@ public abstract class TradeProtocol extends FSMProtocol {
 				@Override
 				public void processInitialMessage(Message<?> message,
 						FSMConversation conv, Transition transition) {
-					if (message.getData() instanceof Offer) {
-						Offer trade = ((Offer) message.getData())
+					if (message.getData() instanceof OfferMessage) {
+						OfferMessage offerMessage = ((OfferMessage) message.getData());
+						Offer trade = offerMessage.getOffer()
 								.reverse();
-						conv.setEntity(trade);
+						conv.setEntity(offerMessage);
 						NetworkAddress from = conv.getNetwork()
 								.getAddress();
 						NetworkAddress to = message.getFrom();
@@ -211,31 +220,31 @@ public abstract class TradeProtocol extends FSMProtocol {
 							// send accept message
 							logger.debug("Accepting exchange proposal: "
 									+ trade);
-							conv.getNetwork().sendMessage(
-									new UnicastMessage<Offer>(
-											Performative.ACCEPT_PROPOSAL,
-											ResponderReplies.ACCEPT.name(), t,
-											from, to, trade));
-							/*
-								try {
-									environment.act(new TradeAction(), id, authkey);
-								} catch (ActionHandlingException e) {
-									logger.warn(e);
-								}
-							*/
+							if(!TradeProtocol.this.tradeHistory.tradeExists(offerMessage.getTradeID())){
+								TradeProtocol.this.tradeHistory.addToHistory(
+										SimTime.get(), offerMessage.getTradeID(), trade);
+								//TODO update the carbon credits of the responder
+								conv.getNetwork().sendMessage(
+										new UnicastMessage<OfferMessage>(
+												Performative.ACCEPT_PROPOSAL,
+												ResponderReplies.ACCEPT.name(), t,
+												from, to, offerMessage));								
+							}else{
+								logger.warn("Trade already happened");
+							}
 						} else {
 							// send reject message
 							logger.debug("Rejecting exchange proposal: "
 									+ trade);
 							conv.getNetwork().sendMessage(
-									new UnicastMessage<Offer>(
+									new UnicastMessage<Object>(
 											Performative.REJECT_PROPOSAL,
 											ResponderReplies.REJECT.name(), t,
-											from, to, trade));
+											from, to, null));
 						}
 					} else {
 						// TODO error transition
-						logger.warn("Message type not equal to Trade");
+						logger.warn("Message type not equal to OfferMessage");
 					}
 				}
 			});
@@ -251,13 +260,25 @@ public abstract class TradeProtocol extends FSMProtocol {
 	/**
 	 * canHandle method overriden in order
 	 * to force this class to handle Message
-	 * containing Trade data types
+	 * containing OfferMessage.class data types
+	 * Moreover it is also checked whether the
+	 * OfferMessge has a valid tradeID assigned
+	 * to it.
 	 */
 	@Override
 	public boolean canHandle(Input in){
 		Message<?> m = (Message<?>) in;
-		if(m.getData().getClass().equals(Offer.class)){
-			return super.canHandle(in);		
+		if(m.getData().getClass().equals(OfferMessage.class)){
+			try{
+				@SuppressWarnings("unchecked")
+				Message<OfferMessage> message = (Message<OfferMessage>) in;
+				if(message.getData().getTradeID() != null)
+					return super.canHandle(in);			
+			}
+			catch(ClassCastException e){
+				logger.warn(e);
+			}
+			return false;
 		}else{
 			return false;
 		}		
@@ -270,7 +291,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 		public TradeSpawnEvent(NetworkAddress with, int quantity, int unitCost, TradeType type) {
 			super(with);
 			UUID id = TradeProtocol.this.tradeToken.getToken();
-			this.offerMessage = new OfferMessage(new Offer(quantity, unitCost, type), id);
+			this.offerMessage = new OfferMessage(new Offer(quantity, unitCost, type),id);
 		}
 
 	}

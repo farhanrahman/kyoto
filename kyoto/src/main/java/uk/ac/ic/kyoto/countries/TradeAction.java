@@ -2,7 +2,7 @@ package uk.ac.ic.kyoto.countries;
 
 import java.util.UUID;
 import uk.ac.ic.kyoto.tokengen.Token;
-import uk.ac.ic.kyoto.tokengen.TokenGenProvider;
+import uk.ac.ic.kyoto.tokengen.SingletonProvider;
 import uk.ac.ic.kyoto.trade.Offer;
 import uk.ac.imperial.presage2.core.Action;
 import uk.ac.imperial.presage2.core.Time;
@@ -24,7 +24,7 @@ public class TradeAction implements Action {
 		this.time = time;
 		this.initiator = initiator;
 		this.receiver = receiver;
-		this.token = TokenGenProvider.get().getToken();
+		this.token = SingletonProvider.get().getToken();
 	}
 	
 	@Override

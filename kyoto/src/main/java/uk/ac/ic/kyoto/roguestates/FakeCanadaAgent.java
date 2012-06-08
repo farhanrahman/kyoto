@@ -1,12 +1,15 @@
 package uk.ac.ic.kyoto.roguestates;
 
+import java.util.Map;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.countries.NonParticipant;
+import uk.ac.ic.kyoto.tokengen.SingletonProvider;
 import uk.ac.ic.kyoto.trade.Offer;
 import uk.ac.ic.kyoto.trade.OfferMessage;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.ic.kyoto.trade.TradeType;
+import uk.ac.ic.kyoto.tradehistory.TradeHistory;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.messaging.Performative;
 import uk.ac.imperial.presage2.core.network.MulticastMessage;
@@ -62,7 +65,7 @@ public class FakeCanadaAgent extends NonParticipant {
 		if(counter < 3){
 			int quantity = 10;
 			int unitCost = 2;
-			Offer trade = new Offer(quantity, unitCost, TradeType.SELL);	//, authkey); Really?! Authkey?!
+			Offer trade = new Offer(quantity, unitCost, TradeType.SELL);
 			this.network.sendMessage(
 						new MulticastMessage<OfferMessage>(
 								Performative.PROPOSE, 
@@ -70,9 +73,14 @@ public class FakeCanadaAgent extends NonParticipant {
 								SimTime.get(), 
 								this.network.getAddress(),
 								this.tradeProtocol.getAgentsNotInConversation(),
-								new OfferMessage(trade, authkey))
+								new OfferMessage(trade))
 					);
 		counter++;
+		}else{
+			TradeHistory tradeHistory = SingletonProvider.getTradeHistory();
+			Map<Integer,Map<UUID,Offer>> m = tradeHistory.getHistory();
+			logger.info(m);
+			logger.info("Test");
 		}
 	}
 }

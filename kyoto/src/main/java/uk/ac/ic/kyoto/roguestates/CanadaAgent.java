@@ -36,7 +36,7 @@ public class CanadaAgent extends NonParticipant {
 			try{
 				@SuppressWarnings("unchecked")
 				Message<OfferMessage> m = (Message<OfferMessage>) in;
-				Offer t = m.getData().getTrade();
+				Offer t = m.getData().getOffer();
 			
 				if(!this.tradeProtocol
 						.getActiveConversationMembers()

@@ -3,7 +3,6 @@
  */
 package uk.ac.ic.kyoto.trade;
 
-import java.util.UUID;
 
 /**
  * @author cmd08 and farhanrahman
