@@ -127,12 +127,13 @@ public final class CarbonReductionHandler{
 			if (carbonOutput <= energyOutput)
 				cleanIndustry = 1 - (carbonOutput / energyOutput);
 			else {
-				country.logger.warn("It is impossible for carbonOutput to exceed energyOutput");
+				//country.logger.warn("It is impossible for carbonOutput to exceed energyOutput");
+				// Move error logging to country when it catches exception
 				throw new NotEnoughCarbonOutputException();
 			}
 		}
 		catch (ArithmeticException e) {
-			country.logger.error("Specified energyOuput was 0: " + e);
+			//country.logger.error("Specified energyOuput was 0: " + e);
 			cleanIndustry = 1;
 		}
 		return cleanIndustry;

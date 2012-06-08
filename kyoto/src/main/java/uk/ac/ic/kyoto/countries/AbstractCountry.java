@@ -31,6 +31,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	final protected String 		ISO;		//ISO 3166-1 alpha-3
 	private 		UUID 		id;
 	
+	// TODO Change visibility of fields
 	/*
 	 * These variables are related to land area for
 	 * dealing with carbon absorption prices
@@ -59,7 +60,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	protected 		Map<Integer, Long> carbonEmissionReports;
 	
 	ParticipantCarbonReportingService reportingService; // TODO add visibility
-	Monitor monitor;
+	private Monitor monitor;
 	
 	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
 	
@@ -69,8 +70,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	protected CarbonReductionHandler 	carbonReductionHandler;
 	protected CarbonAbsorptionHandler 	carbonAbsorptionHandler;
 	protected EnergyUsageHandler		energyUsageHandler;
-
-	protected Logger logger;
 	
 	//================================================================================
     // Constructors and Initializers
@@ -98,12 +97,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.carbonEmissionReports = new HashMap<Integer, Long>();
 		this.energyOutput = energyOutput;
 		
-		// Create an instance of a logger
-		logger = Logger.getLogger(name); // can we do it in constructor?
 	}
 	
 	@Override
-	public void initialise(){
+	final public void initialise(){
 		super.initialise();
 		
 		// Add the country to the monitor service
@@ -114,7 +111,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			System.out.println("Unable to reach monitor service.");
 			e1.printStackTrace();
 		}
-		// Initialize the Action Handlers
+		// Initialize the Action Handlers DO THEY HAVE TO BE INSTANTIATED ALL THE TIME?
 		carbonAbsorptionHandler = new CarbonAbsorptionHandler(this);
 		carbonReductionHandler = new CarbonReductionHandler(this);
 		energyUsageHandler = new EnergyUsageHandler(this);
@@ -126,6 +123,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			System.out.println("Unable to reach emission reporting service.");
 			e.printStackTrace();
 		}
+		
+		calculateATS();
+		initialiseCountry();
 	}
 	
 	//================================================================================
@@ -139,6 +139,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	public abstract void SessionFunction();
 	
+	abstract protected void initialiseCountry();
+	
 	//================================================================================
     // Public methods
     //================================================================================
@@ -151,8 +153,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			TimeService timeService = getEnvironmentService(TimeService.class);
 			
 			if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
+				calculateATS();
 				MonitorTax();
 				checkTargets(); //did the countries meet their targets?
+				updateGDP();
 				updateGDPRate();
 				updateCarbonOffsetYearly();
 				YearlyFunction();
@@ -168,26 +172,27 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		behaviour();
 	}
 	
+	/**
+	 * All individual country behaviour should occur here
+	 */
 	abstract protected void behaviour();
 	
-
+	
+	/**
+	 * Taxes individual percentage part of their GDP to pay for the monitor
+	 */
 	public void MonitorTax() {
 		// Give a tax to Monitor agent for monitoring every year
-		this.monitor.taxForMonitor(availableToSpend*GameConst.MONITOR_COST_PERCENTAGE); // Take % of money for monitoring
-		availableToSpend -= availableToSpend*GameConst.MONITOR_COST_PERCENTAGE;
+		this.monitor.applyTaxation(GDP*GameConst.MONITOR_COST_PERCENTAGE); // Take % of GDP for monitoring
+		availableToSpend -= GDP*GameConst.MONITOR_COST_PERCENTAGE;
 	}
 
 	/**
-	 * Method used for monitoring. Is called randomly by the Monitor agent
-	 * @return 
+	 * Method used for monitoring. It is called by the Monitor
+	 * @return
+	 * Real Carbon Output of a country
 	 */
 	public final long getMonitored() {
-//		long latestReport = this.carbonEmissionReports.get(SimTime.get().intValue());
-//		long trueCarbon = this.carbonOutput;
-//		
-//		if (latestReport != trueCarbon) {
-//				//TODO - Insert sanctions here!
-//		}
 		return carbonOutput;
 	}
 	
@@ -246,6 +251,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
     // Private methods
     //================================================================================
 	
+	/**
+	 * Calculates GDP rate for the next year
+	 * @author Adam, ct
+	 */
 	private final void updateGDPRate() {
 		double marketStateFactor = 0;
 		
@@ -267,6 +276,21 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			System.out.println("Unable to reach economy service.");
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Updates GDP using GDPRate for the past year
+	 * @author sc1109
+	 */
+	private final void updateGDP() {
+		GDP = GDP + GDP * GDPRate;
+	}
+	
+	/**
+	 * Calculate available to spend for the next year as an extra 1% of GDP
+	 */
+	private final void calculateATS() {
+		availableToSpend = Math.round(availableToSpend * GameConst.PERCENTAGE_OF_GDP);
 	}
 	
 	/**
@@ -327,10 +351,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.emissionsTarget = emissionsTarget;
 	}
 	
-	public void setAvailableToSpend(UUID id, long availableToSpend) {
-		if (this.id==id) {
-			this.availableToSpend = availableToSpend;
-		}
+	public void setAvailableToSpend(long availableToSpend) {
+		this.availableToSpend = availableToSpend;
 	}
 
 }

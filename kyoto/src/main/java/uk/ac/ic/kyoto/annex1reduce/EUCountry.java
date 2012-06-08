@@ -35,8 +35,7 @@ public class EUCountry extends AbstractCountry {
 	}
 
 	@Override
-	public void initialise(){
-		super.initialise();
+	public void initialiseCountry(){
 		
 		// Add the country to the EU service
 		try {

@@ -44,7 +44,7 @@ public class CanadaAgent extends NonParticipant {
 	}
 	
 	@Override
-	public void initialise() {
+	public void initialiseCountry() {
 		super.initialise();
 		carbonOutput = 80;
 		try {
@@ -65,17 +65,21 @@ public class CanadaAgent extends NonParticipant {
 	}
 	
 	@Override
-	public void execute() {
-		super.execute();
-		Set<NetworkAddress> nodes = network.getConnectedNodes();
-//		Iterator i = nodes.iterator();
-//		while (i.hasNext()) {
-//			(NetworkAddress)i.
+	public void behaviour() {
+//		Set<NetworkAddress> nodes = network.getConnectedNodes();
+//		for (NetworkAddress i: nodes) {
+//			try {
+//				tradeProtocol.offer(i, 10, 5, TradeType.BUY);
+//			} catch (FSMException e) {
+//				e.printStackTrace();
+//			}
 //		}
-		for (NetworkAddress i: nodes) {
+		if (availableToSpend > 0) {
 			try {
-				tradeProtocol.offer(i, 10, 5, TradeType.BUY);
-			} catch (FSMException e) {
+				carbonReductionHandler.invest((long) (availableToSpend*0.1));
+				System.out.println("Spending " + availableToSpend* 0.1 + " on carbon reduction. Current carbon output is " + carbonOutput + ".");
+			} catch (Exception e) {
+				logger.warn(e.getMessage(), e);
 				e.printStackTrace();
 			}
 		}

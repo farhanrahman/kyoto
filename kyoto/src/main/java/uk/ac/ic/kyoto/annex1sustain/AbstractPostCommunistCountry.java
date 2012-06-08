@@ -68,12 +68,23 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 */
 	@Override
 	protected void processInput(Input input) {
+		// TODO process input (if any)
 	}
 	
-
+	/**
+	 * Initialisation function
+	 */
+	@Override
+	protected void initialiseCountry() {
+		// TODO initialisation
+	}
+	
+	/**
+	 * Behaviour function
+	 */
 	@Override
 	protected void behaviour() {
-		
+		// TODO behaviour
 	}
 	
 	//================================================================================
@@ -129,11 +140,9 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 */
 	private void updateInternalPrice() {
 		internalPrice   = 	(long)
-							(
-							calculateMarketPrice() * 
-							calculateEndOfRoundFactor() * 
-							lastYearFactor
-							);
+							( calculateMarketPrice() * 
+							  calculateEndOfRoundFactor() * 
+							  lastYearFactor );
 	}
 	
 	/**
@@ -159,7 +168,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			marketPrice = (maximumCommittedPrice + minimumUncommittedPrice) / 2;
 		}
 		catch (Exception e) {
-			logger.warn("Problem calculating marketPrice: " + e);
+			logger.warn("Problem with calculating marketPrice: " + e);
 			marketPrice = 0;
 		}
 		
@@ -186,7 +195,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 									);
 		}
 		catch (Exception e) {
-			logger.warn("Problem calculating endOfRoundFactor: " + e);
+			logger.warn("Problem with calculating endOfRoundFactor: " + e);
 			endOfRoundFactor = 1;
 		}
 		return endOfRoundFactor;
@@ -260,8 +269,8 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		long potentialProfit;
 		
 		try {
-			investmentCost = carbonAbsorptionHandler.getCost(Constants.MINIMAL_INVESTMENT);
-			potentialProfit = Constants.MINIMAL_INVESTMENT * internalPrice;
+			investmentCost = carbonAbsorptionHandler.getCost(absorptionInvestmentTarget);
+			potentialProfit = absorptionInvestmentTarget * internalPrice;
 			
 			if (potentialProfit > investmentCost) {
 				carbonAbsorptionHandler.invest(investmentCost);
@@ -282,7 +291,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			logger.info("Post-Communist Country " + this.getName() + " has insufficient land for carbon absorption");
 		}
 		catch (Exception e) {
-			logger.warn("Problem investing in carbon absorption: " + e);
+			logger.warn("Problem with investing in carbon absorption: " + e);
 		}
 	}
 	
@@ -295,8 +304,8 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		long potentialProfit;
 		
 		try {
-			investmentCost = carbonReductionHandler.getCost(Constants.MINIMAL_INVESTMENT);
-			potentialProfit = Constants.MINIMAL_INVESTMENT * internalPrice;
+			investmentCost = carbonReductionHandler.getCost(reductionInvestmentTarget);
+			potentialProfit = reductionInvestmentTarget * internalPrice;
 			
 			if (potentialProfit > investmentCost) {
 				carbonReductionHandler.invest(investmentCost);
@@ -317,7 +326,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			logger.info("Post-Communist Country " + this.getName() + " has insufficient carbon output for carbon reduction");
 		}
 		catch (Exception e) {
-			logger.warn("Problem investing in carbon reduction: " + e);
+			logger.warn("Problem with investing in carbon reduction: " + e);
 		}
 	}
 	
@@ -357,9 +366,9 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		try {
 			// Calculate new target based on three factors
 			newSellingTarget =	(long) 
-						( calculateAvailableCreditsFactor() *
-						  calculateFossilFuelsFactor() *
-						  calculateMarketFactor() );
+								( calculateAvailableCreditsFactor() *
+								  calculateFossilFuelsFactor() *
+								  calculateMarketFactor() );
 			
 			// Adjust the new target if out of possible range
 			if (newSellingTarget > carbonOffset) {
@@ -367,7 +376,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			}
 		}
 		catch (Exception e) {
-			logger.warn("Problem when calculating newTarget " + e);
+			logger.warn("Problem with calculating newTarget: " + e);
 			newSellingTarget = creditsToSellTarget;
 		}
 		creditsToSellTarget = newSellingTarget;
@@ -384,7 +393,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			availableCreditsFactor = carbonOffset * Constants.SELL_AMOUNT_COEFFICIENT;
 		}
 		catch (Exception e) {
-			logger.warn("Problem when calculating availableCreditsFactor " + e);
+			logger.warn("Problem with calculating availableCreditsFactor: " + e);
 			availableCreditsFactor = carbonOffset;
 		}
 		return availableCreditsFactor;
@@ -426,7 +435,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			fossilFuelsFactor = 1;
 		}
 		catch (Exception e) {
-			logger.warn("Problem when calculating fossilFuelsFactor " + e);
+			logger.warn("Problem with calculating fossilFuelsFactor: " + e);
 			fossilFuelsFactor = 1;
 		}
 		return fossilFuelsFactor;
@@ -454,7 +463,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			}
 		}
 		catch (Exception e) {
-			logger.warn("Problem when calculating marketFactor " + e);
+			logger.warn("Problem with calculating marketFactor: " + e);
 			marketFactor = 1;
 		}
 		return marketFactor;
@@ -491,7 +500,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			lastYearFactor = 1 + Constants.LAST_YEAR_FACTOR_SLOPE * (lastYearPercentageSold - Constants.LAST_YEAR_FACTOR_OFFSET);
 		}
 		catch (Exception e) {
-			logger.warn("Problem when calculating lastYearFactor " + e);
+			logger.warn("Problem with calculating lastYearFactor: " + e);
 			lastYearFactor = 1;
 		}
 	}
