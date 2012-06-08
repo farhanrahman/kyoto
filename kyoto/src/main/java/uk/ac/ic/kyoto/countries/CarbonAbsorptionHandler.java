@@ -57,7 +57,7 @@ public final class CarbonAbsorptionHandler{
 		if (landArea > 0)
 			blockCost = (long) (GameConst.CARBON_ABSORPTION_COEFF * GameConst.FOREST_BLOCK_SIZE / landArea);
 		else {
-			country.logger.warn("Trying to find a cost of a block of area for non-positive area left");
+			//country.logger.warn("Trying to find a cost of a block of area for non-positive area left");
 			blockCost = Long.MAX_VALUE;
 		}
 		return blockCost;
