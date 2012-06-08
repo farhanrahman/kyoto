@@ -1,17 +1,24 @@
 package uk.ac.ic.kyoto.trade;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+
 import org.apache.log4j.Logger;
-import uk.ac.ic.kyoto.countries.TradeAction;
+
+import uk.ac.ic.kyoto.tokengen.Token;
+import uk.ac.ic.kyoto.tokengen.SingletonProvider;
+import uk.ac.ic.kyoto.tradehistory.TradeHistory;
 import uk.ac.imperial.presage2.core.Time;
-import uk.ac.imperial.presage2.core.environment.ActionHandlingException;
 import uk.ac.imperial.presage2.core.environment.EnvironmentConnector;
+import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.messaging.Performative;
 import uk.ac.imperial.presage2.core.network.Message;
 import uk.ac.imperial.presage2.core.network.NetworkAdaptor;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.core.network.UnicastMessage;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
+import uk.ac.imperial.presage2.util.fsm.Action;
 import uk.ac.imperial.presage2.util.fsm.AndCondition;
 import uk.ac.imperial.presage2.util.fsm.EventTypeCondition;
 import uk.ac.imperial.presage2.util.fsm.FSM;
@@ -26,113 +33,45 @@ import uk.ac.imperial.presage2.util.protocols.InitialiseConversationAction;
 import uk.ac.imperial.presage2.util.protocols.MessageAction;
 import uk.ac.imperial.presage2.util.protocols.MessageTypeCondition;
 import uk.ac.imperial.presage2.util.protocols.SpawnAction;
-
-
+import uk.ac.imperial.presage2.util.protocols.TimeoutCondition;
 /**
  * 
- * More sure about this: taken from https://github.com/Presage/HelloWorld/blob/master/src/main/java/uk/ac/imperial/presage2/helloworld/HelloWorldProtocol.java
- * https://github.com/sammacbeth/ColouredTrls/blob/master/src/main/java/uk/ac/imperial/colrdtrls/protocols/TokenExchangeProtocol.java
  * 
- * This is just a really simple implementation where one party can only ever accept a trade
- * 
- * @author cmd08
+ * @author cmd08 and farhanrahman and azyzio
  *
  */
 public abstract class TradeProtocol extends FSMProtocol {
-
-	public final static class Trade{
-		final int quantity;
-		final int unitCost;
-		final TradeType type;
-
-		public Trade(int quantity, int unitCost, TradeType type) {
-			this.quantity = quantity;
-			this.unitCost = unitCost;
-			this.type = type;
-		}
-
-		public int getQuantity() {
-			return quantity;
-		}
-
-		public int getUnitCost() {
-			return unitCost;
-		}
-
-		public int getTotalCost() {
-			return unitCost * quantity;
-		}
-		
-		public TradeType getType(){
-			return this.type;
-		}
-
-		@Override
-		public String toString() {
-			return "Trade: "+quantity+" @ "+unitCost; 
-		}
-		
-		public Trade reverse(){
-			TradeType t = this.type.equals(TradeType.BUY)?TradeType.SELL:TradeType.BUY;
-			return new Trade(this.quantity, this.unitCost, t);
-		}
-		
-		@Override
-		//cs2309: Written using Effective Java (Josh Bloch) as reference
-		public boolean equals(Object obj) {
-			if (obj == this){
-				return true;
-			}
-			
-			if (!(obj instanceof Trade)){
-				return false;
-			}
-			
-			Trade trade = (Trade) obj;
-			return (trade.quantity == this.quantity) &&
-					(trade.unitCost == this.unitCost) &&
-					(trade.type == this.type);
-		}
-		
-		@Override
-		//cs2309: Written using Effective Java (Josh Bloch) as reference
-		public int hashCode() {
-			int result = 42;
-			result = 69 * result + this.quantity;
-			result = 69 * result + this.unitCost;
-			
-			switch (this.type) {
-			case BUY:
-				result = 69 * result + 1;
-				break;
-			case SELL:
-				result = 69 * result + 2;
-				break;
-			}
-			
-			return result;
-		}
-
-	}
-
-
 	private final UUID id;
 	private final UUID authkey;
 	protected final EnvironmentConnector environment;
 	private final Logger logger;
 
+	private Token tradeToken;
+
+	private TradeHistory tradeHistory;
+
+	public enum ResponderReplies{
+		ACCEPT,REJECT,WAIT
+	};
+
 	enum States {
-		START, TRADE_PROPOSED, RESPONSE_RECEIVED, TRADE_RECEIVED, TRADE_ACCEPTED, TRADE_REJECTED,
-		//PROPOSITION_PUBLISHED, OFFERS_RECEIVED, OFFER_ACCEPTED, 
-		//PROPOSITION_RECEIVED, OFFERS_PUBLISHED, TRADE_COMPLETE, 
-		TIMED_OUT
+		START, //Common start state
+
+		/*Initiator States*/
+		TRADE_PROPOSED,
+		TIMED_OUT, //Timed out state for initiator
+		TRADE_DONE //Common end state for both responder and initiator		
 	};
 
 	enum Transitions {
-		PROPOSE_TRADE, RECEIVE_RESPONSE, RECEIVE_TRADE, ACCEPT_TRADE, REJECT_TRADE,
-		//PUBLISH_PROPOSITION, RECEIVE_OFFERS, ACCEPT_OFFER, REJECT_OFFER, 
-		//RECEIVE_PROPOSITIONS, PUBLISH_OFFERS, COMPLETE_TRADE,
-		TIMEOUT, ERROR
+		/*Initiator transitions*/
+		PROPOSE_TRADE, 
+		TIMEOUT,
+		TRADE_ACCEPTED,
+		TRADE_REJECTED,
+
+		/*Responder transitions*/
+		RESPOND_TO_TRADE
 	}
 
 	public TradeProtocol(final UUID id, final UUID authkey, 
@@ -147,180 +86,224 @@ public abstract class TradeProtocol extends FSMProtocol {
 
 		logger = Logger.getLogger(TradeProtocol.class.getName() + ", " + id);
 
+		this.tradeToken = SingletonProvider.getToken();
+
+		this.tradeHistory = SingletonProvider.getTradeHistory();
+
+		if(this.tradeToken == null){
+			logger.warn("Huge problem");
+		}
+
+		if(this.tradeHistory == null){
+			logger.warn("Huge problem");
+		}
+
 		try {
 			this.description
-
-			/* Initiator FSM */
 			.addState(States.START, StateType.START)
 			.addState(States.TRADE_PROPOSED)
-			.addState(States.RESPONSE_RECEIVED)
-			.addState(States.TRADE_ACCEPTED, StateType.END)
-			.addState(States.TRADE_REJECTED, StateType.END)
+			.addState(States.TRADE_DONE, StateType.END)
 			.addState(States.TIMED_OUT, StateType.END);
 
+
+			/* Initiator FSM */
 			this.description
-			
 			/*
 			 * Transition: START -> TRADE_PROPOSED.
 			 * Send a trade proposal to all other agents
-			 * Signals intention to trade (either buy or sell).
+			 * Responds to the Multicast message sent by
+			 * and agent.
 			 */
 			.addTransition(Transitions.PROPOSE_TRADE,
-					new EventTypeCondition(ConversationSpawnEvent.class), 
+					new EventTypeCondition(TradeSpawnEvent.class), 
 					States.START,
 					States.TRADE_PROPOSED, 
 					new SpawnAction() {
 
+				@Override
+				public void processSpawn(ConversationSpawnEvent event,
+						FSMConversation conv, Transition transition) {
+					// send message offering the Exchange of tokens
+					// described in the ExchangeSpawnEvent.
+					TradeSpawnEvent e = (TradeSpawnEvent) event;
+					NetworkAddress from = conv.getNetwork().getAddress();
+					NetworkAddress to = conv.recipients.get(0);
+					logger.debug("Initiating: " + e.offerMessage);
+					conv.entity = e.offerMessage;
+					conv.getNetwork().sendMessage(
+							new UnicastMessage<OfferMessage>(
+									Performative.PROPOSE, 
+									Transitions.PROPOSE_TRADE.name(),
+									SimTime.get(), from,
+									to, e.offerMessage));
+				}
+			})
+			.addTransition(Transitions.TRADE_ACCEPTED,
+						   new AndCondition(
+								   new MessageTypeCondition(ResponderReplies.ACCEPT.name()), 
+								   new ConversationCondition()), 
+						   States.TRADE_PROPOSED,
+						   States.TRADE_DONE, 
+						   new MessageAction(){
+
+							@Override
+							public void processMessage(Message<?> message,
+									FSMConversation conv, Transition transition) {
+								// TODO Change the carbon credits of initiator
+								logger.info("Trade was accepted");
+
+							}
+			})
+			.addTransition(Transitions.TRADE_REJECTED,
+						   new AndCondition(
+								   new MessageTypeCondition(ResponderReplies.REJECT.name()), 
+								   new ConversationCondition()), 
+						   States.TRADE_PROPOSED,
+						   States.TRADE_DONE, 
+						   new Action(){
+
+							@Override
+							public void execute(Object event, Object entity,
+									Transition transition) {
+								logger.info("Trade was rejected");
+							}
+			})			
+			.addTransition(Transitions.TIMEOUT,
+					new AndCondition(
+							new TimeoutCondition(4), 
+							new ConversationCondition()),
+					States.TRADE_PROPOSED,
+					States.TIMED_OUT, 
+					new Action(){
+
 						@Override
-						public void processSpawn(ConversationSpawnEvent event,
-								FSMConversation conv, Transition transition) {
-							// send message offering the Exchange of tokens
-							// described in the ExchangeSpawnEvent.
-							TradeSpawnEvent e = (TradeSpawnEvent) event;
-							NetworkAddress from = conv.getNetwork().getAddress();
-							NetworkAddress to = conv.recipients.get(0);
-							logger.debug("Initiating: " + e.trade);
-							conv.entity = e.trade;
-							conv.getNetwork().sendMessage(
-									new UnicastMessage<Trade>(
-											Performative.PROPOSE, 
-											Transitions.PROPOSE_TRADE.name(),
-											SimTime.get(), from,
-											to, e.trade));
+						public void execute(Object event, Object entity,
+								Transition transition) {
+								logger.warn("Initiator timed out");
 						}
-					}
-			)
-			
-			/*
-			 * Transitions: TRADE_PROPOSED -> TRADE_ACCEPTED
-			 * Trade proposal has been accepted by someone
-			 */
-			.addTransition(Transitions.RECEIVE_RESPONSE,
-					new AndCondition(new MessageTypeCondition("ACCEPT"),
-							new ConversationCondition()),
-							States.TRADE_PROPOSED, 
-							States.TRADE_ACCEPTED,
-							new MessageAction() {
 
-								@Override
-								public void processMessage(Message<?> message, FSMConversation conv,
-										Transition transition) {
-									// TODO Auto-generated method stub
-									// On Success callback fired?
-									logger.info("Trade was accepted");
-				
-									if (surrenderResource(message.getFrom(), (Trade) message.getData())){
-										try {
-											environment.act(new TradeAction(), id, authkey);
-										} catch (ActionHandlingException e) {
-											// TODO Auto-generated catch block
-											e.printStackTrace();
-										}
-									}
-								}
-								
-							}
-			)
-			
-			/*
-			 * Transitions: TRADE_PROPOSED -> TRADE_REJECTED
-			 * Trade proposal has been rejected by someone else.
-			 */
-			.addTransition(Transitions.RECEIVE_RESPONSE,
-					new AndCondition(new MessageTypeCondition("REJECT"),
-							new ConversationCondition()),
-							States.TRADE_PROPOSED,
-							States.TRADE_REJECTED,
-							new MessageAction() {
+			});
 
-								@Override
-								public void processMessage(Message<?> message, FSMConversation conv,
-										Transition transition) {
-									// TODO Auto-generated method stub
-									// On rejection callback?
-									logger.info("Trade was rejected");
-				
-								}
-							}
-			)
 
+
+			/*Responder FSM*/
+
+					/*
+					 * Transitions: START -> TRADE_DONE
+					 * Message received by agent who sent the multicast message
+					 */
+			this.description
 			/* Non-initiator FSM */
-			.addTransition(Transitions.RECEIVE_TRADE, 
-					new AndCondition(new MessageTypeCondition("TRADE")),
+			.addTransition(Transitions.RESPOND_TO_TRADE, 
+					new MessageTypeCondition(Transitions.PROPOSE_TRADE.name()),
 					States.START,
-					States.TRADE_ACCEPTED,
-
+					States.TRADE_DONE,
 					new InitialiseConversationAction() {
 
-						@Override
-						public void processInitialMessage(Message<?> message,
-								FSMConversation conv, Transition transition) {
-							if (message.getData() instanceof Trade) {
-								EnvironmentConnector env = TradeProtocol.this.environment;
-								Trade trade = ((Trade) message.getData())
-										.reverse();
-								conv.setEntity(trade);
-								NetworkAddress from = conv.getNetwork()
-										.getAddress();
-								NetworkAddress to = message.getFrom();
-								Time t = SimTime.get();
-								if (acceptExchange(to, trade)) {
-									// send accept message
-									logger.debug("Accepting exchange proposal: "
-											+ trade);
-									conv.getNetwork().sendMessage(
-											new UnicastMessage<Trade>(
-													Performative.ACCEPT_PROPOSAL,
-													Transitions.ACCEPT_TRADE.name(), t,
-													from, to, trade));
-									// TODO optionally surrender appropriate token
-									if (surrenderResource(to, trade)) {
-										try {
-											environment.act(new TradeAction(), id, authkey);
-										} catch (ActionHandlingException e) {
-											// TODO Auto-generated catch block
-											e.printStackTrace();
-										}
-									}
-								} else {
-									// send reject message
-									logger.debug("Rejecting exchange proposal: "
-											+ trade);
-									conv.getNetwork().sendMessage(
-											new UnicastMessage<Trade>(
-													Performative.REJECT_PROPOSAL,
-													Transitions.REJECT_TRADE.name(), t,
-													from, to, trade));
-								}
-							} else {
-								// TODO error transition
+				@Override
+				public void processInitialMessage(Message<?> message,
+						FSMConversation conv, Transition transition) {
+					if (message.getData() instanceof OfferMessage) {
+						OfferMessage offerMessage = ((OfferMessage) message.getData());
+						Offer trade = offerMessage.getOffer()
+								.reverse();
+						conv.setEntity(offerMessage);
+						NetworkAddress from = conv.getNetwork()
+								.getAddress();
+						NetworkAddress to = message.getFrom();
+						Time t = SimTime.get();
+						if (acceptExchange(to, trade)) {
+							// send accept message
+							logger.debug("Accepting exchange proposal: "
+									+ trade);
+							if(!TradeProtocol.this.tradeHistory.tradeExists(offerMessage.getTradeID())){
+								TradeProtocol.this.tradeHistory.addToHistory(
+										SimTime.get(), offerMessage.getTradeID(), trade);
+								//TODO update the carbon credits of the responder
+								conv.getNetwork().sendMessage(
+										new UnicastMessage<OfferMessage>(
+												Performative.ACCEPT_PROPOSAL,
+												ResponderReplies.ACCEPT.name(), t,
+												from, to, offerMessage));								
+							}else{
+								logger.warn("Trade already happened");
 							}
+						} else {
+							// send reject message
+							logger.debug("Rejecting exchange proposal: "
+									+ trade);
+							conv.getNetwork().sendMessage(
+									new UnicastMessage<Object>(
+											Performative.REJECT_PROPOSAL,
+											ResponderReplies.REJECT.name(), t,
+											from, to, null));
 						}
+					} else {
+						// TODO error transition
+						logger.warn("Message type not equal to OfferMessage");
 					}
-			)	
-			
-			.build();
+				}
+			});
 
 		} catch (FSMException e) {
-			e.printStackTrace();
+			logger.warn(e);
 		}
 
 
 
+	}
+
+	/**
+	 * canHandle method overriden in order
+	 * to force this class to handle Message
+	 * containing OfferMessage.class data types
+	 * Moreover it is also checked whether the
+	 * OfferMessge has a valid tradeID assigned
+	 * to it.
+	 */
+	@Override
+	public boolean canHandle(Input in){
+		Message<?> m = (Message<?>) in;
+		if(m.getData().getClass().equals(OfferMessage.class)){
+			try{
+				@SuppressWarnings("unchecked")
+				Message<OfferMessage> message = (Message<OfferMessage>) in;
+				if(message.getData().getTradeID() != null)
+					return super.canHandle(in);			
+			}
+			catch(ClassCastException e){
+				logger.warn(e);
+			}
+			return false;
+		}else{
+			return false;
+		}		
 	}
 
 	class TradeSpawnEvent extends ConversationSpawnEvent {
 
-		final Trade trade;
+		final OfferMessage offerMessage;
 
 		public TradeSpawnEvent(NetworkAddress with, int quantity, int unitCost, TradeType type) {
 			super(with);
-			this.trade = new Trade(quantity, unitCost, type);
+			UUID id = TradeProtocol.this.tradeToken.getToken();
+			this.offerMessage = new OfferMessage(new Offer(quantity, unitCost, type),id);
 		}
 
 	}
 
 
+	/**
+	 * Method used to get agents which are not
+	 * in an FSMProtocol conversation with this
+	 * agent
+	 * @return
+	 */
+	public List<NetworkAddress> getAgentsNotInConversation(){
+		List<NetworkAddress> all = new ArrayList<NetworkAddress>(this.network.getConnectedNodes());
+		all.removeAll(this.getActiveConversationMembers());
+		return all;
+	}
 
 	public void offer(NetworkAddress to, int quantity, int unitPrice, TradeType type)
 			throws FSMException {
@@ -328,10 +311,13 @@ public abstract class TradeProtocol extends FSMProtocol {
 	}
 
 	protected abstract boolean acceptExchange(NetworkAddress from,
-			Trade trade);
+			Offer trade);
 
-	protected boolean surrenderResource(NetworkAddress to, Trade trade){
-		return true;
+	public UUID getId() {
+		return id;
+	}
+
+	public UUID getAuthkey() {
+		return authkey;
 	}
 }
-

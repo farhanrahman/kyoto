@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import uk.ac.ic.kyoto.trade.TradeProtocol.Trade;
+import uk.ac.ic.kyoto.trade.Offer;
 
 /**
  * Stores all messages (trade and investment), and automagically
@@ -16,7 +16,7 @@ public class TickHistory{
 	
 	private final int tickId;
 	
-	private ArrayList<Trade> messages;
+	private ArrayList<Offer> messages;
 	
 	private int tradeHigh;
 	private int tradeLow;
@@ -42,7 +42,7 @@ public class TickHistory{
 	 * Sets High/Low to Float.{MIN/MAX}_VALUE
 	 */
 	private void init(){
-		messages = new ArrayList<Trade>();
+		messages = new ArrayList<Offer>();
 		
 		tradeHigh = Integer.MIN_VALUE;
 		tradeLow = Integer.MAX_VALUE;
@@ -61,7 +61,7 @@ public class TickHistory{
 	 * @return 
 	 * @throws Exception 
 	 */
-	public void addMessage(Trade m) throws Exception{
+	public void addMessage(Offer m) throws Exception{
 	
 		int unitCost = m.getUnitCost();
 		
@@ -79,7 +79,7 @@ public class TickHistory{
 		messages.add(m);
 	}
 	
-	public List<Trade> getMessages() {
+	public List<Offer> getMessages() {
 		return Collections.unmodifiableList(messages);
 	}
 

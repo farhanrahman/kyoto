@@ -198,7 +198,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	// This functionality may be taken over by the carbonOffsetUpdate
 	public void checkTargets() {
-		this.monitor.checkTargets();
+		//this.monitor.checkTargets();
 	}
 	
 	protected Set<ParticipantSharedState> getSharedState(){
