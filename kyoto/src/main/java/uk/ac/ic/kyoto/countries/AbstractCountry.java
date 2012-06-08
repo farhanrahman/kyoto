@@ -103,7 +103,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	@Override
-	public void initialise(){
+	final public void initialise(){
 		super.initialise();
 		
 		// Add the country to the monitor service
@@ -126,7 +126,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			System.out.println("Unable to reach emission reporting service.");
 			e.printStackTrace();
 		}
+		initialiseCountry();
 	}
+	
+	abstract protected void initialiseCountry();
 	
 	//================================================================================
     // Definitions of Abstract methods
@@ -168,13 +171,19 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		behaviour();
 	}
 	
+	/**
+	 * All individual country behaviour should occur here
+	 */
 	abstract protected void behaviour();
 	
-
+	
+	/**
+	 * Taxes individual percentage part of their GDP to pay for the monitor
+	 */
 	public void MonitorTax() {
 		// Give a tax to Monitor agent for monitoring every year
-		this.monitor.taxForMonitor(availableToSpend*GameConst.MONITOR_COST_PERCENTAGE); // Take % of money for monitoring
-		availableToSpend -= availableToSpend*GameConst.MONITOR_COST_PERCENTAGE;
+		this.monitor.taxForMonitor(GDP*GameConst.MONITOR_COST_PERCENTAGE); // Take % of GDP for monitoring
+		availableToSpend -= GDP*GameConst.MONITOR_COST_PERCENTAGE;
 	}
 
 	/**
@@ -246,6 +255,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
     // Private methods
     //================================================================================
 	
+	/**
+	 * Calculates GDP rate for the next year
+	 * @author Adam, ct
+	 */
 	private final void updateGDPRate() {
 		double marketStateFactor = 0;
 		

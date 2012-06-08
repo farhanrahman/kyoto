@@ -68,12 +68,23 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 */
 	@Override
 	protected void processInput(Input input) {
+		// TODO process input (if any)
 	}
 	
-
+	/**
+	 * Initialisation function
+	 */
+	@Override
+	protected void initialiseCountry() {
+		// TODO initialisation
+	}
+	
+	/**
+	 * Behaviour function
+	 */
 	@Override
 	protected void behaviour() {
-		
+		// TODO behaviour
 	}
 	
 	//================================================================================
@@ -129,11 +140,9 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 */
 	private void updateInternalPrice() {
 		internalPrice   = 	(long)
-							(
-							calculateMarketPrice() * 
-							calculateEndOfRoundFactor() * 
-							lastYearFactor
-							);
+							( calculateMarketPrice() * 
+							  calculateEndOfRoundFactor() * 
+							  lastYearFactor );
 	}
 	
 	/**
@@ -357,9 +366,9 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		try {
 			// Calculate new target based on three factors
 			newSellingTarget =	(long) 
-						( calculateAvailableCreditsFactor() *
-						  calculateFossilFuelsFactor() *
-						  calculateMarketFactor() );
+								( calculateAvailableCreditsFactor() *
+								  calculateFossilFuelsFactor() *
+								  calculateMarketFactor() );
 			
 			// Adjust the new target if out of possible range
 			if (newSellingTarget > carbonOffset) {
