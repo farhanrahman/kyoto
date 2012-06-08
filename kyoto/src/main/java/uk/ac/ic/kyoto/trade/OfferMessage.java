@@ -10,15 +10,15 @@ package uk.ac.ic.kyoto.trade;
  * @author farhanrahman
  *
  */
-public class TradeMessage {
-	private final Trade trade;
+public class OfferMessage {
+	private final Offer offer;
 	
-	public TradeMessage(Trade trade){
-		this.trade = trade;
+	public OfferMessage(Offer offer){
+		this.offer = offer;
 	}
 
-	public Trade getTrade() {
-		return trade;
+	public Offer getOffer() {
+		return offer;
 	}
 
 }

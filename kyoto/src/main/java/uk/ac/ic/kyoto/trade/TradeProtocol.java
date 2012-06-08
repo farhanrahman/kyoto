@@ -57,6 +57,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 	
 	enum States {
 		START, //Common start state
+		
 		/*Initiator States*/
 		TRADE_PROPOSED,
 		TIMED_OUT, //Timed out state for initiator
@@ -125,7 +126,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 					logger.debug("Initiating: " + e.trade);
 					conv.entity = e.trade;
 					conv.getNetwork().sendMessage(
-							new UnicastMessage<Trade>(
+							new UnicastMessage<Offer>(
 									Performative.PROPOSE, 
 									Transitions.PROPOSE_TRADE.name(),
 									SimTime.get(), from,
@@ -198,8 +199,8 @@ public abstract class TradeProtocol extends FSMProtocol {
 				@Override
 				public void processInitialMessage(Message<?> message,
 						FSMConversation conv, Transition transition) {
-					if (message.getData() instanceof Trade) {
-						Trade trade = ((Trade) message.getData())
+					if (message.getData() instanceof Offer) {
+						Offer trade = ((Offer) message.getData())
 								.reverse();
 						conv.setEntity(trade);
 						NetworkAddress from = conv.getNetwork()
@@ -211,7 +212,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 							logger.debug("Accepting exchange proposal: "
 									+ trade);
 							conv.getNetwork().sendMessage(
-									new UnicastMessage<Trade>(
+									new UnicastMessage<Offer>(
 											Performative.ACCEPT_PROPOSAL,
 											ResponderReplies.ACCEPT.name(), t,
 											from, to, trade));
@@ -227,7 +228,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 							logger.debug("Rejecting exchange proposal: "
 									+ trade);
 							conv.getNetwork().sendMessage(
-									new UnicastMessage<Trade>(
+									new UnicastMessage<Offer>(
 											Performative.REJECT_PROPOSAL,
 											ResponderReplies.REJECT.name(), t,
 											from, to, trade));
@@ -255,7 +256,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 	@Override
 	public boolean canHandle(Input in){
 		Message<?> m = (Message<?>) in;
-		if(m.getData().getClass().equals(Trade.class)){
+		if(m.getData().getClass().equals(Offer.class)){
 			return super.canHandle(in);		
 		}else{
 			return false;
@@ -264,12 +265,12 @@ public abstract class TradeProtocol extends FSMProtocol {
 	
 	class TradeSpawnEvent extends ConversationSpawnEvent {
 
-		final Trade trade;
+		final Offer trade;
 
 		public TradeSpawnEvent(NetworkAddress with, int quantity, int unitCost, TradeType type) {
 			super(with);
 			UUID id = TradeProtocol.this.tradeToken.getToken();
-			this.trade = new Trade(quantity, unitCost, type, id);
+			this.trade = new Offer(quantity, unitCost, type, id);
 		}
 
 	}
@@ -293,7 +294,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 	}
 	
 	protected abstract boolean acceptExchange(NetworkAddress from,
-			Trade trade);
+			Offer trade);
 
 	public UUID getId() {
 		return id;

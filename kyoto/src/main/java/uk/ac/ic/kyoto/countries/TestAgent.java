@@ -3,8 +3,8 @@ package uk.ac.ic.kyoto.countries;
 import java.util.Set;
 import java.util.UUID;
 
-import uk.ac.ic.kyoto.trade.Trade;
-import uk.ac.ic.kyoto.trade.TradeMessage;
+import uk.ac.ic.kyoto.trade.Offer;
+import uk.ac.ic.kyoto.trade.OfferMessage;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.messaging.Performative;
@@ -18,7 +18,7 @@ import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 public class TestAgent extends AbstractParticipant {
 	
 	TradeProtocol trade;
-	Set<Trade> trades;
+	Set<Offer> trades;
 
 	public TestAgent(UUID id, String name) {
 		super(id, name);
@@ -33,7 +33,7 @@ public class TestAgent extends AbstractParticipant {
 			this.trade = new TradeProtocol(getID(), this.authkey, environment, network) {
 				
 				@Override
-				protected boolean acceptExchange(NetworkAddress from, Trade trade) {
+				protected boolean acceptExchange(NetworkAddress from, Offer trade) {
 					// TODO decide if we should accept the trade
 					// for example...
 					if(trade.getUnitCost() == 0){
@@ -57,9 +57,9 @@ public class TestAgent extends AbstractParticipant {
 		// TODO Auto-generated method stub
 		if (in instanceof Message){
 			@SuppressWarnings("unchecked")
-			Message<Trade> m = (Message<Trade>) in;
+			Message<Offer> m = (Message<Offer>) in;
 			if(m.getType().equalsIgnoreCase("Trade")){
-				Trade t = (Trade) m.getData();
+				Offer t = (Offer) m.getData();
 				//Update our knowledgebase
 				//trades.add(t);
 				
@@ -77,7 +77,7 @@ public class TestAgent extends AbstractParticipant {
 						"TRADE", 
 						SimTime.get(), 
 						network.getAddress(), 
-						new TradeMessage()
+						new OfferMessage(new Offer())
 				)
 			);
 		

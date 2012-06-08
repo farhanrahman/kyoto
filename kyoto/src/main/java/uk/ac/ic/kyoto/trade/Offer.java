@@ -9,7 +9,7 @@ import java.util.UUID;
  * @author cmd08 and farhanrahman
  *
  */
-public class Trade{
+public class Offer{
 	final int quantity;
 	final int unitCost;
 	final TradeType type;
@@ -17,7 +17,7 @@ public class Trade{
 
 	public static String TRADE_PROPOSAL = "Trade proposal";	
 	
-	public Trade(int quantity, int unitCost, TradeType type, UUID tradeID) {
+	public Offer(int quantity, int unitCost, TradeType type, UUID tradeID) {
 		this.quantity = quantity;
 		this.unitCost = unitCost;
 		this.type = type;
@@ -39,13 +39,17 @@ public class Trade{
 	public TradeType getType(){
 		return this.type;
 	}
+	
+	public UUID getUUID(){
+		return tradeID;
+	}
 
 	@Override
 	public String toString() {
 		return "Trade: "+quantity+" @ "+unitCost; 
 	}
 
-	public boolean equals(Trade t){
+	public boolean equals(Offer t){
 		if(this == t) {
 			return true;
 		} else if (	this.quantity == t.getQuantity() && 
@@ -65,9 +69,9 @@ public class Trade{
 		}
 	}
 	
-	public Trade reverse(){
+	public Offer reverse(){
 		TradeType t = this.type.equals(TradeType.BUY)?TradeType.SELL:TradeType.BUY;
-		return new Trade(this.quantity, this.unitCost, t,this.tradeID);
+		return new Offer(this.quantity, this.unitCost, t,this.tradeID);
 	}
 
 }

@@ -5,8 +5,8 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 
 import uk.ac.ic.kyoto.countries.NonParticipant;
-import uk.ac.ic.kyoto.trade.Trade;
-import uk.ac.ic.kyoto.trade.TradeMessage;
+import uk.ac.ic.kyoto.trade.Offer;
+import uk.ac.ic.kyoto.trade.OfferMessage;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.network.Message;
@@ -35,8 +35,8 @@ public class CanadaAgent extends NonParticipant {
 		if(in instanceof Message){
 			try{
 				@SuppressWarnings("unchecked")
-				Message<TradeMessage> m = (Message<TradeMessage>) in;
-				Trade t = m.getData().getTrade();
+				Message<OfferMessage> m = (Message<OfferMessage>) in;
+				Offer t = m.getData().getTrade();
 			
 				if(!this.tradeProtocol
 						.getActiveConversationMembers()
@@ -66,7 +66,7 @@ public class CanadaAgent extends NonParticipant {
 			tradeProtocol = new TradeProtocol(getID(), authkey, environment, network) {
 				@Override
 				protected boolean acceptExchange(NetworkAddress from,
-						Trade trade) {
+						Offer trade) {
 					if (carbonOutput - emissionsTarget + carbonOffset > 0) {
 						return true;
 					}

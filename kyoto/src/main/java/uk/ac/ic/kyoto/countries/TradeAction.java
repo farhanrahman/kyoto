@@ -1,7 +1,7 @@
 package uk.ac.ic.kyoto.countries;
 
 import java.util.UUID;
-import uk.ac.ic.kyoto.trade.Trade;
+import uk.ac.ic.kyoto.trade.Offer;
 import uk.ac.imperial.presage2.core.Action;
 import uk.ac.imperial.presage2.core.Time;
 
@@ -10,12 +10,12 @@ import uk.ac.imperial.presage2.core.Time;
  */
 public class TradeAction implements Action {
 	
-	final private Trade t;
+	final private Offer t;
 	final private Time time;
 	final private UUID initiator;
 	final private UUID receiver;
 	
-	public TradeAction(Trade t, Time time, UUID initiator, UUID receiver) {
+	public TradeAction(Offer t, Time time, UUID initiator, UUID receiver) {
 		super();
 		this.t = t;
 		this.time = time;
@@ -28,7 +28,7 @@ public class TradeAction implements Action {
 		return "Trade occurred at: " + time.intValue() + " between "+ initiator + " and " + receiver;
 	}
 
-	public Trade getTrade() {
+	public Offer getTrade() {
 		return t;
 	}
 	

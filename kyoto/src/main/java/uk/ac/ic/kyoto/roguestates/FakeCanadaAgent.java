@@ -3,8 +3,8 @@ package uk.ac.ic.kyoto.roguestates;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.countries.NonParticipant;
-import uk.ac.ic.kyoto.trade.Trade;
-import uk.ac.ic.kyoto.trade.TradeMessage;
+import uk.ac.ic.kyoto.trade.Offer;
+import uk.ac.ic.kyoto.trade.OfferMessage;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.imperial.presage2.core.messaging.Input;
@@ -40,7 +40,7 @@ public class FakeCanadaAgent extends NonParticipant {
 			tradeProtocol = new TradeProtocol(getID(), authkey, environment, network) {
 				@Override
 				protected boolean acceptExchange(NetworkAddress from,
-						Trade trade) {
+						Offer trade) {
 					if (carbonOutput - emissionsTarget + carbonOffset < 0) {
 						return true;
 					}
@@ -62,15 +62,15 @@ public class FakeCanadaAgent extends NonParticipant {
 		if(counter < 3){
 			int quantity = 10;
 			int unitCost = 2;
-			Trade trade = new Trade(quantity, unitCost, TradeType.SELL, authkey);
+			Offer trade = new Offer(quantity, unitCost, TradeType.SELL, authkey);
 			this.network.sendMessage(
-						new MulticastMessage<TradeMessage>(
+						new MulticastMessage<OfferMessage>(
 								Performative.PROPOSE, 
-								Trade.TRADE_PROPOSAL, 
+								Offer.TRADE_PROPOSAL, 
 								SimTime.get(), 
 								this.network.getAddress(),
 								this.tradeProtocol.getAgentsNotInConversation(),
-								new TradeMessage(trade))
+								new OfferMessage(trade))
 					);
 		counter++;
 		}
