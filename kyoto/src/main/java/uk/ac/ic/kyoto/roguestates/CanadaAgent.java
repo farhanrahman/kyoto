@@ -44,7 +44,7 @@ public class CanadaAgent extends NonParticipant {
 	}
 	
 	@Override
-	public void initialise() {
+	public void initialiseCountry() {
 		super.initialise();
 		carbonOutput = 80;
 		try {
@@ -65,8 +65,7 @@ public class CanadaAgent extends NonParticipant {
 	}
 	
 	@Override
-	public void execute() {
-		super.execute();
+	public void behaviour() {
 		Set<NetworkAddress> nodes = network.getConnectedNodes();
 //		Iterator i = nodes.iterator();
 //		while (i.hasNext()) {

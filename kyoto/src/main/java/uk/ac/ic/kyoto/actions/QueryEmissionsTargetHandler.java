@@ -13,10 +13,10 @@ import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.messaging.Input;
 
-/*
+/**
  * Action handler to enable agents to query session targets.
  * 
- * Author: Jonathan Ely
+ * @author Jonathan Ely
  */
 
 public class QueryEmissionsTargetHandler implements ActionHandler {

@@ -10,26 +10,29 @@ import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
 import uk.ac.imperial.presage2.core.event.EventListener;
 
 /**
- * <p>Environment service for setting of carbon targets. Queried by countries via an action.git</p><br>
+ * <p>Environment service for setting of carbon targets. Queried by countries via an action.git</p>
+ * 
+ * <p><b>Formula:</b></p>
+ * 
  * <p>
- * Formula:<br>
- * <br>
- * 	Assuming 5% drop per session<br>
- * 	total1990Emission = sum(existing countries’ emissions in 1990)<br>
- * <br>
- * 	for each country {<br>
- * 		firstSessionTarget = 1990emission*(1 - 5%)<br>
- * 		yearTarget = 1990emission *(1 - (yearNumber % sessionLength)*(5% / sessionLength))<br>
- * 		proportionOfWorldEmissions = 1990emission / total1990Emission<br>
- * 	}<br>
- * <br>
- * 	endofSessionEmissions = sum(all reported emissions at end of session)<br>
- * 	<br>
- *  for each country {<br>
- *  	nextSessionTarget = (proportionOfWorldEmissions * endofSessionEmissions)*(1 - 5%)<br>
- * 		nextYearTarget = (proportionOfWorldEmissions * endofSessionEmissions)*(1 - (yearNumber % sessionLength)*(5% / sessionLength)) <br>
- *  }<br>
+ * Assuming 5% drop per session<br />
+ * total1990Emission = sum(existing countries’ emissions in 1990)<br />
  * </p>
+ * <p>
+ * <b>For each country :</b><br />
+ * firstSessionTarget = 1990emission*(1 - 5%)<br />
+ * yearTarget = 1990emission *(1 - (yearNumber % sessionLength)*(5% / sessionLength))<br />
+ * proportionOfWorldEmissions = 1990emission / total1990Emission<br />
+ * </p>
+ * 
+ * <p>endofSessionEmissions = sum(all reported emissions at end of session)</p>
+ * 
+ * <p>
+ *  <b>For each country :</b><br />
+ *  nextSessionTarget = (proportionOfWorldEmissions * endofSessionEmissions)*(1 - 5%)<br />
+ *  nextYearTarget = (proportionOfWorldEmissions * endofSessionEmissions)*(1 - (yearNumber % sessionLength)*(5% / sessionLength)) <br />
+ *  </p>
+ *  
  *  @author Jonathan Ely
  */
 
@@ -92,8 +95,13 @@ public class CarbonTarget extends EnvironmentService {
 	 */
 	private int generateSessionTarget(UUID country, int Session)
 	{
-		return 0;
+		/*
+		 * TO BE IMPLEMENTED
+		 * 
+		 * Data needs to be loaded from somewhere. MongoDB?
+		 */
 		
+		return 0;
 	}
 	
 	/*
@@ -101,8 +109,10 @@ public class CarbonTarget extends EnvironmentService {
 	 */
 	private int generateYearTarget()
 	{
+		/*
+		 * TO BE IMPLEMENTED
+		 */
 		return 0;
-		
 	}	
 	
 	public long queryTarget(UUID country) {
