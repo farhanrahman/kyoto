@@ -26,17 +26,19 @@ public class CarbonAbsorptionHandlerTest {
 	TestCountry france = new TestCountry(randomID, "France", "FRA",
 										640427, 182711, 1113056,
 										2.34, 0, 0,
-										230546, 686403, 399028);
+										234567, 686403, 399028);
 	CarbonAbsorptionHandler testObject = new CarbonAbsorptionHandler (france);
 
 	
 	@Test
-	public void testCarbonAbsorptionHandler() {
+	public void testGetCost() {
 		
-		fail("Not implemented yet. Waiting for AbstractCountry constructor to be corrected.");
+		for (int i=1; i <= 100000000; i *= 10) {
+			System.out.println(i + ": " + testObject.getCost(i));
+		}
+	// TODO TEST THIS MORE AND MORE THOROUGLY, THEN OPEN A BUG REPORT (OR CORRECT IT)	
 		
-		System.out.println(france.getCarbonOffset());
-		System.out.println(testObject.getCost(france.getCarbonOffset()));
+//		fail("Not implemented yet. Waiting for AbstractCountry constructor to be corrected.");
 	}
 
 }
