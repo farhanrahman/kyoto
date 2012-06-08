@@ -103,7 +103,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	@Override
-	public void initialise(){
+	final public void initialise(){
 		super.initialise();
 		
 		// Add the country to the monitor service
@@ -126,7 +126,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			System.out.println("Unable to reach emission reporting service.");
 			e.printStackTrace();
 		}
+		initialiseCountry();
 	}
+	
+	abstract protected void initialiseCountry();
 	
 	//================================================================================
     // Definitions of Abstract methods
