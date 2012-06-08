@@ -60,6 +60,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	ParticipantCarbonReportingService reportingService; // TODO add visibility
 	Monitor monitor;
+	TimeService timeService;
 	
 	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
 	
@@ -104,10 +105,17 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		
 		// Add the country to the monitor service
 		try {
-			this.monitor = this.getEnvironmentService(Monitor.class);
-			this.monitor.addMemberState(this);
+			monitor = getEnvironmentService(Monitor.class);
+			monitor.addMemberState(this);
 		} catch (UnavailableServiceException e1) {
 			System.out.println("Unable to reach monitor service.");
+			e1.printStackTrace();
+		}
+		
+		try {
+			timeService = getEnvironmentService(TimeService.class);
+		} catch (UnavailableServiceException e1) {
+			System.out.println("TimeService doesn't work");
 			e1.printStackTrace();
 		}
 		// Initialize the Action Handlers
@@ -145,24 +153,16 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	@Override
 	final public void execute() {
 		super.execute();
-		try {
-			// TODO make sure that the proper getters are used
-			TimeService timeService = getEnvironmentService(TimeService.class);
-			
-			if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
-				MonitorTax();
-				checkTargets(); //did the countries meet their targets?
-				updateGDPRate();
-				updateCarbonOffsetYearly();
-				YearlyFunction();
-			}
-			if (timeService.getCurrentYear() % timeService.getYearsInSession() == 0) {
-				resetCarbonOffset();
-				SessionFunction();
-			}
-		} catch (UnavailableServiceException e) {
-			logger.warn(e.getMessage(), e);
-			e.printStackTrace();
+		if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
+			MonitorTax();
+			checkTargets(); //did the countries meet their targets?
+			updateGDPRate();
+			updateCarbonOffsetYearly();
+			YearlyFunction();
+		}
+		if (timeService.getCurrentYear() % timeService.getYearsInSession() == 0) {
+			resetCarbonOffset();
+			SessionFunction();
 		}
 		behaviour();
 	}
