@@ -53,6 +53,12 @@ public class CarbonReportingService extends EnvironmentService {
 			logger.info("ATTIME= "+simTime.toString()+" ID= " + id + " Key: " + key + " Value: " + s.get(key) + "\n");
 		}
 		
-		System.out.println();*/		
+		System.out.println();*/
+	}
+	
+	// TODO implement
+	public double getReport(UUID id, Time simTime) {
+		double report = 0;
+		return report;
 	}
 }
