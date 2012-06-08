@@ -39,4 +39,18 @@ public class TestCountry extends AbstractCountry {
 		
 	}
 
+
+	@Override
+	protected void initialiseCountry() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	protected void behaviour() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

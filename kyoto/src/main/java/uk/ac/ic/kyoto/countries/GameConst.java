@@ -29,6 +29,11 @@ public final class GameConst {
 	 */
 	public static final double PERCENTAGE_OF_GDP = 0.1;
 	
+	
+	/**
+	 * The price of reducing carbon reduction by one unit when we have 100% dirty industry
+	 */
+	public static long CARBON_REDUCTION_OFFSET = 1;
 	/**
 	 * Coefficient to calculate the cost of carbon reduction
 	 */

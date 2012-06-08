@@ -1,78 +1,57 @@
 package uk.ac.ic.kyoto.annex1reduce;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.UUID;
+import java.util.Map;
 
-import uk.ac.imperial.presage2.core.messaging.Input;
-import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
-
-// TODO Everything
+import uk.ac.ic.kyoto.countries.AbstractCountry;
+import uk.ac.ic.kyoto.countries.GameConst;
+import uk.ac.ic.kyoto.services.CarbonReportingService;
+import uk.ac.ic.kyoto.services.TimeService.EndOfYearCycle;
+import uk.ac.imperial.presage2.core.environment.EnvironmentService;
+import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
+import uk.ac.imperial.presage2.core.event.EventListener;
+import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
+import uk.ac.imperial.presage2.core.simulator.SimTime;
+import uk.ac.imperial.presage2.core.util.random.Random;
 
 /**
- * Main EU body
- * Provides functions for allocating credits and imposing sactions on EU members
- * Singleton class with mostly static variables and methods
- * @author Nik
- *
+ * EU service. Allocates carbon emissions targets for EU countries and does local monitoring and sanctioning.
+ * @author ov109
  */
-public class EU extends AbstractParticipant {
+public class EU extends EnvironmentService {
 	
-	static final private UUID id = UUID.randomUUID();
-	static final private String NAME = "EuropeanUnion";
-	static final private ArrayList<EUCountry> memberStates = new ArrayList<EUCountry>();
-	
-	public EU() {
-		super(id,NAME);
-	}
-	
-	//TODO PLACEHOLDER Determine how input names work
-	static final String NEWROUND = "NEWROUND";
-	
-	/**
-	 * Called by execute multiple times for many inputs
-	 * @param input The current input to be handled
-	 */
-	@Override
-	protected void processInput(Input input) {
-		String name = input.getType();
+	private ArrayList<EUCountry> euMemberStates = new ArrayList<EUCountry>();
 
-		//If the input is relevant, perform an action
-		if (name == NEWROUND) {
-			applySanctions();
-			allocateCredits();
-		}
-		//TODO handle more actions
-		
-		
+	protected EU(EnvironmentSharedStateAccess sharedState) {
+		super(sharedState);
 	}
-
-	/**
-	 * Called when a round ends. Calculates and applies sanctions to 
-	 * member states
-	 */
-	static private void applySanctions() {
-		for (EUCountry state : memberStates) {
-			//TODO calculate and apply sanctions to member states
+	
+	// TODO Allocate target distribution
+	
+	@EventListener
+	public void monitorCountries (EndOfYearCycle e) {
+		for (EUCountry a : euMemberStates) {
+			long realCarbonOutput = a.getMonitored();
+			Serializable state = sharedState.get(CarbonReportingService.name, a.getID());
+			Map<Integer, Double> reports = (Map<Integer, Double>)state;
+			if (realCarbonOutput != reports.get(SimTime.get().intValue())) {
+				sanction(a);
+			}
 		}
 	}
 	
-	/**
-	 * Called when a round ends. Calculates and allocates credits to
-	 * member states
-	 */
-	static private void allocateCredits() {
-		for (EUCountry state : memberStates) {
-			//TODO Calculate credits to give to all EU member states
-		}
+	private void sanction(EUCountry sanctionee) {
+		/// TODO Sanctions
 	}
 	
 	/**
-	 * Add member states to the EU. Allows operation of sanctions, 
-	 * credits, etc.
+	 * Add EU member states to the EU service.
 	 * @param state 
 	 */
-	static public void addMemberState(EUCountry state) {
-		memberStates.add(state);
+	public void addMemberState(EUCountry state) {
+		euMemberStates.add(state);
 	}
+
 	
 }
