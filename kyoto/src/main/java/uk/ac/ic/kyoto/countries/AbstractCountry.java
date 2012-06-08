@@ -122,10 +122,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			System.out.println("Unable to reach emission reporting service.");
 			e.printStackTrace();
 		}
+		
+		calculateATS();
 		initialiseCountry();
 	}
-	
-	abstract protected void initialiseCountry();
 	
 	//================================================================================
     // Definitions of Abstract methods
@@ -137,6 +137,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	public abstract void YearlyFunction();
 	
 	public abstract void SessionFunction();
+	
+	abstract protected void initialiseCountry();
 	
 	//================================================================================
     // Public methods
@@ -150,8 +152,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			TimeService timeService = getEnvironmentService(TimeService.class);
 			
 			if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
+				calculateATS();
 				MonitorTax();
 				checkTargets(); //did the countries meet their targets?
+				updateGDP();
 				updateGDPRate();
 				updateCarbonOffsetYearly();
 				YearlyFunction();
@@ -276,6 +280,21 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			System.out.println("Unable to reach economy service.");
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Updates GDP using GDPRate for the past year
+	 * @author sc1109
+	 */
+	private final void updateGDP() {
+		GDP = GDP + GDP * GDPRate;
+	}
+	
+	/**
+	 * Calculate available to spend for the next year as an extra 1% of GDP
+	 */
+	private final void calculateATS() {
+		availableToSpend = Math.round(availableToSpend * GameConst.PERCENTAGE_OF_GDP);
 	}
 	
 	/**
