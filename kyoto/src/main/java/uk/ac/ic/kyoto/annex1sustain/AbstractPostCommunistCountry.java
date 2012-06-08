@@ -260,8 +260,8 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		long potentialProfit;
 		
 		try {
-			investmentCost = carbonAbsorptionHandler.getCost(Constants.MINIMAL_INVESTMENT);
-			potentialProfit = Constants.MINIMAL_INVESTMENT * internalPrice;
+			investmentCost = carbonAbsorptionHandler.getCost(absorptionInvestmentTarget);
+			potentialProfit = absorptionInvestmentTarget * internalPrice;
 			
 			if (potentialProfit > investmentCost) {
 				carbonAbsorptionHandler.invest(investmentCost);
@@ -295,8 +295,8 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		long potentialProfit;
 		
 		try {
-			investmentCost = carbonReductionHandler.getCost(Constants.MINIMAL_INVESTMENT);
-			potentialProfit = Constants.MINIMAL_INVESTMENT * internalPrice;
+			investmentCost = carbonReductionHandler.getCost(reductionInvestmentTarget);
+			potentialProfit = reductionInvestmentTarget * internalPrice;
 			
 			if (potentialProfit > investmentCost) {
 				carbonReductionHandler.invest(investmentCost);
