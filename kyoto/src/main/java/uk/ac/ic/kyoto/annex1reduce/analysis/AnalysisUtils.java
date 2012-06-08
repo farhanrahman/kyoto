@@ -91,6 +91,18 @@ public class AnalysisUtils {
 		
 		return new Range(type, startTick, endTick, low, high);
 	}
+
+	public final static void nPointMoningAverage(){
+		//TODO Implementation
+	}
+	
+	public final static void weightedAverage(SessionHistory[] sessions /* ... */){
+		//TODO Implementation
+	}
+	
+	public final static void windowedWeightedAverage(SessionHistory[] sessions /* ... */){
+		//TODO Implementation
+	}
 	
 	public static class Range{
 		public final TradeType type;
