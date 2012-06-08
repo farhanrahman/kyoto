@@ -56,6 +56,7 @@ public final class CarbonReductionHandler{
 		catch (NotEnoughCarbonOutputException e) {
 			throw new NotEnoughCarbonOutputException();
 		}
+		System.out.println("Cost?" + cost);
 		return cost;
 	}
 	
@@ -78,6 +79,7 @@ public final class CarbonReductionHandler{
 			double b = GameConst.CARBON_REDUCTION_COEFF * cleanIndustryBefore + GameConst.CARBON_REDUCTION_OFFSET;
 			double c = - cost;
 			QuadraticEquation equation = new QuadraticEquation(a, b, c);
+			System.out.println("Quadradtic roots a: "+equation.getRootOne()+" b: "+equation.getRootTwo());
 			
 			double cleanIndustryChange = Math.max(equation.getRootOne(), equation.getRootTwo() );
 			carbonOutputChange = calculateCarbonOutput(cleanIndustryChange, country.energyOutput);
@@ -86,6 +88,7 @@ public final class CarbonReductionHandler{
 			System.out.println("Carbon reduction has died");
 			e.printStackTrace();
 		}
+		System.out.println("CarbonOutputChange: " + carbonOutputChange);
 		return carbonOutputChange;
 	}
 		
@@ -126,7 +129,7 @@ public final class CarbonReductionHandler{
 		double cleanIndustry = 1;
 		try {
 			if (carbonOutput <= energyOutput)
-				cleanIndustry = 1 - (carbonOutput / energyOutput);
+				cleanIndustry = 1 - ((double)carbonOutput / (double)energyOutput);
 			else {
 				//country.logger.warn("It is impossible for carbonOutput to exceed energyOutput");
 				// Move error logging to country when it catches exception
@@ -137,12 +140,15 @@ public final class CarbonReductionHandler{
 			//country.logger.error("Specified energyOuput was 0: " + e);
 			System.out.println("Calculate clean industry measure error");
 		}
+		System.out.println("CleanIndustry: " + cleanIndustry);
 		return cleanIndustry;
 	}
 	
 	private long calculateCarbonOutput(double cleanIndustry, long energyOutput) {
 		long carbonOutput;
-		carbonOutput = (long) (energyOutput * (1 - cleanIndustry) ); // TODO implement exception handling
+		carbonOutput = (long) ((double)energyOutput * (1 - cleanIndustry) ); 
+		System.out.println("CarbonOutput: " + carbonOutput);
 		return carbonOutput;
+		// TODO implement exception handling
 	}
 }
