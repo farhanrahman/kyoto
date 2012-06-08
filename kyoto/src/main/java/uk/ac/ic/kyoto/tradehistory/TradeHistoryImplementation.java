@@ -9,6 +9,13 @@ import uk.ac.imperial.presage2.core.Time;
 
 import com.google.inject.Singleton;
 
+/**
+ * Singleton class that provides
+ * read and write access to the trade
+ * history so far
+ * @author farhanrahman
+ *
+ */
 @Singleton
 public class TradeHistoryImplementation implements TradeHistory{
 	private static Map<Integer, Map<UUID, Offer>> history = new HashMap<Integer,Map<UUID,Offer>>();
