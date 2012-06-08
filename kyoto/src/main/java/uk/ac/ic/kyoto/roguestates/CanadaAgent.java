@@ -66,11 +66,20 @@ public class CanadaAgent extends NonParticipant {
 	
 	@Override
 	public void behaviour() {
-		Set<NetworkAddress> nodes = network.getConnectedNodes();
-		for (NetworkAddress i: nodes) {
+//		Set<NetworkAddress> nodes = network.getConnectedNodes();
+//		for (NetworkAddress i: nodes) {
+//			try {
+//				tradeProtocol.offer(i, 10, 5, TradeType.BUY);
+//			} catch (FSMException e) {
+//				e.printStackTrace();
+//			}
+//		}
+		if (availableToSpend > 0) {
 			try {
-				tradeProtocol.offer(i, 10, 5, TradeType.BUY);
-			} catch (FSMException e) {
+				carbonReductionHandler.invest((long) (availableToSpend*0.1));
+				System.out.println("Spending " + availableToSpend* 0.1 + " on carbon reduction. Current carbon output is " + carbonOutput + ".");
+			} catch (Exception e) {
+				logger.warn(e.getMessage(), e);
 				e.printStackTrace();
 			}
 		}
