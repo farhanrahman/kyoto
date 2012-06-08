@@ -67,7 +67,7 @@ public final class CarbonReductionHandler{
 	 * @return the change in carbon output from specified cost
 	 */
 	public final double getCarbonOutputChange(long cost) {
-		double carbonOutputChange;
+		double carbonOutputChange=0;
 
 		try {
 			// Calculate the clean industry rate before the investment
@@ -83,7 +83,8 @@ public final class CarbonReductionHandler{
 			carbonOutputChange = calculateCarbonOutput(cleanIndustryChange, country.energyOutput);
 		}
 		catch (Exception e) {
-			carbonOutputChange = 0;
+			System.out.println("Carbon reduction has died");
+			e.printStackTrace();
 		}
 		return carbonOutputChange;
 	}
@@ -122,7 +123,7 @@ public final class CarbonReductionHandler{
 	 * Calculates the clean industry rate for specified carbon output and energy output
 	 */
 	private double calculateCleanIndustryMeasure(long carbonOutput, long energyOutput) throws NotEnoughCarbonOutputException{
-		double cleanIndustry;
+		double cleanIndustry = 1;
 		try {
 			if (carbonOutput <= energyOutput)
 				cleanIndustry = 1 - (carbonOutput / energyOutput);
@@ -134,7 +135,7 @@ public final class CarbonReductionHandler{
 		}
 		catch (ArithmeticException e) {
 			//country.logger.error("Specified energyOuput was 0: " + e);
-			cleanIndustry = 1;
+			System.out.println("Calculate clean industry measure error");
 		}
 		return cleanIndustry;
 	}

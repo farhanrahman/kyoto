@@ -89,6 +89,8 @@ public class CanadaAgent extends NonParticipant {
 				e.printStackTrace();
 			}
 		}
+		
+		System.out.println("I have this much money: " + availableToSpend + ".");
 	}
 
 }
