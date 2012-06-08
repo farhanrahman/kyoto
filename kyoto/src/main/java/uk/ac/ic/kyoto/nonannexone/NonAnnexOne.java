@@ -21,13 +21,6 @@ public class NonAnnexOne extends AbstractCountry {
 		// TODO Auto-generated method stub
 
 	}
-	
-	@Override
-	public void execute() {
-		// TODO Auto-generated method stub - what does this mean?
-		
-		//write some behaviors pseudocode
-	}
 
 	@Override
 	public void YearlyFunction() {
@@ -37,6 +30,18 @@ public class NonAnnexOne extends AbstractCountry {
 
 	@Override
 	public void SessionFunction() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void initialiseCountry() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void behaviour() {
 		// TODO Auto-generated method stub
 		
 	}

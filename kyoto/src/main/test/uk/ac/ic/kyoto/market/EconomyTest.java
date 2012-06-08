@@ -22,7 +22,7 @@ public class EconomyTest {
 
 	@Test
 	public void testEconomy() {
-		
+		fail("How do I pass a sharedState to my Economy object?")
 	}
 	
 }
