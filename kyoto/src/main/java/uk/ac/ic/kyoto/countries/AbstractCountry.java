@@ -73,8 +73,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
     //================================================================================
 	
 	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
-					double GDPRate, long availableToSpend, long emissionsTarget, long carbonOffset,
-					long energyOutput, long carbonOutput) {
+					double GDPRate, long emissionsTarget, long energyOutput, long carbonOutput) {
 
 		//TODO Validate parameters
 		
@@ -86,8 +85,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.GDP = GDP;
 		this.GDPRate = GDPRate;
 		this.emissionsTarget = emissionsTarget;
-		this.carbonOffset = carbonOffset;
-		this.availableToSpend = availableToSpend;
+		this.carbonOffset = 0;
+		this.availableToSpend = 0;
 		this.carbonOutput = carbonOutput;
 		this.carbonEmissionReports = new HashMap<Integer, Long>();
 		this.energyOutput = energyOutput;
@@ -119,7 +118,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			e.printStackTrace();
 		}
 		
-		initialiseAvailableToSpend();
+		updateAvailableToSpend();
 		initialiseCountry();
 	}
 	
@@ -148,9 +147,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			TimeService timeService = getEnvironmentService(TimeService.class);
 			
 			if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
-				initialiseAvailableToSpend();
+				updateAvailableToSpend();
 				MonitorTax();
-				checkTargets(); //did the countries meet their targets?
 				updateGDP();
 				updateGDPRate();
 				updateCarbonOffsetYearly();
@@ -190,12 +188,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	public final long getMonitored() {
 		return carbonOutput;
 	}
-	
-	// This functionality may be taken over by the carbonOffsetUpdate
-	public void checkTargets() {
-		//this.monitor.checkTargets();
-	}
-	
+		
 	protected Set<ParticipantSharedState> getSharedState(){
 		Set<ParticipantSharedState> s = super.getSharedState();
 		s.add(ParticipantCarbonReportingService.createSharedState(this.getCarbonEmissionReports(), this.getID()));
@@ -227,17 +220,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 */
 	public Double reportCarbonEmission(Time t){
 		
-		// This  is an example of how reporting your carbon output is structured
-		/*try{
-		Time t = SimTime.get();
-		AbstractCountry.this.environment.act(new SubmitCarbonEmissionReport(
-					AbstractCountry.this.reportCarbonEmission(t), t), 
-					AbstractCountry.this.getID(), 
-					AbstractCountry.this.authkey);
-		}catch(ActionHandlingException e){
-			logger.warn("Error trying to submit report");
-		}*/
-		
+		// TODO implement a method to cheat
 		this.addToReports(t, carbonOutput);
 		return new Double(carbonOutput);
 	}
@@ -283,9 +266,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	/**
 	 * Calculate available to spend for the next year as an extra 1% of GDP
+	 * If we haven't spent something last year, it will be available this year too
 	 */
-	private final void initialiseAvailableToSpend() {
-		availableToSpend = Math.round(availableToSpend * GameConst.PERCENTAGE_OF_GDP);
+	private final void updateAvailableToSpend() {
+		availableToSpend += GDP * GameConst.PERCENTAGE_OF_GDP;
 	}
 	
 	/**
