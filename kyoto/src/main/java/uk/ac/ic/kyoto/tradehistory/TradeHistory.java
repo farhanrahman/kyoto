@@ -6,6 +6,14 @@ import java.util.UUID;
 import uk.ac.ic.kyoto.trade.Offer;
 import uk.ac.imperial.presage2.core.Time;
 
+/**
+ * Interface for getting
+ * Trade history which is updated
+ * by the TradeProtocol after
+ * a trade has been made successful
+ * @author farhanrahman
+ *
+ */
 public interface TradeHistory {
 	public Map<Integer,Map<UUID,Offer>> getHistory();
 	
