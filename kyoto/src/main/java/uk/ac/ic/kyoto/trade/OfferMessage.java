@@ -1,5 +1,7 @@
 package uk.ac.ic.kyoto.trade;
 
+import java.util.UUID;
+
 /**
  * Wrapper class for Trade
  * data. This is to distinguish
@@ -12,13 +14,19 @@ package uk.ac.ic.kyoto.trade;
  */
 public class OfferMessage {
 	private final Offer offer;
+	private final UUID id;
 	
-	public OfferMessage(Offer offer){
+	public OfferMessage(Offer offer, UUID id){
 		this.offer = offer;
+		this.id = id;
 	}
 
 	public Offer getOffer() {
 		return offer;
+	}
+	
+	public UUID getUUID() {
+		return id;
 	}
 
 }

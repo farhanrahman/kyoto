@@ -13,15 +13,13 @@ public class Offer{
 	final int quantity;
 	final int unitCost;
 	final TradeType type;
-	final UUID tradeID;
 
 	public static String TRADE_PROPOSAL = "Trade proposal";	
 	
-	public Offer(int quantity, int unitCost, TradeType type, UUID tradeID) {
+	public Offer(int quantity, int unitCost, TradeType type) {
 		this.quantity = quantity;
 		this.unitCost = unitCost;
 		this.type = type;
-		this.tradeID = tradeID;
 	}
 
 	public int getQuantity() {
@@ -40,10 +38,6 @@ public class Offer{
 		return this.type;
 	}
 	
-	public UUID getUUID(){
-		return tradeID;
-	}
-
 	@Override
 	public String toString() {
 		return "Trade: "+quantity+" @ "+unitCost; 
@@ -71,7 +65,7 @@ public class Offer{
 	
 	public Offer reverse(){
 		TradeType t = this.type.equals(TradeType.BUY)?TradeType.SELL:TradeType.BUY;
-		return new Offer(this.quantity, this.unitCost, t,this.tradeID);
+		return new Offer(this.quantity, this.unitCost, t);
 	}
 
 }
