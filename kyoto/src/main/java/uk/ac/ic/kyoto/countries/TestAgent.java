@@ -2,13 +2,15 @@ package uk.ac.ic.kyoto.countries;
 
 import java.util.Set;
 import java.util.UUID;
-import uk.ac.ic.kyoto.trade.TradeMessage;
+
+import uk.ac.ic.kyoto.trade.Offer;
+import uk.ac.ic.kyoto.trade.OfferMessage;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
-import uk.ac.ic.kyoto.trade.TradeProtocol.Trade;
+import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.messaging.Performative;
+import uk.ac.imperial.presage2.core.network.BroadcastMessage;
 import uk.ac.imperial.presage2.core.network.Message;
-import uk.ac.imperial.presage2.core.network.MulticastMessage;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
 import uk.ac.imperial.presage2.util.fsm.FSMException;
@@ -17,7 +19,7 @@ import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 public class TestAgent extends AbstractParticipant {
 	
 	TradeProtocol trade;
-	Set<Trade> trades;
+	Set<Offer> trades;
 
 	public TestAgent(UUID id, String name) {
 		super(id, name);
@@ -32,7 +34,7 @@ public class TestAgent extends AbstractParticipant {
 			this.trade = new TradeProtocol(getID(), this.authkey, environment, network) {
 				
 				@Override
-				protected boolean acceptExchange(NetworkAddress from, Trade trade) {
+				protected boolean acceptExchange(NetworkAddress from, Offer trade) {
 					// TODO decide if we should accept the trade
 					// for example...
 					if(trade.getUnitCost() == 0){
@@ -55,9 +57,10 @@ public class TestAgent extends AbstractParticipant {
 	protected void processInput(Input in) {
 		// TODO Auto-generated method stub
 		if (in instanceof Message){
-			Message m = (Message) in;
+			@SuppressWarnings("unchecked")
+			Message<Offer> m = (Message<Offer>) in;
 			if(m.getType().equalsIgnoreCase("Trade")){
-				Trade t = (Trade) m.getData();
+				//Offer t = (Offer) m.getData();
 				//Update our knowledgebase
 				//trades.add(t);
 				
@@ -70,12 +73,12 @@ public class TestAgent extends AbstractParticipant {
 	public void execute() {
 		super.execute();
 		this.network.sendMessage(
-				new MulticastMessage<Object>(
+				new BroadcastMessage<Object>(
 						Performative.PROPOSE, 
 						"TRADE", 
 						SimTime.get(), 
 						network.getAddress(), 
-						new TradeMessage()
+						new OfferMessage(new Offer(0, 0, TradeType.SELL), authkey)
 				)
 			);
 		

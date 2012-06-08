@@ -1,15 +1,9 @@
 package uk.ac.ic.kyoto.roguestates;
 
-import java.util.Iterator;
-import java.util.Set;
 import java.util.UUID;
 
-import org.apache.log4j.Logger;
-
-import com.mongodb.MongoException.Network;
-
+import uk.ac.ic.kyoto.trade.Offer;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
-import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.util.fsm.FSMException;
@@ -51,7 +45,7 @@ public class CanadaAgent extends NonParticipant {
 			tradeProtocol = new TradeProtocol(getID(), authkey, environment, network) {
 				@Override
 				protected boolean acceptExchange(NetworkAddress from,
-						Trade trade) {
+						Offer trade) {
 					if (carbonOutput - emissionsTarget + carbonOffset > 0) {
 						return true;
 					}

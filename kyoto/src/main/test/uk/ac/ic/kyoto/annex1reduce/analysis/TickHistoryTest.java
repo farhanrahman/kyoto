@@ -7,7 +7,7 @@ import java.util.Iterator;
 
 import org.junit.Test;
 
-import uk.ac.ic.kyoto.trade.TradeProtocol.Trade;
+import uk.ac.ic.kyoto.trade.Offer;
 import uk.ac.ic.kyoto.trade.TradeType;
 
 public class TickHistoryTest {
@@ -28,7 +28,7 @@ public class TickHistoryTest {
 	@Test
 	public void testAddMessage() {
 		TickHistory			t	= new TickHistory(0);
-		Trade				m1	= new Trade(1, 1, TradeType.BUY);
+		Offer				m1	= new Offer(1, 1, TradeType.BUY);
 		
 		try {
 			t.addMessage(m1);
@@ -42,8 +42,8 @@ public class TickHistoryTest {
 	public void testGetMessages() {
 		TickHistory	t	= new TickHistory(0);
 		
-		Trade		m1	= new Trade(1, 2, TradeType.BUY);
-		Trade		m2	= new Trade(3, 4, TradeType.BUY);
+		Offer		m1	= new Offer(1, 2, TradeType.BUY);
+		Offer		m2	= new Offer(3, 4, TradeType.BUY);
 		
 		try {
 			t.addMessage(m1);
@@ -52,7 +52,7 @@ public class TickHistoryTest {
 			fail("Exception while adding messages");
 		}
 		
-		Iterator<Trade> messages = t.getMessages().iterator();
+		Iterator<Offer> messages = t.getMessages().iterator();
 		
 		assertTrue(messages.next().equals(m1));
 		assertTrue(messages.next().equals(m2));		
@@ -64,8 +64,8 @@ public class TickHistoryTest {
 	public void testGetTradeHigh() {
 		TickHistory			t	= new TickHistory(0);
 		
-		Trade				m1	= new Trade(1, 1, TradeType.BUY);
-		Trade				m2	= new Trade(1, 100, TradeType.SELL);
+		Offer				m1	= new Offer(1, 1, TradeType.BUY);
+		Offer				m2	= new Offer(1, 100, TradeType.SELL);
 		
 		try {
 			t.addMessage(m1);
@@ -82,8 +82,8 @@ public class TickHistoryTest {
 	public void testGetTradeLow() {
 		TickHistory	t	= new TickHistory(0);
 		
-		Trade		m1	= new Trade(1, 2, TradeType.BUY);
-		Trade		m2	= new Trade(1, 100, TradeType.BUY);
+		Offer		m1	= new Offer(1, 2, TradeType.BUY);
+		Offer		m2	= new Offer(1, 100, TradeType.BUY);
 		
 		try {
 			t.addMessage(m1);
@@ -115,9 +115,9 @@ public class TickHistoryTest {
 	public void testGetTradeAverage() {
 		TickHistory	t	= new TickHistory(0);
 		
-		Trade		m1	= new Trade(1, 4, TradeType.BUY);
-		Trade		m2	= new Trade(1, 5, TradeType.BUY);
-		Trade		m3	= new Trade(1, 6, TradeType.BUY);
+		Offer		m1	= new Offer(1, 4, TradeType.BUY);
+		Offer		m2	= new Offer(1, 5, TradeType.BUY);
+		Offer		m3	= new Offer(1, 6, TradeType.BUY);
 		
 		try {
 			t.addMessage(m1);
@@ -142,9 +142,9 @@ public class TickHistoryTest {
 		TickHistory t3 = new TickHistory(0);
 		TickHistory t4 = new TickHistory(0);
 		
-		Trade		m1	= new Trade(1, 4, TradeType.BUY);
-		Trade		m2	= new Trade(1, 5, TradeType.BUY);
-		Trade		m3	= new Trade(1, 6, TradeType.BUY);
+		Offer		m1	= new Offer(1, 4, TradeType.BUY);
+		Offer		m2	= new Offer(1, 5, TradeType.BUY);
+		Offer		m3	= new Offer(1, 6, TradeType.BUY);
 		
 		try {
 			t1.addMessage(m1);
@@ -188,9 +188,9 @@ public class TickHistoryTest {
 		TickHistory t2 = new TickHistory(0);
 		TickHistory t3 = new TickHistory(0);
 		
-		Trade		m1	= new Trade(1, 4, TradeType.BUY);
-		Trade		m2	= new Trade(1, 5, TradeType.BUY);
-		Trade		m3	= new Trade(1, 6, TradeType.BUY);
+		Offer		m1	= new Offer(1, 4, TradeType.BUY);
+		Offer		m2	= new Offer(1, 5, TradeType.BUY);
+		Offer		m3	= new Offer(1, 6, TradeType.BUY);
 		
 		try {
 			t1.addMessage(m1);
