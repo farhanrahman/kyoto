@@ -1,5 +1,7 @@
 package uk.ac.ic.kyoto.countries;
 
+import static org.junit.Assert.*;
+
 import java.util.UUID;
 
 import org.junit.Test;
@@ -30,6 +32,9 @@ public class CarbonAbsorptionHandlerTest {
 	
 	@Test
 	public void testCarbonAbsorptionHandler() {
+		
+		fail("Not implemented yet. Waiting for AbstractCountry constructor to be corrected.");
+		
 		System.out.println(france.getCarbonOffset());
 		System.out.println(testObject.getCost(france.getCarbonOffset()));
 	}
