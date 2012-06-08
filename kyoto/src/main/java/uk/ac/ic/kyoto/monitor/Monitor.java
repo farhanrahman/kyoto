@@ -27,11 +27,15 @@ public class Monitor extends EnvironmentService {
 	
 	private Map<AbstractCountry, Integer> sinBin;
 	
-	//percentage increase in target i.e. 1.05 for 5%
+	/**
+	 * percentage increase in target i.e. 1.05 for 5%
+	 */
 	@Parameter(name="target_penalty")
 	int target_penalty;
 	
-	//percentage decrease in cash i.e. 0.95 for 5%
+	/**
+	 * percentage decrease in cash i.e. 0.95 for 5%
+	 */
 	@Parameter(name="cash_penalty")
 	int cash_penalty;
 	
@@ -58,14 +62,19 @@ public class Monitor extends EnvironmentService {
 	}
 	
 
-	//compare real output to target and sanction if not met
+	/**
+	 * compare real output to target and sanction if not met
+	 */
 	public void checkTargets () {
 		for (AbstractCountry a : memberStates) {
 			long realCarbonOutput = a.getMonitored();
 			//TODO - Like above but using jonny's CarbonTargetService?
 			}
 	}
-	
+	/**
+	 * Sanction for cheating
+	 * @param sanctionee
+	 */
 	private void cheatSanction(AbstractCountry sanctionee) {
 		
 		//sanctionee added to sinBin/increase sinCount
@@ -79,7 +88,10 @@ public class Monitor extends EnvironmentService {
 		sanctionee.setAvailableToSpend(sanctionee.getID(), (long) (sanctionee.getAvailableToSpend()-sanctionee.getGDP()*(sinCount-1)*cash_penalty));
 	}
 	
-	//sanction for not meeting targets
+	/**
+	 * sanction for not meeting targets
+	 * @param sanctionee
+	 */
 	private void targetSanction(AbstractCountry sanctionee) {
 		
 		//5% higher target regardless of number of sins (compound)
