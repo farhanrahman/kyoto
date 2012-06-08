@@ -67,10 +67,6 @@ public class CanadaAgent extends NonParticipant {
 	@Override
 	public void behaviour() {
 		Set<NetworkAddress> nodes = network.getConnectedNodes();
-//		Iterator i = nodes.iterator();
-//		while (i.hasNext()) {
-//			(NetworkAddress)i.
-//		}
 		for (NetworkAddress i: nodes) {
 			try {
 				tradeProtocol.offer(i, 10, 5, TradeType.BUY);

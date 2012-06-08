@@ -69,8 +69,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	protected CarbonReductionHandler 	carbonReductionHandler;
 	protected CarbonAbsorptionHandler 	carbonAbsorptionHandler;
 	protected EnergyUsageHandler		energyUsageHandler;
-
-	protected Logger logger;
 	
 	//================================================================================
     // Constructors and Initializers
@@ -98,8 +96,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.carbonEmissionReports = new HashMap<Integer, Long>();
 		this.energyOutput = energyOutput;
 		
-		// Create an instance of a logger
-		logger = Logger.getLogger(name); // can we do it in constructor?
 	}
 	
 	@Override
