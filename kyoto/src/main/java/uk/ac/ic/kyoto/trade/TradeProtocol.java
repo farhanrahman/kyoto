@@ -123,14 +123,14 @@ public abstract class TradeProtocol extends FSMProtocol {
 					TradeSpawnEvent e = (TradeSpawnEvent) event;
 					NetworkAddress from = conv.getNetwork().getAddress();
 					NetworkAddress to = conv.recipients.get(0);
-					logger.debug("Initiating: " + e.trade);
-					conv.entity = e.trade;
+					logger.debug("Initiating: " + e.offerMessage);
+					conv.entity = e.offerMessage;
 					conv.getNetwork().sendMessage(
-							new UnicastMessage<Offer>(
+							new UnicastMessage<OfferMessage>(
 									Performative.PROPOSE, 
 									Transitions.PROPOSE_TRADE.name(),
 									SimTime.get(), from,
-									to, e.trade));
+									to, e.offerMessage));
 				}
 			})
 			.addTransition(Transitions.TRADE_ACCEPTED,
@@ -265,12 +265,12 @@ public abstract class TradeProtocol extends FSMProtocol {
 	
 	class TradeSpawnEvent extends ConversationSpawnEvent {
 
-		final Offer trade;
+		final OfferMessage offerMessage;
 
 		public TradeSpawnEvent(NetworkAddress with, int quantity, int unitCost, TradeType type) {
 			super(with);
 			UUID id = TradeProtocol.this.tradeToken.getToken();
-			this.trade = new Offer(quantity, unitCost, type, id);
+			this.offerMessage = new OfferMessage(new Offer(quantity, unitCost, type), id);
 		}
 
 	}
