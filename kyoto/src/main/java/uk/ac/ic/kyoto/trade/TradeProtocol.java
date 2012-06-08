@@ -1,13 +1,16 @@
 package uk.ac.ic.kyoto.trade;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
 
-import uk.ac.ic.kyoto.countries.TradeAction;
+import uk.ac.ic.kyoto.tokengen.Token;
+import uk.ac.ic.kyoto.tokengen.TokenGenProvider;
 import uk.ac.imperial.presage2.core.Time;
-import uk.ac.imperial.presage2.core.environment.ActionHandlingException;
 import uk.ac.imperial.presage2.core.environment.EnvironmentConnector;
+import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.messaging.Performative;
 import uk.ac.imperial.presage2.core.network.Message;
 import uk.ac.imperial.presage2.core.network.NetworkAdaptor;
@@ -30,12 +33,6 @@ import uk.ac.imperial.presage2.util.protocols.MessageAction;
 import uk.ac.imperial.presage2.util.protocols.MessageTypeCondition;
 import uk.ac.imperial.presage2.util.protocols.SpawnAction;
 import uk.ac.imperial.presage2.util.protocols.TimeoutCondition;
-
-import com.google.inject.Guice;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
 /**
  * 
  * More sure about this: taken from https://github.com/Presage/HelloWorld/blob/master/src/main/java/uk/ac/imperial/presage2/helloworld/HelloWorldProtocol.java
@@ -52,7 +49,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 	protected final EnvironmentConnector environment;
 	private final Logger logger;
 
-	protected TradeToken tradeToken;
+	protected Token tradeToken;
 	
 	public enum ResponderReplies{
 		ACCEPT,REJECT,WAIT
@@ -89,13 +86,16 @@ public abstract class TradeProtocol extends FSMProtocol {
 
 		logger = Logger.getLogger(TradeProtocol.class.getName() + ", " + id);
 
-		this.tradeToken = TradeTokenFactory.get();
+		this.tradeToken = TokenGenProvider.get();
+		
+		if(this.tradeToken == null){
+			logger.warn("Huge problem");
+		}
 		
 		try {
 			this.description
 			.addState(States.START, StateType.START)
 			.addState(States.TRADE_PROPOSED)
-			//.addState(States.RESPONSE_RECEIVED)
 			.addState(States.TRADE_DONE, StateType.END)
 			.addState(States.TIMED_OUT, StateType.END);
 
@@ -133,7 +133,9 @@ public abstract class TradeProtocol extends FSMProtocol {
 				}
 			})
 			.addTransition(Transitions.TRADE_ACCEPTED,
-						   new AndCondition(new MessageTypeCondition(ResponderReplies.ACCEPT.name()), new ConversationCondition()), 
+						   new AndCondition(
+								   new MessageTypeCondition(ResponderReplies.ACCEPT.name()), 
+								   new ConversationCondition()), 
 						   States.TRADE_PROPOSED,
 						   States.TRADE_DONE, 
 						   new MessageAction(){
@@ -147,7 +149,9 @@ public abstract class TradeProtocol extends FSMProtocol {
 							}
 			})
 			.addTransition(Transitions.TRADE_REJECTED,
-						   new AndCondition(new MessageTypeCondition(ResponderReplies.REJECT.name()), new ConversationCondition()), 
+						   new AndCondition(
+								   new MessageTypeCondition(ResponderReplies.REJECT.name()), 
+								   new ConversationCondition()), 
 						   States.TRADE_PROPOSED,
 						   States.TRADE_DONE, 
 						   new Action(){
@@ -160,7 +164,9 @@ public abstract class TradeProtocol extends FSMProtocol {
 							}
 			})			
 			.addTransition(Transitions.TIMEOUT,
-					new AndCondition(new TimeoutCondition(4), new ConversationCondition()),
+					new AndCondition(
+							new TimeoutCondition(4), 
+							new ConversationCondition()),
 					States.TRADE_PROPOSED,
 					States.TIMED_OUT, 
 					new Action(){
@@ -178,7 +184,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 			/*Responder FSM*/
 			
 					/*
-					 * Transitions: START -> RESPONSE_RECEIVED
+					 * Transitions: START -> TRADE_DONE
 					 * Message received by agent who sent the multicast message
 					 */
 			this.description
@@ -193,7 +199,6 @@ public abstract class TradeProtocol extends FSMProtocol {
 				public void processInitialMessage(Message<?> message,
 						FSMConversation conv, Transition transition) {
 					if (message.getData() instanceof Trade) {
-						//EnvironmentConnector env = TradeProtocol.this.environment;
 						Trade trade = ((Trade) message.getData())
 								.reverse();
 						conv.setEntity(trade);
@@ -210,15 +215,13 @@ public abstract class TradeProtocol extends FSMProtocol {
 											Performative.ACCEPT_PROPOSAL,
 											ResponderReplies.ACCEPT.name(), t,
 											from, to, trade));
-							// TODO optionally surrender appropriate token
-							/*if (surrenderResource(to, trade)) {
+							/*
 								try {
 									environment.act(new TradeAction(), id, authkey);
 								} catch (ActionHandlingException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
+									logger.warn(e);
 								}
-							}*/
+							*/
 						} else {
 							// send reject message
 							logger.debug("Rejecting exchange proposal: "
@@ -237,11 +240,26 @@ public abstract class TradeProtocol extends FSMProtocol {
 			});
 
 		} catch (FSMException e) {
-			e.printStackTrace();
+			logger.warn(e);
 		}
 
 
 
+	}
+	
+	/**
+	 * canHandle method overriden in order
+	 * to force this class to handle Message
+	 * containing Trade data types
+	 */
+	@Override
+	public boolean canHandle(Input in){
+		Message<?> m = (Message<?>) in;
+		if(m.getData().getClass().equals(Trade.class)){
+			return super.canHandle(in);		
+		}else{
+			return false;
+		}		
 	}
 	
 	class TradeSpawnEvent extends ConversationSpawnEvent {
@@ -257,6 +275,17 @@ public abstract class TradeProtocol extends FSMProtocol {
 	}
 
 
+	/**
+	 * Method used to get agents which are not
+	 * in an FSMProtocol conversation with this
+	 * agent
+	 * @return
+	 */
+	public List<NetworkAddress> getAgentsNotInConversation(){
+		List<NetworkAddress> all = new ArrayList<NetworkAddress>(this.network.getConnectedNodes());
+		all.removeAll(this.getActiveConversationMembers());
+		return all;
+	}
 
 	public void offer(NetworkAddress to, int quantity, int unitPrice, TradeType type)
 			throws FSMException {
@@ -266,8 +295,12 @@ public abstract class TradeProtocol extends FSMProtocol {
 	protected abstract boolean acceptExchange(NetworkAddress from,
 			Trade trade);
 
-	protected boolean surrenderResource(NetworkAddress to, Trade trade){
-		return true;
+	public UUID getId() {
+		return id;
+	}
+
+	public UUID getAuthkey() {
+		return authkey;
 	}
 }
 

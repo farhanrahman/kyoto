@@ -8,18 +8,14 @@ import uk.ac.ic.kyoto.roguestates.CanadaAgent;
 import uk.ac.ic.kyoto.roguestates.FakeCanadaAgent;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
-import uk.ac.ic.kyoto.trade.TradeTokenModule;
 import uk.ac.imperial.presage2.core.simulator.InjectedSimulation;
-import uk.ac.imperial.presage2.core.simulator.Parameter;
 import uk.ac.imperial.presage2.core.simulator.Scenario;
 import uk.ac.imperial.presage2.core.util.random.Random;
-import uk.ac.imperial.presage2.rules.RuleModule;
 import uk.ac.imperial.presage2.util.environment.AbstractEnvironmentModule;
 import uk.ac.imperial.presage2.util.network.NetworkModule;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
 
 public class Simulation extends InjectedSimulation {
 	
@@ -61,7 +57,7 @@ public class Simulation extends InjectedSimulation {
 	@Override
 	protected void addToScenario(Scenario s) {
 		// TODO Auto-generated method stub
-		AbstractParticipant p = new FakeCanadaAgent(Random.randomUUID(), "Canada", "CND", 10000, 5000, 1000000, 2, 500000, 1000, -200, 10);
+		AbstractParticipant p = new FakeCanadaAgent(Random.randomUUID(), "FakeCanada", "FCND", 10000, 5000, 1000000, 2, 500000, 1000, -200, 10);
 		s.addParticipant(p);
 		
 		AbstractParticipant q = new CanadaAgent(Random.randomUUID(), "Canada", "CND", 10000, 5000, 1000000, 2, 500000, 1000, 200, 10);

@@ -6,7 +6,7 @@ package uk.ac.ic.kyoto.trade;
 import java.util.UUID;
 
 /**
- * @author cmd08
+ * @author cmd08 and farhanrahman
  *
  */
 public class Trade{
@@ -15,6 +15,8 @@ public class Trade{
 	final TradeType type;
 	final UUID tradeID;
 
+	public static String TRADE_PROPOSAL = "Trade proposal";	
+	
 	public Trade(int quantity, int unitCost, TradeType type, UUID tradeID) {
 		this.quantity = quantity;
 		this.unitCost = unitCost;

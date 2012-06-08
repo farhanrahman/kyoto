@@ -1,28 +1,22 @@
 package uk.ac.ic.kyoto.roguestates;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
-import com.mongodb.MongoException.Network;
+import org.apache.log4j.Logger;
 
 import uk.ac.ic.kyoto.countries.NonParticipant;
-import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.ic.kyoto.trade.Trade;
-import uk.ac.ic.kyoto.trade.TradeType;
+import uk.ac.ic.kyoto.trade.TradeMessage;
+import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.network.Message;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
-import uk.ac.imperial.presage2.core.simulator.SimTime;
-import uk.ac.imperial.presage2.core.util.random.Random;
 import uk.ac.imperial.presage2.util.fsm.FSMException;
-import uk.ac.imperial.presage2.util.protocols.Conversation;
 
 public class CanadaAgent extends NonParticipant {
 
+	Logger logger = Logger.getLogger(CanadaAgent.class);
+	
 	public CanadaAgent(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
 			double GDPRate, float availableToSpend, long emissionsTarget, long carbonOffset,
 			long energyOutput) {
@@ -34,9 +28,34 @@ public class CanadaAgent extends NonParticipant {
 
 	@Override
 	protected void processInput(Input in) {
-		if (this.tradeProtocol != null && this.tradeProtocol.canHandle(in)) {
+
+		if(this.tradeProtocol.canHandle(in))
 			this.tradeProtocol.handle(in);
-		}
+		
+		if(in instanceof Message){
+			try{
+				@SuppressWarnings("unchecked")
+				Message<TradeMessage> m = (Message<TradeMessage>) in;
+				Trade t = m.getData().getTrade();
+			
+				if(!this.tradeProtocol
+						.getActiveConversationMembers()
+							.contains(m.getFrom())){
+					try {
+						this.tradeProtocol.offer(
+								m.getFrom(), 
+								t.getQuantity(), 
+								t.getUnitCost(), 
+								t.reverse().getType());
+					} catch (FSMException e) {
+						e.printStackTrace();
+					}
+				}
+			}catch(ClassCastException e){
+				logger.warn("Class cast exception");
+				logger.warn(e);
+			}
+		}		
 	}
 	
 	@Override
@@ -63,50 +82,8 @@ public class CanadaAgent extends NonParticipant {
 	@Override
 	public void execute() {
 		super.execute();
-		
-//		Set<NetworkAddress> nodes = network.getConnectedNodes();
-//		Iterator i = nodes.iterator();
-//		while (i.hasNext()) {
-//			(NetworkAddress)i.
-//		}
-//		for (NetworkAddress i: nodes) {
-//			try {
-//				tradeProtocol.offer(i, 10, 5, TradeType.BUY);
-//			} catch (FSMException e) {
-//				e.printStackTrace();
-//			}
-//		}
-//		
-		/*this.tradeProtocol.incrementTime();
-		
-		if (this.tradeProtocol != null) {
-			for (NetworkAddress a : this.network.getConnectedNodes()) {
-				try {
-					this.tradeProtocol.offer(a, 10, 5, TradeType.BUY);
-				} catch (FSMException e) {
-					logger.warn("Error creating token offer", e);
-				}
-			}
-			this.tradeProtocol.incrementTime();
-			for (Conversation conv: tradeProtocol.getActiveConversations()) {
-				
-			}
-		}*/
 		this.tradeProtocol.incrementTime();
-		//logger.info("Message: " + this.network.getMessages());
-		//this.enqueueInput(this.network.getMessages());
-		
-		if (this.tradeProtocol != null) {
-			for (NetworkAddress a : this.network.getConnectedNodes()) {
-				try {
-					if(!this.tradeProtocol.getActiveConversations().contains(a))
-						this.tradeProtocol.offer(a, 10, 5, TradeType.BUY);
-				} catch (FSMException e) {
-					logger.warn("Error creating token offer", e);
-				}
-			}
-			this.tradeProtocol.incrementTime();
-		}
+
 		
 	}
 }

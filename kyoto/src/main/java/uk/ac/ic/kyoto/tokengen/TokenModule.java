@@ -1,9 +1,8 @@
 /**
  * 
  */
-package uk.ac.ic.kyoto.trade;
+package uk.ac.ic.kyoto.tokengen;
 
-import uk.ac.ic.kyoto.tokengen.TradeTokenGenerator;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
@@ -13,7 +12,7 @@ import com.google.inject.assistedinject.FactoryModuleBuilder;
  * @author farhanrahman
  *
  */
-public class TradeTokenModule extends AbstractModule {
+public class TokenModule extends AbstractModule {
 
 	/* (non-Javadoc)
 	 * @see com.google.inject.AbstractModule#configure()
@@ -25,7 +24,7 @@ public class TradeTokenModule extends AbstractModule {
 	     .build(TradeTokenFactory.class));*/
 		
 		//bind(TradeToken.class).to(TradeTokenGenerator.class);
-		bind(TradeToken.class).to(TradeTokenGenerator.class).in(Singleton.class);
+		bind(Token.class).to(TokenGenerator.class).in(Singleton.class);
 	}
 
 }

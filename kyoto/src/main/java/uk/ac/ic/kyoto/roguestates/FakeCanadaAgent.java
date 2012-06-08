@@ -1,15 +1,11 @@
 package uk.ac.ic.kyoto.roguestates;
 
-import java.util.Iterator;
-import java.util.Set;
 import java.util.UUID;
 
-import com.mongodb.MongoException.Network;
-
 import uk.ac.ic.kyoto.countries.NonParticipant;
+import uk.ac.ic.kyoto.trade.Trade;
 import uk.ac.ic.kyoto.trade.TradeMessage;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
-import uk.ac.ic.kyoto.trade.Trade;
 import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.messaging.Performative;
@@ -58,53 +54,25 @@ public class FakeCanadaAgent extends NonParticipant {
 	}
 	
 	private int counter = 0;
-	
 	@Override
 	public void execute() {
 		super.execute();
 		
-//		Set<NetworkAddress> nodes = network.getConnectedNodes();
-//		Iterator i = nodes.iterator();
-//		while (i.hasNext()) {
-//			(NetworkAddress)i.
-//		}
-//		for (NetworkAddress i: nodes) {
-//			try {
-//				tradeProtocol.offer(i, 10, 5, TradeType.BUY);
-//			} catch (FSMException e) {
-//				e.printStackTrace();
-//			}
-//		}
-//		
-		
-		if(counter > 0){
+		this.tradeProtocol.incrementTime();
+		if(counter < 3){
 			int quantity = 10;
 			int unitCost = 2;
 			Trade trade = new Trade(quantity, unitCost, TradeType.SELL, authkey);
 			this.network.sendMessage(
-					new MulticastMessage<Object>(
-							Performative.PROPOSE, 
-							"TRADE", 
-							SimTime.get(), 
-							network.getAddress(), 
-							trade
-					)
-				);
-			counter++;
+						new MulticastMessage<TradeMessage>(
+								Performative.PROPOSE, 
+								Trade.TRADE_PROPOSAL, 
+								SimTime.get(), 
+								this.network.getAddress(),
+								this.tradeProtocol.getAgentsNotInConversation(),
+								new TradeMessage(trade))
+					);
+		counter++;
 		}
-		
-		/*this.tradeProtocol.incrementTime();
-		
-		if (this.tradeProtocol != null) {
-			for (NetworkAddress a : this.network.getConnectedNodes()) {
-				try {
-					if(!this.tradeProtocol.getActiveConversations().contains(a))
-						this.tradeProtocol.offer(a, 10, 5, TradeType.BUY);
-				} catch (FSMException e) {
-					logger.warn("Error creating token offer", e);
-				}
-			}
-			this.tradeProtocol.incrementTime();
-		}*/
 	}
 }

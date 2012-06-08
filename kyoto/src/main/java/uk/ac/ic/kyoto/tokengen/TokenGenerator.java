@@ -7,7 +7,6 @@ import java.util.UUID;
 
 import com.google.inject.Singleton;
 
-import uk.ac.ic.kyoto.trade.TradeToken;
 import uk.ac.imperial.presage2.core.util.random.Random;
 
 /**
@@ -15,7 +14,7 @@ import uk.ac.imperial.presage2.core.util.random.Random;
  *
  */
 @Singleton
-public class TradeTokenGenerator implements TradeToken {
+public class TokenGenerator implements Token {
 
 	private static UUID tradeID = Random.randomUUID();
 	/* (non-Javadoc)
@@ -23,9 +22,9 @@ public class TradeTokenGenerator implements TradeToken {
 	 */
 	@Override
 	public UUID getToken() {
-		synchronized(TradeTokenGenerator.tradeID){
-			TradeTokenGenerator.tradeID = Random.randomUUID();
+		synchronized(TokenGenerator.tradeID){
+			TokenGenerator.tradeID = Random.randomUUID();
 		}
-		return TradeTokenGenerator.tradeID;
+		return TokenGenerator.tradeID;
 	}
 }

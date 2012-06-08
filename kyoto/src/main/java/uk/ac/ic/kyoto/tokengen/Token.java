@@ -1,7 +1,7 @@
 /**
  * 
  */
-package uk.ac.ic.kyoto.trade;
+package uk.ac.ic.kyoto.tokengen;
 
 import java.util.UUID;
 
@@ -9,6 +9,6 @@ import java.util.UUID;
  * @author farhanrahman
  *
  */
-public interface TradeToken {
+public interface Token {
 	public UUID getToken();
 }
