@@ -46,7 +46,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			long availiableToSpend, long emissionsTarget, long carbonOffset, long energyOutput, long carbonOutput)
 	{
 		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, emissionsTarget,
-				carbonOffset, energyOutput, energyOutput, energyOutput);
+				carbonOffset, energyOutput);
 		
 		this.internalPrice = Long.MAX_VALUE;
 		this.uncommittedTransactionsCosts = new ArrayList<Double>();
