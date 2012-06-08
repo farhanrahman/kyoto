@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Map;
 
+import uk.ac.ic.kyoto.actions.QueryEmissionsTarget;
+import uk.ac.ic.kyoto.actions.QueryEmissionsTargetHandler;
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.GameConst;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
@@ -26,6 +28,8 @@ public class EU extends EnvironmentService {
 	protected EU(EnvironmentSharedStateAccess sharedState) {
 		super(sharedState);
 	}
+	
+	QueryEmissionsTargetHandler targetHandler = new QueryEmissionsTargetHandler(sharedState, environment);
 	
 	// TODO Allocate target distribution
 	
