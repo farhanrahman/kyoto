@@ -62,7 +62,7 @@ public class FakeCanadaAgent extends NonParticipant {
 		if(counter < 3){
 			int quantity = 10;
 			int unitCost = 2;
-			Offer trade = new Offer(quantity, unitCost, TradeType.SELL, authkey);
+			Offer trade = new Offer(quantity, unitCost, TradeType.SELL);	//, authkey); Really?! Authkey?!
 			this.network.sendMessage(
 						new MulticastMessage<OfferMessage>(
 								Performative.PROPOSE, 
@@ -70,7 +70,7 @@ public class FakeCanadaAgent extends NonParticipant {
 								SimTime.get(), 
 								this.network.getAddress(),
 								this.tradeProtocol.getAgentsNotInConversation(),
-								new OfferMessage(trade))
+								new OfferMessage(trade, authkey))
 					);
 		counter++;
 		}

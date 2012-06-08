@@ -6,6 +6,7 @@ import java.util.UUID;
 import uk.ac.ic.kyoto.trade.Offer;
 import uk.ac.ic.kyoto.trade.OfferMessage;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
+import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.messaging.Performative;
 import uk.ac.imperial.presage2.core.network.Message;
@@ -72,12 +73,12 @@ public class TestAgent extends AbstractParticipant {
 	public void execute() {
 		super.execute();
 		this.network.sendMessage(
-				new MulticastMessage<Object>(
+				new BroadcastMessage<Object>(
 						Performative.PROPOSE, 
 						"TRADE", 
 						SimTime.get(), 
 						network.getAddress(), 
-						new OfferMessage(new Offer())
+						new OfferMessage(new Offer(0, 0, TradeType.SELL), authkey)
 				)
 			);
 		
