@@ -286,7 +286,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 
 		public TradeSpawnEvent(NetworkAddress with, int quantity, int unitCost, TradeType type) {
 			super(with);
-			UUID id = TradeProtocol.this.tradeToken.getToken();
+			UUID id = TradeProtocol.this.tradeToken.generate();
 			this.offerMessage = new OfferMessage(new Offer(quantity, unitCost, type),id);
 		}
 
