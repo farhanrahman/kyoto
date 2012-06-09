@@ -10,5 +10,5 @@ import java.util.UUID;
  *
  */
 public interface Token {
-	public UUID getToken();
+	public UUID generate();
 }
