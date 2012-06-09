@@ -79,8 +79,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		
 		super(id, name);
 		
-
-		this.id = id;
 		this.landArea = landArea;
 		this.ISO = ISO;
 		this.arableLandArea = arableLandArea;
