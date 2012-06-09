@@ -35,6 +35,15 @@ public class CarbonReportingService extends EnvironmentService {
 		super.registerParticipant(req);
 	}
 
+	/**
+	 * Allows ActionHandlers or Actions
+	 * to update the shared state (report)
+	 * of a particular participant having
+	 * a unique UUID.
+	 * @param id
+	 * @param carbonEmission
+	 * @param simTime
+	 */
 	public void updateReport(final UUID id, final Double carbonEmission, final Time simTime){
 		this.sharedState.change(name, id, new StateTransformer(){
 			@Override
@@ -56,9 +65,30 @@ public class CarbonReportingService extends EnvironmentService {
 		System.out.println();*/
 	}
 	
-	// TODO implement
-	public double getReport(UUID id, Time simTime) {
-		double report = 0;
-		return report;
+	/**
+	 * Returns null if report
+	 * does not exist for a participant
+	 * at all or there is no report for
+	 * participant at simulation time simTime
+	 * @param id
+	 * @param simTime
+	 * @return
+	 */
+	public Double getReport(UUID id, Time simTime) {
+		try{
+			@SuppressWarnings("unchecked")
+			Map<Integer,Double> reportForParticipant = 
+								(Map<Integer,Double>)this.sharedState.get(
+											CarbonReportingService.name, 
+											id);
+			if(reportForParticipant == null){
+				return null;
+			}else{
+				return reportForParticipant.get(simTime.intValue());
+			}
+		}catch(ClassCastException e){
+			logger.warn(e);
+			return null;
+		}
 	}
 }
