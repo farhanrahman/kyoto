@@ -2,8 +2,6 @@ package uk.ac.ic.kyoto.actions;
 
 import java.util.UUID;
 
-import com.google.inject.Inject;
-
 import uk.ac.ic.kyoto.services.CarbonTarget;
 import uk.ac.imperial.presage2.core.Action;
 import uk.ac.imperial.presage2.core.environment.ActionHandler;
@@ -12,6 +10,8 @@ import uk.ac.imperial.presage2.core.environment.EnvironmentServiceProvider;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.messaging.Input;
+
+import com.google.inject.Inject;
 
 /**
  * Action handler to enable agents to query session targets.
@@ -32,18 +32,24 @@ public class QueryEmissionsTargetHandler implements ActionHandler {
 	public boolean canHandle(Action action) {
 		return action instanceof QueryEmissionsTarget;
 	}
-
+	
 	@Override
 	public Input handle(Action action, UUID countryID) throws ActionHandlingException {
-		// Cast action object
 		QueryEmissionsTarget actionObject = (QueryEmissionsTarget) action;
 		
-		// Look up target in shared state
-		long target = this.ct.queryTarget(countryID);
+		long target = 0;
 		
-		// Set target in action object
+		switch (actionObject.getTargetPeriod()) {
+			case SESSION:
+				target = this.ct.querySessionTarget(countryID);
+				break;
+			
+			case YEAR:
+				target = this.ct.queryYearTarget(countryID);
+				break;
+		}
+				
 		actionObject.setEmissionsTarget(target);
-		
 		return null;
 	}
 

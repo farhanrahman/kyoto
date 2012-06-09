@@ -1,15 +1,9 @@
 package uk.ac.ic.kyoto.roguestates;
 
-import java.util.Iterator;
-import java.util.Set;
 import java.util.UUID;
 
-import org.apache.log4j.Logger;
-
-import com.mongodb.MongoException.Network;
-
+import uk.ac.ic.kyoto.trade.Offer;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
-import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.util.fsm.FSMException;
@@ -51,7 +45,7 @@ public class CanadaAgent extends NonParticipant {
 			tradeProtocol = new TradeProtocol(getID(), authkey, environment, network) {
 				@Override
 				protected boolean acceptExchange(NetworkAddress from,
-						Trade trade) {
+						Offer trade) {
 					if (carbonOutput - emissionsTarget + carbonOffset > 0) {
 						return true;
 					}
@@ -66,15 +60,20 @@ public class CanadaAgent extends NonParticipant {
 	
 	@Override
 	public void behaviour() {
-		Set<NetworkAddress> nodes = network.getConnectedNodes();
-//		Iterator i = nodes.iterator();
-//		while (i.hasNext()) {
-//			(NetworkAddress)i.
+//		Set<NetworkAddress> nodes = network.getConnectedNodes();
+//		for (NetworkAddress i: nodes) {
+//			try {
+//				tradeProtocol.offer(i, 10, 5, TradeType.BUY);
+//			} catch (FSMException e) {
+//				e.printStackTrace();
+//			}
 //		}
-		for (NetworkAddress i: nodes) {
+		if (availableToSpend > 0) {
 			try {
-				tradeProtocol.offer(i, 10, 5, TradeType.BUY);
-			} catch (FSMException e) {
+				carbonReductionHandler.invest((long) (availableToSpend*0.1));
+				System.out.println("Spending " + availableToSpend* 0.1 + " on carbon reduction. Current carbon output is " + carbonOutput + ".");
+			} catch (Exception e) {
+				logger.warn(e.getMessage(), e);
 				e.printStackTrace();
 			}
 		}

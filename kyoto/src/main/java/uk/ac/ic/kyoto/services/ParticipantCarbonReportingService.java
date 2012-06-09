@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.log4j.Logger;
+
 import com.google.inject.Inject;
 
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
@@ -17,6 +19,8 @@ import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
  */
 public class ParticipantCarbonReportingService extends EnvironmentService {
 
+	Logger logger = Logger.getLogger(ParticipantCarbonReportingService.class);
+	
 	/**
 	 * @param sharedState
 	 */
@@ -35,7 +39,7 @@ public class ParticipantCarbonReportingService extends EnvironmentService {
 	 * @return
 	 */
 	public static ParticipantSharedState createSharedState(Map<?,?> data, UUID participantID){
-		return new ParticipantSharedState("Report", (Serializable) data, participantID);	
+		return new ParticipantSharedState(CarbonReportingService.name, (Serializable) data, participantID);	
 	}
 	
 	@Deprecated
@@ -54,13 +58,15 @@ public class ParticipantCarbonReportingService extends EnvironmentService {
 	@SuppressWarnings("unchecked")
 	public Map<Integer,Double> getReportFor(UUID participantId){
 		Map<Integer,Double> report = new HashMap<Integer,Double>();
-		Serializable data = this.sharedState.get("Report", participantId);
-		if(data instanceof Map<?,?>){
+		Serializable data = this.sharedState.get(CarbonReportingService.name, participantId);
+		try{
 			report = (Map<Integer,Double>) data;
 			return report;
-		}else{
+		}catch(ClassCastException e){
+			logger.warn(e);
 			return null;
 		}
+
 	}
 
 }

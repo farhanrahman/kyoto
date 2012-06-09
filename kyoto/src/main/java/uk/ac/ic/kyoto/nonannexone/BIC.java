@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public class BIC extends AbstractCountry {
 	
-	//Variables
+	//Variables........................................................................
 	
 	protected char currentAvailableArea; // area available for planting trees/industry
 	protected long economy_threshold; //point where availableToSpend changes behaviour (to be decided)
@@ -18,24 +18,31 @@ public class BIC extends AbstractCountry {
 	protected double GDP_aim; //aim of GDP for a year
 	
 	
-	//Constants
+	//Constants.............................................................................
 	
 	public static final long  nf_en_output = 0; //effect on energy output of normal factory(to be decided)
 	public static final long  ef_en_output=0; //environment friendly factory's effect(to be decided)
 	public static final long  NFactorycost=0; //cost of normal factory
 	public static final long EFactorycost=0; //cost of environmental factory (expensive)
+	public static final long carbon_effect_nf = 0; //effect on carbon output
+	public static final long carbon_effect_ef = 0; //effect on carbon output - less than normal factory
+	public static final long war_industry_unit_cost = 0; // cost of creating a unit of the greatest empire ever in the known world
+	
+	
+	
+	//............................................................................................ 
 	
 	public BIC(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
-			double GDPRate, long availableToSpend, long emissionsTarget, long carbonOffset,
-			long energyOutput, long carbonOutput)
+			double GDPRate, long emissionsTarget, long energyOutput, long carbonOutput)
 	{
 		super(id, name, ISO, landArea, arableLandArea, GDP,
-				GDPRate, availableToSpend, emissionsTarget, carbonOffset,
+				GDPRate, emissionsTarget,
 				energyOutput, carbonOutput);
 
 }
 	
-	//Inherited functions
+	//Inherited functions......................................................................
+	//.........................................................................................
 	
 	@Override
 	protected void processInput(Input in) {
@@ -43,11 +50,6 @@ public class BIC extends AbstractCountry {
 
 	}
 	
-	@Override
-	public void execute() {
-		// TODO Auto-generated method stub 
-	}
-
 	@Override
 	public void YearlyFunction() {
 		// TODO Auto-generated method stub
@@ -60,6 +62,21 @@ public class BIC extends AbstractCountry {
 		
 	}
 
+	
+	protected void behaviour() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	
+	protected void initialiseCountry() {
+		// TODO Auto-generated method stub
+		
+	}
+	//.......................................................................................
+	//........................................................................................
+	
+	
 	//General functions
 	
 	//Check if the available area is safe=S in order to choose decision accordingly for accepting to sell credits.
@@ -76,25 +93,44 @@ public class BIC extends AbstractCountry {
 	
 	
 		
-	private void buildIndustry()
+	private void buildIndustry(int factory_type)
 	{
-		if (this.carbonOutput < environment_friendly_target) 
-		{
+		switch(factory_type){
+		case 1: //build normal factory 
+			{
 			normal_factory = normal_factory + 1;
 			this.energyOutput = this.energyOutput + nf_en_output;
 			this.availableToSpend = this.availableToSpend - NFactorycost;
+			this.carbonOutput = this.carbonOutput + carbon_effect_nf;
+			}
+		
+		case 2: //build environment friendly factory
+			{
+			environment_friendly_factory = environment_friendly_factory + 1;
+			this.energyOutput = this.energyOutput + ef_en_output;
+			this.availableToSpend = this.availableToSpend - EFactorycost;
+			this.carbonOutput = this.carbonOutput + carbon_effect_ef;
+			}
+		
+		case 3: //invest in creating armies!
+			{
+			war_industry = war_industry + 1;
+			this.availableToSpend = this.availableToSpend - war_industry_unit_cost;
+			}
 		}
+	}
+		//Every round our countries check cash and GDP and invest in factories to grow their economy
+	
+		private void Economy_check()
+		{}
+		
 		
 		//to be continued ...
 	
 	
 	
-	}
+	
 
-	@Override
-	protected void behaviour() {
-		// TODO Auto-generated method stub
 		
-	}	
 	
 }

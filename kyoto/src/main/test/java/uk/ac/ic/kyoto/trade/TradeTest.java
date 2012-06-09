@@ -1,18 +1,18 @@
 /**
- * 
+ * @author cmd08
+ *
  */
-package uk.ac.ic.kyoto.trade;
+package java.uk.ac.ic.kyoto.trade;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-/**
- * @author cmd08
- *
- */
-public class TradeProtocolTest {
+import uk.ac.ic.kyoto.trade.Offer;
+import uk.ac.ic.kyoto.trade.TradeType;
+
+public class TradeTest {
 
 	@Test
 	public void test() {
