@@ -56,7 +56,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	protected 		Map<Integer, Long> carbonEmissionReports;
 	
-	ParticipantCarbonReportingService reportingService; // TODO add visibility
+	protected ParticipantCarbonReportingService reportingService;
 	private Monitor monitor;
 	
 	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
