@@ -23,12 +23,11 @@ public class EUCountry extends AbstractCountry {
 	final private Prolog engine;
 	private EU eu;
 	
-	public EUCountry(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
-			double GDPRate, long availiableToSpend, long emissionsTarget, long carbonOffset,
-			long energyOutput, long carbonOutput) {
+	public EUCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
+			double GDPRate, long emissionsTarget, long energyOutput, long carbonOutput) {
 		
 		super(id, name, ISO, landArea, arableLandArea, GDP,
-					GDPRate, availiableToSpend, emissionsTarget, carbonOffset,
+					GDPRate, emissionsTarget,
 					energyOutput, carbonOutput);
 
 		engine = EUBehaviours.getEngine(name);

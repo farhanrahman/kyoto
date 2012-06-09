@@ -20,11 +20,10 @@ public class USAgent extends NonParticipant {
 	
 	private long internalEmissionsTarget=(long) (carbonOutput*0.95);
 
-	public USAgent(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
-			double GDPRate, long availableToSpend, long emissionsTarget, long carbonOffset,
-			long energyOutput, long carbonOutput){
+	public USAgent(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
+			double GDPRate, long emissionsTarget, long energyOutput, long carbonOutput){
 		super(id, name, ISO, landArea, arableLandArea, GDP,
-				GDPRate, availableToSpend, emissionsTarget, carbonOffset,
+				GDPRate, emissionsTarget,
 				energyOutput, carbonOutput);
 		// TODO Auto-generated constructor stub
 	}
