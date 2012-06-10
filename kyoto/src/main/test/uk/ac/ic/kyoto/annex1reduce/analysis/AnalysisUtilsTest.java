@@ -1,12 +1,14 @@
 package uk.ac.ic.kyoto.annex1reduce.analysis;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 import uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.Range;
-import uk.ac.ic.kyoto.trade.TradeProtocol.Trade;
+import uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.Weighting;
+import uk.ac.ic.kyoto.trade.Offer;
 import uk.ac.ic.kyoto.trade.TradeType;
 
 public class AnalysisUtilsTest {
@@ -19,9 +21,9 @@ public class AnalysisUtilsTest {
 		
 		try{
 			for (int i = 1; i <= 100; i++) {
-				session.add(new Trade(1, 2*i, TradeType.BUY), i);
-				session.add(new Trade(1, 3*i, TradeType.BUY), i);
-				session.add(new Trade(1, 4*i, TradeType.BUY), i);
+				session.add(new Offer(1, 2*i, TradeType.BUY), i);
+				session.add(new Offer(1, 3*i, TradeType.BUY), i);
+				session.add(new Offer(1, 4*i, TradeType.BUY), i);
 				
 				sumOfTrades += 2*i + 3*i + 4*i;
 				numberOfTrades += 3;
@@ -43,9 +45,9 @@ public class AnalysisUtilsTest {
 		
 		try{
 			for (int i = 1; i <= 100; i++) {
-				session[0].add(new Trade(1, 2*i, TradeType.BUY), i);
-				session[0].add(new Trade(1, 3*i, TradeType.BUY), i);
-				session[0].add(new Trade(1, 4*i, TradeType.BUY), i);				
+				session[0].add(new Offer(1, 2*i, TradeType.BUY), i);
+				session[0].add(new Offer(1, 3*i, TradeType.BUY), i);
+				session[0].add(new Offer(1, 4*i, TradeType.BUY), i);				
 			}
 		} catch (Exception e) {
 			fail("Exception during SessionHistory.add(...)");
@@ -83,9 +85,9 @@ public class AnalysisUtilsTest {
 		
 		try{
 			for (int i = 1; i <= 100; i++) {
-				session[0].add(new Trade(1, 2*i, TradeType.BUY), i);
-				session[0].add(new Trade(1, 3*i, TradeType.BUY), i);
-				session[0].add(new Trade(1, 4*i, TradeType.BUY), i);				
+				session[0].add(new Offer(1, 2*i, TradeType.BUY), i);
+				session[0].add(new Offer(1, 3*i, TradeType.BUY), i);
+				session[0].add(new Offer(1, 4*i, TradeType.BUY), i);				
 			}
 		} catch (Exception e) {
 			fail("Exception during SessionHistory.add(...)");
@@ -93,9 +95,9 @@ public class AnalysisUtilsTest {
 		
 		try{
 			for (int i = 101; i <= 200; i++) {
-				session[1].add(new Trade(1, 2*i, TradeType.BUY), i);
-				session[1].add(new Trade(1, 3*i, TradeType.BUY), i);
-				session[1].add(new Trade(1, 4*i, TradeType.BUY), i);				
+				session[1].add(new Offer(1, 2*i, TradeType.BUY), i);
+				session[1].add(new Offer(1, 3*i, TradeType.BUY), i);
+				session[1].add(new Offer(1, 4*i, TradeType.BUY), i);				
 			}
 		} catch (Exception e) {
 			fail("Exception during SessionHistory.add(...)");
@@ -103,9 +105,9 @@ public class AnalysisUtilsTest {
 		
 		try{
 			for (int i = 201; i <= 300; i++) {
-				session[2].add(new Trade(1, 2*i, TradeType.BUY), i);
-				session[2].add(new Trade(1, 3*i, TradeType.BUY), i);
-				session[2].add(new Trade(1, 4*i, TradeType.BUY), i);				
+				session[2].add(new Offer(1, 2*i, TradeType.BUY), i);
+				session[2].add(new Offer(1, 3*i, TradeType.BUY), i);
+				session[2].add(new Offer(1, 4*i, TradeType.BUY), i);				
 			}
 		} catch (Exception e) {
 			fail("Exception during SessionHistory.add(...)");
@@ -135,6 +137,156 @@ public class AnalysisUtilsTest {
 		
 		assertTrue(r6.high == 155 * 4);
 		assertTrue(r6.low == 40*2);
+	}
+	
+	@Test
+	public void TestWeightedAverage_oneSession(){
+		SessionHistory[] session = {new SessionHistory(0)};
+		Weighting[] weightings = {new Weighting(10, 1, 1), new Weighting(20, 11, (float) 0.5)};
+		float sumOfTrades = 0;
+		long numberOfTrades = 0;
+		
+		try{
+			for (int i = 1; i <= 100; i++) {
+				session[0].add(new Offer(1, 2*i, TradeType.BUY), i);
+				session[0].add(new Offer(1, 3*i, TradeType.BUY), i);
+				session[0].add(new Offer(1, 4*i, TradeType.BUY), i);
+				
+				if(i <= 10){
+					sumOfTrades += 2*i + 3*i + 4*i;
+					numberOfTrades += 3;
+				}
+				
+				if(i > 10 && i <= 20){
+					sumOfTrades += (2*i + 3*i + 4*i) * 0.5;
+					numberOfTrades += 3;
+				}
+				
+			}
+		} catch (Exception e) {
+			fail("Exception during SessionHistory.add(...)");
+		}
+		
+		float result1 = AnalysisUtils.weightedAverage(session, weightings, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
+		float result2 = (float) sumOfTrades/numberOfTrades;
+		
+		System.out.println(result1 + " " + result2);
+		
+		assertTrue(result1 == result2);
+	}
+	
+	@Test
+	public void TestWeightedAverage_multipleSession(){
+		SessionHistory[] session = {new SessionHistory(0), new SessionHistory(1)};
+		Weighting[] weightings = {new Weighting(10, 1, 1), new Weighting(20, 11, (float) 0.5), new Weighting(125, 120, (float) 0.1)};
+		float sumOfTrades = 0;
+		long numberOfTrades = 0;
+		
+		try{
+			for (int i = 1; i <= 100; i++) {
+				session[0].add(new Offer(1, 2*i, TradeType.BUY), i);
+				session[0].add(new Offer(1, 3*i, TradeType.BUY), i);
+				session[0].add(new Offer(1, 4*i, TradeType.BUY), i);
+				
+				if(i <= 10){
+					sumOfTrades += 2*i + 3*i + 4*i;
+					numberOfTrades += 3;
+				}
+				
+				if(i > 10 && i <= 20){
+					sumOfTrades += (2*i + 3*i + 4*i) * 0.5;
+					numberOfTrades += 3;
+				}
+				
+			}
+		} catch (Exception e) {
+			fail("Exception during SessionHistory.add(...)");
+		}
+		
+		try{
+			for (int i = 101; i <= 200; i++) {
+				session[0].add(new Offer(1, 2*i, TradeType.BUY), i);
+				session[0].add(new Offer(1, 3*i, TradeType.BUY), i);
+				session[0].add(new Offer(1, 4*i, TradeType.BUY), i);
+				
+				if(i <= 10){
+					sumOfTrades += 2*i + 3*i + 4*i;
+					numberOfTrades += 3;
+				}
+				
+				if(i >= 120 && i <= 125){
+					sumOfTrades += (2*i + 3*i + 4*i) * 0.1;
+					numberOfTrades += 3;
+				}
+				
+			}
+		} catch (Exception e) {
+			fail("Exception during SessionHistory.add(...)");
+		}
+		
+		float result1 = AnalysisUtils.weightedAverage(session, weightings, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
+		float result2 = (float) sumOfTrades/numberOfTrades;
+		
+		System.out.println(result1 + " " + result2);
+		
+		assertTrue(result1 == result2);
+	}
+	
+	@Test
+	public void TestWeightedAverage_sessionWeights(){
+		SessionHistory[] session = {new SessionHistory(0), new SessionHistory(1), new SessionHistory(2)};
+		Weighting[] weightings = {new Weighting(100, 1, 1), new Weighting(200, 101, (float) 0.9), new Weighting(300, 201, (float) 0.9)};
+		float sumOfTrades = 0;
+		long numberOfTrades = 0;
+		
+		try{
+			for (int i = 1; i <= 100; i++) {
+				session[0].add(new Offer(1, 2*i, TradeType.BUY), i);
+				session[0].add(new Offer(1, 3*i, TradeType.BUY), i);
+				session[0].add(new Offer(1, 4*i, TradeType.BUY), i);
+				
+				sumOfTrades += (2*i + 3*i + 4*i) * 1;
+				numberOfTrades += 3;
+				
+			}
+		} catch (Exception e) {
+			fail("Exception during SessionHistory.add(...)");
+		}
+		
+		try{
+			for (int i = 101; i <= 200; i++) {
+				session[0].add(new Offer(1, 2*i, TradeType.BUY), i);
+				session[0].add(new Offer(1, 3*i, TradeType.BUY), i);
+				session[0].add(new Offer(1, 4*i, TradeType.BUY), i);
+				
+				sumOfTrades += (2*i + 3*i + 4*i) * 0.9;
+				numberOfTrades += 3;
+				
+			}
+		} catch (Exception e) {
+			fail("Exception during SessionHistory.add(...)");
+		}
+		
+		try{
+			for (int i = 201; i <= 300; i++) {
+				session[0].add(new Offer(1, 2*i, TradeType.BUY), i);
+				session[0].add(new Offer(1, 3*i, TradeType.BUY), i);
+				session[0].add(new Offer(1, 4*i, TradeType.BUY), i);
+				
+				sumOfTrades += (2*i + 3*i + 4*i) * 0.9;
+				numberOfTrades += 3;
+				
+			}
+		} catch (Exception e) {
+			fail("Exception during SessionHistory.add(...)");
+		}
+		
+		float result1 = AnalysisUtils.weightedAverage(session, weightings, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
+		float result2 = sumOfTrades/numberOfTrades;
+		
+		System.out.println(result1 + " " + result2);
+		
+		assertEquals(result1, result2, 0.1);
 	}
 
 }

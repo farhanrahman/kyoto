@@ -4,8 +4,6 @@ import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import alice.tuprolog.Int;
-
 public class AnalysisUtils {
 	
 	private AnalysisUtils() {	
@@ -94,7 +92,7 @@ public class AnalysisUtils {
 		return new Range(type, startTick, endTick, low, high);
 	}
 	
-	public final static Float weightedAverage(int startTick, int endTick, SessionHistory[] sessions, Weighting[] weightings, TradeType type){
+	public final static float weightedAverage(SessionHistory[] sessions, Weighting[] weightings, TradeType type){
 		SortedMap<Integer, TickHistory> history = new TreeMap<Integer, TickHistory>();
 		SortedMap<Integer, Float> weightedHistory = new TreeMap<Integer, Float>();
 		
@@ -106,15 +104,12 @@ public class AnalysisUtils {
 			history.putAll(s.getSession());
 		}
 		
-		history = history.headMap(startTick+1);
-		history = history.tailMap(endTick);
-		
 		// Weight tick averages
 		for (Weighting w : weightings) {
 			SortedMap<Integer, TickHistory> tempHistory = new TreeMap<Integer, TickHistory>();
 			tempHistory.putAll(history);
 			tempHistory = tempHistory.headMap(w.startTick+1);
-			tempHistory = tempHistory.tailMap(endTick);
+			tempHistory = tempHistory.tailMap(w.endTick);
 			
 			for ( Entry<Integer, TickHistory> e  : tempHistory.entrySet()) {
 				if (type == TradeType.TRADE) {
@@ -132,13 +127,46 @@ public class AnalysisUtils {
 		
 		return sumOfTrades/numberOfTrades;
 	}
+	
+	public final static float average(SessionHistory[] sessions, TradeType type){
+		SortedMap<Integer, TickHistory> history = new TreeMap<Integer, TickHistory>();
+		
+		float sumOfTrades = 0;
+		long numberOfTrades = 0;
+		
+		// Pull all session histories into a single history
+		for (SessionHistory s : sessions) {
+			history.putAll(s.getSession());
+		}
+		
+		// Weight tick averages
+		for (Entry<Integer, TickHistory> ticks : history.entrySet()) {
+			
+			if (type == TradeType.TRADE){
+				sumOfTrades += ticks.getValue().getTradeAverage();
+			}else if (type == TradeType.INVESTMENT){
+				sumOfTrades += ticks.getValue().getInvestmentAverage();
+			}
+			
+			numberOfTrades++;
+		}
+		
+		return sumOfTrades/numberOfTrades;
+	}
 
-	public final static void nPointMoningAverage(){
-		//TODO Implementation
+	public final static float average(SessionHistory session, TradeType type){
+		SessionHistory[] s = {session};
+		return average(s, type);
 	}
 	
-	public final static void windowedWeightedAverage(SessionHistory[] sessions /* ... */){
-		//TODO Implementation
+	public final static float average(SessionHistory session, int startTick, int endTick, TradeType type){
+		Weighting[] w = {new Weighting(startTick, endTick, 1)};
+		SessionHistory[] s = {session};
+		return weightedAverage(s, w, type);
+	}
+	
+	public final static float stardardDeviation(){
+		throw new UnsupportedOperationException();
 	}
 	
 	public static class Range{
@@ -155,6 +183,8 @@ public class AnalysisUtils {
 			this.low = low;
 			this.high = high;
 		}
+		
+		//TODO Check startTick > endTick
 	}
 	
 	public static class Weighting{
@@ -167,6 +197,8 @@ public class AnalysisUtils {
 			this.endTick = endTick;
 			this.weight = weight;
 		}
+		
+		//TODO Check startTick > endTick
 	}
 
 }
