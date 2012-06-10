@@ -1,4 +1,4 @@
-package uk.ac.ic.kyoto.annex1reduce.analysis;
+package uk.ac.ic.kyoto.tradehistory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
