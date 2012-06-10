@@ -11,35 +11,7 @@ import uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.Weighting;
 import uk.ac.ic.kyoto.trade.Offer;
 import uk.ac.ic.kyoto.trade.TradeType;
 
-public class AnalysisUtilsTest {
-
-	@Test
-	@Deprecated
-	public void testSessionAverage() {
-		SessionHistory session = new SessionHistory(0);
-		long sumOfTrades = 0;
-		long numberOfTrades = 0;
-		
-		try{
-			for (int i = 1; i <= 100; i++) {
-				session.add(new Offer(1, 2*i, TradeType.BUY), i);
-				session.add(new Offer(1, 3*i, TradeType.BUY), i);
-				session.add(new Offer(1, 4*i, TradeType.BUY), i);
-				
-				sumOfTrades += 2*i + 3*i + 4*i;
-				numberOfTrades += 3;
-				
-			}
-		} catch (Exception e) {
-			fail("Exception during SessionHistory.add(...)");
-		}
-		
-		float result1 = AnalysisUtils.sessionAverage(session, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
-		float result2 = (float) sumOfTrades/numberOfTrades;
-		
-		assertTrue(result1 == result2);
-	}
-	
+public class AnalysisUtilsTest {	
 	
 	@Test
 	public void testAverage_singleSession(){

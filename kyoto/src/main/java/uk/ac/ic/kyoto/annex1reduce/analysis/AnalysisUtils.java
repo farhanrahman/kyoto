@@ -15,31 +15,6 @@ public class AnalysisUtils {
 	}
 	
 	/**
-	 * Returns the average unit price for the given session
-	 * @param session
-	 * @param type
-	 * @return
-	 * @throws Exception
-	 */
-	public final static float sessionAverage(SessionHistory session, TradeType type){
-		float sumOfTrades = 0;
-		long numberOfTrades = 0;
-		
-		for (Entry<Integer, TickHistory> ticks : session.getSession().entrySet()) {
-			
-			if (type == TradeType.TRADE){
-				sumOfTrades += ticks.getValue().getTradeAverage();
-			}else if (type == TradeType.INVESTMENT){
-				sumOfTrades += ticks.getValue().getInvestmentAverage();
-			}
-			
-			numberOfTrades++;
-		}
-		
-		return sumOfTrades/numberOfTrades;
-	}
-	
-	/**
 	 * Returns a Range object with the high and low values for the range<br/>
 	 * endTick &#8805; Range &#8804; startTick
 	 * @param startTick
