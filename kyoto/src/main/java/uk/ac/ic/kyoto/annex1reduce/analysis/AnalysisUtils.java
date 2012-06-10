@@ -97,13 +97,14 @@ public class AnalysisUtils {
 			tempHistory = tempHistory.tailMap(w.endTick);
 			
 			for ( Entry<Integer, TickHistory> e  : tempHistory.entrySet()) {
+								
 				if (type == TradeType.TRADE) {
 					sumOfTrades += (e.getValue().getTradeAverage() * w.weight);
 				}else if (type == TradeType.INVESTMENT) {
 					sumOfTrades += (e.getValue().getInvestmentAverage() * w.weight);
 				}
 				
-				numberOfTrades++;
+				numberOfTrades += w.weight;
 			}
 		}
 		

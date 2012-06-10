@@ -256,9 +256,12 @@ public class AnalysisUtilsTest {
 	@Test
 	public void TestWeightedAverage_oneSession(){
 		SessionHistory[] session = {new SessionHistory(0)};
-		Weighting[] weightings = {new Weighting(10, 1, 1), new Weighting(20, 11, (float) 0.5)};
+		float weight1 = 1;
+		float weight2 = (float) 4;
 		float sumOfTrades = 0;
 		long numberOfTrades = 0;
+		
+		Weighting[] weightings = {new Weighting(10, 1, weight1), new Weighting(20, 11, (float) weight2)};
 		
 		try{
 			for (int i = 1; i <= 100; i++) {
@@ -267,13 +270,13 @@ public class AnalysisUtilsTest {
 				session[0].add(new Offer(1, 4*i, TradeType.BUY), i);
 				
 				if(i <= 10){
-					sumOfTrades += 2*i + 3*i + 4*i;
-					numberOfTrades += 3;
+					sumOfTrades += (2*i + 3*i + 4*i) * weight1;
+					numberOfTrades += 3 * weight1;
 				}
 				
 				if(i > 10 && i <= 20){
-					sumOfTrades += (2*i + 3*i + 4*i) * 0.5;
-					numberOfTrades += 3;
+					sumOfTrades += (2*i + 3*i + 4*i) * weight2;
+					numberOfTrades += 3 * weight2;
 				}
 				
 			}
@@ -286,15 +289,19 @@ public class AnalysisUtilsTest {
 		
 		//System.out.println(result1 + " " + result2);
 		
-		assertTrue(result1 == result2);
+		assertTrue(result1 + " " + result2, result1 == result2);
 	}
 	
 	@Test
 	public void TestWeightedAverage_multipleSession(){
 		SessionHistory[] session = {new SessionHistory(0), new SessionHistory(1)};
-		Weighting[] weightings = {new Weighting(10, 1, 1), new Weighting(20, 11, (float) 0.5), new Weighting(125, 120, (float) 0.1)};
+		float weight1 = 1;
+		float weight2 = 2;
+		float weight3 = 5;
 		float sumOfTrades = 0;
 		long numberOfTrades = 0;
+		
+		Weighting[] weightings = {new Weighting(10, 1, weight1), new Weighting(20, 11, weight2), new Weighting(125, 120, weight3)};
 		
 		try{
 			for (int i = 1; i <= 100; i++) {
@@ -303,13 +310,13 @@ public class AnalysisUtilsTest {
 				session[0].add(new Offer(1, 4*i, TradeType.BUY), i);
 				
 				if(i <= 10){
-					sumOfTrades += 2*i + 3*i + 4*i;
-					numberOfTrades += 3;
+					sumOfTrades += (2*i + 3*i + 4*i) * weight1;
+					numberOfTrades += 3 * weight1;
 				}
 				
 				if(i > 10 && i <= 20){
-					sumOfTrades += (2*i + 3*i + 4*i) * 0.5;
-					numberOfTrades += 3;
+					sumOfTrades += (2*i + 3*i + 4*i) * weight2;
+					numberOfTrades += 3 * weight2;
 				}
 				
 			}
@@ -319,18 +326,13 @@ public class AnalysisUtilsTest {
 		
 		try{
 			for (int i = 101; i <= 200; i++) {
-				session[0].add(new Offer(1, 2*i, TradeType.BUY), i);
-				session[0].add(new Offer(1, 3*i, TradeType.BUY), i);
-				session[0].add(new Offer(1, 4*i, TradeType.BUY), i);
-				
-				if(i <= 10){
-					sumOfTrades += 2*i + 3*i + 4*i;
-					numberOfTrades += 3;
-				}
+				session[1].add(new Offer(1, 2*i, TradeType.BUY), i);
+				session[1].add(new Offer(1, 3*i, TradeType.BUY), i);
+				session[1].add(new Offer(1, 4*i, TradeType.BUY), i);
 				
 				if(i >= 120 && i <= 125){
-					sumOfTrades += (2*i + 3*i + 4*i) * 0.1;
-					numberOfTrades += 3;
+					sumOfTrades += (2*i + 3*i + 4*i) * weight3;
+					numberOfTrades += 3 * weight3;
 				}
 				
 			}
@@ -341,17 +343,19 @@ public class AnalysisUtilsTest {
 		float result1 = AnalysisUtils.weightedAverage(session, weightings, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
 		float result2 = (float) sumOfTrades/numberOfTrades;
 		
-		//System.out.println(result1 + " " + result2);
-		
-		assertTrue(result1 == result2);
+		assertTrue(result1 + " " + result2, result1 == result2);
 	}
 	
 	@Test
 	public void TestWeightedAverage_sessionWeights(){
 		SessionHistory[] session = {new SessionHistory(0), new SessionHistory(1), new SessionHistory(2)};
-		Weighting[] weightings = {new Weighting(100, 1, 1), new Weighting(200, 101, (float) 0.9), new Weighting(300, 201, (float) 0.9)};
+		float weight1 = 1;
+		float weight2 = 2;
+		float weight3 = 5;
 		float sumOfTrades = 0;
 		long numberOfTrades = 0;
+		
+		Weighting[] weightings = {new Weighting(100, 1, weight1), new Weighting(200, 101, (float) weight2), new Weighting(300, 201, (float) weight3)};
 		
 		try{
 			for (int i = 1; i <= 100; i++) {
@@ -359,8 +363,8 @@ public class AnalysisUtilsTest {
 				session[0].add(new Offer(1, 3*i, TradeType.BUY), i);
 				session[0].add(new Offer(1, 4*i, TradeType.BUY), i);
 				
-				sumOfTrades += (2*i + 3*i + 4*i) * 1;
-				numberOfTrades += 3;
+				sumOfTrades += (2*i + 3*i + 4*i) * weight1;
+				numberOfTrades += 3 * weight1;
 				
 			}
 		} catch (Exception e) {
@@ -369,12 +373,12 @@ public class AnalysisUtilsTest {
 		
 		try{
 			for (int i = 101; i <= 200; i++) {
-				session[0].add(new Offer(1, 2*i, TradeType.BUY), i);
-				session[0].add(new Offer(1, 3*i, TradeType.BUY), i);
-				session[0].add(new Offer(1, 4*i, TradeType.BUY), i);
+				session[1].add(new Offer(1, 2*i, TradeType.BUY), i);
+				session[1].add(new Offer(1, 3*i, TradeType.BUY), i);
+				session[1].add(new Offer(1, 4*i, TradeType.BUY), i);
 				
-				sumOfTrades += (2*i + 3*i + 4*i) * 0.9;
-				numberOfTrades += 3;
+				sumOfTrades += (2*i + 3*i + 4*i) * weight2;
+				numberOfTrades += 3 * weight2;
 				
 			}
 		} catch (Exception e) {
@@ -383,12 +387,12 @@ public class AnalysisUtilsTest {
 		
 		try{
 			for (int i = 201; i <= 300; i++) {
-				session[0].add(new Offer(1, 2*i, TradeType.BUY), i);
-				session[0].add(new Offer(1, 3*i, TradeType.BUY), i);
-				session[0].add(new Offer(1, 4*i, TradeType.BUY), i);
+				session[2].add(new Offer(1, 2*i, TradeType.BUY), i);
+				session[2].add(new Offer(1, 3*i, TradeType.BUY), i);
+				session[2].add(new Offer(1, 4*i, TradeType.BUY), i);
 				
-				sumOfTrades += (2*i + 3*i + 4*i) * 0.9;
-				numberOfTrades += 3;
+				sumOfTrades += (2*i + 3*i + 4*i) * weight3;
+				numberOfTrades += 3 * weight3;
 				
 			}
 		} catch (Exception e) {
@@ -398,9 +402,7 @@ public class AnalysisUtilsTest {
 		float result1 = AnalysisUtils.weightedAverage(session, weightings, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
 		float result2 = sumOfTrades/numberOfTrades;
 		
-		//System.out.println(result1 + " " + result2);
-		
-		assertEquals(result1, result2, 0.1);
+		assertEquals(result1 + " " + result2, result1, result2, 0.1);
 	}
 	
 	@Test
