@@ -80,10 +80,9 @@ public class AnalysisUtils {
 	 */
 	public final static float weightedAverage(SessionHistory[] sessions, Weighting[] weightings, TradeType type){
 		SortedMap<Integer, TickHistory> history = new TreeMap<Integer, TickHistory>();
-		SortedMap<Integer, Float> weightedHistory = new TreeMap<Integer, Float>();
 		
 		float sumOfTrades = 0;
-		long numberOfTrades = 0;
+		float numberOfTrades = 0;
 		
 		// Putting all sessions into a single SortedMap
 		for (SessionHistory s : sessions) {
@@ -99,16 +98,13 @@ public class AnalysisUtils {
 			
 			for ( Entry<Integer, TickHistory> e  : tempHistory.entrySet()) {
 				if (type == TradeType.TRADE) {
-					weightedHistory.put(e.getKey(), (e.getValue().getTradeAverage() * w.weight));
+					sumOfTrades += (e.getValue().getTradeAverage() * w.weight);
 				}else if (type == TradeType.INVESTMENT) {
-					weightedHistory.put(e.getKey(), (e.getValue().getInvestmentAverage() * w.weight));
+					sumOfTrades += (e.getValue().getInvestmentAverage() * w.weight);
 				}
+				
+				numberOfTrades++;
 			}
-		}
-		
-		for (Entry<Integer, Float> tickEntry : weightedHistory.entrySet()) {
-			sumOfTrades += tickEntry.getValue();
-			numberOfTrades++;
 		}
 		
 		return sumOfTrades/numberOfTrades;
