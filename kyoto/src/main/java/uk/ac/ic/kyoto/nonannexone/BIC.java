@@ -9,14 +9,13 @@ public class BIC extends AbstractCountry {
 	
 	//Variables........................................................................
 	
-	protected char currentAvailableArea; // area available for planting trees/industry
 	protected long economy_threshold; //point where availableToSpend changes behaviour (to be decided)
 	protected long environment_friendly_target; //our countries are environmentally friendly and set own emision target :P
 	protected long normal_factory; //factory for increasing energyOutput but with normal carbon emisions
 	protected long environment_friendly_factory; //like normal_factory but with less carbon emisions, however more expensive
 	protected long war_industry; //invest in war industry for extreme measures ie arableArea=0 :p
 	protected double GDP_aim; //aim of GDP for a year
-	
+	protected long tree_area; // number of trees
 	
 	//Constants.............................................................................
 	
@@ -27,7 +26,9 @@ public class BIC extends AbstractCountry {
 	public static final long carbon_effect_nf = 0; //effect on carbon output
 	public static final long carbon_effect_ef = 0; //effect on carbon output - less than normal factory
 	public static final long war_industry_unit_cost = 0; // cost of creating a unit of the greatest empire ever in the known world
-	
+	public static final long enough_units_for_war = 0; // constant for estimating if in good position for declaring war.
+	public static final long tree_cost = 0 ; //cost of each tree from availableToSpend
+	public static final long tree_effect_on_carbon_output = 0; //reduction in carbon output
 	
 	
 	//............................................................................................ 
@@ -79,16 +80,16 @@ public class BIC extends AbstractCountry {
 	
 	//General functions
 	
-	//Check if the available area is safe=S in order to choose decision accordingly for accepting to sell credits.
-	private void currentAvailableArea(){
-		if (this.getArableLandArea() > this.getLandArea()/4)
-			{
-			currentAvailableArea = 'S';
-			}
-		else if ((this.getArableLandArea() == this.getLandArea()/4))
-			currentAvailableArea = 'C';
-		else if (((this.getArableLandArea() < this.getLandArea()/4)))
-			currentAvailableArea = 'N';
+	//Check if the available area is (safe=S,on the limit = L,unsafe=U)  in order to choose decision accordingly for accepting to sell credits or plant trees for own sake.
+	private char currentAvailableArea(){
+		if (this.getArableLandArea() > this.getLandArea()/16)
+			return 'S';
+		else if ((this.getArableLandArea() == this.getLandArea()/16))
+			return 'L';
+		else if (((this.getArableLandArea() < this.getLandArea()/16)))
+			return 'U';
+		return 0;
+		
 	}
 	
 	
@@ -99,34 +100,90 @@ public class BIC extends AbstractCountry {
 		case 1: //build normal factory 
 			{
 			normal_factory = normal_factory + 1;
-			this.energyOutput = this.energyOutput + nf_en_output;
-			this.availableToSpend = this.availableToSpend - NFactorycost;
-			this.carbonOutput = this.carbonOutput + carbon_effect_nf;
+			energyOutput = energyOutput + nf_en_output;
+			availableToSpend = availableToSpend - NFactorycost;
+			carbonOutput = carbonOutput + carbon_effect_nf;
 			}
 		
 		case 2: //build environment friendly factory
 			{
 			environment_friendly_factory = environment_friendly_factory + 1;
-			this.energyOutput = this.energyOutput + ef_en_output;
-			this.availableToSpend = this.availableToSpend - EFactorycost;
-			this.carbonOutput = this.carbonOutput + carbon_effect_ef;
+			energyOutput = energyOutput + ef_en_output;
+			availableToSpend = availableToSpend - EFactorycost;
+			carbonOutput = carbonOutput + carbon_effect_ef;
 			}
 		
 		case 3: //invest in creating armies!
 			{
 			war_industry = war_industry + 1;
-			this.availableToSpend = this.availableToSpend - war_industry_unit_cost;
+			availableToSpend = availableToSpend - war_industry_unit_cost;
 			}
 		}
 	}
 		//Every round our countries check cash and GDP and invest in factories to grow their economy
 	
 		private void Economy_check()
-		{}
+		{
+			if (availableToSpend > economy_threshold) //still have enough money
+			{
+				spend_on_industry(); // invest,expand,build
+				buildIndustry(3); //armies! however not much is spend in this. more in economic growths
+			}
+			if (availableToSpend == economy_threshold) //on the limit
+				listen_to_offers(); //to be implemented
+				
+			if (availableToSpend < economy_threshold) //less than critical state
+				red_alert();
+		}
+		
+		//invest in industry in order to grow economy by increasing the energyOutput by also considering the environment target(optional)
+		private void spend_on_industry()
+		{
+			if (carbonOutput < environment_friendly_target)
+				buildIndustry(1); //build normal factory
+			
+			if (carbonOutput == environment_friendly_target) 
+				buildIndustry(2); //build environment friendly factory
+			if (carbonOutput >= environment_friendly_target)
+				tree_planting(); // more carbonOutput than required, try reducing it by planting forests (reduces arableLandArea)
+		}
+		
+		//.......................................trading................................................
+		//basically search for potential investors in our lands
+		private void listen_to_offers(){
+			//to be implemented
+		}
+		
+		//.........................................................................................
 		
 		
-		//to be continued ...
-	
+		//bad economic state, therefore either invade other nearby countries or listen_to_offers. Praying an option? :p
+		private void red_alert(){
+			if (war_industry >= enough_units_for_war)
+			declare_war(); //to be implemented - if enough war units then declare war to expand and acquire more land
+			else
+			//no money, no tanks
+			listen_to_offers(); //get money
+		
+		}
+		
+		private void tree_planting()
+		{
+			if (currentAvailableArea() == 'S') //safe to plant
+			{
+				tree_area = tree_area + 1;
+				availableToSpend = availableToSpend - tree_cost;
+				carbonOutput = carbonOutput - tree_effect_on_carbon_output;
+			}
+			
+							
+		}
+		
+		private void declare_war()
+		{
+			
+		}
+		
 	
 	
 	
