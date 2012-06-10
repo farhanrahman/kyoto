@@ -58,17 +58,17 @@ public class AnalysisUtils {
 			history.putAll(s.getSession());
 		}
 		
-		System.out.print("Size before: " + history.size());
+		//System.out.print("Size before: " + history.size());
 		
 		history = history.headMap(startTick+1);
 		history = history.tailMap(endTick);
 		
-		System.out.println(" after: " + history.size());
+		//System.out.println(" after: " + history.size());
 		
 		for (Entry<Integer, TickHistory> tickEntry : history.entrySet()) {
 			TickHistory tick = tickEntry.getValue();
 			
-			System.out.println(tickEntry.getKey());
+			//System.out.println(tickEntry.getKey());
 			
 			if (type == TradeType.TRADE) {
 				if (tick.getTradeHigh() > high) {
@@ -163,6 +163,11 @@ public class AnalysisUtils {
 		Weighting[] w = {new Weighting(startTick, endTick, 1)};
 		SessionHistory[] s = {session};
 		return weightedAverage(s, w, type);
+	}
+	
+	public final static float average(SessionHistory[] session, int startTick, int endTick, TradeType type){
+		Weighting[] w = {new Weighting(startTick, endTick, 1)};
+		return weightedAverage(session, w, type);
 	}
 	
 	public final static float stardardDeviation(){

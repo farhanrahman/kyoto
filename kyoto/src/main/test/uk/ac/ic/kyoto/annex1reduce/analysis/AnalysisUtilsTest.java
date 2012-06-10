@@ -14,6 +14,7 @@ import uk.ac.ic.kyoto.trade.TradeType;
 public class AnalysisUtilsTest {
 
 	@Test
+	@Deprecated
 	public void testSessionAverage() {
 		SessionHistory session = new SessionHistory(0);
 		long sumOfTrades = 0;
@@ -36,11 +37,152 @@ public class AnalysisUtilsTest {
 		float result1 = AnalysisUtils.sessionAverage(session, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
 		float result2 = (float) sumOfTrades/numberOfTrades;
 		
-		assertTrue(result1 ==result2);
+		assertTrue(result1 == result2);
+	}
+	
+	
+	@Test
+	public void testAverage_singleSession(){
+		SessionHistory session = new SessionHistory(0);
+		long sumOfTrades = 0;
+		long numberOfTrades = 0;
+		
+		try{
+			for (int i = 1; i <= 100; i++) {
+				session.add(new Offer(1, 2*i, TradeType.BUY), i);
+				session.add(new Offer(1, 3*i, TradeType.BUY), i);
+				session.add(new Offer(1, 4*i, TradeType.BUY), i);
+				
+				sumOfTrades += 2*i + 3*i + 4*i;
+				numberOfTrades += 3;
+				
+			}
+		} catch (Exception e) {
+			fail("Exception during SessionHistory.add(...)");
+		}
+		
+		float result1 = AnalysisUtils.average(session, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
+		float result2 = (float) sumOfTrades/numberOfTrades;
+		
+		assertTrue(result1 == result2);
+	}
+	
+	@Test
+	public void testAverage_singleSessionRange(){
+		SessionHistory session = new SessionHistory(0);
+		long sumOfTrades = 0;
+		long numberOfTrades = 0;
+		
+		try{
+			for (int i = 1; i <= 100; i++) {
+				session.add(new Offer(1, 2*i, TradeType.BUY), i);
+				session.add(new Offer(1, 3*i, TradeType.BUY), i);
+				session.add(new Offer(1, 4*i, TradeType.BUY), i);
+				
+				if (i >= 50 && i <= 60) {
+					sumOfTrades += 2*i + 3*i + 4*i;
+					numberOfTrades += 3;
+				}
+				
+			}
+		} catch (Exception e) {
+			fail("Exception during SessionHistory.add(...)");
+		}
+		
+		float result1 = AnalysisUtils.average(session, 60, 50, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
+		float result2 = (float) sumOfTrades/numberOfTrades;
+		
+		//System.out.println(result1 + " " + result2);
+		
+		assertTrue(result1 == result2);
+	}
+	
+	@Test
+	public void testAverage_multipleSessions(){
+		SessionHistory[] session = {new SessionHistory(0), new SessionHistory(1)};
+		long sumOfTrades = 0;
+		long numberOfTrades = 0;
+		
+		try{
+			for (int i = 1; i <= 100; i++) {
+				session[0].add(new Offer(1, 2*i, TradeType.BUY), i);
+				session[0].add(new Offer(1, 3*i, TradeType.BUY), i);
+				session[0].add(new Offer(1, 4*i, TradeType.BUY), i);
+				
+				sumOfTrades += 2*i + 3*i + 4*i;
+				numberOfTrades += 3;
+				
+			}
+		} catch (Exception e) {
+			fail("Exception during SessionHistory.add(...)");
+		}
+		
+		try{
+			for (int i = 101; i <= 200; i++) {
+				session[0].add(new Offer(1, 2*i, TradeType.BUY), i);
+				session[0].add(new Offer(1, 3*i, TradeType.BUY), i);
+				session[0].add(new Offer(1, 4*i, TradeType.BUY), i);
+				
+				sumOfTrades += 2*i + 3*i + 4*i;
+				numberOfTrades += 3;
+				
+			}
+		} catch (Exception e) {
+			fail("Exception during SessionHistory.add(...)");
+		}
+		
+		float result1 = AnalysisUtils.average(session, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
+		float result2 = (float) sumOfTrades/numberOfTrades;
+		
+		assertTrue(result1 == result2);
+	}
+	
+	@Test
+	public void testAverage_multipleSessionsRange(){
+		SessionHistory[] session = {new SessionHistory(0), new SessionHistory(1)};
+		long sumOfTrades = 0;
+		long numberOfTrades = 0;
+		
+		try{
+			for (int i = 1; i <= 100; i++) {
+				session[0].add(new Offer(1, 2*i, TradeType.BUY), i);
+				session[0].add(new Offer(1, 3*i, TradeType.BUY), i);
+				session[0].add(new Offer(1, 4*i, TradeType.BUY), i);
+				
+				if (i>=90) {
+					sumOfTrades += 2*i + 3*i + 4*i;
+					numberOfTrades += 3;
+				}
+				
+			}
+		} catch (Exception e) {
+			fail("Exception during SessionHistory.add(...)");
+		}
+		
+		try{
+			for (int i = 101; i <= 200; i++) {
+				session[0].add(new Offer(1, 2*i, TradeType.BUY), i);
+				session[0].add(new Offer(1, 3*i, TradeType.BUY), i);
+				session[0].add(new Offer(1, 4*i, TradeType.BUY), i);
+				
+				if (i<=110) {
+					sumOfTrades += 2*i + 3*i + 4*i;
+					numberOfTrades += 3;
+				}
+
+			}
+		} catch (Exception e) {
+			fail("Exception during SessionHistory.add(...)");
+		}
+		
+		float result1 = AnalysisUtils.average(session, 110, 90, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
+		float result2 = (float) sumOfTrades/numberOfTrades;
+		
+		assertTrue(result1 == result2);
 	}
 
 	@Test
-	public void testRange_single_session() {
+	public void testRange_singleSession() {
 		SessionHistory[] session = {new SessionHistory(0)};
 		
 		try{
@@ -58,29 +200,29 @@ public class AnalysisUtilsTest {
 		Range r3 = AnalysisUtils.range(50, 40, session, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
 		Range r4 = AnalysisUtils.range(55, 40, session, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
 		
-		System.out.println(r1.high + " " + r1.low);
+		//System.out.println(r1.high + " " + r1.low);
 		
 		assertTrue(r1.high == 4);
 		assertTrue(r1.low == 2);
 		
-		System.out.println(r2.high + " " + r2.low);
+		//System.out.println(r2.high + " " + r2.low);
 		
 		assertTrue(r2.high == 400);
 		assertTrue(r2.low == 2);
 		
-		System.out.println(r3.high + " " + r3.low);
+		//System.out.println(r3.high + " " + r3.low);
 		
 		assertTrue(r3.high == 200);
 		assertTrue(r3.low == 40*2);
 		
-		System.out.println(r4.high + " " + r4.low);
+		//System.out.println(r4.high + " " + r4.low);
 		
 		assertTrue(r4.high == 220);
 		assertTrue(r4.low == 40*2);
 	}
 	
 	@Test
-	public void testRange_multiple_sessions() {
+	public void testRange_multipleSessions() {
 		SessionHistory[] session = {new SessionHistory(0), new SessionHistory(1), new SessionHistory(3)};
 		
 		try{
@@ -170,7 +312,7 @@ public class AnalysisUtilsTest {
 		float result1 = AnalysisUtils.weightedAverage(session, weightings, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
 		float result2 = (float) sumOfTrades/numberOfTrades;
 		
-		System.out.println(result1 + " " + result2);
+		//System.out.println(result1 + " " + result2);
 		
 		assertTrue(result1 == result2);
 	}
@@ -227,7 +369,7 @@ public class AnalysisUtilsTest {
 		float result1 = AnalysisUtils.weightedAverage(session, weightings, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
 		float result2 = (float) sumOfTrades/numberOfTrades;
 		
-		System.out.println(result1 + " " + result2);
+		//System.out.println(result1 + " " + result2);
 		
 		assertTrue(result1 == result2);
 	}
@@ -284,7 +426,7 @@ public class AnalysisUtilsTest {
 		float result1 = AnalysisUtils.weightedAverage(session, weightings, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
 		float result2 = sumOfTrades/numberOfTrades;
 		
-		System.out.println(result1 + " " + result2);
+		//System.out.println(result1 + " " + result2);
 		
 		assertEquals(result1, result2, 0.1);
 	}
