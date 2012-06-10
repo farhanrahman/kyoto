@@ -178,15 +178,6 @@ public class BIC extends AbstractCountry {
 			
 							
 		}
-		
-		private void declare_war()
-		{
-			
-		}
-		//to be continued ...
-	
-	
-	
 	
 
 		
