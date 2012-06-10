@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.security.InvalidParameterException;
+
 import org.junit.Test;
 
 import uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.Range;
@@ -11,6 +13,11 @@ import uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.Weighting;
 import uk.ac.ic.kyoto.trade.Offer;
 import uk.ac.ic.kyoto.trade.TradeType;
 
+/**
+ * NOTE: This test is not yet considered complete, as some boundary
+ * conditions have not been thoroughly tested.
+ * @author cs2309
+ */
 public class AnalysisUtilsTest {	
 	
 	@Test
@@ -36,7 +43,7 @@ public class AnalysisUtilsTest {
 		float result1 = AnalysisUtils.average(session, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
 		float result2 = (float) sumOfTrades/numberOfTrades;
 		
-		assertTrue(result1 == result2);
+		assertTrue("Calculated: " + result1 + " - Expected: " + result2, result1 == result2);
 	}
 	
 	@Test
@@ -64,9 +71,7 @@ public class AnalysisUtilsTest {
 		float result1 = AnalysisUtils.average(session, 60, 50, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
 		float result2 = (float) sumOfTrades/numberOfTrades;
 		
-		//System.out.println(result1 + " " + result2);
-		
-		assertTrue(result1 == result2);
+		assertTrue("Calculated: " + result1 + " - Expected: " + result2, result1 == result2);
 	}
 	
 	@Test
@@ -106,7 +111,7 @@ public class AnalysisUtilsTest {
 		float result1 = AnalysisUtils.average(session, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
 		float result2 = (float) sumOfTrades/numberOfTrades;
 		
-		assertTrue(result1 == result2);
+		assertTrue("Calculated: " + result1 + " - Expected: " + result2, result1 == result2);
 	}
 	
 	@Test
@@ -150,7 +155,7 @@ public class AnalysisUtilsTest {
 		float result1 = AnalysisUtils.average(session, 110, 90, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
 		float result2 = (float) sumOfTrades/numberOfTrades;
 		
-		assertTrue(result1 == result2);
+		assertTrue("Calculated: " + result1 + " - Expected: " + result2, result1 == result2);
 	}
 
 	@Test
@@ -256,12 +261,12 @@ public class AnalysisUtilsTest {
 	@Test
 	public void TestWeightedAverage_oneSession(){
 		SessionHistory[] session = {new SessionHistory(0)};
-		float weight1 = 1;
-		float weight2 = (float) 4;
+		int weight1 = 1;
+		int weight2 =  4;
 		float sumOfTrades = 0;
 		long numberOfTrades = 0;
 		
-		Weighting[] weightings = {new Weighting(10, 1, weight1), new Weighting(20, 11, (float) weight2)};
+		Weighting[] weightings = {new Weighting(10, 1, weight1), new Weighting(20, 11, weight2)};
 		
 		try{
 			for (int i = 1; i <= 100; i++) {
@@ -287,17 +292,15 @@ public class AnalysisUtilsTest {
 		float result1 = AnalysisUtils.weightedAverage(session, weightings, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
 		float result2 = (float) sumOfTrades/numberOfTrades;
 		
-		//System.out.println(result1 + " " + result2);
-		
-		assertTrue(result1 + " " + result2, result1 == result2);
+		assertTrue("Calculated: " + result1 + " - Expected: " + result2, result1 == result2);
 	}
 	
 	@Test
 	public void TestWeightedAverage_multipleSession(){
 		SessionHistory[] session = {new SessionHistory(0), new SessionHistory(1)};
-		float weight1 = 1;
-		float weight2 = 2;
-		float weight3 = 5;
+		int weight1 = 1;
+		int weight2 = 2;
+		int weight3 = 5;
 		float sumOfTrades = 0;
 		long numberOfTrades = 0;
 		
@@ -343,19 +346,19 @@ public class AnalysisUtilsTest {
 		float result1 = AnalysisUtils.weightedAverage(session, weightings, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
 		float result2 = (float) sumOfTrades/numberOfTrades;
 		
-		assertTrue(result1 + " " + result2, result1 == result2);
+		assertTrue("Calculated: " + result1 + " - Expected: " + result2, result1 == result2);
 	}
 	
 	@Test
 	public void TestWeightedAverage_sessionWeights(){
 		SessionHistory[] session = {new SessionHistory(0), new SessionHistory(1), new SessionHistory(2)};
-		float weight1 = 1;
-		float weight2 = 2;
-		float weight3 = 5;
+		int weight1 = 1;
+		int weight2 = 2;
+		int weight3 = 5;
 		float sumOfTrades = 0;
 		long numberOfTrades = 0;
 		
-		Weighting[] weightings = {new Weighting(100, 1, weight1), new Weighting(200, 101, (float) weight2), new Weighting(300, 201, (float) weight3)};
+		Weighting[] weightings = {new Weighting(100, 1, weight1), new Weighting(200, 101, weight2), new Weighting(300, 201, weight3)};
 		
 		try{
 			for (int i = 1; i <= 100; i++) {
@@ -402,12 +405,30 @@ public class AnalysisUtilsTest {
 		float result1 = AnalysisUtils.weightedAverage(session, weightings, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
 		float result2 = sumOfTrades/numberOfTrades;
 		
-		assertEquals(result1 + " " + result2, result1, result2, 0.1);
+		assertEquals("Calculated: " + result1 + " - Expected: " + result2, result1, result2, 0.1);
 	}
 	
 	@Test
 	public void testStandardDeviation(){
 		fail("Test not yet implemented");
+	}
+	
+	@SuppressWarnings("unused")
+	@Test(expected = InvalidParameterException.class) 
+	public void testRangeClass_tickException(){
+		Range r = new Range(uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE, 1, 2, 1, 1);
+	}
+	
+	@SuppressWarnings("unused")
+	@Test(expected = InvalidParameterException.class) 
+	public void testWeightingClass_tickException(){
+		Weighting w = new Weighting(1, 2, 1);
+	}
+	
+	@SuppressWarnings("unused")
+	@Test(expected = InvalidParameterException.class) 
+	public void testWeightingClass_negativeException(){
+		Weighting w = new Weighting(2, 1, -1);
 	}
 
 }

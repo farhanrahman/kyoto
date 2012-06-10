@@ -28,7 +28,7 @@ public class AnalysisUtils {
 	 * @return
 	 */
 	public final static Range range(int startTick, int endTick, SessionHistory[] sessions, TradeType type){
-		checkPreconditions(startTick, endTick);
+		checkTickPreconditions(startTick, endTick);
 
 		SortedMap<Integer, TickHistory> history = new TreeMap<Integer, TickHistory>();
 		
@@ -162,7 +162,7 @@ public class AnalysisUtils {
 	 * @return
 	 */
 	public final static float average(SessionHistory session, int startTick, int endTick, TradeType type){
-		checkPreconditions(startTick, endTick);
+		checkTickPreconditions(startTick, endTick);
 		
 		Weighting[] w = {new Weighting(startTick, endTick, 1)};
 		SessionHistory[] s = {session};
@@ -178,7 +178,7 @@ public class AnalysisUtils {
 	 * @return
 	 */
 	public final static float average(SessionHistory[] sessions, int startTick, int endTick, TradeType type){
-		checkPreconditions(startTick, endTick);
+		checkTickPreconditions(startTick, endTick);
 		
 		Weighting[] w = {new Weighting(startTick, endTick, 1)};
 		return weightedAverage(sessions, w, type);
@@ -239,7 +239,7 @@ public class AnalysisUtils {
 		public final long high;
 		
 		public Range(TradeType type, int startTick, int endTick, long low, long high) {
-			checkPreconditions(startTick, endTick);
+			checkTickPreconditions(startTick, endTick);
 			
 			this.type = type;
 			this.startTick = startTick;
@@ -256,10 +256,21 @@ public class AnalysisUtils {
 	public static class Weighting{
 		public final int startTick;
 		public final int endTick;
-		public final float weight;
+		public final int weight;
 		
-		public Weighting(int startTick, int endTick, float weight) {
-			checkPreconditions(startTick, endTick);
+		/**
+		 * NOTE: startTick must be &#62; endTick.<br\>
+		 * weight must be a non-negative integer
+		 * @param startTick
+		 * @param endTick
+		 * @param weight
+		 */
+		public Weighting(int startTick, int endTick, int weight) {
+			checkTickPreconditions(startTick, endTick);
+			
+			if (weight < 0) {
+				throw new InvalidParameterException("weight must be a non-negative integer");
+			}
 			
 			this.startTick = startTick;
 			this.endTick = endTick;
@@ -273,7 +284,7 @@ public class AnalysisUtils {
 	 * @param startTick
 	 * @param endTick
 	 */
-	private static void checkPreconditions(int startTick, int endTick){
+	private static void checkTickPreconditions(int startTick, int endTick){
 		if(endTick > startTick){
 			throw new InvalidParameterException("startTick must be > endTick");
 		}
