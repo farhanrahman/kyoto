@@ -8,10 +8,13 @@ import java.security.InvalidParameterException;
 
 import org.junit.Test;
 
-import uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.Range;
-import uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.Weighting;
 import uk.ac.ic.kyoto.trade.Offer;
 import uk.ac.ic.kyoto.trade.TradeType;
+import uk.ac.ic.kyoto.tradehistory.AnalysisUtils;
+import uk.ac.ic.kyoto.tradehistory.AnalysisUtils.TradeActionType;
+import uk.ac.ic.kyoto.tradehistory.SessionHistory;
+import uk.ac.ic.kyoto.tradehistory.AnalysisUtils.Range;
+import uk.ac.ic.kyoto.tradehistory.AnalysisUtils.Weighting;
 
 /**
  * NOTE: This test is not yet considered complete, as some boundary
@@ -40,7 +43,7 @@ public class AnalysisUtilsTest {
 			fail("Exception during SessionHistory.add(...)");
 		}
 		
-		float result1 = AnalysisUtils.average(session, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
+		float result1 = AnalysisUtils.average(session, TradeActionType.TRADE);
 		float result2 = (float) sumOfTrades/numberOfTrades;
 		
 		assertTrue("Calculated: " + result1 + " - Expected: " + result2, result1 == result2);
@@ -68,7 +71,7 @@ public class AnalysisUtilsTest {
 			fail("Exception during SessionHistory.add(...)");
 		}
 		
-		float result1 = AnalysisUtils.average(session, 60, 50, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
+		float result1 = AnalysisUtils.average(session, 60, 50, TradeActionType.TRADE);
 		float result2 = (float) sumOfTrades/numberOfTrades;
 		
 		assertTrue("Calculated: " + result1 + " - Expected: " + result2, result1 == result2);
@@ -108,7 +111,7 @@ public class AnalysisUtilsTest {
 			fail("Exception during SessionHistory.add(...)");
 		}
 		
-		float result1 = AnalysisUtils.average(session, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
+		float result1 = AnalysisUtils.average(session, TradeActionType.TRADE);
 		float result2 = (float) sumOfTrades/numberOfTrades;
 		
 		assertTrue("Calculated: " + result1 + " - Expected: " + result2, result1 == result2);
@@ -152,7 +155,7 @@ public class AnalysisUtilsTest {
 			fail("Exception during SessionHistory.add(...)");
 		}
 		
-		float result1 = AnalysisUtils.average(session, 110, 90, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
+		float result1 = AnalysisUtils.average(session, 110, 90, TradeActionType.TRADE);
 		float result2 = (float) sumOfTrades/numberOfTrades;
 		
 		assertTrue("Calculated: " + result1 + " - Expected: " + result2, result1 == result2);
@@ -172,10 +175,10 @@ public class AnalysisUtilsTest {
 			fail("Exception during SessionHistory.add(...)");
 		}
 		
-		Range r1 = AnalysisUtils.range(1, 1, session, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
-		Range r2 = AnalysisUtils.range(100, 0, session, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
-		Range r3 = AnalysisUtils.range(50, 40, session, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
-		Range r4 = AnalysisUtils.range(55, 40, session, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
+		Range r1 = AnalysisUtils.range(1, 1, session, TradeActionType.TRADE);
+		Range r2 = AnalysisUtils.range(100, 0, session, TradeActionType.TRADE);
+		Range r3 = AnalysisUtils.range(50, 40, session, TradeActionType.TRADE);
+		Range r4 = AnalysisUtils.range(55, 40, session, TradeActionType.TRADE);
 		
 		//System.out.println(r1.high + " " + r1.low);
 		
@@ -232,12 +235,12 @@ public class AnalysisUtilsTest {
 			fail("Exception during SessionHistory.add(...)");
 		}
 		
-		Range r1 = AnalysisUtils.range(1, 1, session, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
-		Range r2 = AnalysisUtils.range(100, 0, session, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
-		Range r3 = AnalysisUtils.range(50, 40, session, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
-		Range r4 = AnalysisUtils.range(55, 40, session, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
-		Range r5 = AnalysisUtils.range(155, 140, session, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
-		Range r6 = AnalysisUtils.range(155, 40, session, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
+		Range r1 = AnalysisUtils.range(1, 1, session, TradeActionType.TRADE);
+		Range r2 = AnalysisUtils.range(100, 0, session, TradeActionType.TRADE);
+		Range r3 = AnalysisUtils.range(50, 40, session, TradeActionType.TRADE);
+		Range r4 = AnalysisUtils.range(55, 40, session, TradeActionType.TRADE);
+		Range r5 = AnalysisUtils.range(155, 140, session, TradeActionType.TRADE);
+		Range r6 = AnalysisUtils.range(155, 40, session, TradeActionType.TRADE);
 				
 		assertTrue(r1.high == 4);
 		assertTrue(r1.low == 2);
@@ -289,7 +292,7 @@ public class AnalysisUtilsTest {
 			fail("Exception during SessionHistory.add(...)");
 		}
 		
-		float result1 = AnalysisUtils.weightedAverage(session, weightings, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
+		float result1 = AnalysisUtils.weightedAverage(session, weightings, TradeActionType.TRADE);
 		float result2 = (float) sumOfTrades/numberOfTrades;
 		
 		assertTrue("Calculated: " + result1 + " - Expected: " + result2, result1 == result2);
@@ -343,7 +346,7 @@ public class AnalysisUtilsTest {
 			fail("Exception during SessionHistory.add(...)");
 		}
 		
-		float result1 = AnalysisUtils.weightedAverage(session, weightings, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
+		float result1 = AnalysisUtils.weightedAverage(session, weightings, TradeActionType.TRADE);
 		float result2 = (float) sumOfTrades/numberOfTrades;
 		
 		assertTrue("Calculated: " + result1 + " - Expected: " + result2, result1 == result2);
@@ -402,7 +405,7 @@ public class AnalysisUtilsTest {
 			fail("Exception during SessionHistory.add(...)");
 		}
 		
-		float result1 = AnalysisUtils.weightedAverage(session, weightings, uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE);
+		float result1 = AnalysisUtils.weightedAverage(session, weightings, TradeActionType.TRADE);
 		float result2 = sumOfTrades/numberOfTrades;
 		
 		assertEquals("Calculated: " + result1 + " - Expected: " + result2, result1, result2, 0.1);
@@ -416,7 +419,7 @@ public class AnalysisUtilsTest {
 	@SuppressWarnings("unused")
 	@Test(expected = InvalidParameterException.class) 
 	public void testRangeClass_tickException(){
-		Range r = new Range(uk.ac.ic.kyoto.annex1reduce.analysis.AnalysisUtils.TradeType.TRADE, 1, 2, 1, 1);
+		Range r = new Range(TradeActionType.TRADE, 1, 2, 1, 1);
 	}
 	
 	@SuppressWarnings("unused")

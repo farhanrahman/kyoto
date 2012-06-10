@@ -1,4 +1,4 @@
-package uk.ac.ic.kyoto.annex1reduce.analysis;
+package uk.ac.ic.kyoto.tradehistory;
 
 import java.security.InvalidParameterException;
 import java.util.Map.Entry;
@@ -14,7 +14,7 @@ public class AnalysisUtils {
 	private AnalysisUtils() {}
 	
 	//TODO Give enum a better name
-	enum TradeType {
+	public enum TradeActionType {
 		TRADE, INVESTMENT
 	}
 	
@@ -27,7 +27,7 @@ public class AnalysisUtils {
 	 * @param type
 	 * @return
 	 */
-	public final static Range range(int startTick, int endTick, SessionHistory[] sessions, TradeType type){
+	public final static Range range(int startTick, int endTick, SessionHistory[] sessions, TradeActionType type){
 		checkTickPreconditions(startTick, endTick);
 
 		SortedMap<Integer, TickHistory> history = new TreeMap<Integer, TickHistory>();
@@ -46,7 +46,7 @@ public class AnalysisUtils {
 		for (Entry<Integer, TickHistory> tickEntry : history.entrySet()) {
 			TickHistory tick = tickEntry.getValue();
 						
-			if (type == TradeType.TRADE) {
+			if (type == TradeActionType.TRADE) {
 				if (tick.getTradeHigh() > high) {
 					high = tick.getTradeHigh();
 				}
@@ -55,7 +55,7 @@ public class AnalysisUtils {
 					low = tick.getTradeLow();
 				}
 				
-			}else if (type == TradeType.INVESTMENT) {
+			}else if (type == TradeActionType.INVESTMENT) {
 				
 				if (tick.getInvestmentHigh() > high) {
 					high = tick.getInvestmentHigh();
@@ -78,7 +78,7 @@ public class AnalysisUtils {
 	 * @param type
 	 * @return
 	 */
-	public final static float weightedAverage(SessionHistory[] sessions, Weighting[] weightings, TradeType type){
+	public final static float weightedAverage(SessionHistory[] sessions, Weighting[] weightings, TradeActionType type){
 		SortedMap<Integer, TickHistory> history = new TreeMap<Integer, TickHistory>();
 		
 		float sumOfTrades = 0;
@@ -98,9 +98,9 @@ public class AnalysisUtils {
 			
 			for ( Entry<Integer, TickHistory> e  : tempHistory.entrySet()) {
 								
-				if (type == TradeType.TRADE) {
+				if (type == TradeActionType.TRADE) {
 					sumOfTrades += (e.getValue().getTradeAverage() * w.weight);
-				}else if (type == TradeType.INVESTMENT) {
+				}else if (type == TradeActionType.INVESTMENT) {
 					sumOfTrades += (e.getValue().getInvestmentAverage() * w.weight);
 				}
 				
@@ -117,7 +117,7 @@ public class AnalysisUtils {
 	 * @param type
 	 * @return
 	 */
-	public final static float average(SessionHistory[] sessions, TradeType type){
+	public final static float average(SessionHistory[] sessions, TradeActionType type){
 		SortedMap<Integer, TickHistory> history = new TreeMap<Integer, TickHistory>();
 		
 		float sumOfTrades = 0;
@@ -130,9 +130,9 @@ public class AnalysisUtils {
 		
 		for (Entry<Integer, TickHistory> ticks : history.entrySet()) {
 			
-			if (type == TradeType.TRADE){
+			if (type == TradeActionType.TRADE){
 				sumOfTrades += ticks.getValue().getTradeAverage();
-			}else if (type == TradeType.INVESTMENT){
+			}else if (type == TradeActionType.INVESTMENT){
 				sumOfTrades += ticks.getValue().getInvestmentAverage();
 			}
 			
@@ -148,7 +148,7 @@ public class AnalysisUtils {
 	 * @param type
 	 * @return
 	 */
-	public final static float average(SessionHistory session, TradeType type){
+	public final static float average(SessionHistory session, TradeActionType type){
 		SessionHistory[] s = {session};
 		return average(s, type);
 	}
@@ -161,7 +161,7 @@ public class AnalysisUtils {
 	 * @param type
 	 * @return
 	 */
-	public final static float average(SessionHistory session, int startTick, int endTick, TradeType type){
+	public final static float average(SessionHistory session, int startTick, int endTick, TradeActionType type){
 		checkTickPreconditions(startTick, endTick);
 		
 		Weighting[] w = {new Weighting(startTick, endTick, 1)};
@@ -177,7 +177,7 @@ public class AnalysisUtils {
 	 * @param type
 	 * @return
 	 */
-	public final static float average(SessionHistory[] sessions, int startTick, int endTick, TradeType type){
+	public final static float average(SessionHistory[] sessions, int startTick, int endTick, TradeActionType type){
 		checkTickPreconditions(startTick, endTick);
 		
 		Weighting[] w = {new Weighting(startTick, endTick, 1)};
@@ -192,7 +192,7 @@ public class AnalysisUtils {
 	 * @return
 	 */
 	@Deprecated
-	public final static double stardardDeviation(SessionHistory[] sessions, TradeType type){
+	public final static double stardardDeviation(SessionHistory[] sessions, TradeActionType type){
 		SortedMap<Integer, TickHistory> history = new TreeMap<Integer, TickHistory>();
 		SortedMap<Integer, Float> m = new TreeMap<Integer, Float>();
 		
@@ -209,9 +209,9 @@ public class AnalysisUtils {
 		float average = average(sessions, type);
 		
 		for (Entry<Integer, TickHistory> e : history.entrySet()) {
-			if (type == TradeType.TRADE) {
+			if (type == TradeActionType.TRADE) {
 				m.put(e.getKey(), (e.getValue().getTradeAverage() - average));
-			}else if (type == TradeType.INVESTMENT) {
+			}else if (type == TradeActionType.INVESTMENT) {
 				m.put(e.getKey(), (e.getValue().getInvestmentAverage() - average));
 			}
 		}
@@ -232,13 +232,13 @@ public class AnalysisUtils {
 	 *
 	 */
 	public static class Range{
-		public final TradeType type;
+		public final TradeActionType type;
 		public final int startTick;
 		public final int endTick;
 		public final long low;
 		public final long high;
 		
-		public Range(TradeType type, int startTick, int endTick, long low, long high) {
+		public Range(TradeActionType type, int startTick, int endTick, long low, long high) {
 			checkTickPreconditions(startTick, endTick);
 			
 			this.type = type;
