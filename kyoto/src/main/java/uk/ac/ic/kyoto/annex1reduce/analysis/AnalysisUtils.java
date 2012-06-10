@@ -4,6 +4,8 @@ import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import alice.tuprolog.Int;
+
 public class AnalysisUtils {
 	
 	private AnalysisUtils() {	
@@ -91,12 +93,47 @@ public class AnalysisUtils {
 		
 		return new Range(type, startTick, endTick, low, high);
 	}
+	
+	public final static Float weightedAverage(int startTick, int endTick, SessionHistory[] sessions, Weighting[] weightings, TradeType type){
+		SortedMap<Integer, TickHistory> history = new TreeMap<Integer, TickHistory>();
+		SortedMap<Integer, Float> weightedHistory = new TreeMap<Integer, Float>();
+		
+		float sumOfTrades = 0;
+		long numberOfTrades = 0;
+		
+		// Pull all session histories into a single history
+		for (SessionHistory s : sessions) {
+			history.putAll(s.getSession());
+		}
+		
+		history = history.headMap(startTick+1);
+		history = history.tailMap(endTick);
+		
+		// Weight tick averages
+		for (Weighting w : weightings) {
+			SortedMap<Integer, TickHistory> tempHistory = new TreeMap<Integer, TickHistory>();
+			tempHistory.putAll(history);
+			tempHistory = tempHistory.headMap(w.startTick+1);
+			tempHistory = tempHistory.tailMap(endTick);
+			
+			for ( Entry<Integer, TickHistory> e  : tempHistory.entrySet()) {
+				if (type == TradeType.TRADE) {
+					weightedHistory.put(e.getKey(), (e.getValue().getTradeAverage() * w.weight));
+				}else if (type == TradeType.INVESTMENT) {
+					weightedHistory.put(e.getKey(), (e.getValue().getInvestmentAverage() * w.weight));
+				}
+			}
+		}
+		
+		for (Entry<Integer, Float> tickEntry : weightedHistory.entrySet()) {
+			sumOfTrades += tickEntry.getValue();
+			numberOfTrades++;
+		}
+		
+		return sumOfTrades/numberOfTrades;
+	}
 
 	public final static void nPointMoningAverage(){
-		//TODO Implementation
-	}
-	
-	public final static void weightedAverage(SessionHistory[] sessions /* ... */){
 		//TODO Implementation
 	}
 	
@@ -117,6 +154,18 @@ public class AnalysisUtils {
 			this.endTick = endTick;
 			this.low = low;
 			this.high = high;
+		}
+	}
+	
+	public static class Weighting{
+		public final int startTick;
+		public final int endTick;
+		public final float weight;
+		
+		public Weighting(int startTick, int endTick, float weight) {
+			this.startTick = startTick;
+			this.endTick = endTick;
+			this.weight = weight;
 		}
 	}
 
