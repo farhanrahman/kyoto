@@ -140,13 +140,43 @@ public class AnalysisUtils {
 		return weightedAverage(s, w, type);
 	}
 	
-	public final static float average(SessionHistory[] session, int startTick, int endTick, TradeType type){
+	public final static float average(SessionHistory[] sessions, int startTick, int endTick, TradeType type){
 		Weighting[] w = {new Weighting(startTick, endTick, 1)};
-		return weightedAverage(session, w, type);
+		return weightedAverage(sessions, w, type);
 	}
 	
-	public final static float stardardDeviation(){
-		throw new UnsupportedOperationException();
+	public final static double stardardDeviation(SessionHistory[] sessions, TradeType type){
+		SortedMap<Integer, TickHistory> history = new TreeMap<Integer, TickHistory>();
+		SortedMap<Integer, Float> m = new TreeMap<Integer, Float>();
+		
+		float sumOfVars = 0;
+		int numberOfVars = 0;
+		
+		float variance;
+		
+		// Pull all session histories into a single history
+		for (SessionHistory s : sessions) {
+			history.putAll(s.getSession());
+		}
+		
+		float average = average(sessions, type);
+		
+		for (Entry<Integer, TickHistory> e : history.entrySet()) {
+			if (type == TradeType.TRADE) {
+				m.put(e.getKey(), (e.getValue().getTradeAverage() - average));
+			}else if (type == TradeType.INVESTMENT) {
+				m.put(e.getKey(), (e.getValue().getInvestmentAverage() - average));
+			}
+		}
+		
+		for (Entry<Integer, Float> e : m.entrySet()) {
+			sumOfVars += (e.getValue() * e.getValue());
+			numberOfVars++;
+		}
+		
+		variance = sumOfVars/numberOfVars;
+		
+		return Math.sqrt(variance);		
 	}
 	
 	public static class Range{

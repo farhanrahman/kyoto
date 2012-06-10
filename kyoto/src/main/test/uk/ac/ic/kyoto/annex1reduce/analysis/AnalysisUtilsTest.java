@@ -402,5 +402,10 @@ public class AnalysisUtilsTest {
 		
 		assertEquals(result1, result2, 0.1);
 	}
+	
+	@Test
+	public void testStandardDeviation(){
+		fail("Test not yet implemented");
+	}
 
 }
