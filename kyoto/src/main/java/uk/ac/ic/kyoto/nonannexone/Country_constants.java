@@ -1,7 +1,7 @@
 package uk.ac.ic.kyoto.nonannexone;
 
 public class Country_constants {
-
+	
 	public static final long  nf_en_output = 0; //effect on energy output of normal factory(to be decided)
 	public static final long  ef_en_output=0; //environment friendly factory's effect(to be decided)
 	public static final long  NFactorycost=0; //cost of normal factory
