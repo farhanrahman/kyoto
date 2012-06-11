@@ -106,7 +106,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			System.out.println("Unable to reach monitor service.");
 			e1.printStackTrace();
 		}
-		// Initialize the Action Handlers DO THEY HAVE TO BE INSTANTIATED ALL THE TIME?
+		// Initialize the Action Handlers DO THEY HAVE TO BE INSTANTIATED ALL THE TIME? Yes
 		try {
 			timeService = getEnvironmentService(TimeService.class);
 		} catch (UnavailableServiceException e1) {
