@@ -4,7 +4,7 @@ import uk.ac.ic.kyoto.math.QuadraticEquation;
 
 /**
  * 
- * @author Stuart, Adam
+ * @author Stuart, Adam, Piotr
  */
 public final class CarbonReductionHandler{
 	
@@ -30,12 +30,13 @@ public final class CarbonReductionHandler{
 	 * 
 	 * @param carbonOutputChange
 	 * The amount of carbon reduction which we want to price
+	 * 
 	 * @return
 	 * cost of reducing carbon by the specified amount.
+	 * 
 	 * @throws NotEnoughCarbonOutputException 
 	 * when it is impossible for a given country to reduce carbon by the specified amount
 	 * as they don't produce that much carbon
-	 * 
 	 */
 	public final long getCost(long carbonOutputChange) throws Exception {
 		long cost;
@@ -55,7 +56,7 @@ public final class CarbonReductionHandler{
 							* cleanIndustryChange);
 		}
 		catch (Exception e) {
-			throw new Exception("getCost function error");
+			throw new Exception("getCost function error: " + e);
 		}
 		
 		return cost;
@@ -66,6 +67,7 @@ public final class CarbonReductionHandler{
 	 * for a specified cost of investment.
 	 * 
 	 * @param investment cost
+	 * 
 	 * @return the change in carbon output from specified cost
 	 */
 	public final double getCarbonOutputChange(long cost) throws Exception {
@@ -87,7 +89,7 @@ public final class CarbonReductionHandler{
 			carbonOutputChange = calculateCarbonOutput(cleanIndustryChange, country.energyOutput);
 		}
 		catch (Exception e) {
-			throw new Exception("getCarbonOutputChange function error");
+			throw new Exception("getCarbonOutputChange function error: " + e);
 		}
 		
 		return carbonOutputChange;
@@ -99,6 +101,7 @@ public final class CarbonReductionHandler{
 	 * On failure, will throw Exception.
 	 * 
 	 * @param investment
+	 * 
 	 * @throws Exception
 	 */
 	public final void invest(long investment) throws Exception {
@@ -121,7 +124,7 @@ public final class CarbonReductionHandler{
 			}
 		}
 		catch (Exception e) {
-			throw new Exception("invest function error");
+			throw new Exception("invest function error: " + e);
 		}
 		
 	}
@@ -131,7 +134,7 @@ public final class CarbonReductionHandler{
     //================================================================================
 	
 	/**
-	 * Calculates the clean industry rate for specified carbon output and energy output
+	 * Calculates the clean industry rate for specified carbon output and energy output.
 	 */
 	private double calculateCleanIndustryMeasure(long carbonOutput, long energyOutput) throws Exception {
 		double cleanIndustry;
@@ -140,11 +143,11 @@ public final class CarbonReductionHandler{
 			if (carbonOutput <= energyOutput)
 				cleanIndustry = 1 - ((double)carbonOutput / (double)energyOutput);
 			else {
-				throw new Exception("carbonOutput is greater than energyOutput");
+				throw new Exception("carbonOutput is greater than energyOutput: " + e);
 			}
 		}
 		catch (Exception e) {
-			throw new Exception("calculateCleanIndustryMeasure function error");
+			throw new Exception("calculateCleanIndustryMeasure function error " + e);
 		}
 		
 		return cleanIndustry;
@@ -157,7 +160,7 @@ public final class CarbonReductionHandler{
 			carbonOutput = (long) ((double)energyOutput * (1 - cleanIndustry));
 		}
 		catch (Exception e) {
-			throw new Exception("calculateCarbonOutput error");
+			throw new Exception("calculateCarbonOutput error: " + e);
 		}
 		
 		return carbonOutput;

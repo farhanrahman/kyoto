@@ -43,7 +43,7 @@ public final class CarbonAbsorptionHandler {
 			}
 		}
 		catch (Exception e) {
-			throw new Exception("getCost function error");
+			throw new Exception("getCost function error: " + e);
 		}
 		
 		return totalCost;
@@ -72,9 +72,11 @@ public final class CarbonAbsorptionHandler {
 			carbonAbsorption = (long) (GameConst.FOREST_CARBON_ABSORPTION * (country.arableLandArea-tempArableLandArea) );
 		}
 		catch (Exception e) {
-			throw new Exception("getCarbonAbsorption function error");
+			throw new Exception("getCarbonAbsorption function error: " + e);
 		}
 		
+		carbonAbsorption = (long) (GameConst.FOREST_CARBON_ABSORPTION * (country.arableLandArea - tempArableLandArea) );
+
 		return carbonAbsorption;
 	}
 	
@@ -96,7 +98,7 @@ public final class CarbonAbsorptionHandler {
 			}
 		}
 		catch (Exception e) {
-			throw new Exception("getBlockCost function error");
+			throw new Exception("getBlockCost function error: " + e);
 		}
 		
 		return blockCost;
@@ -137,7 +139,7 @@ public final class CarbonAbsorptionHandler {
 			}
 		}
 		catch (Exception e) {
-			throw new Exception("invest function error");
+			throw new Exception("invest function error: " + e);
 		}
 	}
 }
