@@ -5,7 +5,7 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-import uk.ac.ic.kyoto.trade.TradeProtocol.Trade;
+import uk.ac.ic.kyoto.trade.Offer;
 import uk.ac.ic.kyoto.trade.TradeType;
 
 public class SessionHistoryTest {
@@ -14,10 +14,10 @@ public class SessionHistoryTest {
 	public void testAdd() {
 		SessionHistory	s	= new SessionHistory(0);
 		
-		Trade	m1	= new Trade(1, 1, TradeType.BUY);
-		Trade	m2	= new Trade(1, 2, TradeType.BUY);
-		Trade	m3	= new Trade(1, 3, TradeType.BUY);
-		Trade	m4	= new Trade(1, 4, TradeType.BUY);
+		Offer	m1	= new Offer(1, 1, TradeType.BUY);
+		Offer	m2	= new Offer(1, 2, TradeType.BUY);
+		Offer	m3	= new Offer(1, 3, TradeType.BUY);
+		Offer	m4	= new Offer(1, 4, TradeType.BUY);
 		
 		try {
 			s.add(m1, 0);
@@ -33,8 +33,8 @@ public class SessionHistoryTest {
 	public void testGetTick() {
 		SessionHistory		s	= new SessionHistory(0);
 		
-		Trade				m1	= new Trade(1, 1, TradeType.BUY);
-		Trade				m2	= new Trade(1, 2, TradeType.BUY);
+		Offer				m1	= new Offer(1, 1, TradeType.BUY);
+		Offer				m2	= new Offer(1, 2, TradeType.BUY);
 		
 		TickHistory			t1	= new TickHistory(0);
 		TickHistory			t2	= new TickHistory(1);
@@ -71,10 +71,10 @@ public class SessionHistoryTest {
 		SessionHistory		s3	= new SessionHistory(0);
 		SessionHistory		s4	= new SessionHistory(1);
 		
-		Trade				m1	= new Trade(1, 1, TradeType.BUY);
-		Trade				m2	= new Trade(1, 2, TradeType.BUY);
-		Trade				m3	= new Trade(1, 3, TradeType.BUY);
-		Trade				m4	= new Trade(1, 4, TradeType.BUY);
+		Offer				m1	= new Offer(1, 1, TradeType.BUY);
+		Offer				m2	= new Offer(1, 2, TradeType.BUY);
+		Offer				m3	= new Offer(1, 3, TradeType.BUY);
+		Offer				m4	= new Offer(1, 4, TradeType.BUY);
 		
 		try {
 			s1.add(m1, 0);
@@ -106,10 +106,10 @@ public class SessionHistoryTest {
 		SessionHistory		s3	= new SessionHistory(0);
 		SessionHistory		s4	= new SessionHistory(1);
 		
-		Trade				m1	= new Trade(1, 1, TradeType.BUY);
-		Trade				m2	= new Trade(1, 2, TradeType.BUY);
-		Trade				m3	= new Trade(1, 3, TradeType.BUY);
-		Trade				m4	= new Trade(1, 4, TradeType.BUY);
+		Offer				m1	= new Offer(1, 1, TradeType.BUY);
+		Offer				m2	= new Offer(1, 2, TradeType.BUY);
+		Offer				m3	= new Offer(1, 3, TradeType.BUY);
+		Offer				m4	= new Offer(1, 4, TradeType.BUY);
 		
 		try {
 			s1.add(m1, 0);

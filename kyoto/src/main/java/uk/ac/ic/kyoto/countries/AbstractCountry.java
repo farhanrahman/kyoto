@@ -5,8 +5,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.log4j.Logger;
-
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.monitor.Monitor;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
@@ -29,7 +27,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
     //================================================================================
 	
 	final protected String 		ISO;		//ISO 3166-1 alpha-3
-	private 		UUID 		id;
 	
 	// TODO Change visibility of fields
 	/*
@@ -60,7 +57,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	protected 		Map<Integer, Long> carbonEmissionReports;
 	
 	ParticipantCarbonReportingService reportingService; // TODO add visibility
-	private Monitor monitor;
+	Monitor monitor;
+	TimeService timeService;
 	
 	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
 	
@@ -76,23 +74,20 @@ public abstract class AbstractCountry extends AbstractParticipant {
     //================================================================================
 	
 	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
-					double GDPRate, long availableToSpend, long emissionsTarget, long carbonOffset,
-					long energyOutput, long carbonOutput) {
+					double GDPRate, long emissionsTarget, long energyOutput, long carbonOutput) {
 
 		//TODO Validate parameters
 		
 		super(id, name);
 		
-		
-		this.id = id;
 		this.landArea = landArea;
 		this.ISO = ISO;
 		this.arableLandArea = arableLandArea;
 		this.GDP = GDP;
 		this.GDPRate = GDPRate;
 		this.emissionsTarget = emissionsTarget;
-		this.carbonOffset = carbonOffset;
-		this.availableToSpend = availableToSpend;
+		this.carbonOffset = 0;
+		this.availableToSpend = 0;
 		this.carbonOutput = carbonOutput;
 		this.carbonEmissionReports = new HashMap<Integer, Long>();
 		this.energyOutput = energyOutput;
@@ -105,13 +100,20 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		
 		// Add the country to the monitor service
 		try {
-			this.monitor = this.getEnvironmentService(Monitor.class);
-			this.monitor.addMemberState(this);
+			monitor = getEnvironmentService(Monitor.class);
+			monitor.addMemberState(this);
 		} catch (UnavailableServiceException e1) {
 			System.out.println("Unable to reach monitor service.");
 			e1.printStackTrace();
 		}
 		// Initialize the Action Handlers DO THEY HAVE TO BE INSTANTIATED ALL THE TIME?
+		try {
+			timeService = getEnvironmentService(TimeService.class);
+		} catch (UnavailableServiceException e1) {
+			System.out.println("TimeService doesn't work");
+			e1.printStackTrace();
+		}
+		// Initialize the Action Handlers
 		carbonAbsorptionHandler = new CarbonAbsorptionHandler(this);
 		carbonReductionHandler = new CarbonReductionHandler(this);
 		energyUsageHandler = new EnergyUsageHandler(this);
@@ -124,7 +126,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			e.printStackTrace();
 		}
 		
-		calculateATS();
+		updateAvailableToSpend();
 		initialiseCountry();
 	}
 	
@@ -148,26 +150,16 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	@Override
 	final public void execute() {
 		super.execute();
-		try {
-			// TODO make sure that the proper getters are used
-			TimeService timeService = getEnvironmentService(TimeService.class);
-			
-			if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
-				calculateATS();
-				MonitorTax();
-				checkTargets(); //did the countries meet their targets?
-				updateGDP();
-				updateGDPRate();
-				updateCarbonOffsetYearly();
-				YearlyFunction();
-			}
-			if (timeService.getCurrentYear() % timeService.getYearsInSession() == 0) {
-				resetCarbonOffset();
-				SessionFunction();
-			}
-		} catch (UnavailableServiceException e) {
-			logger.warn(e.getMessage(), e);
-			e.printStackTrace();
+		if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
+	//		MonitorTax();
+	//		checkTargets(); //did the countries meet their targets?
+			updateGDPRate();
+			updateCarbonOffsetYearly();
+			YearlyFunction();
+		}
+		if (timeService.getCurrentYear() % timeService.getYearsInSession() == 0) {
+			resetCarbonOffset();
+			SessionFunction();
 		}
 		behaviour();
 	}
@@ -195,12 +187,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	public final long getMonitored() {
 		return carbonOutput;
 	}
-	
-	// This functionality may be taken over by the carbonOffsetUpdate
-	public void checkTargets() {
-		this.monitor.checkTargets();
-	}
-	
+		
 	protected Set<ParticipantSharedState> getSharedState(){
 		Set<ParticipantSharedState> s = super.getSharedState();
 		s.add(ParticipantCarbonReportingService.createSharedState(this.getCarbonEmissionReports(), this.getID()));
@@ -232,17 +219,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 */
 	public Double reportCarbonEmission(Time t){
 		
-		// This  is an example of how reporting your carbon output is structured
-		/*try{
-		Time t = SimTime.get();
-		AbstractCountry.this.environment.act(new SubmitCarbonEmissionReport(
-					AbstractCountry.this.reportCarbonEmission(t), t), 
-					AbstractCountry.this.getID(), 
-					AbstractCountry.this.authkey);
-		}catch(ActionHandlingException e){
-			logger.warn("Error trying to submit report");
-		}*/
-		
+		// TODO implement a method to cheat
 		this.addToReports(t, carbonOutput);
 		return new Double(carbonOutput);
 	}
@@ -288,9 +265,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	/**
 	 * Calculate available to spend for the next year as an extra 1% of GDP
+	 * If we haven't spent something last year, it will be available this year too
 	 */
-	private final void calculateATS() {
-		availableToSpend = Math.round(availableToSpend * GameConst.PERCENTAGE_OF_GDP);
+	private final void updateAvailableToSpend() {
+		availableToSpend += GDP * GameConst.PERCENTAGE_OF_GDP;
 	}
 	
 	/**

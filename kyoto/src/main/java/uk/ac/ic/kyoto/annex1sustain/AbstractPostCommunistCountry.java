@@ -46,7 +46,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			long availiableToSpend, long emissionsTarget, long carbonOffset, long energyOutput, long carbonOutput)
 	{
 		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, emissionsTarget,
-				carbonOffset, energyOutput, energyOutput, energyOutput);
+				carbonOffset, energyOutput);
 		
 		this.internalPrice = Long.MAX_VALUE;
 		this.uncommittedTransactionsCosts = new ArrayList<Double>();
@@ -379,6 +379,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			logger.warn("Problem with calculating newTarget: " + e);
 			newSellingTarget = creditsToSellTarget;
 		}
+		
 		creditsToSellTarget = newSellingTarget;
 	}
 	
@@ -396,6 +397,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			logger.warn("Problem with calculating availableCreditsFactor: " + e);
 			availableCreditsFactor = carbonOffset;
 		}
+		
 		return availableCreditsFactor;
 	}
 	
@@ -408,25 +410,25 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		
 		try {			
 			
-			// get current year from the Time service
+			// Get current year from the Time service
 			TimeService timeService = getEnvironmentService(TimeService.class);
 			int currentYear = timeService.getCurrentYear();
 			
-			// get the data from the FossilPrices Service
+			// Get the data from the FossilPrices Service
 			FossilPrices fossilPrices = getEnvironmentService(FossilPrices.class);
 			double newOilPrice = fossilPrices.getOilPrice(currentYear);
 			double oldOilPrice = fossilPrices.getOilPrice(currentYear - 1);
 			double newGasPrice = fossilPrices.getGasPrice(currentYear);
 			double oldGasPrice = fossilPrices.getGasPrice(currentYear - 1);
 			
-			// if the data is relevant, calculate the gradients and the coefficient
-			if ((newOilPrice != 0) && (oldOilPrice != 0) && (newGasPrice != 0) && (oldGasPrice != 0) ) {
+			// If values for this and previous year exist, calculate gradient and factor
+			if ((newOilPrice >= 0) && (oldOilPrice >= 0) && (newGasPrice >= 0) && (oldGasPrice >= 0) ) {
 				double oilGradient = (newOilPrice - oldOilPrice) / oldOilPrice;
 				double gasGradient = (newGasPrice - oldGasPrice) / oldGasPrice;
 				fossilFuelsFactor = Constants.FOSSIL_FUEL_PRICE_COEFFICIENT * (oilGradient + gasGradient) / 2;
 			}
 			
-			// if the data is irrelevant, coefficient becomes irrelevant.
+			// If no data exists, return default 1 value.
 			else
 				fossilFuelsFactor = 1;
 		}
@@ -438,6 +440,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			logger.warn("Problem with calculating fossilFuelsFactor: " + e);
 			fossilFuelsFactor = 1;
 		}
+		
 		return fossilFuelsFactor;
 	}
 	
@@ -466,6 +469,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			logger.warn("Problem with calculating marketFactor: " + e);
 			marketFactor = 1;
 		}
+		
 		return marketFactor;
 	}
 	

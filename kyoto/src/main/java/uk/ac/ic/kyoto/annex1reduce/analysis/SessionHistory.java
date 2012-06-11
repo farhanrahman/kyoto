@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 
-import uk.ac.ic.kyoto.trade.TradeProtocol.Trade;
+import uk.ac.ic.kyoto.trade.Offer;
 
 /**
  * Stores and makes available all given TickHistories for current Session
@@ -33,7 +33,7 @@ public class SessionHistory {
 	 * @param currentTick
 	 * @throws Exception 
 	 */
-	public void add(Trade m, int currentTick) throws Exception{
+	public void add(Offer m, int currentTick) throws Exception{
 		
 		if(session.isEmpty()){
 			TickHistory t = new TickHistory(currentTick);
