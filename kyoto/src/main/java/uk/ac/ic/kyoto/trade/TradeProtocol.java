@@ -216,7 +216,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 							// send accept message
 							logger.debug("Accepting exchange proposal: "
 									+ trade);
-							if(!TradeProtocol.this.tradeHistory.tradeExists(offerMessage.getTradeID())){
+							//if(!TradeProtocol.this.tradeHistory.tradeExists(offerMessage.getTradeID())){
 								TradeProtocol.this.tradeHistory.addToHistory(
 										SimTime.get(), offerMessage.getTradeID(), trade);
 								//TODO update the carbon credits of the responder
@@ -225,9 +225,9 @@ public abstract class TradeProtocol extends FSMProtocol {
 												Performative.ACCEPT_PROPOSAL,
 												ResponderReplies.ACCEPT.name(), t,
 												from, to, offerMessage));								
-							}else{
-								logger.warn("Trade already happened");
-							}
+							//}else{
+							//	logger.warn("Trade already happened");
+							//}
 						} else {
 							// send reject message
 							logger.debug("Rejecting exchange proposal: "
