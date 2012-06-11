@@ -15,10 +15,11 @@ import uk.ac.imperial.presage2.core.util.random.Random;
 public class USAgent extends NonParticipant {
 
 	private int yearMod4 = 0;
-	
-	private boolean democratElected=true;
-	
-	private long internalEmissionsTarget=(long) (carbonOutput*0.95);
+	private boolean democratElected; 			// chosen at random on class instantiation
+	private long AbsolutionReductionTarget; 	// Units in metric tonnes C02
+												// Can be positive or negative
+	private long IntensityReductionTarget; 	// Units percentage (%)
+	private long IntensityRatio;				// Units tonnes / million $
 
 	public USAgent(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
 			double GDPRate, long availableToSpend, long emissionsTarget, long carbonOffset,
@@ -26,6 +27,8 @@ public class USAgent extends NonParticipant {
 		super(id, name, ISO, landArea, arableLandArea, GDP,
 				GDPRate, availableToSpend, emissionsTarget, carbonOffset,
 				energyOutput, carbonOutput);
+		SetInitialPoliticalParty();
+		SetInitialIntensityRatio();
 		// TODO Auto-generated constructor stub
 	}
 	
@@ -37,46 +40,82 @@ public class USAgent extends NonParticipant {
 			election();
 		}
 		if (democratElected) {
-			internalEmissionsTarget = (long) (carbonOutput*0.95);
+			AbsolutionReductionTarget = (long) (carbonOutput*0.95);
 		}
 		else {
-			internalEmissionsTarget = carbonOutput;
+			AbsolutionReductionTarget = carbonOutput;
 		}
 	}
 	
 	@Override
+	/*
+	 * (non-Javadoc)
+	 * @see uk.ac.ic.kyoto.countries.AbstractCountry#YearlyFunction()
+	 * Called by execute() every year.
+	 */
 	public void YearlyFunction() {
-		try {
-			TimeService timeService = getEnvironmentService(TimeService.class);
-			if (timeService.getCurrentYear() % 4 == 0) {
-				election();
-			}
-		} catch (UnavailableServiceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		/*
+		 * Function is executed at the end of every year. 
+		 */
+		if(IsElectionYear) {
+			HoldElection(); // will set democratElected to either true or false
 		}
+		SetEmissionsTarget();
 		if (democratElected) {
-			internalEmissionsTarget = (long) (carbonOutput*0.95);
+			AbsolutionReductionTarget = (long) (carbonOutput*0.95);
 		}
 		else {
-			internalEmissionsTarget = carbonOutput;
+			AbsolutionReductionTarget = carbonOutput;
 		}
 	}
 	
 	@Override
+	/*
+	 * (non-Javadoc)
+	 * @see uk.ac.ic.kyoto.countries.AbstractCountry#SessionFunction()
+	 * Called by execute every session.
+	 * Notes:
+	 * Carbon offsets are wiped at the beginning of each session. 
+	 */ 
 	public void SessionFunction() {
 		if (carbonOutput <= emissionsTarget) {
 			// Consider joining Kyoto here
 		}
 	}
 	
+	/*
+	 * Sets the emissions target for the year after taking into account various factors. 
+	 * Variable will hold an absolute value, but the agent itself will be targeting an
+	 * intensity ratio. 
+	 */
+	public void SetEmissionsTarget() {
+		
+	}
+	/*
+	 * Functions returns true if it is an election year, false otherwise. 
+	 */
+	public boolean IsElectionYear() {
+		try {
+			TimeService timeService = getEnvironmentService(TimeService.class);
+			if (timeService.getCurrentYear() % 4 == 0) {
+				return(true);
+			}
+		} 
+		catch (UnavailableServiceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return(false);
+	}
+		
 	/* US state goal is to achieve a specified ratio of economic growth to carbon output. 
+	 * Bush administration committed to reduce "greenhouse gas intensity” (ratio of emissions to economic output) of the U.S. economy by 18% over the next 10 years.
+	 * Units of TonsCO2/Million$ GDP
 	 * Politics of the US affect the current attitude toward carbon reduction. 
 	 * Democrats are willing to accept a lower ratio, republicans a higher.
 	 * General trend over time is for a lowering of the target ratio 
 	 * 	-> must be a limit to how low this can go
 	 * 	-> this will depend on what normal values of GDP growth turn out to be in the function. 
-	 * Every 4 years an election is held.
 	 * Only have two parties, democrats or republicans. 
 	 * Winner of each election is decided by a function of economic performance of the past four years and a certain amount of randomness. 
 	 * Republican parties will target whatever the previous term's ratio was. 
@@ -92,8 +131,26 @@ public class USAgent extends NonParticipant {
 	 *  Check current party
 	 *  	-> is resultant ratio  
 	 */
+	private void HoldElection() {		
+		// Local variables
+		double DemocratCampaignTarget;
+		
+		// Choose democrat next election period target intensity ratio reduction. Remember that
+		// this target will be translated into an absolute metric value, thus higher values result
+		// in a greater reduction. 		
+		DemocratCampaignTarget = this.IntensityReductionTarget + Random.randomDouble(5);
+		
+		if(this.GDPRate		
+	}
 	
-	private void election() {
+	private double CalculateTargetRatio(){
+		
+		return(result);
+	}
+	/*
+	 * This function only called when country is instantiated. 
+	 */
+	private void SetInitialPoliticalParty() {
 		int rand = Random.randomInt(100);
 		if (rand < 50) {
 			democratElected = true;
@@ -103,12 +160,30 @@ public class USAgent extends NonParticipant {
 		}
 	}
 	
+	/*
+	 * Called on agent object instantiation. 
+	 */
+	private void SetInitialIntensityRatio() {
+		CalculateIntensityRatio();
+	}
+	/*
+	 * Calculation based on the currently held values. 
+	 */
+	private void CalculateIntensityRatio() {
+		this.IntensityRatio = (long) (this.GDP / this.carbonOutput); // can remove the casting if AbstractCountry standardises types. 
+	}
+	
 	@Override
 	public void initialiseCountry() {
 		
 	}
 	
 	@Override
+	/*
+	 * (non-Javadoc)
+	 * @see uk.ac.ic.kyoto.countries.AbstractCountry#processInput(uk.ac.imperial.presage2.core.messaging.Input)
+	 * Called by execute when input objects are waiting on your agent. 
+	 */
 	protected void processInput(uk.ac.imperial.presage2.core.messaging.Input input) {
 		
 	};

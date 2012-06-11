@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.log4j.Logger;
+
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.monitor.Monitor;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
@@ -27,14 +29,14 @@ public abstract class AbstractCountry extends AbstractParticipant {
     //================================================================================
 	
 	final protected String 		ISO;		//ISO 3166-1 alpha-3
+	private 		UUID 		id;
 	
-	// TODO Change visibility of fields
 	/*
 	 * These variables are related to land area for
 	 * dealing with carbon absorption prices
 	 */
 	final protected double 		landArea;
-	protected 		double 		arableLandArea;
+	protected 		  double 		arableLandArea;
 	
 	/*
 	 * These variables are related to carbon emissions and 
@@ -58,7 +60,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	ParticipantCarbonReportingService reportingService; // TODO add visibility
 	Monitor monitor;
-	TimeService timeService;
 	
 	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
 	
@@ -68,30 +69,37 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	protected CarbonReductionHandler 	carbonReductionHandler;
 	protected CarbonAbsorptionHandler 	carbonAbsorptionHandler;
 	protected EnergyUsageHandler		energyUsageHandler;
+
+	protected Logger logger;
 	
 	//================================================================================
     // Constructors and Initializers
     //================================================================================
 	
 	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
-					double GDPRate, long emissionsTarget, long energyOutput, long carbonOutput) {
+					double GDPRate, long availableToSpend, long emissionsTarget, long carbonOffset,
+					long energyOutput, long carbonOutput) {
 
 		//TODO Validate parameters
 		
 		super(id, name);
 		
+		
+		this.id = id;
 		this.landArea = landArea;
 		this.ISO = ISO;
 		this.arableLandArea = arableLandArea;
 		this.GDP = GDP;
 		this.GDPRate = GDPRate;
 		this.emissionsTarget = emissionsTarget;
-		this.carbonOffset = 0;
-		this.availableToSpend = 0;
+		this.carbonOffset = carbonOffset;
+		this.availableToSpend = availableToSpend;
 		this.carbonOutput = carbonOutput;
 		this.carbonEmissionReports = new HashMap<Integer, Long>();
 		this.energyOutput = energyOutput;
 		
+		// Create an instance of a logger
+		logger = Logger.getLogger(name); // can we do it in constructor?
 	}
 	
 	@Override
@@ -100,17 +108,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		
 		// Add the country to the monitor service
 		try {
-			monitor = getEnvironmentService(Monitor.class);
-			monitor.addMemberState(this);
+			this.monitor = this.getEnvironmentService(Monitor.class);
+			this.monitor.addMemberState(this);
 		} catch (UnavailableServiceException e1) {
 			System.out.println("Unable to reach monitor service.");
-			e1.printStackTrace();
-		}
-		// Initialize the Action Handlers DO THEY HAVE TO BE INSTANTIATED ALL THE TIME?
-		try {
-			timeService = getEnvironmentService(TimeService.class);
-		} catch (UnavailableServiceException e1) {
-			System.out.println("TimeService doesn't work");
 			e1.printStackTrace();
 		}
 		// Initialize the Action Handlers
@@ -125,10 +126,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			System.out.println("Unable to reach emission reporting service.");
 			e.printStackTrace();
 		}
-		
-		updateAvailableToSpend();
 		initialiseCountry();
 	}
+	
+	abstract protected void initialiseCountry();
 	
 	//================================================================================
     // Definitions of Abstract methods
@@ -141,8 +142,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	public abstract void SessionFunction();
 	
-	abstract protected void initialiseCountry();
-	
 	//================================================================================
     // Public methods
     //================================================================================
@@ -150,16 +149,24 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	@Override
 	final public void execute() {
 		super.execute();
-		if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
-	//		MonitorTax();
-	//		checkTargets(); //did the countries meet their targets?
-			updateGDPRate();
-			updateCarbonOffsetYearly();
-			YearlyFunction();
-		}
-		if (timeService.getCurrentYear() % timeService.getYearsInSession() == 0) {
-			resetCarbonOffset();
-			SessionFunction();
+		try {
+			// TODO make sure that the proper getters are used
+			TimeService timeService = getEnvironmentService(TimeService.class);
+			
+			if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
+				MonitorTax();
+				checkTargets(); //did the countries meet their targets?
+				updateGDPRate();
+				updateCarbonOffsetYearly();
+				YearlyFunction();
+			}
+			if (timeService.getCurrentYear() % timeService.getYearsInSession() == 0) {
+				resetCarbonOffset();
+				SessionFunction();
+			}
+		} catch (UnavailableServiceException e) {
+			logger.warn(e.getMessage(), e);
+			e.printStackTrace();
 		}
 		behaviour();
 	}
@@ -175,19 +182,29 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 */
 	public void MonitorTax() {
 		// Give a tax to Monitor agent for monitoring every year
-		this.monitor.applyTaxation(GDP*GameConst.MONITOR_COST_PERCENTAGE); // Take % of GDP for monitoring
+		this.monitor.taxForMonitor(GDP*GameConst.MONITOR_COST_PERCENTAGE); // Take % of GDP for monitoring
 		availableToSpend -= GDP*GameConst.MONITOR_COST_PERCENTAGE;
 	}
 
 	/**
-	 * Method used for monitoring. It is called by the Monitor
-	 * @return
-	 * Real Carbon Output of a country
+	 * Method used for monitoring. Is called randomly by the Monitor agent
+	 * @return 
 	 */
 	public final long getMonitored() {
+//		long latestReport = this.carbonEmissionReports.get(SimTime.get().intValue());
+//		long trueCarbon = this.carbonOutput;
+//		
+//		if (latestReport != trueCarbon) {
+//				//TODO - Insert sanctions here!
+//		}
 		return carbonOutput;
 	}
-		
+	
+	// This functionality may be taken over by the carbonOffsetUpdate
+	public void checkTargets() {
+		this.monitor.checkTargets();
+	}
+	
 	protected Set<ParticipantSharedState> getSharedState(){
 		Set<ParticipantSharedState> s = super.getSharedState();
 		s.add(ParticipantCarbonReportingService.createSharedState(this.getCarbonEmissionReports(), this.getID()));
@@ -219,7 +236,17 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 */
 	public Double reportCarbonEmission(Time t){
 		
-		// TODO implement a method to cheat
+		// This  is an example of how reporting your carbon output is structured
+		/*try{
+		Time t = SimTime.get();
+		AbstractCountry.this.environment.act(new SubmitCarbonEmissionReport(
+					AbstractCountry.this.reportCarbonEmission(t), t), 
+					AbstractCountry.this.getID(), 
+					AbstractCountry.this.authkey);
+		}catch(ActionHandlingException e){
+			logger.warn("Error trying to submit report");
+		}*/
+		
 		this.addToReports(t, carbonOutput);
 		return new Double(carbonOutput);
 	}
@@ -253,22 +280,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			System.out.println("Unable to reach economy service.");
 			e.printStackTrace();
 		}
-	}
-	
-	/**
-	 * Updates GDP using GDPRate for the past year
-	 * @author sc1109
-	 */
-	private final void updateGDP() {
-		GDP = GDP + GDP * GDPRate;
-	}
-	
-	/**
-	 * Calculate available to spend for the next year as an extra 1% of GDP
-	 * If we haven't spent something last year, it will be available this year too
-	 */
-	private final void updateAvailableToSpend() {
-		availableToSpend += GDP * GameConst.PERCENTAGE_OF_GDP;
 	}
 	
 	/**
@@ -329,8 +340,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.emissionsTarget = emissionsTarget;
 	}
 	
-	public void setAvailableToSpend(long availableToSpend) {
-		this.availableToSpend = availableToSpend;
+	public void setAvailableToSpend(UUID id, long availableToSpend) {
+		if (this.id==id) {
+			this.availableToSpend = availableToSpend;
+		}
 	}
 
 }
