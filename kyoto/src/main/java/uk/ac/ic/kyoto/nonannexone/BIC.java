@@ -1,9 +1,20 @@
 package uk.ac.ic.kyoto.nonannexone;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
+import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
-
+import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
+import uk.ac.ic.kyoto.services.TimeService;
 import java.util.UUID;
+
+/** author George
+ * 
+ *  
+ *  Updated file soon to be added that uses CarbonAbsorptionHandler,CarbonReductionHandler 
+ *  and EnergyUsageHandler that replaces the below strategy
+ *  
+ *  
+ *  **/
 
 public class BIC extends AbstractCountry {
 	
@@ -22,9 +33,7 @@ public class BIC extends AbstractCountry {
 	public BIC(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
 			double GDPRate, long emissionsTarget, long energyOutput, long carbonOutput)
 	{
-		super(id, name, ISO, landArea, arableLandArea, GDP,
-				GDPRate, emissionsTarget,
-				energyOutput, carbonOutput);
+		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, emissionsTarget, energyOutput, carbonOutput);
 
 }
 	
@@ -37,16 +46,28 @@ public class BIC extends AbstractCountry {
 
 	}
 	
+	@EventListener
+	public void TickFunction(EndOfTimeCycle e){
+		//TODO implement functions that are done every tick
+		//trades are done every tick ( CSM offers) 
+		
+	}
+	
 	@Override
 	public void YearlyFunction() {
-		// TODO Auto-generated method stub
+		// TODO implement
+		//the functions that are implemented every year
+				//1)GDP growth
+				//2)Grow GDP
+				//3)Calculate availabletoSpend
+				//4)Recalculate carbonOffset
 		
 	}
 
 	@Override
 	public void SessionFunction() {
-		// TODO Auto-generated method stub
-		
+		// TODO implement 
+		// carbonAbsorption to carbonOffset
 	}
 
 	
@@ -66,16 +87,16 @@ public class BIC extends AbstractCountry {
 	
 	//General functions
 	
-	//Check if the available area is (safe=S,on the limit = L,unsafe=U)  in order to choose decision accordingly for accepting to sell credits or plant trees for own sake.
-	private char currentAvailableArea(){
-		if (this.getArableLandArea() > this.getLandArea()/16)
-			return 'S';
-		else if ((this.getArableLandArea() == this.getLandArea()/16))
-			return 'L';
-		else if (((this.getArableLandArea() < this.getLandArea()/16)))
-			return 'U';
-		return 0;
+	//Check available area  in order to choose decision accordingly for accepting to sell credits or plant trees for own sake.
+	private String currentAvailableArea(){
 		
+		if (this.getArableLandArea() > this.getLandArea()/16)
+			return "Safe";
+		else if ((this.getArableLandArea() == this.getLandArea()/16))
+			return "Limit";
+		else if (this.getArableLandArea() < this.getLandArea()/16)
+			return "Danger";
+		return "";		
 	}
 	
 	
@@ -134,8 +155,8 @@ public class BIC extends AbstractCountry {
 				tree_planting(); // more carbonOutput than required, try reducing it by planting forests (reduces arableLandArea)
 		}
 		
-		//.......................................trading................................................
-		//basically search for potential investors in our lands
+		//.......................................trading.CSM...............................................
+		//basically search for potential investors in our lands through clean development mechanism (acquire cash!)
 		private void listen_to_offers(){
 			//to be implemented
 		}
@@ -155,7 +176,7 @@ public class BIC extends AbstractCountry {
 		
 		private void tree_planting()
 		{
-			if (currentAvailableArea() == 'S') //safe to plant
+			if (currentAvailableArea() == "Safe") //safe to plant
 			{
 				tree_area = tree_area + 1;
 				availableToSpend = availableToSpend - Country_constants.tree_cost;
