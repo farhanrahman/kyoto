@@ -70,6 +70,29 @@ public class USAgent extends NonParticipant {
 		}
 	}
 	
+	/* US state goal is to achieve a specified ratio of economic growth to carbon output. 
+	 * Politics of the US affect the current attitude toward carbon reduction. 
+	 * Democrats are willing to accept a lower ratio, republicans a higher.
+	 * General trend over time is for a lowering of the target ratio 
+	 * 	-> must be a limit to how low this can go
+	 * 	-> this will depend on what normal values of GDP growth turn out to be in the function. 
+	 * Every 4 years an election is held.
+	 * Only have two parties, democrats or republicans. 
+	 * Winner of each election is decided by a function of economic performance of the past four years and a certain amount of randomness. 
+	 * Republican parties will target whatever the previous term's ratio was. 
+	 * Democrats will try to lower each term. 
+	 * 	-> during each election democrats will campaign to lower by a certain amount. 
+	 * 	-> if previous session economic performance was poor - higher value will improve election chances. 
+	 * 		-> why? poor performance governments will promise 'green jobs' etc and increase investment. 
+	 *  -> else if performance was good - higher value will lower election chances 
+	 *  	-> why? opposition party will frame it as unnecessary expenditure. 
+	 *  
+	 *  Rough flow of execution:
+	 *  Calculate resultant ratio from any action.
+	 *  Check current party
+	 *  	-> is resultant ratio  
+	 */
+	
 	private void election() {
 		int rand = Random.randomInt(100);
 		if (rand < 50) {
