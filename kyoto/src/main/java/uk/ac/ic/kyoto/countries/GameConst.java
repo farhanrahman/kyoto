@@ -33,21 +33,21 @@ public final class GameConst {
 	/**
 	 * The price of reducing carbon reduction by one unit when we have 100% dirty industry
 	 */
-	public static long CARBON_REDUCTION_OFFSET = 1;
+	public static float CARBON_REDUCTION_OFFSET = 1;
 	/**
 	 * Coefficient to calculate the cost of carbon reduction
 	 */
-	public static long CARBON_REDUCTION_COEFF = 1;
+	public static float CARBON_REDUCTION_COEFF = 1;
 	
 	/**
 	 * Coefficient to calculate the cost of carbon absorption
 	 */
-	public static long CARBON_ABSORPTION_COEFF = 1;
+	public static float CARBON_ABSORPTION_COEFF = 1;
 	
 	/**
 	 * Size of a block of arable land
 	 */
-	public static long FOREST_BLOCK_SIZE = 100;
+	public static float FOREST_BLOCK_SIZE = 100;
 	
 	/**
 	 * Amount of carbon (in tons) that you offset with a single unit of forest PER YEAR
