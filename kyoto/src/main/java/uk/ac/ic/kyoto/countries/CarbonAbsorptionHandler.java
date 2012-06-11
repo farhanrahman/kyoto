@@ -25,7 +25,7 @@ public final class CarbonAbsorptionHandler {
 	 * 
 	 * @param carbonOffset
 	 */
-	public long getCost(long carbonOffset) {
+	public long getCost(long carbonOffset) throws Exception {
 		double neededLand;
 		long noBlocks;
 		long totalCost;
@@ -43,8 +43,7 @@ public final class CarbonAbsorptionHandler {
 			}
 		}
 		catch (Exception e) {
-			//country.logger.warn("Problem with calculating the cost of investment: " + e);
-			totalCost = Long.MAX_VALUE; // This is to prevent country actually investing for free in case of error
+			throw new Exception("getCost function error");
 		}
 		
 		return totalCost;
@@ -56,7 +55,7 @@ public final class CarbonAbsorptionHandler {
 	 * 
 	 * @param investment
 	 */
-	public long getCarbonAbsorption(double investment) {
+	public long getCarbonAbsorption(double investment) throws Exception {
 		long totalCost;
 		double tempArableLandArea;
 		long carbonAbsorption;
@@ -73,8 +72,7 @@ public final class CarbonAbsorptionHandler {
 			carbonAbsorption = (long) (GameConst.FOREST_CARBON_ABSORPTION * (country.arableLandArea-tempArableLandArea) );
 		}
 		catch (Exception e) {
-			//country.logger.warn("Problem with calculating absorption for given investment: " + e);
-			carbonAbsorption = 0;
+			throw new Exception("getCarbonAbsorption function error");
 		}
 		
 		return carbonAbsorption;
@@ -86,7 +84,7 @@ public final class CarbonAbsorptionHandler {
 	 * 
 	 * @param landArea
 	 */
-	private long getBlockCost(double landArea) {
+	private long getBlockCost(double landArea) throws Exception {
 		long blockCost;
 		
 		try {
@@ -94,13 +92,11 @@ public final class CarbonAbsorptionHandler {
 				blockCost = (long) (GameConst.CARBON_ABSORPTION_COEFF * GameConst.FOREST_BLOCK_SIZE / landArea);
 			}
 			else {
-				//country.logger.warn("Trying to find a cost of a block of area for non-positive area left");
-				blockCost = Long.MAX_VALUE;
+				throw new Exception("Trying to find a cost of a block of area for non-positive area left");
 			}
 		}
 		catch (Exception e) {
-			//country.logger.warn("Problem with calculating cost of forest block: " + e);
-			blockCost = Long.MAX_VALUE;
+			throw new Exception("getBlockCost function error");
 		}
 		
 		return blockCost;
@@ -141,7 +137,7 @@ public final class CarbonAbsorptionHandler {
 			}
 		}
 		catch (Exception e) {
-			//country.logger.warn("Problem with investing in carbon absorption: " + e);
+			throw new Exception("invest function error");
 		}
 	}
 }
