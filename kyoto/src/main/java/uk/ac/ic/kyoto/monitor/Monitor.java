@@ -177,7 +177,7 @@ public class Monitor extends EnvironmentService {
 		
 		// Deduct the cash from the country that has cheated
 		// newCash = oldCash - GDP * cash_penalty
-		sanctionee.setAvailableToSpend( (long) (sanctionee.getAvailableToSpend()-sanctionee.getGDP()*(sinCount-1)*cash_penalty));
+		sanctionee.setAvailableToSpend(Math.round((sanctionee.getAvailableToSpend()-sanctionee.getGDP()*(sinCount-1)*cash_penalty)));
 	}
 	
 	/**
