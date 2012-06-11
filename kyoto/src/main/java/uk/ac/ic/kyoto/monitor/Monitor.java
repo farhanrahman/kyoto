@@ -143,6 +143,7 @@ public class Monitor extends EnvironmentService {
 			while (monitoredCountries.contains(pickedCountry) );
 			
 			// Monitor the country
+			cash -= GameConst.MONITORING_PRICE;
 			long realCarbonOutput = pickedCountry.getMonitored();
 					
 			// Note that the country was monitored
