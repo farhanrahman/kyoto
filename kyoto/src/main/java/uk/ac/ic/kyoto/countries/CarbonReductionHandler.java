@@ -56,7 +56,7 @@ public final class CarbonReductionHandler{
 							* cleanIndustryChange);
 		}
 		catch (Exception e) {
-			throw new Exception("getCost function error");
+			throw new Exception("getCost function error: " + e);
 		}
 		
 		return cost;
@@ -89,7 +89,7 @@ public final class CarbonReductionHandler{
 			carbonOutputChange = calculateCarbonOutput(cleanIndustryChange, country.energyOutput);
 		}
 		catch (Exception e) {
-			throw new Exception("getCarbonOutputChange function error");
+			throw new Exception("getCarbonOutputChange function error: " + e);
 		}
 		
 		return carbonOutputChange;
@@ -124,7 +124,7 @@ public final class CarbonReductionHandler{
 			}
 		}
 		catch (Exception e) {
-			throw new Exception("invest function error");
+			throw new Exception("invest function error: " + e);
 		}
 		
 	}
@@ -143,11 +143,11 @@ public final class CarbonReductionHandler{
 			if (carbonOutput <= energyOutput)
 				cleanIndustry = 1 - ((double)carbonOutput / (double)energyOutput);
 			else {
-				throw new Exception("carbonOutput is greater than energyOutput");
+				throw new Exception("carbonOutput is greater than energyOutput: " + e);
 			}
 		}
 		catch (Exception e) {
-			throw new Exception("calculateCleanIndustryMeasure function error");
+			throw new Exception("calculateCleanIndustryMeasure function error " + e);
 		}
 		
 		return cleanIndustry;
@@ -160,7 +160,7 @@ public final class CarbonReductionHandler{
 			carbonOutput = (long) ((double)energyOutput * (1 - cleanIndustry));
 		}
 		catch (Exception e) {
-			throw new Exception("calculateCarbonOutput error");
+			throw new Exception("calculateCarbonOutput error: " + e);
 		}
 		
 		return carbonOutput;
