@@ -50,8 +50,7 @@ public final class EnergyUsageHandler {
 	 * Calculates the increase of carbon output
 	 * @param cost
 	 * The amount of money to be spent on carbon industry growth
-	 * @return
-	 * The increase of carbon output
+	 * @e increase of carbon output
 	 */
 	protected long calculateCarbonIndustryGrowth (long cost){
 		return (long) (cost / GameConst.CARBON_INVESTMENT_PRICE);
@@ -63,10 +62,10 @@ public final class EnergyUsageHandler {
 	 * @param carbon
 	 * The increase of the carbon output that will be achieved.
 	 */
-	protected void investInCarbonIndustry(long investment) throws Exception{
+	public final void investInCarbonIndustry(long investment) throws Exception{
 
 		long carbon = calculateCarbonIndustryGrowth(investment);
-		if (investment > this.country.availableToSpend) {
+		if (investment < this.country.availableToSpend) {
 			this.country.carbonOutput += carbon;
 			this.country.energyOutput += carbon;
 			this.country.availableToSpend -= investment;

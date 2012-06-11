@@ -43,7 +43,9 @@ public class Simulation extends InjectedSimulation {
 			.addParticipantEnvironmentService(Monitor.class)
 			.addParticipantEnvironmentService(ParticipantCarbonReportingService.class)
 			.addParticipantEnvironmentService(TimeService.class)
-			.addParticipantEnvironmentService(Economy.class));		
+			.addParticipantEnvironmentService(Economy.class)
+//			.addParticipantEnvironmentService(CarbonTarget.class)
+			);		
 	
 		modules.add(new RuleModule());
 			//.addClasspathDrlFile("foo.drl")

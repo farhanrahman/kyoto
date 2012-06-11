@@ -125,8 +125,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			System.out.println("Unable to reach emission reporting service.");
 			e.printStackTrace();
 		}
-		
-		updateAvailableToSpend();
+	
 		initialiseCountry();
 	}
 	
@@ -151,7 +150,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	final public void execute() {
 		super.execute();
 		if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
-			System.out.println("CALLED BITCHES");
+			System.out.println(timeService.getCurrentTick() + " " + timeService.getTicksInYear());
 	//		MonitorTax();
 	//		checkTargets(); //did the countries meet their targets?
 			updateGDPRate();
@@ -262,7 +261,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * @author sc1109
 	 */
 	private final void updateGDP() {
-		GDP = GDP + GDP * GDPRate;
+		GDP += GDP * GDPRate;
 	}
 	
 	/**
