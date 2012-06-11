@@ -3,7 +3,10 @@ package uk.ac.ic.kyoto.market;
 import java.util.Random;
 import org.apache.log4j.Logger;
 
+import com.google.inject.Inject;
+
 import uk.ac.ic.kyoto.countries.GameConst;
+import uk.ac.imperial.presage2.core.environment.EnvironmentRegistrationRequest;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
 
@@ -13,8 +16,10 @@ import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
  */
 public class Economy extends EnvironmentService
 {
-	protected Economy(EnvironmentSharedStateAccess sharedState) {
+	@Inject
+	public Economy(EnvironmentSharedStateAccess sharedState) {
 		super(sharedState);
+		currentEconomyState=State.GROWTH;
 	}
 
 	public enum State {
@@ -30,6 +35,12 @@ public class Economy extends EnvironmentService
 	private final int growthNumberLimit = (int) (100 * GameConst.GROWTH_MARKET_CHANCE);
 	private final int stableNumberLimit = (int) (growthNumberLimit + 100 * GameConst.STABLE_MARKET_CHANCE);
 	private final int recessionNumberLimit = (int) (stableNumberLimit + 100 * GameConst.RECESSION_MARKET_CHANCE);
+	
+	@Override
+	public void registerParticipant(EnvironmentRegistrationRequest req) {
+		// TODO Auto-generated method stub
+		super.registerParticipant(req);
+	}
 	
 	/**
 	 * Function changes the State of Economy for a given year 

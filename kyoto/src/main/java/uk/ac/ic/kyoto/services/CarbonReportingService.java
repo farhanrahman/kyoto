@@ -24,7 +24,6 @@ public class CarbonReportingService extends EnvironmentService {
 	
 	public static String name = "Report";
 	
-	
 	@Inject
 	protected CarbonReportingService(EnvironmentSharedStateAccess sharedState) {
 		super(sharedState);

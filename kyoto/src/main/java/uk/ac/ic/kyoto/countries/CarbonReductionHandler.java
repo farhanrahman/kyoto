@@ -56,6 +56,7 @@ public final class CarbonReductionHandler{
 		catch (NotEnoughCarbonOutputException e) {
 			throw new NotEnoughCarbonOutputException();
 		}
+		System.out.println("Cost?" + cost);
 		return cost;
 	}
 	
@@ -67,7 +68,7 @@ public final class CarbonReductionHandler{
 	 * @return the change in carbon output from specified cost
 	 */
 	public final double getCarbonOutputChange(long cost) {
-		double carbonOutputChange;
+		double carbonOutputChange=0;
 
 		try {
 			// Calculate the clean industry rate before the investment
@@ -78,13 +79,16 @@ public final class CarbonReductionHandler{
 			double b = GameConst.CARBON_REDUCTION_COEFF * cleanIndustryBefore + GameConst.CARBON_REDUCTION_OFFSET;
 			double c = - cost;
 			QuadraticEquation equation = new QuadraticEquation(a, b, c);
+			System.out.println("Quadradtic roots a: "+equation.getRootOne()+" b: "+equation.getRootTwo());
 			
 			double cleanIndustryChange = Math.max(equation.getRootOne(), equation.getRootTwo() );
 			carbonOutputChange = calculateCarbonOutput(cleanIndustryChange, country.energyOutput);
 		}
 		catch (Exception e) {
-			carbonOutputChange = 0;
+			System.out.println("Carbon reduction has died");
+			e.printStackTrace();
 		}
+		System.out.println("CarbonOutputChange: " + carbonOutputChange);
 		return carbonOutputChange;
 	}
 		
@@ -122,10 +126,10 @@ public final class CarbonReductionHandler{
 	 * Calculates the clean industry rate for specified carbon output and energy output
 	 */
 	private double calculateCleanIndustryMeasure(long carbonOutput, long energyOutput) throws NotEnoughCarbonOutputException{
-		double cleanIndustry;
+		double cleanIndustry = 1;
 		try {
 			if (carbonOutput <= energyOutput)
-				cleanIndustry = 1 - (carbonOutput / energyOutput);
+				cleanIndustry = 1 - ((double)carbonOutput / (double)energyOutput);
 			else {
 				//country.logger.warn("It is impossible for carbonOutput to exceed energyOutput");
 				// Move error logging to country when it catches exception
@@ -134,14 +138,17 @@ public final class CarbonReductionHandler{
 		}
 		catch (ArithmeticException e) {
 			//country.logger.error("Specified energyOuput was 0: " + e);
-			cleanIndustry = 1;
+			System.out.println("Calculate clean industry measure error");
 		}
+		System.out.println("CleanIndustry: " + cleanIndustry);
 		return cleanIndustry;
 	}
 	
 	private long calculateCarbonOutput(double cleanIndustry, long energyOutput) {
 		long carbonOutput;
-		carbonOutput = (long) (energyOutput * (1 - cleanIndustry) ); // TODO implement exception handling
+		carbonOutput = (long) ((double)energyOutput * (1 - cleanIndustry) ); 
+		System.out.println("CarbonOutput: " + carbonOutput);
 		return carbonOutput;
+		// TODO implement exception handling
 	}
 }
