@@ -46,7 +46,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			long availiableToSpend, long emissionsTarget, long carbonOffset, long energyOutput, long carbonOutput)
 	{
 		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, emissionsTarget,
-				carbonOffset, energyOutput, energyOutput, energyOutput);
+				carbonOffset, energyOutput);
 		
 		this.internalPrice = Long.MAX_VALUE;
 		this.uncommittedTransactionsCosts = new ArrayList<Double>();
@@ -68,12 +68,23 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 */
 	@Override
 	protected void processInput(Input input) {
+		// TODO process input (if any)
 	}
 	
-
+	/**
+	 * Initialisation function
+	 */
+	@Override
+	protected void initialiseCountry() {
+		// TODO initialisation
+	}
+	
+	/**
+	 * Behaviour function
+	 */
 	@Override
 	protected void behaviour() {
-		
+		// TODO behaviour
 	}
 	
 	//================================================================================
@@ -129,11 +140,9 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 */
 	private void updateInternalPrice() {
 		internalPrice   = 	(long)
-							(
-							calculateMarketPrice() * 
-							calculateEndOfRoundFactor() * 
-							lastYearFactor
-							);
+							( calculateMarketPrice() * 
+							  calculateEndOfRoundFactor() * 
+							  lastYearFactor );
 	}
 	
 	/**
@@ -159,7 +168,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			marketPrice = (maximumCommittedPrice + minimumUncommittedPrice) / 2;
 		}
 		catch (Exception e) {
-			logger.warn("Problem calculating marketPrice: " + e);
+			logger.warn("Problem with calculating marketPrice: " + e);
 			marketPrice = 0;
 		}
 		
@@ -186,7 +195,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 									);
 		}
 		catch (Exception e) {
-			logger.warn("Problem calculating endOfRoundFactor: " + e);
+			logger.warn("Problem with calculating endOfRoundFactor: " + e);
 			endOfRoundFactor = 1;
 		}
 		return endOfRoundFactor;
@@ -282,7 +291,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			logger.info("Post-Communist Country " + this.getName() + " has insufficient land for carbon absorption");
 		}
 		catch (Exception e) {
-			logger.warn("Problem investing in carbon absorption: " + e);
+			logger.warn("Problem with investing in carbon absorption: " + e);
 		}
 	}
 	
@@ -317,7 +326,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			logger.info("Post-Communist Country " + this.getName() + " has insufficient carbon output for carbon reduction");
 		}
 		catch (Exception e) {
-			logger.warn("Problem investing in carbon reduction: " + e);
+			logger.warn("Problem with investing in carbon reduction: " + e);
 		}
 	}
 	
@@ -357,9 +366,9 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		try {
 			// Calculate new target based on three factors
 			newSellingTarget =	(long) 
-						( calculateAvailableCreditsFactor() *
-						  calculateFossilFuelsFactor() *
-						  calculateMarketFactor() );
+								( calculateAvailableCreditsFactor() *
+								  calculateFossilFuelsFactor() *
+								  calculateMarketFactor() );
 			
 			// Adjust the new target if out of possible range
 			if (newSellingTarget > carbonOffset) {
@@ -367,9 +376,10 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			}
 		}
 		catch (Exception e) {
-			logger.warn("Problem when calculating newTarget " + e);
+			logger.warn("Problem with calculating newTarget: " + e);
 			newSellingTarget = creditsToSellTarget;
 		}
+		
 		creditsToSellTarget = newSellingTarget;
 	}
 	
@@ -384,9 +394,10 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			availableCreditsFactor = carbonOffset * Constants.SELL_AMOUNT_COEFFICIENT;
 		}
 		catch (Exception e) {
-			logger.warn("Problem when calculating availableCreditsFactor " + e);
+			logger.warn("Problem with calculating availableCreditsFactor: " + e);
 			availableCreditsFactor = carbonOffset;
 		}
+		
 		return availableCreditsFactor;
 	}
 	
@@ -399,25 +410,25 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		
 		try {			
 			
-			// get current year from the Time service
+			// Get current year from the Time service
 			TimeService timeService = getEnvironmentService(TimeService.class);
 			int currentYear = timeService.getCurrentYear();
 			
-			// get the data from the FossilPrices Service
+			// Get the data from the FossilPrices Service
 			FossilPrices fossilPrices = getEnvironmentService(FossilPrices.class);
 			double newOilPrice = fossilPrices.getOilPrice(currentYear);
 			double oldOilPrice = fossilPrices.getOilPrice(currentYear - 1);
 			double newGasPrice = fossilPrices.getGasPrice(currentYear);
 			double oldGasPrice = fossilPrices.getGasPrice(currentYear - 1);
 			
-			// if the data is relevant, calculate the gradients and the coefficient
-			if ((newOilPrice != 0) && (oldOilPrice != 0) && (newGasPrice != 0) && (oldGasPrice != 0) ) {
+			// If values for this and previous year exist, calculate gradient and factor
+			if ((newOilPrice >= 0) && (oldOilPrice >= 0) && (newGasPrice >= 0) && (oldGasPrice >= 0) ) {
 				double oilGradient = (newOilPrice - oldOilPrice) / oldOilPrice;
 				double gasGradient = (newGasPrice - oldGasPrice) / oldGasPrice;
 				fossilFuelsFactor = Constants.FOSSIL_FUEL_PRICE_COEFFICIENT * (oilGradient + gasGradient) / 2;
 			}
 			
-			// if the data is irrelevant, coefficient becomes irrelevant.
+			// If no data exists, return default 1 value.
 			else
 				fossilFuelsFactor = 1;
 		}
@@ -426,9 +437,10 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			fossilFuelsFactor = 1;
 		}
 		catch (Exception e) {
-			logger.warn("Problem when calculating fossilFuelsFactor " + e);
+			logger.warn("Problem with calculating fossilFuelsFactor: " + e);
 			fossilFuelsFactor = 1;
 		}
+		
 		return fossilFuelsFactor;
 	}
 	
@@ -454,9 +466,10 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			}
 		}
 		catch (Exception e) {
-			logger.warn("Problem when calculating marketFactor " + e);
+			logger.warn("Problem with calculating marketFactor: " + e);
 			marketFactor = 1;
 		}
+		
 		return marketFactor;
 	}
 	
@@ -491,7 +504,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			lastYearFactor = 1 + Constants.LAST_YEAR_FACTOR_SLOPE * (lastYearPercentageSold - Constants.LAST_YEAR_FACTOR_OFFSET);
 		}
 		catch (Exception e) {
-			logger.warn("Problem when calculating lastYearFactor " + e);
+			logger.warn("Problem with calculating lastYearFactor: " + e);
 			lastYearFactor = 1;
 		}
 	}

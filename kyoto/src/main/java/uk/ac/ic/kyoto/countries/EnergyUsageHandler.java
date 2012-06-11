@@ -63,13 +63,13 @@ public final class EnergyUsageHandler {
 	 * @param carbon
 	 * The increase of the carbon output that will be achieved.
 	 */
-	protected void investInCarbonIndustry(long carbon) throws Exception{
+	protected void investInCarbonIndustry(long investment) throws Exception{
 
-		long cost = calculateCostOfInvestingInCarbonIndustry(carbon);
-		if (cost > this.country.availableToSpend) {
+		long carbon = calculateCarbonIndustryGrowth(investment);
+		if (investment > this.country.availableToSpend) {
 			this.country.carbonOutput += carbon;
 			this.country.energyOutput += carbon;
-			this.country.availableToSpend -= cost;
+			this.country.availableToSpend -= investment;
 		}
 		else {
 			throw new NotEnoughCashException();

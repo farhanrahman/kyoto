@@ -1,12 +1,6 @@
 package uk.ac.ic.kyoto.market;
 
-import static org.junit.Assert.*;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
@@ -22,7 +16,7 @@ public class EconomyTest {
 
 	@Test
 	public void testEconomy() {
-		
+		fail("How do I pass a sharedState to my Economy object?");
 	}
 	
 }

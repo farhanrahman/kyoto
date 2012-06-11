@@ -9,10 +9,9 @@ public class NonAnnexOne extends AbstractCountry {
 
 
 	public NonAnnexOne(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
-			double GDPRate, long availableToSpend, long emissionsTarget, long carbonOffset,
-			long energyOutput, long carbonOutput){
+			double GDPRate, long emissionsTarget, long energyOutput, long carbonOutput){
 		super(id, name, ISO, landArea, arableLandArea, GDP,
-				GDPRate, availableToSpend, emissionsTarget, carbonOffset,
+				GDPRate, emissionsTarget,
 				energyOutput, carbonOutput);
 	}
 
@@ -20,13 +19,6 @@ public class NonAnnexOne extends AbstractCountry {
 	protected void processInput(Input in) {
 		// TODO Auto-generated method stub
 
-	}
-	
-	@Override
-	public void execute() {
-		// TODO Auto-generated method stub - what does this mean?
-		
-		//write some behaviors pseudocode
 	}
 
 	@Override
@@ -37,6 +29,18 @@ public class NonAnnexOne extends AbstractCountry {
 
 	@Override
 	public void SessionFunction() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void initialiseCountry() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void behaviour() {
 		// TODO Auto-generated method stub
 		
 	}
