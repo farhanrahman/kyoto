@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.log4j.Logger;
+
 import uk.ac.ic.kyoto.trade.Offer;
 import uk.ac.ic.kyoto.tradehistory.TradeHistory;
 import uk.ac.ic.kyoto.tokengen.SingletonProvider;
@@ -23,6 +25,7 @@ import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
  */
 public class SimulationAgent extends AbstractParticipant {
 
+	Logger logger = Logger.getLogger(SimulationAgent.class);
 	private TradeHistory tradeHistory = SingletonProvider.getTradeHistory();
 	private Map<Integer, Map<UUID,Offer>> session = null;
 	private final static String key = "TRADE_HISTORY";
@@ -56,13 +59,16 @@ public class SimulationAgent extends AbstractParticipant {
 	@Override
 	public void execute(){
 		Time currentTime = SimTime.get();
+		if(tradeHistory == null){
+			logger.warn("HUGE PROBLEM!!");
+		}
 		Map<UUID,Offer> currentTrade = tradeHistory.getHistoryForTime(currentTime);
 		if(currentTrade != null){
 			if(this.session == null){
 				session = new HashMap<Integer,Map<UUID,Offer>>();
 			}
 			
-			session.put(currentTime.intValue(), currentTrade);
+			//session.put(currentTime.intValue(), currentTrade);
 		}
 		
 		this.persist.setProperty(SimulationAgent.key, session.toString());

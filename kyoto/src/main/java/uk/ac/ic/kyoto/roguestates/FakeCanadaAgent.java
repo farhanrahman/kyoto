@@ -15,22 +15,22 @@ import uk.ac.imperial.presage2.core.network.MulticastMessage;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
 import uk.ac.imperial.presage2.util.fsm.FSMException;
+import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
-public class FakeCanadaAgent extends NonParticipant {
+public class FakeCanadaAgent extends AbstractParticipant {
 
 	Logger logger = Logger.getLogger(FakeCanadaAgent.class);
 	
+	private TradeProtocol tradeProtocol;
+	
+	private int carbonOutput;
+	private int emissionsTarget;
+	private int carbonOffset;
+	
 	public FakeCanadaAgent(UUID id, String name, String ISO){
-		super(id, name, ISO);
+		super(id, name);
 	}
 	
-	public FakeCanadaAgent(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
-			double GDPRate, long emissionsTarget, long energyOutput, long carbonOutput){
-		super(id, name, ISO, landArea, arableLandArea, GDP,
-				GDPRate, emissionsTarget,
-				energyOutput, carbonOutput);
-		// TODO Auto-generated constructor stub
-	}
 	
 	@Override
 	protected void processInput(Input in) {
@@ -65,20 +65,10 @@ public class FakeCanadaAgent extends NonParticipant {
 	}
 
 	@Override
-	public void YearlyFunction() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void SessionFunction() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void initialiseCountry() {
+	public void initialise() {
 		carbonOutput = 80;
+		emissionsTarget = 20;
+		carbonOffset = 10;
 		try {
 			tradeProtocol = new TradeProtocol(getID(), authkey, environment, network) {
 				@Override
@@ -99,9 +89,9 @@ public class FakeCanadaAgent extends NonParticipant {
 	private int counter = 0;
 
 	@Override
-	protected void behaviour() {
+	public void execute() {
 		this.tradeProtocol.incrementTime();
-		if(counter < 3){
+		if(counter < 3 && this.getName().equals("FakeCanada1")){
 			int quantity = 10;
 			int unitCost = 2;
 			Offer trade = new Offer(quantity, unitCost, TradeType.SELL);

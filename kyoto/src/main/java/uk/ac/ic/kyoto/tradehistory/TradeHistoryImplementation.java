@@ -25,7 +25,11 @@ public class TradeHistoryImplementation implements TradeHistory{
 	}
 
 	public Map<UUID,Offer> getHistoryForTime(Time simTime){
-		return new HashMap<UUID,Offer>(history.get(simTime.intValue()));
+		if(history.get(simTime.intValue()) == null){
+			return new HashMap<UUID,Offer>();
+		}else{
+			return new HashMap<UUID,Offer>(history.get(simTime.intValue()));
+		}
 	}
 	
 	public boolean tradeExists(UUID id){

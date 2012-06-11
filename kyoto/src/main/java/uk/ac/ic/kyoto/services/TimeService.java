@@ -1,5 +1,7 @@
 package uk.ac.ic.kyoto.services;
 
+import com.google.inject.Inject;
+
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
@@ -7,6 +9,7 @@ import uk.ac.imperial.presage2.core.event.Event;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 import uk.ac.imperial.presage2.core.simulator.Parameter;
+import uk.ac.imperial.presage2.core.simulator.SimTime;
 
 /** 
  * @author sc1109 & azyzio & Stuart
@@ -23,8 +26,8 @@ public class TimeService extends EnvironmentService {
 	@Parameter(name="yearsInSession")
 	int yearsInSession;
 	
-	
-	protected TimeService(EnvironmentSharedStateAccess sharedState) {
+	@Inject
+	public TimeService(EnvironmentSharedStateAccess sharedState) {
 		super(sharedState);
 	}
 	
