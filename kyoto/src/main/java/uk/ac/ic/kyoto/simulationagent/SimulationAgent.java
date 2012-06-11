@@ -69,10 +69,15 @@ public class SimulationAgent extends AbstractParticipant {
 			}
 			
 			session.put(currentTime.intValue(), currentTrade);
+			logger.info(session);
+			logger.info("log break");
 		}
-		logger.info(tradeHistory.getHistory());
+
+/*			TradeHistory tradeHistory = SingletonProvider.getTradeHistory();
+			Map<Integer,Map<UUID,Offer>> m = tradeHistory.getHistory();
+			logger.info(m);
+			logger.info("Test");*/
 //		this.persist.setProperty(SimulationAgent.key, session.toString());
-		logger.info("");
 	}
 
 }

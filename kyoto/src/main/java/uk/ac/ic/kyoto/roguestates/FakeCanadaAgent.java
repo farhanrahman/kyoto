@@ -1,13 +1,16 @@
 package uk.ac.ic.kyoto.roguestates;
 
+import java.util.Map;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
 
+import uk.ac.ic.kyoto.tokengen.SingletonProvider;
 import uk.ac.ic.kyoto.trade.Offer;
 import uk.ac.ic.kyoto.trade.OfferMessage;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.ic.kyoto.trade.TradeType;
+import uk.ac.ic.kyoto.tradehistory.TradeHistory;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.messaging.Performative;
 import uk.ac.imperial.presage2.core.network.Message;
@@ -75,10 +78,11 @@ public class FakeCanadaAgent extends AbstractParticipant {
 				@Override
 				protected boolean acceptExchange(NetworkAddress from,
 						Offer trade) {
-					if (carbonOutput - emissionsTarget + carbonOffset < 0) {
+					return true;
+					/*if (carbonOutput - emissionsTarget + carbonOffset < 0) {
 						return true;
 					}
-					return true;
+					return true;*/
 				}
 			};
 		} catch (FSMException e) {
@@ -93,7 +97,7 @@ public class FakeCanadaAgent extends AbstractParticipant {
 	public void execute() {
 		super.execute();
 		this.tradeProtocol.incrementTime();
-		if(counter < 3 && this.getName().equals("FakeCanada1")){
+		//if(counter < 7){
 			int quantity = 10;
 			int unitCost = 2;
 			Offer trade = new Offer(quantity, unitCost, TradeType.SELL);
@@ -108,6 +112,6 @@ public class FakeCanadaAgent extends AbstractParticipant {
 			//TODO might need to acquire Trade ID here
 					);
 		counter++;
-		}
+		//}
 	}
 }
