@@ -8,10 +8,8 @@ import org.apache.log4j.Logger;
 
 import com.mongodb.MongoException.Network;
 
-import uk.ac.ic.kyoto.services.TimeService.EndOfSessionCycle;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.ic.kyoto.trade.TradeType;
-import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.util.fsm.FSMException;
@@ -46,7 +44,7 @@ public class CanadaAgent extends NonParticipant {
 	}
 	
 	@Override
-	public void initialise() {
+	public void initialiseCountry() {
 		super.initialise();
 		carbonOutput = 80;
 		try {
@@ -61,14 +59,13 @@ public class CanadaAgent extends NonParticipant {
 				}
 			};
 		} catch (FSMException e) {
-			// TODO Auto-generated catch block
+			logger.warn(e.getMessage(), e);
 			e.printStackTrace();
 		}
 	}
 	
 	@Override
-	public void execute() {
-		super.execute();
+	public void behaviour() {
 		Set<NetworkAddress> nodes = network.getConnectedNodes();
 //		Iterator i = nodes.iterator();
 //		while (i.hasNext()) {

@@ -14,6 +14,12 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
+/**
+ * May no longer be needed. Consult Sam before deletion
+ * 
+ * @author sam
+ */
+@Deprecated
 @Singleton
 public class KnowledgeBaseService extends EnvironmentService {
 

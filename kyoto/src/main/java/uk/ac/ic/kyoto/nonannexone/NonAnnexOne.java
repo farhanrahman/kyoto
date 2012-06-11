@@ -29,4 +29,16 @@ public class NonAnnexOne extends AbstractCountry {
 		//write some behaviors pseudocode
 	}
 
+	@Override
+	public void YearlyFunction() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void SessionFunction() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

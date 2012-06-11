@@ -1,36 +1,41 @@
 package uk.ac.ic.kyoto.annex1sustain;
 
+import java.util.ArrayList;
 import java.util.UUID;
 import java.util.List;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
+import uk.ac.ic.kyoto.countries.NotEnoughCarbonOutputException;
+import uk.ac.ic.kyoto.countries.NotEnoughCashException;
+import uk.ac.ic.kyoto.countries.NotEnoughLandException;
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.market.FossilPrices;
-import uk.ac.ic.kyoto.services.TimeService.EndOfYearCycle;
+import uk.ac.ic.kyoto.services.TimeService;
+import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 
-import org.apache.log4j.Logger;
-
+/**
+ * 
+ * @author Adam, Piotr
+ */
 public class AbstractPostCommunistCountry extends AbstractCountry {
 	
+	
 	//================================================================================
-    // PrivateFields
+    // Private Fields
     //================================================================================
 	
-	protected long	 		internalPrice;
-	protected List<Double> 	uncommittedTransactionsCosts;
-	protected List<Double> 	committedTransactionsCosts;
-	protected long 			ticksToEndOfRound;
-	protected long 			creditsToSell;
-	protected long 			creditsToSellTarget;
-	protected double		lastYearFactor;
+	protected long	 		internalPrice;					// The price of a single carbon credit that we estimate we will be able to successfully sell at
+	protected List<Double> 	uncommittedTransactionsCosts;	// List of transactions and their prices that were advertised but not completed
+	protected List<Double> 	committedTransactionsCosts;		// List of transactions and their prices that were completed
+	protected long 			creditsToSellTarget;			// Total amount of credits we aim to sell in current year
+	protected long 			creditsToSell;					// Credits left for sale from the current sell target
+	protected long			absorptionInvestmentTarget;		// The amount (in carbon) of a single carbon absorption investment considered this tick  
+	protected long			reductionInvestmentTarget;		// The amount (in carbon) of a single carbon reduction investment considered this tick 
+	protected double		lastYearFactor;					// Coefficient reflecting the percentage of credit sales target that was met, adjusted by a constant
 	
-	// temporary variables
-	private Logger		logger;
-	protected long 			currentYear;
-	protected long 			availableCredits; // corresponds to carbon offset
 	
 	//================================================================================
     // Constructors
@@ -38,40 +43,53 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	
 	public AbstractPostCommunistCountry(UUID id, String name, String ISO,
 			double landArea, double arableLandArea, double GDP, double GDPRate,
-			long availiableToSpend, long emissionsTarget, long carbonOffset, long energyOutput)
+			long availiableToSpend, long emissionsTarget, long carbonOffset, long energyOutput, long carbonOutput)
 	{
 		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, emissionsTarget,
 				carbonOffset, energyOutput, energyOutput, energyOutput);
-		// TODO Initialize the fields
 		
-		// Initialize logger. Should be done in AbstractCountry
-		logger = Logger.getLogger(AbstractPostCommunistCountry.class);
-
+		this.internalPrice = Long.MAX_VALUE;
+		this.uncommittedTransactionsCosts = new ArrayList<Double>();
+		this.committedTransactionsCosts = new ArrayList<Double>();
+		this.creditsToSell = 0;
+		this.creditsToSellTarget = 0;
+		this.absorptionInvestmentTarget = Constants.MINIMAL_INVESTMENT;
+		this.reductionInvestmentTarget = Constants.MINIMAL_INVESTMENT;
+		this.lastYearFactor = 1;	
 	}
 	
-	//================================================================================
-    // Overridden functions
-    //================================================================================
-	
-	@Override
-	protected void processInput(Input input) {
-		// TODO Auto-generated method stub
-	}
-
 	
 	//================================================================================
-    // Public methods to update data
+    // Input function
     //================================================================================
 	
 	/**
-	 * Updates the internal data that is supposed to change every tick
-	 *  
+	 * Function processing input (what is this?)
+	 */
+	@Override
+	protected void processInput(Input input) {
+	}
+	
+
+	@Override
+	protected void behaviour() {
+		
+	}
+	
+	//================================================================================
+    // Periodic functions
+    //================================================================================
+	
+	/**
+	 * Function called at the end of each tick.
+	 * - Updates the internal variables.
+	 * - Decides on and initiates investments
+	 * 
 	 * @param e
 	 * The event that is called every simulation tick
 	 */
 	@EventListener
-	public void updateTickData(EndOfTimeCycle e) {
-		updateCounter();
+	public void TickFunction(EndOfTimeCycle e) {
 		updateUncommittedTransactions();
 		updateCommittedTransactions();
 		updateInternalPrice();
@@ -80,18 +98,35 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	}
 	
 	/**
-	 * Called at the beginning of each year.
+	 * Function called at the end of each year.
+	 * - Updates the internal variables.
 	 */
-	public void updateYearlyData(EndOfYearCycle e) {
+	@Override
+	public void YearlyFunction() {
 		calculateLastYearFactor();
 		calculateNewSellingTarget();
 		logger.info("Internal Yearly Data of Post-Communist Country " + this.getName() + " was updated");
 	}
 	
+	/**
+	 * Function called at the end of each session.
+	 */
+	@Override
+	public void SessionFunction() {
+		// TODO implement
+	}
+	
+	
 	//================================================================================
-    // Private functions called every tick
+    // Tick update function
     //================================================================================
 	
+	/**
+	 * Calculates a new internal price, which is a multiplication of three factors:
+	 * - average market price of credits
+	 * - time until the end of session
+	 * - meeting the sales target from previous year
+	 */
 	private void updateInternalPrice() {
 		internalPrice   = 	(long)
 							(
@@ -100,7 +135,10 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 							lastYearFactor
 							);
 	}
-
+	
+	/**
+	 * Calculates market price basing on the internal log of successful and unsuccessful transactions.
+	 */
 	private double calculateMarketPrice() {
 		double marketPrice;
 		double maximumCommittedPrice = 0;
@@ -128,9 +166,17 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		return marketPrice;
 	}
 	
+	/**
+	 * Calculates the factor representing how far we are in the session.
+	 * The less ticks till the end, the cheaper we sell.
+	 */
 	private double calculateEndOfRoundFactor() {
 		double endOfRoundFactor = 1;
 		try {
+			// get ticksToEndOfRound from Time service
+			TimeService timeService = getEnvironmentService(TimeService.class);
+			int ticksToEndOfRound = timeService.getTicksInYear() - timeService.getCurrentTick();
+			
 			if(ticksToEndOfRound < Constants.END_OF_ROUND_MINIMUM_NUMBER_OF_TICKS)
 				endOfRoundFactor = 	Constants.END_OF_ROUND_FACTOR_SLOPE *
 									(
@@ -146,57 +192,186 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		return endOfRoundFactor;
 	}
 	
+	/**
+	 * Stores unsuccessful transactions from last X ticks in a list.
+	 */
 	private void updateUncommittedTransactions() {
 		// TODO implement
 	}
 	
+	/**
+	 * Stores successful transactions from last X ticks in a list.
+	 */
 	private void updateCommittedTransactions() {
 		// TODO implement
 	}
 	
-	// temporary function
-	private void updateCounter() {
-		ticksToEndOfRound--;
+	
+	//================================================================================
+    // Investment functions
+    //================================================================================
+	
+	/**
+	 * Increases the new carbon absorption investment target. Adjusts it if out of limits.
+	 */
+	private void increaseAbsorptionInvestmentTarget() {
+		absorptionInvestmentTarget = (long) (absorptionInvestmentTarget * Constants.INVESTMENT_SCALING);
+		if (absorptionInvestmentTarget > Constants.MAXIMAL_INVESTMENT) {
+			absorptionInvestmentTarget = Constants.MAXIMAL_INVESTMENT;
+		}
 	}
 	
+	/**
+	 * Decreases the new carbon absorption investment target. Adjusts it if out of limits.
+	 */
+	private void decreaseAbsorptionInvestmentTarget() {
+		absorptionInvestmentTarget = (long) (absorptionInvestmentTarget / Constants.INVESTMENT_SCALING);
+		if (absorptionInvestmentTarget < Constants.MINIMAL_INVESTMENT) {
+			absorptionInvestmentTarget = Constants.MINIMAL_INVESTMENT;
+		}
+	}
+	
+	/**
+	 * Increases the new carbon reduction investment target. Adjusts it if out of limits.
+	 */
+	private void increaseReductionInvestmentTarget() {
+		reductionInvestmentTarget = (long) (reductionInvestmentTarget * Constants.INVESTMENT_SCALING);
+		if (reductionInvestmentTarget > Constants.MAXIMAL_INVESTMENT) {
+			reductionInvestmentTarget = Constants.MAXIMAL_INVESTMENT;
+		}
+	}
+	
+	/**
+	 * Decreases the new carbon reduction investment target. Adjusts it if out of limits.
+	 */
+	private void decreaseReductionInvestmentTarget() {
+		reductionInvestmentTarget = (long) (reductionInvestmentTarget / Constants.INVESTMENT_SCALING);
+		if (reductionInvestmentTarget < Constants.MINIMAL_INVESTMENT) {
+			reductionInvestmentTarget = Constants.MINIMAL_INVESTMENT;
+		}
+	}
+	
+	/**
+	 * Calculates if potential profit made by selling acquired credits outweighs the cost of investment in carbon absorption.
+	 * If so, tries to invest. Increases the next investment target on success, decreases on failure.
+	 */
 	private void carbonAbsorptionInvestment () {
-		long investmentCost = carbonAbsorptionHandler.getCost(Constants.INVESTMENT_AMOUNT);
-		long potentialProfit = Constants.INVESTMENT_AMOUNT * internalPrice;
+		long investmentCost;
+		long potentialProfit;
 		
-		if (potentialProfit > investmentCost) {
-			carbonAbsorptionHandler.invest(investmentCost);
-			logger.info("Post-Communist Country " + this.getName() + " invested " + String.valueOf(investmentCost) + " in carbon absorption");
-			// We don't check if we have enough money and land, as there are no functions for it.
-			//  While the former is checked by the handler function, the latter is not - should be implemented.
-			//  Should we react if we don't have enough of either?
+		try {
+			investmentCost = carbonAbsorptionHandler.getCost(absorptionInvestmentTarget);
+			potentialProfit = absorptionInvestmentTarget * internalPrice;
+			
+			if (potentialProfit > investmentCost) {
+				carbonAbsorptionHandler.invest(investmentCost);
+				increaseAbsorptionInvestmentTarget();
+				logger.info("Post-Communist Country " + this.getName() + " invested " + String.valueOf(investmentCost) + " in carbon absorption");
+			}
+			else {
+				decreaseAbsorptionInvestmentTarget();
+				logger.info("Post-Communist Country " + this.getName() + " deemed carbon absorption not profitable");
+			}
+		}
+		catch (NotEnoughCashException e) {
+			decreaseAbsorptionInvestmentTarget();
+			logger.info("Post-Communist Country " + this.getName() + " has insufficient funds for carbon absorption");
+		}
+		catch (NotEnoughLandException e) {
+			decreaseAbsorptionInvestmentTarget();
+			logger.info("Post-Communist Country " + this.getName() + " has insufficient land for carbon absorption");
+		}
+		catch (Exception e) {
+			logger.warn("Problem investing in carbon absorption: " + e);
 		}
 	}
 	
+	/**
+	 * Calculates if potential profit made by selling acquired credits outweighs the cost of investment in carbon reduction.
+	 * If so, tries to invest. Increases the next investment target on success, decreases on failure.
+	 */
 	private void carbonReductionInvestment () {
-		long investmentCost = carbonReductionHandler.getCost(Constants.INVESTMENT_AMOUNT);
-		long potentialProfit = Constants.INVESTMENT_AMOUNT * internalPrice;
+		long investmentCost;
+		long potentialProfit;
 		
-		if (potentialProfit > investmentCost) {
-			carbonReductionHandler.invest(investmentCost);
-			logger.info("Post-Communist Country " + this.getName() + " invested " + String.valueOf(investmentCost) + " in carbon reduction");
-			// Same problem as in carbonAbsorptionInvestment
+		try {
+			investmentCost = carbonReductionHandler.getCost(reductionInvestmentTarget);
+			potentialProfit = reductionInvestmentTarget * internalPrice;
+			
+			if (potentialProfit > investmentCost) {
+				carbonReductionHandler.invest(investmentCost);
+				increaseReductionInvestmentTarget();
+				logger.info("Post-Communist Country " + this.getName() + " invested " + String.valueOf(investmentCost) + " in carbon reduction");
+			}
+			else {
+				decreaseReductionInvestmentTarget();
+				logger.info("Post-Communist Country " + this.getName() + " deemed carbon reduction not profitable");
+			}
+		}
+		catch (NotEnoughCashException e) {
+			decreaseReductionInvestmentTarget();
+			logger.info("Post-Communist Country " + this.getName() + " has insufficient funds for carbon reduction");
+		}
+		catch (NotEnoughCarbonOutputException e) {
+			decreaseReductionInvestmentTarget();
+			logger.info("Post-Communist Country " + this.getName() + " has insufficient carbon output for carbon reduction");
+		}
+		catch (Exception e) {
+			logger.warn("Problem investing in carbon reduction: " + e);
 		}
 	}
 	
+	/**
+	 * Calculates if potential profit made by selling acquired credits outweighs the cost of investment in other countries.
+	 * If so, tries to invest. Increases the next investment target on success, decreases on failure.
+	 */
 	private void otherCountriesInvestment () {
 		// TODO implement
 		//   There are no handlers for investing in other countries yet
 	}
 	
+	/**
+	 * Calls all the investment functions.
+	 */
 	private void makeInvestments() {
 		carbonAbsorptionInvestment();
 		carbonReductionInvestment();
 		otherCountriesInvestment();
 	}
 	
+	
 	//================================================================================
-    // Private functions called every year
+    // Yearly update functions
     //================================================================================
+	
+	/**
+	 * Returns a new target, which is a multiplication of three factors:
+	 * - available credits
+	 * - fossil fuels historical prices
+	 * - current state of the market
+	 * All adjusted with a constant coefficient.
+	 */
+	protected void calculateNewSellingTarget() {
+		long newSellingTarget;
+		
+		try {
+			// Calculate new target based on three factors
+			newSellingTarget =	(long) 
+						( calculateAvailableCreditsFactor() *
+						  calculateFossilFuelsFactor() *
+						  calculateMarketFactor() );
+			
+			// Adjust the new target if out of possible range
+			if (newSellingTarget > carbonOffset) {
+				newSellingTarget = carbonOffset;
+			}
+		}
+		catch (Exception e) {
+			logger.warn("Problem when calculating newTarget " + e);
+			newSellingTarget = creditsToSellTarget;
+		}
+		creditsToSellTarget = newSellingTarget;
+	}
 	
 	/**
 	 * Gets the number of credits available to sell.
@@ -222,15 +397,33 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	private double calculateFossilFuelsFactor() {
 		double fossilFuelsFactor;
 		
-		try {
-			double newOilPrice = FossilPrices.getOilPrice(currentYear);
-			double oldOilPrice = FossilPrices.getOilPrice(currentYear - 1);
-			double newGasPrice = FossilPrices.getGasPrice(currentYear);
-			double oldGasPrice = FossilPrices.getGasPrice(currentYear - 1);
-			double oilGradient = (newOilPrice - oldOilPrice) / oldOilPrice;
-			double gasGradient = (newGasPrice - oldGasPrice) / oldGasPrice;
+		try {			
 			
-			fossilFuelsFactor = Constants.FOSSIL_FUEL_PRICE_COEFFICIENT * (oilGradient + gasGradient) / 2;
+			// get current year from the Time service
+			TimeService timeService = getEnvironmentService(TimeService.class);
+			int currentYear = timeService.getCurrentYear();
+			
+			// get the data from the FossilPrices Service
+			FossilPrices fossilPrices = getEnvironmentService(FossilPrices.class);
+			double newOilPrice = fossilPrices.getOilPrice(currentYear);
+			double oldOilPrice = fossilPrices.getOilPrice(currentYear - 1);
+			double newGasPrice = fossilPrices.getGasPrice(currentYear);
+			double oldGasPrice = fossilPrices.getGasPrice(currentYear - 1);
+			
+			// if the data is relevant, calculate the gradients and the coefficient
+			if ((newOilPrice != 0) && (oldOilPrice != 0) && (newGasPrice != 0) && (oldGasPrice != 0) ) {
+				double oilGradient = (newOilPrice - oldOilPrice) / oldOilPrice;
+				double gasGradient = (newGasPrice - oldGasPrice) / oldGasPrice;
+				fossilFuelsFactor = Constants.FOSSIL_FUEL_PRICE_COEFFICIENT * (oilGradient + gasGradient) / 2;
+			}
+			
+			// if the data is irrelevant, coefficient becomes irrelevant.
+			else
+				fossilFuelsFactor = 1;
+		}
+		catch (UnavailableServiceException e) {
+			logger.warn("Unable to reach the fossil fuel service: " + e);
+			fossilFuelsFactor = 1;
 		}
 		catch (Exception e) {
 			logger.warn("Problem when calculating fossilFuelsFactor " + e);
@@ -246,9 +439,9 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		double marketFactor;
 		
 		try {
-			Economy.State economyState = Economy.getEconomyState();
+			Economy economy = getEnvironmentService(Economy.class);
 			
-			switch (economyState) {
+			switch (economy.getEconomyState()) {
 				case GROWTH:
 					marketFactor = 1 + Constants.MARKET_STATE_COEFFICIENT;
 					break;
@@ -265,35 +458,6 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			marketFactor = 1;
 		}
 		return marketFactor;
-	}
-	
-	/**
-	 * Returns a new target, which is a multiplication of three factors:
-	 * - available credits
-	 * - fossil fuels historical prices
-	 * - current state of the market
-	 * All adjusted with a constant coefficient.
-	 */
-	protected void calculateNewSellingTarget() {
-		long newSellingTarget;
-		
-		try {
-			// Calculate new target based on three factors
-			newSellingTarget =	(long) 
-						( calculateAvailableCreditsFactor() *
-						  calculateFossilFuelsFactor() *
-						  calculateMarketFactor() );
-			
-			// Adjust the new target if out of possible range
-			if (newSellingTarget > availableCredits) {
-				newSellingTarget = availableCredits;
-			}
-		}
-		catch (Exception e) {
-			logger.warn("Problem when calculating newTarget " + e);
-			newSellingTarget = creditsToSellTarget;
-		}
-		creditsToSellTarget = newSellingTarget;
 	}
 	
 	/**
@@ -331,6 +495,4 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			lastYearFactor = 1;
 		}
 	}
-	
-
 }
