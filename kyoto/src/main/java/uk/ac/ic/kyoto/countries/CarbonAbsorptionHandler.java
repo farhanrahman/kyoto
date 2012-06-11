@@ -25,26 +25,20 @@ public final class CarbonAbsorptionHandler {
 	 * 
 	 * @param carbonOffset
 	 */
-	public long getCost(long carbonOffset) {
+	public long getCost(long carbonOffset) throws Exception {
 		double neededLand;
 		long noBlocks;
 		long totalCost;
 		double tempLandArea;
 		
-		try {
-			neededLand = carbonOffset / GameConst.FOREST_CARBON_ABSORPTION;
-			noBlocks = (long) (neededLand / GameConst.FOREST_BLOCK_SIZE);
-			totalCost = 0;
-			tempLandArea = this.country.arableLandArea;
-			
-			for (int i=0; i < noBlocks; i++) {
-				totalCost += getBlockCost(tempLandArea);
-				tempLandArea -= GameConst.FOREST_BLOCK_SIZE;
-			}
-		}
-		catch (Exception e) {
-			//country.logger.warn("Problem with calculating the cost of investment: " + e);
-			totalCost = Long.MAX_VALUE; // This is to prevent country actually investing for free in case of error
+		neededLand = carbonOffset / GameConst.FOREST_CARBON_ABSORPTION;
+		noBlocks = (long) (neededLand / GameConst.FOREST_BLOCK_SIZE);
+		totalCost = 0;
+		tempLandArea = this.country.arableLandArea;
+		
+		for (int i=0; i < noBlocks; i++) {
+			totalCost += getBlockCost(tempLandArea);
+			tempLandArea -= GameConst.FOREST_BLOCK_SIZE;
 		}
 		
 		return totalCost;
@@ -56,27 +50,21 @@ public final class CarbonAbsorptionHandler {
 	 * 
 	 * @param investment
 	 */
-	public long getCarbonAbsorption(double investment) {
+	public long getCarbonAbsorption(double investment) throws Exception {
 		long totalCost;
 		double tempArableLandArea;
 		long carbonAbsorption;
 		
-		try {
-			totalCost = 0;
-			tempArableLandArea = country.arableLandArea;
-			
-			while (totalCost <= investment && tempArableLandArea >= GameConst.FOREST_BLOCK_SIZE) {
-				totalCost += getBlockCost(tempArableLandArea);
-				tempArableLandArea -= GameConst.FOREST_BLOCK_SIZE;
-			}
-			
-			carbonAbsorption = (long) (GameConst.FOREST_CARBON_ABSORPTION * (country.arableLandArea-tempArableLandArea) );
-		}
-		catch (Exception e) {
-			//country.logger.warn("Problem with calculating absorption for given investment: " + e);
-			carbonAbsorption = 0;
+		totalCost = 0;
+		tempArableLandArea = country.arableLandArea;
+		
+		while (totalCost <= investment && tempArableLandArea >= GameConst.FOREST_BLOCK_SIZE) {
+			totalCost += getBlockCost(tempArableLandArea);
+			tempArableLandArea -= GameConst.FOREST_BLOCK_SIZE;
 		}
 		
+		carbonAbsorption = (long) (GameConst.FOREST_CARBON_ABSORPTION * (country.arableLandArea - tempArableLandArea) );
+
 		return carbonAbsorption;
 	}
 	
@@ -86,21 +74,14 @@ public final class CarbonAbsorptionHandler {
 	 * 
 	 * @param landArea
 	 */
-	private long getBlockCost(double landArea) {
+	private long getBlockCost(double landArea) throws Exception {
 		long blockCost;
 		
-		try {
-			if (landArea > 0) {
-				blockCost = (long) (GameConst.CARBON_ABSORPTION_COEFF * GameConst.FOREST_BLOCK_SIZE / landArea);
-			}
-			else {
-				//country.logger.warn("Trying to find a cost of a block of area for non-positive area left");
-				blockCost = Long.MAX_VALUE;
-			}
+		if (landArea > 0) {
+			blockCost = (long) (GameConst.CARBON_ABSORPTION_COEFF * GameConst.FOREST_BLOCK_SIZE / landArea);
 		}
-		catch (Exception e) {
-			//country.logger.warn("Problem with calculating cost of forest block: " + e);
-			blockCost = Long.MAX_VALUE;
+		else {
+			throw new Exception("Trying to find a cost of a block of area for non-positive area left");
 		}
 		
 		return blockCost;
@@ -119,29 +100,23 @@ public final class CarbonAbsorptionHandler {
 		long additionalAbsorption;
 		double arableAreaUsed;
 		
-		try {
-			// Calculate how much Carbon Offset will be gained through the investment
-			additionalAbsorption = getCarbonAbsorption(investment);
-			// Calculate how much arable area has to be used during the investment
-			arableAreaUsed = additionalAbsorption / GameConst.FOREST_CARBON_ABSORPTION;
-			
-			if (investment <= country.availableToSpend) {
-				
-				if (arableAreaUsed <= country.arableLandArea) {
-					country.availableToSpend -= investment;
-					country.carbonAbsorption += additionalAbsorption;
-					country.arableLandArea -= arableAreaUsed;
-				}
-				else {
-					throw new NotEnoughLandException();
-				}
+		// Calculate how much Carbon Offset will be gained through the investment
+		additionalAbsorption = getCarbonAbsorption(investment);
+		// Calculate how much arable area has to be used during the investment
+		arableAreaUsed = additionalAbsorption / GameConst.FOREST_CARBON_ABSORPTION;
+		
+		if (investment <= country.availableToSpend) {
+			if (arableAreaUsed <= country.arableLandArea) {
+				country.availableToSpend -= investment;
+				country.carbonAbsorption += additionalAbsorption;
+				country.arableLandArea -= arableAreaUsed;
 			}
 			else {
-				throw new NotEnoughCashException();
+				throw new NotEnoughLandException();
 			}
 		}
-		catch (Exception e) {
-			//country.logger.warn("Problem with investing in carbon absorption: " + e);
+		else {
+			throw new NotEnoughCashException();
 		}
 	}
 }
