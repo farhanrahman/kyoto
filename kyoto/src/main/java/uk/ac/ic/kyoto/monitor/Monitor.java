@@ -11,6 +11,7 @@ import uk.ac.ic.kyoto.countries.GameConst;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.CarbonTarget;
 import uk.ac.ic.kyoto.services.TimeService.EndOfYearCycle;
+import uk.ac.imperial.presage2.core.environment.EnvironmentRegistrationRequest;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentServiceProvider;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
@@ -18,7 +19,12 @@ import uk.ac.imperial.presage2.core.environment.ServiceDependencies;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.simulator.Parameter;
+import uk.ac.imperial.presage2.core.event.EventBus;
+import uk.ac.imperial.presage2.core.event.EventListener;
+import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
+
+import com.google.inject.Inject;
 
 /**
  * Monitoring service
@@ -37,21 +43,22 @@ public class Monitor extends EnvironmentService {
 	// Structure that counts the number of times the country cheated
 	private Map<AbstractCountry, Integer> sinBin;
 	
+	EventBus eb;
+	
 	/**
 	 * percentage increase in target i.e. 1.05 for 5%
 	 */
-	@Parameter(name="target_penalty")
+	//@Parameter(name="target_penalty")
 	int target_penalty;
 	
 	/**
 	 * percentage decrease in cash i.e. 0.95 for 5%
 	 */
-	@Parameter(name="cash_penalty")
+	//@Parameter(name="cash_penalty")
 	int cash_penalty;
 	
 	private CarbonReportingService carbonReportingService;
 	private CarbonTarget carbonTargetingService;
-	
 	@Inject
 	public Monitor(EnvironmentSharedStateAccess sharedState,
 					EnvironmentServiceProvider provider) {
@@ -85,6 +92,17 @@ public class Monitor extends EnvironmentService {
 	 */
 	public void addMemberState(AbstractCountry state) {
 		memberStates.add(state);
+	}
+	
+	@Inject
+	public void setEB(EventBus eb) {
+		this.eb = eb;
+		eb.subscribe(this);
+	}
+	
+	@Override
+	public void registerParticipant(EnvironmentRegistrationRequest req) {
+		super.registerParticipant(req);
 	}
 	
 	@EventListener
