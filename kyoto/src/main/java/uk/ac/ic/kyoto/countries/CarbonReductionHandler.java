@@ -143,7 +143,7 @@ public final class CarbonReductionHandler{
 			if (carbonOutput <= energyOutput)
 				cleanIndustry = 1 - ((double)carbonOutput / (double)energyOutput);
 			else {
-				throw new Exception("carbonOutput is greater than energyOutput: " + e);
+				throw new Exception("carbonOutput is greater than energyOutput");
 			}
 		}
 		catch (Exception e) {
