@@ -151,11 +151,13 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	final public void execute() {
 		super.execute();
 		if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
+			System.out.println("CALLED BITCHES");
 	//		MonitorTax();
 	//		checkTargets(); //did the countries meet their targets?
 			updateGDPRate();
 			updateCarbonOffsetYearly();
 			YearlyFunction();
+			updateAvailableToSpend(); 
 		}
 		if (timeService.getCurrentYear() % timeService.getYearsInSession() == 0) {
 			resetCarbonOffset();
