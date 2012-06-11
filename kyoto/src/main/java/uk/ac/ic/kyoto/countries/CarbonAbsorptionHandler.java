@@ -31,14 +31,19 @@ public final class CarbonAbsorptionHandler {
 		long totalCost;
 		double tempLandArea;
 		
-		neededLand = carbonOffset / GameConst.FOREST_CARBON_ABSORPTION;
-		noBlocks = (long) (neededLand / GameConst.FOREST_BLOCK_SIZE);
-		totalCost = 0;
-		tempLandArea = this.country.arableLandArea;
-		
-		for (int i=0; i < noBlocks; i++) {
-			totalCost += getBlockCost(tempLandArea);
-			tempLandArea -= GameConst.FOREST_BLOCK_SIZE;
+		try {
+			neededLand = carbonOffset / GameConst.FOREST_CARBON_ABSORPTION;
+			noBlocks = (long) (neededLand / GameConst.FOREST_BLOCK_SIZE);
+			totalCost = 0;
+			tempLandArea = this.country.arableLandArea;
+			
+			for (int i=0; i < noBlocks; i++) {
+				totalCost += getBlockCost(tempLandArea);
+				tempLandArea -= GameConst.FOREST_BLOCK_SIZE;
+			}
+		}
+		catch (Exception e) {
+			throw new Exception("getCost function error");
 		}
 		
 		return totalCost;
@@ -55,12 +60,19 @@ public final class CarbonAbsorptionHandler {
 		double tempArableLandArea;
 		long carbonAbsorption;
 		
-		totalCost = 0;
-		tempArableLandArea = country.arableLandArea;
-		
-		while (totalCost <= investment && tempArableLandArea >= GameConst.FOREST_BLOCK_SIZE) {
-			totalCost += getBlockCost(tempArableLandArea);
-			tempArableLandArea -= GameConst.FOREST_BLOCK_SIZE;
+		try {
+			totalCost = 0;
+			tempArableLandArea = country.arableLandArea;
+			
+			while (totalCost <= investment && tempArableLandArea >= GameConst.FOREST_BLOCK_SIZE) {
+				totalCost += getBlockCost(tempArableLandArea);
+				tempArableLandArea -= GameConst.FOREST_BLOCK_SIZE;
+			}
+			
+			carbonAbsorption = (long) (GameConst.FOREST_CARBON_ABSORPTION * (country.arableLandArea-tempArableLandArea) );
+		}
+		catch (Exception e) {
+			throw new Exception("getCarbonAbsorption function error");
 		}
 		
 		carbonAbsorption = (long) (GameConst.FOREST_CARBON_ABSORPTION * (country.arableLandArea - tempArableLandArea) );
@@ -77,11 +89,16 @@ public final class CarbonAbsorptionHandler {
 	private long getBlockCost(double landArea) throws Exception {
 		long blockCost;
 		
-		if (landArea > 0) {
-			blockCost = (long) (GameConst.CARBON_ABSORPTION_COEFF * GameConst.FOREST_BLOCK_SIZE / landArea);
+		try {
+			if (landArea > 0) {
+				blockCost = (long) (GameConst.CARBON_ABSORPTION_COEFF * GameConst.FOREST_BLOCK_SIZE / landArea);
+			}
+			else {
+				throw new Exception("Trying to find a cost of a block of area for non-positive area left");
+			}
 		}
-		else {
-			throw new Exception("Trying to find a cost of a block of area for non-positive area left");
+		catch (Exception e) {
+			throw new Exception("getBlockCost function error");
 		}
 		
 		return blockCost;
@@ -115,8 +132,8 @@ public final class CarbonAbsorptionHandler {
 				throw new NotEnoughLandException();
 			}
 		}
-		else {
-			throw new NotEnoughCashException();
+		catch (Exception e) {
+			throw new Exception("invest function error");
 		}
 	}
 }
