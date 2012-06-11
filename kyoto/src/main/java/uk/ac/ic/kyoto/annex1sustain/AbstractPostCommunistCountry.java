@@ -524,7 +524,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			}
 		}
 		catch (ArithmeticException e) {
-			logger.warn("LAST_YEAR_FACTOR_OFFSET must be greater than 0 and less than 1");
+			logger.warn("LAST_YEAR_FACTOR_OFFSET must be > 0 and < 1");
 			lastYearFactor = 0;
 		}
 		catch (Exception e) {

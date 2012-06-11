@@ -41,6 +41,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * calculating 'effective' carbon output
 	 */
 	protected 		long 		carbonOutput;		// Tons of CO2 produced every year
+	protected		long		carbonAbsorption;	// Tons of CO2 absorbed by forests every year
 	protected 		long 		carbonOffset; 		// Tons of CO2 that the country acquired (by trading or energy absorption)
 	protected 		long		emissionsTarget;	// Number of tons of carbon you SHOULD produce
 	
@@ -88,6 +89,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.carbonOffset = 0;
 		this.availableToSpend = 0;
 		this.carbonOutput = carbonOutput;
+		this.carbonAbsorption = 0;
 		this.carbonEmissionReports = new HashMap<Integer, Long>();
 		this.energyOutput = energyOutput;
 		
