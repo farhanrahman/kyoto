@@ -3,6 +3,7 @@ package uk.ac.ic.kyoto.services;
 import com.google.inject.Inject;
 
 import uk.ac.imperial.presage2.core.Time;
+import uk.ac.imperial.presage2.core.TimeDriven;
 import uk.ac.imperial.presage2.core.environment.EnvironmentRegistrationRequest;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
@@ -16,7 +17,7 @@ import uk.ac.imperial.presage2.core.simulator.SimTime;
 /** 
  * @author sc1109 & azyzio & Stuart
  */
-public class TimeService extends EnvironmentService {
+public class TimeService extends EnvironmentService implements TimeDriven {
 
 	private int tickCounter=0;
 	private int yearCounter=0;
@@ -46,14 +47,23 @@ public class TimeService extends EnvironmentService {
 		super.registerParticipant(req);
 	}
 	
-	@EventListener
-	public void updateTickCounter (EndOfTimeCycle e) {
+	@Override
+	public void incrementTime() {
 		tickCounter++;
 		if (getCurrentTick() == ticksInYear) {
 			EndOfYearCycle y = new EndOfYearCycle(yearCounter);
 			eb.publish(y);
 		}
 	}
+	
+//	@EventListener
+//	public void updateTickCounter (EndOfTimeCycle e) {
+//		tickCounter++;
+//		if (getCurrentTick() == ticksInYear) {
+//			EndOfYearCycle y = new EndOfYearCycle(yearCounter);
+//			eb.publish(y);
+//		}
+//	}
 	
 	@EventListener
 	public void updateYearCounter (EndOfYearCycle e) {
