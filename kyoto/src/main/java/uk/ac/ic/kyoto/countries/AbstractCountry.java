@@ -71,6 +71,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	//================================================================================
     // Constructors and Initializers
     //================================================================================
+	/*Constructor for testing*/
+	public AbstractCountry(UUID id, String name, String ISO){
+		super(id,name);
+		this.landArea = 0;
+		this.ISO = ISO;
+	}
 	
 	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
 					double GDPRate, long emissionsTarget, long energyOutput, long carbonOutput) {
