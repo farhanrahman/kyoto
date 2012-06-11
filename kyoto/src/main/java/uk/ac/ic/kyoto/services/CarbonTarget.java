@@ -69,7 +69,6 @@ public class CarbonTarget extends EnvironmentService {
 		this.participantCountries.add(countryDetails);
 		
 		generateSessionTarget(countryDetails);
-		sharedState.create("EmissionsSessionTarget", countryDetails.countryID, target);
 	}
 	
 	@Inject
