@@ -68,10 +68,11 @@ public class SimulationAgent extends AbstractParticipant {
 				session = new HashMap<Integer,Map<UUID,Offer>>();
 			}
 			
-			//session.put(currentTime.intValue(), currentTrade);
+			session.put(currentTime.intValue(), currentTrade);
 		}
-		
-		this.persist.setProperty(SimulationAgent.key, session.toString());
+		logger.info(tradeHistory.getHistory());
+//		this.persist.setProperty(SimulationAgent.key, session.toString());
+		logger.info("");
 	}
 
 }

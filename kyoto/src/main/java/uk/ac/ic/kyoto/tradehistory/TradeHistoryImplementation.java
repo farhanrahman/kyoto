@@ -30,6 +30,7 @@ public class TradeHistoryImplementation implements TradeHistory{
 		}else{
 			return new HashMap<UUID,Offer>(history.get(simTime.intValue()));
 		}
+		
 	}
 	
 	public boolean tradeExists(UUID id){

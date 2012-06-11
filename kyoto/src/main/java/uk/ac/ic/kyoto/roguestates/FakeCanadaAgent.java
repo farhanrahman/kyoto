@@ -66,6 +66,7 @@ public class FakeCanadaAgent extends AbstractParticipant {
 
 	@Override
 	public void initialise() {
+		super.initialise();
 		carbonOutput = 80;
 		emissionsTarget = 20;
 		carbonOffset = 10;
@@ -90,6 +91,7 @@ public class FakeCanadaAgent extends AbstractParticipant {
 
 	@Override
 	public void execute() {
+		super.execute();
 		this.tradeProtocol.incrementTime();
 		if(counter < 3 && this.getName().equals("FakeCanada1")){
 			int quantity = 10;
