@@ -117,19 +117,25 @@ public final class CarbonAbsorptionHandler {
 		long additionalAbsorption;
 		double arableAreaUsed;
 		
-		// Calculate how much Carbon Offset will be gained through the investment
-		additionalAbsorption = getCarbonAbsorption(investment);
-		// Calculate how much arable area has to be used during the investment
-		arableAreaUsed = additionalAbsorption / GameConst.FOREST_CARBON_ABSORPTION;
-		
-		if (investment <= country.availableToSpend) {
-			if (arableAreaUsed <= country.arableLandArea) {
-				country.availableToSpend -= investment;
-				country.carbonAbsorption += additionalAbsorption;
-				country.arableLandArea -= arableAreaUsed;
+		try {
+			// Calculate how much Carbon Offset will be gained through the investment
+			additionalAbsorption = getCarbonAbsorption(investment);
+			// Calculate how much arable area has to be used during the investment
+			arableAreaUsed = additionalAbsorption / GameConst.FOREST_CARBON_ABSORPTION;
+			
+			if (investment <= country.availableToSpend) {
+				
+				if (arableAreaUsed <= country.arableLandArea) {
+					country.availableToSpend -= investment;
+					country.carbonAbsorption += additionalAbsorption;
+					country.arableLandArea -= arableAreaUsed;
+				}
+				else {
+					throw new NotEnoughLandException();
+				}
 			}
 			else {
-				throw new NotEnoughLandException();
+				throw new NotEnoughCashException();
 			}
 		}
 		catch (Exception e) {
