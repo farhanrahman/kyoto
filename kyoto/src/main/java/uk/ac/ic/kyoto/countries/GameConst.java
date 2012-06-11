@@ -50,9 +50,9 @@ public final class GameConst {
 	public static long FOREST_BLOCK_SIZE = 100;
 	
 	/**
-	 * Amount of carbon (in tons) that you offset with a single unit of forest
+	 * Amount of carbon (in tons) that you offset with a single unit of forest PER YEAR
 	 */
-	public static long FOREST_CARBON_OFFSET = 10;
+	public static long FOREST_CARBON_ABSORPTION = 10;
 	
 	/**
 	 * Percentage of GDP that is levied from availiableToSpend for monitoring
