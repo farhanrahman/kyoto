@@ -114,7 +114,7 @@ public class Monitor extends EnvironmentService {
 			double emissionTarget = country.getEmissionsTarget();
 			
 			if (reportedEmission < emissionTarget) {
-				targetSanction(country);
+				targetSanction(country, emissionTarget - reportedEmission);
 			}
 		}
 	}
@@ -134,6 +134,7 @@ public class Monitor extends EnvironmentService {
 				if (realCarbonOutput > reportedCarbonOutput)
 					cheatSanction(country);
 			}
+			// TODO log the information about it
 		}
 		else {
 			// Create a list of countries that were already monitored this year
@@ -193,14 +194,22 @@ public class Monitor extends EnvironmentService {
 	
 	/**
 	 * Sanction for not meeting targets
-	 * @param sanctionee
+	 * @param country
 	 * The country to be sanctioned
 	 */
-	public void targetSanction(AbstractCountry sanctionee) {
+	public void targetSanction(AbstractCountry country, double carbonExcess) {
+		double previousEmissionTarget = carbonTargetingService.queryYearTarget(country.getID());
 		
-		//5% higher target regardless of number of sins (compound)
-		//sanctionee.setEmissionsTarget((long) (sanctionee.getEmissionsTarget()*target_penalty));  TODO: Decide on this penalty
-
+		double newEmissionTarget = previousEmissionTarget - carbonExcess * 1.3;
+		/**
+		 * Impossible to implement as the emission targets in the shared state cannot be changed externally
+		 */
+		country.setEmissionsTarget( (long) newEmissionTarget);
+		
+		// Charge the country for not meeting the target
+		
+		country.setAvailableToSpend( (long) (country.getAvailableToSpend() - carbonExcess * cash_penalty) );
+		
 	}
 	
 	/**
