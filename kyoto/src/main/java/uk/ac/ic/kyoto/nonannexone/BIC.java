@@ -107,7 +107,7 @@ public class BIC extends AbstractCountry {
 	*
 	*/
 	
-	private void buildIndustry(long invest) 
+	private void buildIndustry(double invest) 
 	{
 	double carbon_difference; //the difference between environmentally friendly target and actual carbon emission.
 	
@@ -148,7 +148,7 @@ public class BIC extends AbstractCountry {
 	
 		private void economy()
 		{
-		long difference;
+		double difference;
 		difference = energy_aim - energyOutput; //difference in energy aim and current energy output.
 		
 		if (energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(difference) < availableToSpend)	
