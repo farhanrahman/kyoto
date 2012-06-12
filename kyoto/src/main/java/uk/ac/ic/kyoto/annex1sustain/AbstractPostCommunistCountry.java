@@ -275,7 +275,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 * If so, tries to invest. Increases the next investment target on success, decreases on failure.
 	 */
 	private void carbonAbsorptionInvestment () {
-		long investmentCost;
+		double investmentCost;
 		long potentialProfit;
 		
 		try {
