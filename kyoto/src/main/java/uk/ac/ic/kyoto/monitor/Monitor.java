@@ -128,7 +128,7 @@ public class Monitor extends EnvironmentService {
 		if (noToMonitor >= memberStates.size()) {
 			// monitor all the countries
 			for (AbstractCountry country: memberStates) {
-				long realCarbonOutput = country.getMonitored();
+				double realCarbonOutput = country.getMonitored();
 				cash -= GameConst.MONITORING_PRICE;
 				double reportedCarbonOutput = carbonReportingService.getReport(country.getID(), SimTime.get());
 				if (realCarbonOutput > reportedCarbonOutput)
@@ -154,7 +154,7 @@ public class Monitor extends EnvironmentService {
 				
 				// Monitor the country
 				cash -= GameConst.MONITORING_PRICE;
-				long realCarbonOutput = pickedCountry.getMonitored();
+				double realCarbonOutput = pickedCountry.getMonitored();
 						
 				// Note that the country was monitored
 				monitoredCountries.add(pickedCountry);

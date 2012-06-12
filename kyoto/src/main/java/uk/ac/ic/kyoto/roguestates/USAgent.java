@@ -16,7 +16,7 @@ public class USAgent extends NonParticipant {
 
 	private int yearMod4 = 0;
 	private boolean democratElected; 			// chosen at random on class instantiation
-	private long AbsolutionReductionTarget; 	// Units in metric tonnes C02
+	private double AbsolutionReductionTarget; 	// Units in metric tonnes C02
 												// Can be positive or negative
 	private long IntensityReductionTarget; 	// Units percentage (%)
 	private long IntensityRatio;				// Units tonnes / million $

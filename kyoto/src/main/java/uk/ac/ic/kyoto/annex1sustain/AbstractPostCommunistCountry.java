@@ -383,7 +383,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			
 			// Adjust the new target if out of possible range
 			if (newSellingTarget > carbonOffset) {
-				newSellingTarget = carbonOffset;
+				newSellingTarget = Math.round(carbonOffset);
 			}
 		}
 		catch (Exception e) {

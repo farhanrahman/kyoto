@@ -70,7 +70,7 @@ public final class CarbonReductionHandler{
 	 * 
 	 * @return the change in carbon output from specified cost
 	 */
-	public final double getCarbonOutputChange(long cost) throws Exception {
+	public final double getCarbonOutputChange(double d) throws Exception {
 		double carbonOutputChange;
 
 		try {
@@ -80,7 +80,7 @@ public final class CarbonReductionHandler{
 			//Solve the quadratic equation to find the change of clean industry
 			double a = GameConst.CARBON_REDUCTION_COEFF / 2;
 			double b = GameConst.CARBON_REDUCTION_COEFF * cleanIndustryBefore + GameConst.CARBON_REDUCTION_OFFSET;
-			double c = - cost;
+			double c = - d;
 			QuadraticEquation equation = new QuadraticEquation(a, b, c);
 			System.out.println("Quadradtic roots a: "+equation.getRootOne()+" b: "+equation.getRootTwo());
 			
@@ -100,19 +100,19 @@ public final class CarbonReductionHandler{
 	 * On success, will reduce Carbon Output of a country keeping the Energy Output constant
 	 * On failure, will throw Exception.
 	 * 
-	 * @param investment
+	 * @param d
 	 * 
 	 * @throws Exception
 	 */
-	public final void invest(long investment) throws Exception, NotEnoughCarbonOutputException, NotEnoughCashException {
+	public final void invest(double d) throws Exception, NotEnoughCarbonOutputException, NotEnoughCashException {
 		double carbonOutputChange;
 		
 		try {
-			carbonOutputChange = getCarbonOutputChange(investment);
+			carbonOutputChange = getCarbonOutputChange(d);
 			
-			if (investment <= this.country.availableToSpend){
+			if (d <= this.country.availableToSpend){
 				if (carbonOutputChange <= this.country.carbonOutput) {
-					this.country.availableToSpend -= investment;
+					this.country.availableToSpend -= d;
 					this.country.carbonOutput -= carbonOutputChange;
 				}
 				else {
@@ -136,12 +136,12 @@ public final class CarbonReductionHandler{
 	/**
 	 * Calculates the clean industry rate for specified carbon output and energy output.
 	 */
-	private double calculateCleanIndustryMeasure(long carbonOutput, long energyOutput) throws Exception {
+	private double calculateCleanIndustryMeasure(double carbonOutput, double energyOutput) throws Exception {
 		double cleanIndustry;
 		
 		try {
 			if (carbonOutput <= energyOutput)
-				cleanIndustry = 1 - ((double)carbonOutput / (double)energyOutput);
+				cleanIndustry = 1 - carbonOutput / energyOutput;
 			else {
 				throw new Exception("carbonOutput is greater than energyOutput");
 			}
@@ -153,11 +153,11 @@ public final class CarbonReductionHandler{
 		return cleanIndustry;
 	}
 	
-	private long calculateCarbonOutput(double cleanIndustry, long energyOutput) throws Exception {
-		long carbonOutput;
+	private double calculateCarbonOutput(double cleanIndustry, double energyOutput) throws Exception {
+		double carbonOutput;
 		
 		try {
-			carbonOutput = (long) ((double)energyOutput * (1 - cleanIndustry));
+			carbonOutput = energyOutput * (1 - cleanIndustry);
 		}
 		catch (Exception e) {
 			throw new Exception("calculateCarbonOutput error: " + e);
