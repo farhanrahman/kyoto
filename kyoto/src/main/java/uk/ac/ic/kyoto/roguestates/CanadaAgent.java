@@ -3,11 +3,12 @@ package uk.ac.ic.kyoto.roguestates;
 import java.util.Set;
 import java.util.UUID;
 
-import uk.ac.ic.kyoto.countries.EnergyUsageHandler;
+import uk.ac.ic.kyoto.countries.AbstractCountry;
+
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
 import uk.ac.imperial.presage2.core.messaging.Input;
 
-public class CanadaAgent extends NonParticipant {
+public class CanadaAgent extends AbstractCountry {
 
 	public CanadaAgent(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
 			double GDPRate, double emissionsTarget, double energyOutput, double carbonOutput) {
