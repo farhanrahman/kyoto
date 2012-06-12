@@ -2,7 +2,6 @@ package uk.ac.ic.kyoto;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReportHandler;
 import uk.ac.ic.kyoto.market.Economy;
@@ -10,12 +9,10 @@ import uk.ac.ic.kyoto.monitor.Monitor;
 import uk.ac.ic.kyoto.roguestates.CanadaAgent;
 //import uk.ac.ic.kyoto.roguestates.TestAbsorptionHandlerAgent;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
-import uk.ac.ic.kyoto.services.CarbonTarget;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.imperial.presage2.core.simulator.InjectedSimulation;
-import uk.ac.imperial.presage2.core.simulator.Parameter;
 import uk.ac.imperial.presage2.core.simulator.Scenario;
 import uk.ac.imperial.presage2.core.util.random.Random;
 import uk.ac.imperial.presage2.rules.RuleModule;
@@ -36,9 +33,6 @@ public class Simulation extends InjectedSimulation {
 //	@Parameter(name="nonParticipantCount")
 //	public int nonParticipantCount = 1;
 	
-	@Parameter(name="pie")
-	public int pie;
-	
 	@Override
 	protected Set<AbstractModule> getModules() {
 		Set<AbstractModule> modules = new HashSet<AbstractModule>();
@@ -53,8 +47,6 @@ public class Simulation extends InjectedSimulation {
 			.addParticipantEnvironmentService(Economy.class)
 //			.addParticipantEnvironmentService(CarbonTarget.class)
 			);
-		
-		System.out.println("Pie: " + pie);
 	
 		modules.add(new RuleModule());
 			//.addClasspathDrlFile("foo.drl")

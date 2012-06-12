@@ -43,10 +43,9 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	
 	public AbstractPostCommunistCountry(UUID id, String name, String ISO,
 			double landArea, double arableLandArea, double GDP, double GDPRate,
-			long availiableToSpend, long emissionsTarget, long carbonOffset, long energyOutput, long carbonOutput)
+			long availiableToSpend, long carbonOffset, long energyOutput, long carbonOutput)
 	{
-		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, emissionsTarget,
-				carbonOffset, energyOutput);
+		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, carbonOffset, energyOutput);
 		
 		this.internalPrice = Long.MAX_VALUE;
 		this.uncommittedTransactionsCosts = new LinkedList<Double>();
@@ -383,7 +382,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			
 			// Adjust the new target if out of possible range
 			if (newSellingTarget > carbonOffset) {
-				newSellingTarget = carbonOffset;
+				newSellingTarget = Math.round(carbonOffset);
 			}
 		}
 		catch (Exception e) {

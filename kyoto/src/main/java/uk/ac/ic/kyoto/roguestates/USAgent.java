@@ -5,23 +5,21 @@ import java.util.UUID;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.util.random.Random;
+import uk.ac.ic.kyoto.countries.AbstractCountry;
 
-
-public class USAgent extends NonParticipant {
+public class USAgent extends AbstractCountry {
 
 	private int yearMod4 = 0;
 	private boolean democratElected; 			// chosen at random on class instantiation
-	private long AbsolutionReductionTarget; 	// Units in metric tonnes C02
+	private double AbsolutionReductionTarget; 	// Units in metric tonnes C02
 												// Can be positive or negative
 	private long IntensityReductionTarget; 	// Units percentage (%)
 	private long IntensityRatio;				// Units tonnes / million $
 
 	public USAgent(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
-			double GDPRate, long emissionsTarget,
-			long energyOutput, long carbonOutput){
+			double GDPRate, double energyOutput, double carbonOutput){
 		super(id, name, ISO, landArea, arableLandArea, GDP,
-				GDPRate, emissionsTarget,
-				energyOutput, carbonOutput);
+				GDPRate, energyOutput, carbonOutput);
 		SetInitialPoliticalParty();
 		SetInitialIntensityRatio();
 	}
@@ -36,12 +34,14 @@ public class USAgent extends NonParticipant {
 		/*
 		 * Function is executed at the end of every year. 
 		 */
+		
+		// Election results are affected by the previous years GDPEate
 		if(IsElectionYear()) {
 			HoldElection(); // will set democratElected to either true or false
 		}
 		SetEmissionsTarget();
 		if (democratElected) {
-			AbsolutionReductionTarget = (long) (carbonOutput*0.95);
+			AbsolutionReductionTarget = carbonOutput*0.95;
 		}
 		else {
 			AbsolutionReductionTarget = carbonOutput;
@@ -118,6 +118,7 @@ public class USAgent extends NonParticipant {
 		// this target will be translated into an absolute metric value, thus higher values result
 		// in a greater reduction. 		
 		DemocratCampaignTarget = this.IntensityReductionTarget + Random.randomInt(5);
+		
 		
 		
 	}

@@ -28,6 +28,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	final protected String 		ISO;		//ISO 3166-1 alpha-3
 	
+	/*
+	 *  Simple boolean to check if the country is a member of Kyoto
+	 *  Defaults to true. Rogue states should set this to false in their constructor
+	 */
+	protected boolean isKyotoMember=true; 
+	
 	// TODO Change visibility of fields
 	/*
 	 * These variables are related to land area for
@@ -41,10 +47,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * These variables are related to carbon emissions and 
 	 * calculating 'effective' carbon output
 	 */
-	protected 		long 		carbonOutput;		// Tons of CO2 produced every year
-	protected		long		carbonAbsorption;	// Tons of CO2 absorbed by forests every year
-	protected 		long 		carbonOffset; 		// Tons of CO2 that the country acquired (by trading or energy absorption)
-	protected 		long		emissionsTarget;	// Number of tons of carbon you SHOULD produce
+	protected 		double 		carbonOutput;		// Tons of CO2 produced every year
+	protected		double		carbonAbsorption;	// Tons of CO2 absorbed by forests every year
+	protected 		double 		carbonOffset; 		// Tons of CO2 that the country acquired (by trading or energy absorption)
+	protected 		double		emissionsTarget;	// Number of tons of carbon you SHOULD produce
 	
 	/*
 	 * These variables are related to GDP and
@@ -52,11 +58,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 */
 	protected 		double 		GDP;				// GDP of the country in millions of dollars. Changes every year
 	protected 		double 		GDPRate;			// The rate in which the GDP changes in a given year. Expressed in %
-	protected 		long  		energyOutput;		// How much Carbon we would use if the whole industry was carbon based. Measured in Tons of Carbon per year
-	protected 		long 		availableToSpend;	// Measure of cash available to the country in millions of dollars. Note, can NOT be derived from GDP. Initial value can be derived from there, but cash reserves need to be able to lower independently.
+	protected 		double  		energyOutput;		// How much Carbon we would use if the whole industry was carbon based. Measured in Tons of Carbon per year
+	protected 		double 		availableToSpend;	// Measure of cash available to the country in millions of dollars. Note, can NOT be derived from GDP. Initial value can be derived from there, but cash reserves need to be able to lower independently.
 	
 	
-	protected 		Map<Integer, Long> carbonEmissionReports;
+	protected 		Map<Integer, Double> carbonEmissionReports;
 	
 	ParticipantCarbonReportingService reportingService; // TODO add visibility
 	Monitor monitor;
@@ -74,9 +80,15 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	//================================================================================
     // Constructors and Initializers
     //================================================================================
+	/*Constructor for testing*/
+	public AbstractCountry(UUID id, String name, String ISO){
+		super(id,name);
+		this.landArea = 0;
+		this.ISO = ISO;
+	}
 	
 	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
-					double GDPRate, long emissionsTarget, long energyOutput, long carbonOutput) {
+					double GDPRate, double energyOutput, double carbonOutput) {
 
 		//TODO Validate parameters
 		
@@ -87,12 +99,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.arableLandArea = arableLandArea;
 		this.GDP = GDP;
 		this.GDPRate = GDPRate;
-		this.emissionsTarget = emissionsTarget;
+		this.emissionsTarget = 0;
 		this.carbonOffset = 0;
 		this.availableToSpend = 0;
 		this.carbonOutput = carbonOutput;
 		this.carbonAbsorption = 0;
-		this.carbonEmissionReports = new HashMap<Integer, Long>();
+		this.carbonEmissionReports = new HashMap<Integer, Double>();
 		this.energyOutput = energyOutput;
 		
 	}
@@ -152,9 +164,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	final public void execute() {
 		super.execute();
 		if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {			
-	//		MonitorTax();
-	//		checkTargets(); //did the countries meet their targets?
+			if (isKyotoMember) {
+				MonitorTax();
+				//checkTargets(); //did the countries meet their targets?
+			}
 			updateAvailableToSpend();
+			updateGDP(); //left out until this runs only every year
 			updateGDPRate();
 			updateCarbonOffsetYearly();
 			YearlyFunction();
@@ -186,7 +201,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * @return
 	 * Real Carbon Output of a country
 	 */
-	public final long getMonitored() {
+	public final double getMonitored() {
 		return carbonOutput;
 	}
 
@@ -196,7 +211,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return s;
 	}
 	
-	public Map<Integer,Long> getCarbonEmissionReports(){
+	public Map<Integer,Double> getCarbonEmissionReports(){
 		return this.carbonEmissionReports;
 	}
 	
@@ -206,7 +221,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * @param emission
 	 * @return
 	 */
-	private Map<Integer,Long> addToReports(Time simTime, Long emission){
+	private Map<Integer,Double> addToReports(Time simTime, double emission){
 		this.carbonEmissionReports.put(simTime.intValue(), emission);
 		return this.carbonEmissionReports;
 	}
@@ -310,23 +325,23 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return GDPRate;
 	}
 
-	public long getEmissionsTarget() {
+	public double getEmissionsTarget() {
 		return emissionsTarget;
 	}
 
-	public long getCarbonOffset() {
+	public double getCarbonOffset() {
 		return carbonOffset;
 	}
 
-	public long getAvailableToSpend() {
+	public double getAvailableToSpend() {
 		return availableToSpend;
 	}
 	
-	public void setEmissionsTarget(long emissionsTarget) {
+	public void setEmissionsTarget(double emissionsTarget) {
 		this.emissionsTarget = emissionsTarget;
 	}
 	
-	public void setAvailableToSpend(long availableToSpend) {
+	public void setAvailableToSpend(double availableToSpend) {
 			this.availableToSpend = availableToSpend;
 	}
 
