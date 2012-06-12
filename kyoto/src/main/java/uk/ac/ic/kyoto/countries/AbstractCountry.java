@@ -8,7 +8,7 @@ import java.util.UUID;
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.monitor.Monitor;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
-import uk.ac.ic.kyoto.services.TimeService;
+import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
@@ -60,7 +60,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	ParticipantCarbonReportingService reportingService; // TODO add visibility
 	Monitor monitor;
-	TimeService timeService;
+	ParticipantTimeService timeService;
 	
 	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
 	
@@ -111,7 +111,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		}
 		// Initialize the Action Handlers DO THEY HAVE TO BE INSTANTIATED ALL THE TIME? Yes
 		try {
-			timeService = getEnvironmentService(TimeService.class);
+			timeService = getEnvironmentService(ParticipantTimeService.class);
 		} catch (UnavailableServiceException e1) {
 			System.out.println("TimeService doesn't work");
 			e1.printStackTrace();

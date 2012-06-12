@@ -10,7 +10,7 @@ import uk.ac.ic.kyoto.countries.NotEnoughCashException;
 import uk.ac.ic.kyoto.countries.NotEnoughLandException;
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.market.FossilPrices;
-import uk.ac.ic.kyoto.services.TimeService;
+import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
@@ -187,7 +187,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		
 		try {
 			// Create time service and get the tick variables
-			TimeService timeService = getEnvironmentService(TimeService.class);
+			ParticipantTimeService timeService = getEnvironmentService(ParticipantTimeService.class);
 			
 			ticksInYear = timeService.getTicksInYear();
 			currentTick = timeService.getCurrentTick();
@@ -422,7 +422,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		try {			
 			
 			// Get current year from the Time service
-			TimeService timeService = getEnvironmentService(TimeService.class);
+			ParticipantTimeService timeService = getEnvironmentService(ParticipantTimeService.class);
 			int currentYear = timeService.getCurrentYear();
 			
 			// Get the data from the FossilPrices Service

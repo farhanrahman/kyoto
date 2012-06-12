@@ -10,7 +10,7 @@ import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.GameConst;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.CarbonTarget;
-import uk.ac.ic.kyoto.services.TimeService.EndOfYearCycle;
+import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfYearCycle;
 import uk.ac.imperial.presage2.core.environment.EnvironmentRegistrationRequest;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentServiceProvider;

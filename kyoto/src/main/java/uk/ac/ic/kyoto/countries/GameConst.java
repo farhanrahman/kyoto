@@ -69,4 +69,14 @@ public final class GameConst {
 	 * Price for each monitor
 	 */
 	public static double MONITORING_PRICE = 5000;
+	
+	/**
+	 * Number of ticks in a year
+	 */
+	public static int TICKS_IN_YEAR = 365;
+	
+	/**
+	 * Number of years in a session
+	 */
+	public static int YEARS_IN_SESSION = 10;
 }

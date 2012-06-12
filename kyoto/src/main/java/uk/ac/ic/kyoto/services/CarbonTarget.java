@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
-import uk.ac.ic.kyoto.services.TimeService.EndOfSessionCycle;
-import uk.ac.ic.kyoto.services.TimeService.EndOfYearCycle;
+import uk.ac.ic.kyoto.services.ParticipantTimeService.EndOfSessionCycle;
+import uk.ac.ic.kyoto.services.ParticipantTimeService.EndOfYearCycle;
 import uk.ac.imperial.presage2.core.environment.EnvironmentRegistrationRequest;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentServiceProvider;
@@ -41,13 +41,13 @@ public class CarbonTarget extends EnvironmentService {
 	private long lastSessionTotalEmissions = 0;
 	
 	private EventBus eb;
-	private TimeService TimeService;
+	private ParticipantTimeService TimeService;
 	
 	@Inject
 	protected CarbonTarget(EnvironmentSharedStateAccess sharedState, EnvironmentServiceProvider provider) {
 		super(sharedState);
 		try {
-			this.TimeService = provider.getEnvironmentService(TimeService.class);
+			this.TimeService = provider.getEnvironmentService(ParticipantTimeService.class);
 		} catch (UnavailableServiceException e) {
 			System.out.println("Unable to get environment service 'TimeService'.");
 			e.printStackTrace();

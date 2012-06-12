@@ -2,7 +2,7 @@ package uk.ac.ic.kyoto.roguestates;
 
 import java.util.UUID;
 
-import uk.ac.ic.kyoto.services.TimeService;
+import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.util.random.Random;
 
@@ -24,7 +24,6 @@ public class USAgent extends NonParticipant {
 				energyOutput, carbonOutput);
 		SetInitialPoliticalParty();
 		SetInitialIntensityRatio();
-		// TODO Auto-generated constructor stub
 	}
 	
 	@Override
@@ -76,7 +75,7 @@ public class USAgent extends NonParticipant {
 	 */
 	public boolean IsElectionYear() {
 		try {
-			TimeService timeService = getEnvironmentService(TimeService.class);
+			ParticipantTimeService timeService = getEnvironmentService(ParticipantTimeService.class);
 			if (timeService.getCurrentYear() % 4 == 0) {
 				return(true);
 			}
