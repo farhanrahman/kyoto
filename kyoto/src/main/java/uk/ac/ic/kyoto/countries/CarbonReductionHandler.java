@@ -10,31 +10,23 @@ public final class CarbonReductionHandler{
 
 	/**
 	 * Create instance of CarbonReductionHandler
+	 * 
 	 * @param abstractCountry
 	 * Specify on which country will the handler operate
 	 */
 	CarbonReductionHandler(AbstractCountry abstractCountry) {
 		this.country = abstractCountry;
 	}
-
-	//================================================================================
-    // Public functions to calculate the changes
-    //================================================================================
 	
 	/**
-	 * Returns the cost of investment required to
-	 * reduce dirty industry by a specified amount of tons of carbon.
-	 * The cost per unit increases linearly with increase of clean industry %
+	 * Returns the investment necessary to reduce carbon output by specified amount.
+	 * The cost of reduction by a single ton of CO2 is linearly proportional to clean industry measure.
 	 * 
 	 * @param carbonOutputChange
-	 * The amount of carbon reduction which we want to price
+	 * The amount of carbon reduction which we want to price.
 	 * 
 	 * @return
-	 * cost of reducing carbon by the specified amount.
-	 * 
-	 * @throws NotEnoughCarbonOutputException 
-	 * when it is impossible for a given country to reduce carbon by the specified amount
-	 * as they don't produce that much carbon
+	 * Cost of reducing carbon by the specified amount.
 	 */
 	public final double getInvestmentRequired(double carbonOutputChange) throws Exception {
 		double investmentRequired;
@@ -61,20 +53,22 @@ public final class CarbonReductionHandler{
 	}
 	
 	/**
-	 * Returns the reduction of carbon output
-	 * for a specified cost of investment.
+	 * Returns the reduction of carbon output for given investment amount.
+	 * Rounds down to the nearest integer, which means that actual reduction might be slightly higher.
 	 * 
-	 * @param investment cost
+	 * @param Investment amount
 	 * 
-	 * @return the change in carbon output from specified cost
+	 * @return Change in carbon output from specified cost
 	 */
 	public final double getCarbonOutputChange(double investmentAmount) throws Exception {
 		double carbonOutputChange;
 		double tempInvestmentAmount;
 
 		try {
+			// Initialise variables to zero
 			carbonOutputChange = 0;
 			tempInvestmentAmount = 0;
+			
 			// Increase carbon output until the cost is higher than investment
 			while (tempInvestmentAmount < investmentAmount) {
 				carbonOutputChange += 1;
@@ -90,22 +84,24 @@ public final class CarbonReductionHandler{
 		
 	/**
 	 * Executes carbon reduction investment.
-	 * On success, will reduce Carbon Output of a country keeping the Energy Output constant
-	 * On failure, will throw Exception.
+	 * On success, will reduce carbon output of a country keeping the energy output constant.
+	 * On failure, will throw exception.
 	 * 
-	 * @param investment
+	 * @param Carbon output reduction
 	 * 
 	 * @throws Exception
 	 */
-	public final void invest(double investment) throws Exception, NotEnoughCarbonOutputException, NotEnoughCashException {
-		double carbonOutputChange;
+	public final void investInCarbonReduction(double carbonOutputChange) throws Exception, NotEnoughCarbonOutputException, NotEnoughCashException {
+		double investmentAmount;
 		
 		try {
-			carbonOutputChange = getCarbonOutputChange(investment);
+			// Calculate the investment necessary to reduce carbon output by specified amount
+			investmentAmount = getInvestmentRequired(carbonOutputChange);
 			
-			if (investment <= this.country.availableToSpend){
+			// If enough cash and carbon output, proceed with the investment
+			if (investmentAmount <= this.country.availableToSpend){
 				if (carbonOutputChange <= this.country.carbonOutput) {
-					this.country.availableToSpend -= investment;
+					this.country.availableToSpend -= investmentAmount;
 					this.country.carbonOutput -= carbonOutputChange;
 				}
 				else {
@@ -117,14 +113,10 @@ public final class CarbonReductionHandler{
 			}
 		}
 		catch (Exception e) {
-			throw new Exception("invest function error: " + e.getMessage());
+			throw new Exception("investInCarbonReduction function error: " + e.getMessage());
 		}
 		
 	}
-	
-	//================================================================================
-    // Private methods for getting clean industry from carbon output and vice versa
-    //================================================================================
 	
 	/**
 	 * Calculates the clean industry rate for specified carbon output and energy output.
@@ -133,8 +125,9 @@ public final class CarbonReductionHandler{
 		double cleanIndustry;
 		
 		try {
-			if (carbonOutput <= energyOutput)
+			if (carbonOutput <= energyOutput) {
 				cleanIndustry = (1 - (carbonOutput / energyOutput));
+			}
 			else {
 				throw new Exception("carbonOutput is greater than energyOutput");
 			}
