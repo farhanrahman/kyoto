@@ -14,6 +14,8 @@ import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
+import uk.ac.ic.kyoto.simulationagent.SimulationAgent;
+import uk.ac.ic.kyoto.trade.TradeProtocolTestAgent;
 import uk.ac.imperial.presage2.core.simulator.InjectedSimulation;
 import uk.ac.imperial.presage2.core.simulator.Scenario;
 import uk.ac.imperial.presage2.core.util.random.Random;
@@ -160,13 +162,13 @@ public class Simulation extends InjectedSimulation {
 		 * 
 		 */
 		
+		String endTime = this.getParameter("finishTime");
 		
 //		AbstractParticipant p = new CanadaAgent(Random.randomUUID(),"CANADA","CAN",20000,10000,5000000,3,200000,28000,0,50000,30000);
 		AbstractParticipant p1 = new EUTest1(Random.randomUUID(), "Chris Test1", "CS1", 20000, 10000, 5000000, 3, 200000, 28000, 50000);
 		AbstractParticipant p2 = new EUTest2(Random.randomUUID(), "Chris Test2", "CS2", 20000, 10000, 5000000, 3, 200000, 28000, 50000);
 		s.addParticipant(p1);
 		s.addParticipant(p2);
-		
 	}
 
 }

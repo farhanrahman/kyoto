@@ -27,14 +27,15 @@ public class SimulationAgent extends AbstractParticipant {
 
 	Logger logger = Logger.getLogger(SimulationAgent.class);
 	private TradeHistory tradeHistory = SingletonProvider.getTradeHistory();
-	private Map<Integer, Map<UUID,Offer>> session = null;
 	private final static String key = "TRADE_HISTORY";
+	private Integer endTime;
 	/**
 	 * @param id
 	 * @param name
 	 */
-	public SimulationAgent(UUID id, String name) {
+	public SimulationAgent(UUID id, String name, Integer endTime) {
 		super(id, name);
+		this.endTime = endTime;
 	}
 
 	/**
@@ -62,16 +63,23 @@ public class SimulationAgent extends AbstractParticipant {
 		if(tradeHistory == null){
 			logger.warn("HUGE PROBLEM!!");
 		}
-		Map<UUID,Offer> currentTrade = tradeHistory.getHistoryForTime(currentTime);
-		if(currentTrade != null){
-			if(this.session == null){
-				session = new HashMap<Integer,Map<UUID,Offer>>();
+		
+		if(SimTime.get().intValue() == (this.endTime - 1)){
+			Map<Integer, Map<UUID,Offer>> session = tradeHistory.getHistory();
+			if(session != null){
+	            String s = "\n";
+	            for(Integer i : session.keySet()){
+	                    Map<UUID,Offer> offers = session.get(i);
+	                    s += "Time: " + i;
+	                    if(offers != null){
+		                    for(UUID id : offers.keySet()){
+		                            s += "          id:" + id + " trade: " + offers.get(id).toString();
+		                    }
+	                    }
+	                    s += "\n";
+	            }
+	            this.persist.setProperty(SimulationAgent.key, s);
 			}
-			
-			session.put(currentTime.intValue(), currentTrade);
-			logger.info(session);
-			logger.info("log break");
-			this.persist.setProperty(SimulationAgent.key, session.toString());
 		}
 
 /*			TradeHistory tradeHistory = SingletonProvider.getTradeHistory();
