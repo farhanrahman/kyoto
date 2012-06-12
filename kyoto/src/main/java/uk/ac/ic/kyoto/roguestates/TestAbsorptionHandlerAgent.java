@@ -3,12 +3,13 @@ package uk.ac.ic.kyoto.roguestates;
 import java.util.Set;
 import java.util.UUID;
 
+import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.NotEnoughCashException;
 import uk.ac.ic.kyoto.countries.NotEnoughLandException;
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
 import uk.ac.imperial.presage2.core.messaging.Input;
 
-public class TestAbsorptionHandlerAgent extends NonParticipant {
+public class TestAbsorptionHandlerAgent extends AbstractCountry {
 
 	public TestAbsorptionHandlerAgent(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
 			double GDPRate, double energyOutput, double carbonOutput) {
