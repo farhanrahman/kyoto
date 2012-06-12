@@ -8,7 +8,7 @@ import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReportHandler;
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.monitor.Monitor;
 import uk.ac.ic.kyoto.roguestates.CanadaAgent;
-import uk.ac.ic.kyoto.roguestates.TestAbsorptionHandlerAgent;
+//import uk.ac.ic.kyoto.roguestates.TestAbsorptionHandlerAgent;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.CarbonTarget;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;

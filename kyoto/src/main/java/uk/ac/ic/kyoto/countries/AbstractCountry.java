@@ -154,6 +154,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {			
 	//		MonitorTax();
 	//		checkTargets(); //did the countries meet their targets?
+			updateAvailableToSpend();
 			updateGDPRate();
 			updateCarbonOffsetYearly();
 			YearlyFunction();
