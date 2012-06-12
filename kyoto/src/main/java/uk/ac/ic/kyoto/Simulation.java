@@ -1,6 +1,7 @@
 package uk.ac.ic.kyoto;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import uk.ac.ic.kyoto.monitor.Monitor;
@@ -67,7 +68,15 @@ public class Simulation extends InjectedSimulation {
 		s.addParticipant(agent1);
 		s.addParticipant(agent2);
 		s.addParticipant(simAgent);
+		System.out.println(this.getParameter("simID"));
+		System.out.println("dave");
 		
+		Map<String, String> parameters = this.simPersist.getParameters();
+		for(String key : parameters.keySet()){
+			System.out.println("Key: " + s + " Value: " + parameters.get(key));
+		}
+		System.out.println(this.simPersist.getID());
+		System.out.println("dave");
 	}
 
 }

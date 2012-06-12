@@ -71,6 +71,7 @@ public class SimulationAgent extends AbstractParticipant {
 			session.put(currentTime.intValue(), currentTrade);
 			logger.info(session);
 			logger.info("log break");
+			this.persist.setProperty(SimulationAgent.key, session.toString());
 		}
 
 /*			TradeHistory tradeHistory = SingletonProvider.getTradeHistory();

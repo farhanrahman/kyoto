@@ -66,7 +66,7 @@ public class FakeCanadaAgent extends AbstractParticipant {
 			}
 		}			
 	}
-
+	
 	@Override
 	public void initialise() {
 		super.initialise();
@@ -114,4 +114,5 @@ public class FakeCanadaAgent extends AbstractParticipant {
 		counter++;
 		//}
 	}
+	
 }
