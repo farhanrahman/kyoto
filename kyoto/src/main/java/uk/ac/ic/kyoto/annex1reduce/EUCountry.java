@@ -23,11 +23,11 @@ public class EUCountry extends AbstractCountry {
 	private EU eu;
 	
 	public EUCountry(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
-			double GDPRate, double availiableToSpend, double emissionsTarget, double carbonOffset,
+			double GDPRate, double availiableToSpend, double carbonOffset,
 			double energyOutput, double carbonOutput) {
 		
 		super(id, name, ISO, landArea, arableLandArea, GDP,
-					GDPRate, emissionsTarget, energyOutput, carbonOutput);
+					GDPRate, energyOutput, carbonOutput);
 
 		engine = EUBehaviours.getEngine(name);
 	}

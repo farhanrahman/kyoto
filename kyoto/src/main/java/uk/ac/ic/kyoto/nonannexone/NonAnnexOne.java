@@ -9,10 +9,9 @@ public class NonAnnexOne extends AbstractCountry {
 
 
 	public NonAnnexOne(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
-			double GDPRate, long emissionsTarget, long energyOutput, long carbonOutput){
+			double GDPRate, double energyOutput, double carbonOutput){
 		super(id, name, ISO, landArea, arableLandArea, GDP,
-				GDPRate, emissionsTarget,
-				energyOutput, carbonOutput);
+				GDPRate, energyOutput, carbonOutput);
 	}
 
 	@Override

@@ -169,7 +169,7 @@ public class Simulation extends InjectedSimulation {
 		//AbstractParticipant landTester = new TestAbsorptionHandlerAgent(Random.randomUUID(),"LAND","LAN",20000, 0 ,5000000,3,28000,50000,30000);
 		s.addParticipant(p1);
 		s.addParticipant(p2);
-		s.addParticipant(a);
+		//s.addParticipant(a);
 		//s.addParticipant(overalTester);
 		//s.addParticipant(landTester);
 	}
