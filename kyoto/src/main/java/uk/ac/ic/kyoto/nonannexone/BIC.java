@@ -6,26 +6,16 @@ import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 import java.util.UUID;
 
-import uk.ac.ic.kyoto.countries.NotEnoughCarbonOutputException;
-import uk.ac.ic.kyoto.countries.NotEnoughCashException;
-import uk.ac.ic.kyoto.countries.NotEnoughLandException;
-
 /** author George
  * 
- *  
- *  Updated file soon to be added that uses CarbonAbsorptionHandler,CarbonReductionHandler 
- *  and EnergyUsageHandler that replaces the below strategy
- *  
- *  
- *  **/
+ **/
 
 public class BIC extends AbstractCountry {
 	
 	//Variables........................................................................
 	
-	protected double economy_threshold; //point where availableToSpend changes behaviour (to be decided)
-	protected double environment_friendly_target; //our countries are environmentally friendly and set own emision target :P
-	protected double energy_aim; // the energy output aim of a country for each year.
+	protected double environment_friendly_target; //country environmentally friendly
+	protected double energy_aim ; // the energy output aim of a country each year.
 	
 	
 	//............................................................................................ 
@@ -56,11 +46,15 @@ public class BIC extends AbstractCountry {
 	@Override
 	public void YearlyFunction() {
 		// TODO implement
-		//the functions that are implemented every year
+		//functions that are implemented every year
+				economy();
 				//1)GDP growth
-		economy();
+				updateGDPRate();
 				//2)Grow GDP
+				updateGDP();
 				//3)Calculate availabletoSpend
+				updateAvailableToSpend();
+				
 				//4)Recalculate carbonOffset
 		
 	}
@@ -80,27 +74,40 @@ public class BIC extends AbstractCountry {
 	
 	protected void initialiseCountry() {
 		// TODO Auto-generated method stub
-		
+		energy_aim = 0 ; //initialise an aim (to be decided)
+		environment_friendly_target = 0; //initialise a target (to be decided)
 	}
 	//.......................................................................................
 	//........................................................................................
 	
 	
 	
-	//General functions
+	/************************Functions executed every year**************************************/
 	
-	//Check available area  in order to choose decision accordingly for accepting to sell credits or plant trees for own sake.
-	private String currentAvailableArea(){
-		
-		if (this.getArableLandArea() > this.getLandArea()/16)
-			return "Safe";
-		else if ((this.getArableLandArea() == this.getLandArea()/16))
-			return "Limit";
-		else if (this.getArableLandArea() < this.getLandArea()/16)
-			return "Danger";
-		return "";		
-	}
+	//Every round our countries check current energy output and make decisions
 	
+			private void economy()
+			{
+			double difference;
+			boolean aim_success = false; 
+			difference = energy_aim - energyOutput; //difference in energy aim and current energy output.
+			
+			if (energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(difference) < availableToSpend)	
+			{
+				buildIndustry(difference); 
+				aim_success = true;
+				logger.info("Country met its yearly energy output goal");
+			}
+			else 
+			{
+				clean_development_mechanism(); //to be implemented
+				aim_success = false;
+				logger.info("Country failed to met its yearly energy output goal");
+			}
+			update_energy_aim(energy_aim,aim_success); //update the energy aim for the next year.		
+			
+			}
+			
 	
 	/*function that uses EnergyUsageHandler to create factories and increase energy output
 	 * however carbon output also increases   
@@ -120,8 +127,9 @@ public class BIC extends AbstractCountry {
 			logger.warn("Invest in carbon industry not successful");
 		}
 		}	
-	if (carbonOutput + energyUsageHandler.calculateCarbonIndustryGrowth(invest) > environment_friendly_target)
+	if (carbonOutput + energyUsageHandler.calculateCarbonIndustryGrowth(invest) >= environment_friendly_target)
 	{
+		logger.info("Country exceeded its environment friendly goal");
 		try{
 			energyUsageHandler.investInCarbonIndustry(invest);
 			} 
@@ -144,26 +152,36 @@ public class BIC extends AbstractCountry {
 		
 	
 	}
-		//Every round our countries check current energy output and make decisions
 	
-		private void economy()
+	//Function that updates the energy goal each year.
+	
+	private void update_energy_aim(double previous_aim,boolean success)
+	{
+		if (success) // country met goal, change goal
 		{
-		double difference;
-		difference = energy_aim - energyOutput; //difference in energy aim and current energy output.
-		
-		if (energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(difference) < availableToSpend)	
-			buildIndustry(difference); 
-			
-		else 
-			clean_development_mechanism(); //to be implemented
-				
+			energy_aim = previous_aim + previous_aim/16; //double aim every year
 		}
-		
+	}
+	
+			
 	  //.......................................trading.CSM...............................................
 		//basically search for potential investors in our lands through clean development mechanism (acquire cash!)
 		private void clean_development_mechanism(){
 			//to be implemented
 		}
+		
+		//Check available area  in order to choose decision accordingly for accepting to sell credits or plant trees for own sake.
+	/*	private String currentAvailableArea(){
+			
+			if (this.getArableLandArea() > this.getLandArea()/16)
+				return "Safe";
+			else if ((this.getArableLandArea() == this.getLandArea()/16))
+				return "Limit";
+			else if (this.getArableLandArea() < this.getLandArea()/16)
+				return "Danger";
+			return "";		
+		}
+		*/
 		
 }		
 		
