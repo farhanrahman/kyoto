@@ -20,9 +20,9 @@ public class Parameters {
 	
 	public String toString(){
 		String s = "";
-		s += " {finishTime: " + finishTime;
-		s += " ,testkey: " + testkey;
-		s += " ,worldemission: " + worldemision + "}";
+		s += "{ \"finishTime\" : " + "\"" + finishTime + "\"";
+		s += " , \"testkey\" : " + "\"" + testkey + "\"";
+		s += " , \"worldemision\" : " + "\"" + worldemision + "\"}";
 		return s;
 	}
 }

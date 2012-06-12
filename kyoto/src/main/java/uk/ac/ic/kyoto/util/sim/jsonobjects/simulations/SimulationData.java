@@ -17,9 +17,9 @@ public class SimulationData {
 	private String description;
 	private String state;
 	private Integer finishTime;
-	private Long createdAt;
+	private String createdAt;
 	private Integer currentTime;
-	private Integer finishedAt;
+	private String finishedAt;
 	private Parameters parameters;
 	private Integer parent;
 	private Collection<?> children;
@@ -37,12 +37,12 @@ public class SimulationData {
 	public void setState(String state){this.state = state;}
 	public Integer getFinishTime(){return finishTime;}
 	public void setFinishTime(Integer finishTime){this.finishTime = finishTime;}
-	public Long getCreatedAt(){return createdAt;}
-	public void setCreatedAt(Long createdAt){this.createdAt = createdAt;}
+	public String getCreatedAt(){return createdAt;}
+	public void setCreatedAt(String createdAt){this.createdAt = createdAt;}
 	public Integer getCurrentTime(){return currentTime;}
 	public void setCurrentTime(Integer currentTime){this.currentTime = currentTime;}
-	public Integer getFinishedAt(){return finishedAt;}
-	public void setFinishedAt(Integer finishedAt){this.finishedAt = finishedAt;}
+	public String getFinishedAt(){return finishedAt;}
+	public void setFinishedAt(String finishedAt){this.finishedAt = finishedAt;}
 	public Parameters getParameters(){return parameters;}
 	public void setParameters(Parameters parameters){this.parameters = parameters;}
 	public Integer getParent(){return parent;}
@@ -53,23 +53,41 @@ public class SimulationData {
 	public void setCountries(Map<String, CountryData> countries){this.countries = countries;}
 	
 	public String toString(){
-		String c = "";
-		for(String key : countries.keySet()){
-			c += countries.get(key).toString();
-		}		
+		String c = "{";
+		if(countries != null){
+			int index = 0;
+			for(String key : countries.keySet()){
+				if(index == 0){
+					c += " \"" + key + "\" :"+ countries.get(key).toString();
+				}
+				else{
+					c += " , \"" + key + "\" :" + countries.get(key).toString();
+				}
+				index++;
+			}
+		}
+		c += "}";
 		String s = "";
-		s += "{ _id:" + _id;
-		s += " ,name: " + name;
-		s += " ,classname: " + classname;
-		s += " ,description: " + description;
-		s += " ,state: " + state;
-		s += " ,finishTime: " + finishTime;
-		s += " ,createdAt: " + createdAt;
-		s += " ,parameters: " + parameters.toString();
-		s += " ,parent: " + parent;
-		s += " ,children: " + children.toString();
-		s += " ,countries: " + c;
-		s += " }";
+		s += "{ \"_id\" : " + _id;
+		s += " , \"name\" : " + "\"" + name + "\"";
+		s += " , \"classname\" : " + "\"" + classname + "\"";
+		s += " , \"description\" : " + "\"" + description + "\"";
+		s += " , \"state\" : " + "\"" + state + "\"";
+		s += " , \"finishTime\" : " + finishTime;
+		s += " , \"createdAt\" : " + createdAt;
+		s += " , \"currentTime\" : " + currentTime;
+		s += " , \"finishedAt\" : " + finishedAt;
+		s += " , \"parameters\" : ";
+		if(parameters != null){
+			s += parameters.toString();
+		}
+		s += " , \"parent\" : " + parent;
+		s += " , \"children\" : ";
+		if(children != null){
+			s += children.toString();
+		}
+		s += " , \"countries\" : " + c;
+		s += "}";
 		return s;
 	}
 }

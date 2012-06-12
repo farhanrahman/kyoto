@@ -26,22 +26,22 @@ public class CountryData{
 	
 	public String toString(){
 		String s = "";
-		s += " {ISO: " + ISO;
-		s += " ,name: " + name;
-		s += " ,agentName: " + agentName;
-		s += " ,Type: " + Type;
-		s += " ,Ratified: " + Ratified;
-		s += " ,totalArea: " + totalArea;
-		s += " ,waterArea: " + waterArea;
-		s += " ,arableLandArea: " + arableLandArea;
-		s += " ,GDP: " + GDP;
-		s += " ,GDPRate: " + GDPRate;
-		s += " ,landArea: " + landArea;
-		s += " ,availableToSpend " + availableToSpend;
-		s += " ,emissionsTarget " + emissionsTarget;
-		s += " ,carbonOffset " + carbonOffset;
-		s += " ,energyOutput " + energyOutput;
-		s += " ,carbonOutput " + carbonOutput + "}";
+		s += " { \"Type\" : \"" + Type + "\"";
+		s += " , \"name\" : \"" + name + "\"";
+		s += " , \"ISO\" : \"" + ISO + "\"";
+		s += " , \"agentName\" : \"" + agentName + "\"";
+		s += " , \"Ratified\" : \"" + Ratified + "\"";
+		s += " , \"totalArea\" : \"" + totalArea + "\"";
+		s += " , \"landArea\" : \"" + landArea + "\"";
+		s += " , \"waterArea\" : \"" + waterArea + "\"";
+		s += " , \"arableLandArea\" : \"" + arableLandArea + "\"";
+		s += " , \"GDP\" : \"" + GDP + "\"";
+		s += " , \"GDPRate\" : \"" + GDPRate + "\"";
+		s += " , \"availableToSpend\" : \"" + availableToSpend + "\"";
+		s += " , \"emissionsTarget\" : \"" + emissionsTarget + "\"";
+		s += " , \"carbonOffset\" : \"" + carbonOffset + "\"";
+		s += " , \"energyOutput\" : \"" + energyOutput + "\"";
+		s += " , \"carbonOutput\" : \"" + carbonOutput + "\"" + "}";
 		return s;
 		
 	}
