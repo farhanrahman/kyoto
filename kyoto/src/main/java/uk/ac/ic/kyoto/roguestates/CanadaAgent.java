@@ -71,25 +71,26 @@ public class CanadaAgent extends NonParticipant {
 //				e.printStackTrace();
 //			}
 //		}
-//		if (availableToSpend > 0) {
-//			try {
-//				carbonReductionHandler.invest((long) (availableToSpend*0.1));
-//				System.out.println("Spending " + availableToSpend* 0.1 + " on carbon reduction. Current carbon output is " + carbonOutput + ".");
-//			} catch (Exception e) {
-//				logger.warn(e.getMessage(), e);
-//				e.printStackTrace();
-//			}
-//		}
 		if (availableToSpend > 0) {
 			try {
-				energyUsageHandler.investInCarbonIndustry((long) (availableToSpend*0.1));
-				System.out.println("Spending " + availableToSpend* 0.1 + " on industry investment.");
-				System.out.println();
-				} catch (Exception e) {
+				carbonReductionHandler.invest((long) (availableToSpend*0.1));
+				System.out.println("Spending " + availableToSpend* 0.1 + " on carbon reduction. Current carbon output is " + carbonOutput + ".");
+			} catch (Exception e) {
 				logger.warn(e.getMessage(), e);
 				e.printStackTrace();
 			}
 		}
+//		if (availableToSpend > 0) {
+//			try {
+//				energyUsageHandler.investInCarbonIndustry((long) (availableToSpend*0.1));
+//				System.out.println("Spending " + availableToSpend* 0.1 + " on industry investment.");
+//				System.out.println();
+//				} catch (Exception e) {
+//				logger.warn(e.getMessage(), e);
+//				e.printStackTrace();
+//			}
+//		}
+//		System.out.println(energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(500));
 		System.out.println("I have this much money: " + availableToSpend + ".");
 		System.out.println("My GDPRate is : " + GDPRate);
 		System.out.println("My carbon output is : " + carbonOutput);

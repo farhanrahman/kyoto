@@ -109,7 +109,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			System.out.println("Unable to reach monitor service.");
 			e1.printStackTrace();
 		}
-		// Initialize the Action Handlers DO THEY HAVE TO BE INSTANTIATED ALL THE TIME? Yes
+		// Initialize the Action Handlers DO THEY HAVE TO BE INSTANTIATED ALL THE TIME?
 		try {
 			timeService = getEnvironmentService(ParticipantTimeService.class);
 		} catch (UnavailableServiceException e1) {
@@ -128,7 +128,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			System.out.println("Unable to reach emission reporting service.");
 			e.printStackTrace();
 		}
-	
 		initialiseCountry();
 	}
 	
@@ -152,13 +151,13 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	@Override
 	final public void execute() {
 		super.execute();
-		if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
-			MonitorTax();
+		if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {			
+	//		MonitorTax();
 	//		checkTargets(); //did the countries meet their targets?
+			updateAvailableToSpend();
 			updateGDPRate();
 			updateCarbonOffsetYearly();
 			YearlyFunction();
-			updateAvailableToSpend(); 
 		}
 		if (timeService.getCurrentYear() % timeService.getYearsInSession() == 0) {
 			resetCarbonOffset();
@@ -252,7 +251,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		}
 		
 		GDPRate = GDPRate + marketStateFactor + (GameConst.GROWTH_SCALER*(energyOutput))/GDP;
-		GDPRate = GDPRate / 100; // Makes it a % that we can multiply by later.
 		} catch (UnavailableServiceException e) {
 			System.out.println("Unable to reach economy service.");
 			e.printStackTrace();
@@ -264,7 +262,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * @author sc1109
 	 */
 	private final void updateGDP() {
-		GDP += GDP * GDPRate;
+		GDP = GDP + GDP * GDPRate;
 	}
 	
 	/**
