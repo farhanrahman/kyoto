@@ -9,13 +9,15 @@ import uk.ac.ic.kyoto.countries.AbstractCountry;
 
 public class USAgent extends AbstractCountry {
 
-	private int yearMod4 = 0;
-	private boolean democratElected; 			// chosen at random on class instantiation
-	private long AbsolutionReductionTarget; 	// Units in metric tonnes C02
-												// Can be positive or negative
-	private long IntensityReductionTarget; 	// Units percentage (%)
-	private long IntensityRatio;				// Units tonnes / million $
-
+	private int 		    yearMod4 = 0;
+	private boolean       democratElected; 			// chosen at random on class instantiation
+	private double 		AbsolutionReductionTarget; 	// Units in metric tonnes C02
+													// Can be positive or negative
+	private double 		IntensityReductionTarget; 	// Units percentage (%)
+	private double 		IntensityRatio;				// Units tonnes / million $
+	
+	private double			AverageGDPRate; // to be stored in an array or DB for furhter analysis. 
+	
 	public USAgent(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
 			double GDPRate, long emissionsTarget,
 			long energyOutput, long carbonOutput){
@@ -33,17 +35,16 @@ public class USAgent extends AbstractCountry {
 	 * Called by execute() every year.
 	 */
 	public void YearlyFunction() {
-		/*
-		 * Function is executed at the end of every year. 
-		 */
-		
-		// Election results are affected by the previous years GDPEate
+		// GDPRate function calculates what the GDPRate was for the previous year.
+		CalculateAverageGDP(); // takes the previously saved AverageGDPRate, adds the just calculated
+		// value and divides by the elapsed number of years.
+		// Election results are affected by the previous years GDPRate
 		if(IsElectionYear()) {
 			HoldElection(); // will set democratElected to either true or false
 		}
 		SetEmissionsTarget();
 		if (democratElected) {
-			AbsolutionReductionTarget = (long) (carbonOutput*0.95);
+			AbsolutionReductionTarget = (carbonOutput*0.95);
 		}
 		else {
 			AbsolutionReductionTarget = carbonOutput;
@@ -120,10 +121,32 @@ public class USAgent extends AbstractCountry {
 		// this target will be translated into an absolute metric value, thus higher values result
 		// in a greater reduction. 		
 		DemocratCampaignTarget = this.IntensityReductionTarget + Random.randomInt(5);
-		
-		
-		
+		// How to define what is a 'good' / 'bad' GDPRate for the previous year?
+		// Long term average?
+		// GDPRate += 
 	}
+	
+	private void CalculateAverageGDP() {
+	// Previous cumulative GDP changes divided by new total years elapsed. 
+		try {
+			ParticipantTimeService timeService = getEnvironmentService(ParticipantTimeService.class);			
+		} 
+		catch (UnavailableServiceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		int YearsElapsed = timeService.getCurrentYear(); // returns years elapsed from year 0
+		
+		if(YearsElapsed==0) {
+			AverageGDPRate = GDPRate; // GDPRates are seeded from historical data. 
+		}
+		else {
+			(AverageGDPRate + GDPRate) / YearsElapsed;
+		}
+	}
+	
+	
 	
 	private double CalculateTargetRatio(){
 		
