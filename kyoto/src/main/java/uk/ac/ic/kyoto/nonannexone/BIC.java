@@ -21,11 +21,10 @@ public class BIC extends AbstractCountry {
 	//............................................................................................ 
 	
 	public BIC(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
-			double GDPRate, double energyOutput, double carbonOutput)
-	{
+			double GDPRate, double energyOutput, double carbonOutput){
 		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput);
 
-}
+	}
 	
 	//Inherited functions......................................................................
 	//.........................................................................................
@@ -48,10 +47,6 @@ public class BIC extends AbstractCountry {
 		// TODO implement
 		//functions that are implemented every year
 				economy();
-				//1)GDP growth
-				updateGDPRate();
-				//2)Grow GDP
-				updateGDP();
 				//3)Calculate availabletoSpend
 				updateAvailableToSpend();
 				
@@ -86,27 +81,24 @@ public class BIC extends AbstractCountry {
 	
 	//Every round our countries check current energy output and make decisions
 	
-			private void economy()
-			{
-			double difference;
-			boolean aim_success = false; 
-			difference = energy_aim - energyOutput; //difference in energy aim and current energy output.
+	private void economy(){
+		double difference;
+		boolean aim_success = false; 
+		difference = energy_aim - energyOutput; //difference in energy aim and current energy output.
+		
+		if (energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(difference) < availableToSpend){
+			buildIndustry(difference); 
+			aim_success = true;
+			logger.info("Country met its yearly energy output goal");
+		}
+		else{
+			clean_development_mechanism(); //to be implemented
+			aim_success = false;
+			logger.info("Country failed to met its yearly energy output goal");
+		}
+		update_energy_aim(energy_aim,aim_success); //update the energy aim for the next year.		
 			
-			if (energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(difference) < availableToSpend)	
-			{
-				buildIndustry(difference); 
-				aim_success = true;
-				logger.info("Country met its yearly energy output goal");
-			}
-			else 
-			{
-				clean_development_mechanism(); //to be implemented
-				aim_success = false;
-				logger.info("Country failed to met its yearly energy output goal");
-			}
-			update_energy_aim(energy_aim,aim_success); //update the energy aim for the next year.		
-			
-			}
+	}
 			
 	
 	/*function that uses EnergyUsageHandler to create factories and increase energy output
@@ -114,51 +106,44 @@ public class BIC extends AbstractCountry {
 	*
 	*/
 	
-	private void buildIndustry(double invest) 
-	{
-	double carbon_difference; //the difference between environmentally friendly target and actual carbon emission.
+	private void buildIndustry(double invest) {
+		double carbon_difference; //the difference between environmentally friendly target and actual carbon emission.
 	
-	if (carbonOutput + energyUsageHandler.calculateCarbonIndustryGrowth(invest) < environment_friendly_target) //invest but also check if we meet our environment friendly target.
-		{
-		try{
-	energyUsageHandler.investInCarbonIndustry(invest);
+		if (carbonOutput + energyUsageHandler.calculateCarbonIndustryGrowth(invest) < environment_friendly_target){ //invest but also check if we meet our environment friendly target.
+			try{
+				energyUsageHandler.investInCarbonIndustry(invest);
 			} 
-		catch (Exception e) {
-			logger.warn("Invest in carbon industry not successful");
-		}
+			catch (Exception e) {
+				logger.warn("Invest in carbon industry not successful");
+			}
 		}	
-	if (carbonOutput + energyUsageHandler.calculateCarbonIndustryGrowth(invest) >= environment_friendly_target)
-	{
-		logger.info("Country exceeded its environment friendly goal");
-		try{
-			energyUsageHandler.investInCarbonIndustry(invest);
+		
+		if (carbonOutput + energyUsageHandler.calculateCarbonIndustryGrowth(invest) >= environment_friendly_target)
+		{
+			logger.info("Country exceeded its environment friendly goal");
+			
+			try{
+				energyUsageHandler.investInCarbonIndustry(invest);
 			} 
-				catch (Exception e)
-				{
-					logger.warn("Invest in carbon industry not successful");
-				}
-		try{ //also since country exceeds its own carbon target, invests in carbon absorption in order to get carbon offset.
-			carbon_difference = environment_friendly_target - (carbonOutput + energyUsageHandler.calculateCarbonIndustryGrowth(invest));
-			if (carbonAbsorptionHandler.getCost(carbon_difference) < availableToSpend )
-				carbonAbsorptionHandler.invest(carbonAbsorptionHandler.getCost(carbon_difference));
+			catch (Exception e){
+				logger.warn("Invest in carbon industry not successful");
 			}
-		catch (Exception e)
-			{
-			logger.warn("Problem with investing in carbon absorption: " + e);
-		
+			
+			try{ //also since country exceeds its own carbon target, invests in carbon absorption in order to get carbon offset.
+				carbon_difference = environment_friendly_target - (carbonOutput + energyUsageHandler.calculateCarbonIndustryGrowth(invest));
+				if (carbonAbsorptionHandler.getCost(carbon_difference) < availableToSpend )
+					carbonAbsorptionHandler.invest(carbonAbsorptionHandler.getCost(carbon_difference));
 			}
-	}
-	
-		
-	
+			catch (Exception e){
+				logger.warn("Problem with investing in carbon absorption: " + e);
+			}
+		}
 	}
 	
 	//Function that updates the energy goal each year.
 	
-	private void update_energy_aim(double previous_aim,boolean success)
-	{
-		if (success) // country met goal, change goal
-		{
+	private void update_energy_aim(double previous_aim,boolean success){
+		if (success){ // country met goal, change goal
 			energy_aim = previous_aim + previous_aim/16; //double aim every year
 		}
 	}
