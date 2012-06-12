@@ -29,14 +29,13 @@ public abstract class AbstractCountry extends AbstractParticipant {
     //================================================================================
 	
 	final protected String 		ISO;		//ISO 3166-1 alpha-3
-	private 		UUID 		id;
 	
 	/*
 	 * These variables are related to land area for
 	 * dealing with carbon absorption prices
 	 */
-	final protected double 		landArea;
-	protected 		  double 		arableLandArea;
+	final protected	double 		landArea;
+	protected 		double 		arableLandArea;
 	
 	/*
 	 * These variables are related to carbon emissions and 
@@ -85,8 +84,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		
 		super(id, name);
 		
-		
-		this.id = id;
 		this.landArea = landArea;
 		this.ISO = ISO;
 		this.arableLandArea = arableLandArea;
@@ -157,7 +154,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			
 			if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
 				MonitorTax();
-				checkTargets(); //did the countries meet their targets?
 				updateGDPRate();
 				updateCarbonOffsetYearly();
 				YearlyFunction();
@@ -184,7 +180,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 */
 	public void MonitorTax() {
 		// Give a tax to Monitor agent for monitoring every year
-		this.monitor.taxForMonitor(GDP*GameConst.MONITOR_COST_PERCENTAGE); // Take % of GDP for monitoring
+		this.monitor.applyTaxation(GDP*GameConst.MONITOR_COST_PERCENTAGE); // Take % of GDP for monitoring
 		availableToSpend -= GDP*GameConst.MONITOR_COST_PERCENTAGE;
 	}
 
@@ -200,11 +196,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 //				//TODO - Insert sanctions here!
 //		}
 		return carbonOutput;
-	}
-	
-	// This functionality may be taken over by the carbonOffsetUpdate
-	public void checkTargets() {
-		this.monitor.checkTargets();
 	}
 	
 	protected Set<ParticipantSharedState> getSharedState(){
@@ -342,10 +333,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.emissionsTarget = emissionsTarget;
 	}
 	
-	public void setAvailableToSpend(UUID id, long availableToSpend) {
-		if (this.id==id) {
+	public void setAvailableToSpend(long availableToSpend) {
 			this.availableToSpend = availableToSpend;
-		}
 	}
 
 }

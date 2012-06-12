@@ -18,13 +18,9 @@ import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
 import uk.ac.imperial.presage2.core.environment.ServiceDependencies;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.event.EventListener;
-import uk.ac.imperial.presage2.core.simulator.Parameter;
 import uk.ac.imperial.presage2.core.event.EventBus;
-import uk.ac.imperial.presage2.core.event.EventListener;
-import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
 
-import com.google.inject.Inject;
 
 /**
  * Monitoring service
@@ -59,6 +55,7 @@ public class Monitor extends EnvironmentService {
 	
 	private CarbonReportingService carbonReportingService;
 	private CarbonTarget carbonTargetingService;
+	
 	@Inject
 	public Monitor(EnvironmentSharedStateAccess sharedState,
 					EnvironmentServiceProvider provider) {
@@ -127,32 +124,45 @@ public class Monitor extends EnvironmentService {
 		// Find how many countries can be monitored with the available cash
 		int noToMonitor = (int) Math.floor(cash / GameConst.MONITORING_PRICE);
 		
-		// Create a list of countries that were already monitored this year
-		ArrayList<AbstractCountry> monitoredCountries = new ArrayList<AbstractCountry>();
-		
-		// Instantiate random number generator that will be used to pick the countries to monitor
-		Random randGenerator = new Random();
-		
-		for (int i = 0; i < noToMonitor; i++) {
-			// Pick a country that was not yet monitored
-			AbstractCountry pickedCountry;
-			do {
-				int randomCountryIndex = randGenerator.nextInt(memberStates.size());
-				pickedCountry = memberStates.get(randomCountryIndex);
+		// Check if all the countries can be monitored
+		if (noToMonitor >= memberStates.size()) {
+			// monitor all the countries
+			for (AbstractCountry country: memberStates) {
+				long realCarbonOutput = country.getMonitored();
+				cash -= GameConst.MONITORING_PRICE;
+				double reportedCarbonOutput = carbonReportingService.getReport(country.getID(), SimTime.get());
+				if (realCarbonOutput > reportedCarbonOutput)
+					cheatSanction(country);
 			}
-			while (monitoredCountries.contains(pickedCountry) );
+		}
+		else {
+			// Create a list of countries that were already monitored this year
+			ArrayList<AbstractCountry> monitoredCountries = new ArrayList<AbstractCountry>();
 			
-			// Monitor the country
-			cash -= GameConst.MONITORING_PRICE;
-			long realCarbonOutput = pickedCountry.getMonitored();
-					
-			// Note that the country was monitored
-			monitoredCountries.add(pickedCountry);
+			// Instantiate random number generator that will be used to pick the countries to monitor
+			Random randGenerator = new Random();
 			
-			// Apply sanctions if a country has cheated
-			double reportedCarbonOutput = carbonReportingService.getReport(pickedCountry.getID(), SimTime.get());
-			if (realCarbonOutput > reportedCarbonOutput)
-			cheatSanction(pickedCountry);
+			for (int i = 0; i < noToMonitor; i++) {
+				// Pick a country that was not yet monitored
+				AbstractCountry pickedCountry;
+				do {
+					int randomCountryIndex = randGenerator.nextInt(memberStates.size());
+					pickedCountry = memberStates.get(randomCountryIndex);
+				}
+				while (monitoredCountries.contains(pickedCountry) );
+				
+				// Monitor the country
+				cash -= GameConst.MONITORING_PRICE;
+				long realCarbonOutput = pickedCountry.getMonitored();
+						
+				// Note that the country was monitored
+				monitoredCountries.add(pickedCountry);
+				
+				// Apply sanctions if a country has cheated
+				double reportedCarbonOutput = carbonReportingService.getReport(pickedCountry.getID(), SimTime.get());
+				if (realCarbonOutput > reportedCarbonOutput)
+					cheatSanction(pickedCountry);
+			}
 		}
 	}
 	
