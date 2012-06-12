@@ -37,9 +37,10 @@ public class TimeService extends EnvironmentService {
 	}
 	
 	@Inject
-	public void setEB(EventBus eb) {
+	void setEventBus(EventBus eb) {
 		this.eb = eb;
 		eb.subscribe(this);
+		System.out.println("FUUUUUU");
 	}
 	
 	@Override

@@ -29,21 +29,6 @@ public class USAgent extends NonParticipant {
 		// TODO Auto-generated constructor stub
 	}
 	
-	@EventListener
-	private void yearCounter(EndOfYearCycle e) {
-		yearMod4++;
-		if (yearMod4 == 4) {
-			yearMod4 = 0;
-			election();
-		}
-		if (democratElected) {
-			internalEmissionsTarget = (long) (carbonOutput*0.95);
-		}
-		else {
-			internalEmissionsTarget = carbonOutput;
-		}
-	}
-	
 	@Override
 	public void YearlyFunction() {
 		try {
