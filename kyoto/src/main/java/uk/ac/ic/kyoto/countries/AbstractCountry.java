@@ -266,6 +266,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		}
 		
 		GDPRate = GDPRate + marketStateFactor + (GameConst.GROWTH_SCALER*(energyOutput))/GDP;
+		GDPRate /= 100; // Needs to be a % for rate formula
 		} catch (UnavailableServiceException e) {
 			System.out.println("Unable to reach economy service.");
 			e.printStackTrace();
@@ -277,7 +278,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * @author sc1109
 	 */
 	private final void updateGDP() {
-		GDP = GDP + GDP * GDPRate;
+		GDP += GDP * GDPRate;
 	}
 	
 	/**
