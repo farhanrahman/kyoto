@@ -11,11 +11,9 @@ import uk.ac.imperial.presage2.core.messaging.Input;
 public class TestAbsorptionHandlerAgent extends NonParticipant {
 
 	public TestAbsorptionHandlerAgent(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
-			double GDPRate, long emissionsTarget,
-			long energyOutput, long carbonOutput) {
+			double GDPRate, double energyOutput, double carbonOutput) {
 		super(id, name, ISO, landArea, arableLandArea, GDP,
-				GDPRate, emissionsTarget,
-				energyOutput, carbonOutput);
+				GDPRate, energyOutput, carbonOutput);
 		// TODO Auto-generated constructor stub
 	}
 	
