@@ -7,7 +7,7 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 
 import uk.ac.ic.kyoto.singletonfactory.SingletonProvider;
-import uk.ac.ic.kyoto.singletonfactory.Token;
+import uk.ac.ic.kyoto.tokengen.Token;
 import uk.ac.ic.kyoto.tradehistory.TradeHistory;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.EnvironmentConnector;
@@ -216,7 +216,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 							// send accept message
 							logger.debug("Accepting exchange proposal: "
 									+ trade);
-							//if(!TradeProtocol.this.tradeHistory.tradeExists(offerMessage.getTradeID())){
+							if(!TradeProtocol.this.tradeHistory.tradeExists(offerMessage.getTradeID())){
 								TradeProtocol.this.tradeHistory.addToHistory(
 										SimTime.get(), offerMessage.getTradeID(), trade);
 								//TODO update the carbon credits of the responder if it's not CDM
@@ -225,9 +225,9 @@ public abstract class TradeProtocol extends FSMProtocol {
 												Performative.ACCEPT_PROPOSAL,
 												ResponderReplies.ACCEPT.name(), t,
 												from, to, offerMessage));								
-							//}else{
-							//	logger.warn("Trade already happened");
-							//}
+							}else{
+								logger.warn("Trade already happened");
+							}
 						} else {
 							// send reject message
 							logger.debug("Rejecting exchange proposal: "

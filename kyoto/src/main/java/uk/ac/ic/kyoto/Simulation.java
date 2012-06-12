@@ -169,6 +169,18 @@ public class Simulation extends InjectedSimulation {
 		AbstractParticipant p2 = new EUTest2(Random.randomUUID(), "Chris Test2", "CS2", 20000, 10000, 5000000, 3, 200000, 28000, 50000);
 		s.addParticipant(p1);
 		s.addParticipant(p2);
+		
+
+		//AbstractParticipant p3 = new TradeProtocolTestAgent(Random.randomUUID(), "TEST1", "TST");
+		//AbstractParticipant p4 = new TradeProtocolTestAgent(Random.randomUUID(), "TEST2", "TST");
+		//SimulationAgent a = new SimulationAgent(Random.randomUUID(), "SimAgent", Integer.parseInt(endTime));
+		//AbstractParticipant overalTester = new TestAbsorptionHandlerAgent(Random.randomUUID(),"ABSORPTION","ABS",20000, 10000 ,5000000,3,28000,50000,30000);
+		//AbstractParticipant landTester = new TestAbsorptionHandlerAgent(Random.randomUUID(),"LAND","LAN",20000, 0 ,5000000,3,28000,50000,30000);
+		//s.addParticipant(p3);
+		//s.addParticipant(p4);
+		//s.addParticipant(a);
+		//s.addParticipant(overalTester);
+		//s.addParticipant(landTester);		
 	}
 
 }
