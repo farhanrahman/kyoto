@@ -47,11 +47,11 @@ public class Simulation extends InjectedSimulation {
 			.addGlobalEnvironmentService(CarbonReportingService.class)
 			.addParticipantEnvironmentService(Monitor.class)
 			.addParticipantEnvironmentService(ParticipantCarbonReportingService.class)
+			.addGlobalEnvironmentService(GlobalTimeService.class)
 			.addParticipantEnvironmentService(ParticipantTimeService.class)
 			.addParticipantEnvironmentService(Economy.class)
 //			.addParticipantEnvironmentService(CarbonTarget.class)
-			.addGlobalEnvironmentService(GlobalTimeService.class)
-			);		
+			);
 		
 		System.out.println("Pie: " + pie);
 	

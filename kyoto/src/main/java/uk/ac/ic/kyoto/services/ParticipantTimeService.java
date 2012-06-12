@@ -1,12 +1,16 @@
 package uk.ac.ic.kyoto.services;
 
+import org.apache.log4j.Logger;
+
 import com.google.inject.Inject;
 
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.TimeDriven;
 import uk.ac.imperial.presage2.core.environment.EnvironmentRegistrationRequest;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
+import uk.ac.imperial.presage2.core.environment.EnvironmentServiceProvider;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
+import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.event.Event;
 import uk.ac.imperial.presage2.core.event.EventBus;
 import uk.ac.imperial.presage2.core.event.EventListener;
@@ -25,9 +29,21 @@ public class ParticipantTimeService extends EnvironmentService {
 	//@Parameter(name="yearsInSession")
 	int yearsInSession;
 	
+	Logger logger = Logger.getLogger(ParticipantTimeService.class);
+	
+	GlobalTimeService globalTimeService;
+	
 	@Inject
-	public ParticipantTimeService(EnvironmentSharedStateAccess sharedState) {
+	public ParticipantTimeService(EnvironmentSharedStateAccess sharedState, EnvironmentServiceProvider provider) {
 		super(sharedState);
+		try {
+			globalTimeService = provider.getEnvironmentService(GlobalTimeService.class);
+		} catch (UnavailableServiceException e) {
+			logger.warn(e.getMessage(), e);
+			e.printStackTrace();
+		}
+		ticksInYear = globalTimeService.ticksInYear;
+		yearsInSession = globalTimeService.yearsInSession;
 	}
 	
 	@Override
@@ -39,18 +55,16 @@ public class ParticipantTimeService extends EnvironmentService {
     // Public getters
     //================================================================================
 	
-	public int getCurrentTick() {
-		ticksInYear = (Integer) sharedState.getGlobal("TicksInYear");
-		yearsInSession = (Integer) sharedState.getGlobal("YearsInSession");
+	public int getCurrentTick() {		
 		return SimTime.get().intValue();
 	}
 	
 	public int getCurrentYear() {
-		return (Integer) sharedState.getGlobal("YearCount");
+		return globalTimeService.getYear();
 	}
 	
 	public int getCurrentSession() {
-		return (Integer) sharedState.getGlobal("SessionCount");
+		return globalTimeService.getSession();
 	}
 	
 	public int getTicksInYear() {

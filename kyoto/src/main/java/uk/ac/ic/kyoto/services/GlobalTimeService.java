@@ -13,6 +13,12 @@ import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 import uk.ac.imperial.presage2.core.simulator.Parameter;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
 
+/**
+ * 
+ * @author stuart
+ *
+ */
+
 public class GlobalTimeService extends EnvironmentService {
 	
 	public static String name = "GlobalTime";
@@ -88,6 +94,14 @@ public class GlobalTimeService extends EnvironmentService {
 		EndOfSessionCycle(int endedSession) {
 			this.endedSession = endedSession;
 		}
+	}
+	
+	public int getYear() {
+		return yearCounter;
+	}
+	
+	public int getSession() {
+		return sessionCounter;
 	}
 
 }
