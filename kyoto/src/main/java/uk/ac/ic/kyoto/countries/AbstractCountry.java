@@ -128,8 +128,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			System.out.println("Unable to reach emission reporting service.");
 			e.printStackTrace();
 		}
-		
-		updateAvailableToSpend();
 		initialiseCountry();
 	}
 	
@@ -153,24 +151,16 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	@Override
 	final public void execute() {
 		super.execute();
-		try {
-			// TODO make sure that the proper getters are used
-			TimeService timeService = getEnvironmentService(TimeService.class);
-			
-			if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
-				MonitorTax();
-				updateGDPRate();
-				updateGDP();
-				updateCarbonOffsetYearly();
-				YearlyFunction();
-			}
-			if (timeService.getCurrentYear() % timeService.getYearsInSession() == 0) {
-				resetCarbonOffset();
-				SessionFunction();
-			}
-		} catch (UnavailableServiceException e) {
-			logger.warn(e.getMessage(), e);
-			e.printStackTrace();
+		if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {			
+	//		MonitorTax();
+	//		checkTargets(); //did the countries meet their targets?
+			updateGDPRate();
+			updateCarbonOffsetYearly();
+			YearlyFunction();
+		}
+		if (timeService.getCurrentYear() % timeService.getYearsInSession() == 0) {
+			resetCarbonOffset();
+			SessionFunction();
 		}
 		behaviour();
 	}

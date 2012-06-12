@@ -3,6 +3,7 @@ package uk.ac.ic.kyoto.services;
 import com.google.inject.Inject;
 
 import uk.ac.imperial.presage2.core.Time;
+import uk.ac.imperial.presage2.core.TimeDriven;
 import uk.ac.imperial.presage2.core.environment.EnvironmentRegistrationRequest;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
@@ -36,9 +37,10 @@ public class TimeService extends EnvironmentService {
 	}
 	
 	@Inject
-	public void setEB(EventBus eb) {
+	void setEventBus(EventBus eb) {
 		this.eb = eb;
 		eb.subscribe(this);
+		System.out.println("FUUUUUU");
 	}
 	
 	@Override
@@ -46,10 +48,20 @@ public class TimeService extends EnvironmentService {
 		super.registerParticipant(req);
 	}
 	
+//	@Override
+//	public void incrementTime() {
+//		tickCounter++;
+//		if (getCurrentTick() - yearCounter * ticksInYear == ticksInYear) {
+//			EndOfYearCycle y = new EndOfYearCycle(yearCounter);
+//			eb.publish(y);
+//		}
+//	}
+	
 	@EventListener
 	public void updateTickCounter (EndOfTimeCycle e) {
 		tickCounter++;
-		if (getCurrentTick() == ticksInYear) {
+		System.out.println("LOL");
+		if (getCurrentTick() - yearCounter * ticksInYear == ticksInYear) {
 			EndOfYearCycle y = new EndOfYearCycle(yearCounter);
 			eb.publish(y);
 		}
@@ -58,7 +70,7 @@ public class TimeService extends EnvironmentService {
 	@EventListener
 	public void updateYearCounter (EndOfYearCycle e) {
 		yearCounter++;
-		if (yearCounter == yearsInSession) {
+		if (yearCounter - sessionCounter * yearsInSession == yearsInSession) {
 			EndOfSessionCycle s = new EndOfSessionCycle(sessionCounter);
 			eb.publish(s);
 		}
@@ -94,11 +106,11 @@ public class TimeService extends EnvironmentService {
     //================================================================================
 	
 	public int getCurrentTick() {
-		return tickCounter - yearCounter * ticksInYear;
+		return SimTime.get().intValue();
 	}
 	
 	public int getCurrentYear() {
-		return yearCounter - sessionCounter * yearsInSession;
+		return yearCounter;
 	}
 	
 	public int getCurrentSession() {

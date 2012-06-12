@@ -9,6 +9,7 @@ import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.monitor.Monitor;
 import uk.ac.ic.kyoto.roguestates.CanadaAgent;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
+import uk.ac.ic.kyoto.services.CarbonTarget;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.TimeService;
 import uk.ac.imperial.presage2.core.simulator.InjectedSimulation;
@@ -43,7 +44,9 @@ public class Simulation extends InjectedSimulation {
 			.addParticipantEnvironmentService(Monitor.class)
 			.addParticipantEnvironmentService(ParticipantCarbonReportingService.class)
 			.addParticipantEnvironmentService(TimeService.class)
-			.addParticipantEnvironmentService(Economy.class));		
+			.addParticipantEnvironmentService(Economy.class)
+//			.addParticipantEnvironmentService(CarbonTarget.class)
+			);		
 	
 		modules.add(new RuleModule());
 			//.addClasspathDrlFile("foo.drl")
@@ -156,7 +159,7 @@ public class Simulation extends InjectedSimulation {
 		 */
 		
 		
-		AbstractParticipant p = new CanadaAgent(Random.randomUUID(),"CANADA","CAN",20000,10000,5000000,3,200000,28000,0,50000,30000);
+		AbstractParticipant p = new CanadaAgent(Random.randomUUID(),"CANADA","CAN",20000,10000,5000000,3,28000,50000,30000);
 		s.addParticipant(p);
 		
 	}
