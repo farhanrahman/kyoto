@@ -59,7 +59,8 @@ public class TimeService extends EnvironmentService {
 	@EventListener
 	public void updateTickCounter (EndOfTimeCycle e) {
 		tickCounter++;
-		if (getCurrentTick() == ticksInYear) {
+		System.out.println("LOL");
+		if (getCurrentTick() - yearCounter * ticksInYear == ticksInYear) {
 			EndOfYearCycle y = new EndOfYearCycle(yearCounter);
 			eb.publish(y);
 		}
