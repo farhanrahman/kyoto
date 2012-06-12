@@ -4,7 +4,7 @@ import uk.ac.ic.kyoto.math.QuadraticEquation;
 
 /**
  * 
- * @author Stuart, Adam
+ * @author Stuart, Adam, Piotr
  */
 public final class CarbonReductionHandler{
 	
@@ -30,15 +30,17 @@ public final class CarbonReductionHandler{
 	 * 
 	 * @param carbonOutputChange
 	 * The amount of carbon reduction which we want to price
+	 * 
 	 * @return
 	 * cost of reducing carbon by the specified amount.
+	 * 
 	 * @throws NotEnoughCarbonOutputException 
 	 * when it is impossible for a given country to reduce carbon by the specified amount
 	 * as they don't produce that much carbon
-	 * 
 	 */
-	public final long getCost(long carbonOutputChange) throws NotEnoughCarbonOutputException {
+	public final long getCost(long carbonOutputChange) throws Exception {
 		long cost;
+		
 		try {			
 			// Calculate the initial clean industry rate and the change during investment
 			double cleanIndustryBefore = calculateCleanIndustryMeasure(country.carbonOutput, country.energyOutput);
@@ -53,10 +55,10 @@ public final class CarbonReductionHandler{
 							GameConst.CARBON_REDUCTION_COEFF * cleanIndustryChange / 2)
 							* cleanIndustryChange);
 		}
-		catch (NotEnoughCarbonOutputException e) {
-			throw new NotEnoughCarbonOutputException();
+		catch (Exception e) {
+			throw new Exception("getCost function error: " + e);
 		}
-		System.out.println("Cost?" + cost);
+		
 		return cost;
 	}
 	
@@ -65,10 +67,11 @@ public final class CarbonReductionHandler{
 	 * for a specified cost of investment.
 	 * 
 	 * @param investment cost
+	 * 
 	 * @return the change in carbon output from specified cost
 	 */
-	public final double getCarbonOutputChange(long cost) {
-		double carbonOutputChange=0;
+	public final double getCarbonOutputChange(double d) throws Exception {
+		double carbonOutputChange;
 
 		try {
 			// Calculate the clean industry rate before the investment
@@ -77,18 +80,18 @@ public final class CarbonReductionHandler{
 			//Solve the quadratic equation to find the change of clean industry
 			double a = GameConst.CARBON_REDUCTION_COEFF / 2;
 			double b = GameConst.CARBON_REDUCTION_COEFF * cleanIndustryBefore + GameConst.CARBON_REDUCTION_OFFSET;
-			double c = - cost;
+			double c = - d;
 			QuadraticEquation equation = new QuadraticEquation(a, b, c);
 			System.out.println("Quadradtic roots a: "+equation.getRootOne()+" b: "+equation.getRootTwo());
 			
 			double cleanIndustryChange = Math.max(equation.getRootOne(), equation.getRootTwo() );
+			
 			carbonOutputChange = calculateCarbonOutput(cleanIndustryChange, country.energyOutput);
 		}
 		catch (Exception e) {
-			System.out.println("Carbon reduction has died");
-			e.printStackTrace();
+			throw new Exception("getCarbonOutputChange function error: " + e);
 		}
-		System.out.println("CarbonOutputChange: " + carbonOutputChange);
+		
 		return carbonOutputChange;
 	}
 		
@@ -97,25 +100,33 @@ public final class CarbonReductionHandler{
 	 * On success, will reduce Carbon Output of a country keeping the Energy Output constant
 	 * On failure, will throw Exception.
 	 * 
-	 * @param investment
+	 * @param d
+	 * 
 	 * @throws Exception
 	 */
-	public final void invest(long investment) throws Exception{
-		// calculate the decrease in carbon output
-		double carbonOutputChange = getCarbonOutputChange(investment);
+	public final void invest(double d) throws Exception, NotEnoughCarbonOutputException, NotEnoughCashException {
+		double carbonOutputChange;
 		
-		if (investment <= this.country.availableToSpend){
-			if (carbonOutputChange <= this.country.carbonOutput) {
-				this.country.availableToSpend -= investment;
-				this.country.carbonOutput -= carbonOutputChange;
+		try {
+			carbonOutputChange = getCarbonOutputChange(d);
+			
+			if (d <= this.country.availableToSpend){
+				if (carbonOutputChange <= this.country.carbonOutput) {
+					this.country.availableToSpend -= d;
+					this.country.carbonOutput -= carbonOutputChange;
+				}
+				else {
+					throw new NotEnoughCarbonOutputException();
+				}
 			}
 			else {
-				throw new NotEnoughCarbonOutputException();
+				throw new NotEnoughCashException();
 			}
 		}
-		else {
-			throw new NotEnoughCashException();
+		catch (Exception e) {
+			throw new Exception("invest function error: " + e);
 		}
+		
 	}
 	
 	//================================================================================
@@ -123,32 +134,35 @@ public final class CarbonReductionHandler{
     //================================================================================
 	
 	/**
-	 * Calculates the clean industry rate for specified carbon output and energy output
+	 * Calculates the clean industry rate for specified carbon output and energy output.
 	 */
-	private double calculateCleanIndustryMeasure(long carbonOutput, long energyOutput) throws NotEnoughCarbonOutputException{
-		double cleanIndustry = 1;
+	private double calculateCleanIndustryMeasure(double carbonOutput, double energyOutput) throws Exception {
+		double cleanIndustry;
+		
 		try {
 			if (carbonOutput <= energyOutput)
-				cleanIndustry = 1 - ((double)carbonOutput / (double)energyOutput);
+				cleanIndustry = 1 - carbonOutput / energyOutput;
 			else {
-				//country.logger.warn("It is impossible for carbonOutput to exceed energyOutput");
-				// Move error logging to country when it catches exception
-				throw new NotEnoughCarbonOutputException();
+				throw new Exception("carbonOutput is greater than energyOutput");
 			}
 		}
-		catch (ArithmeticException e) {
-			//country.logger.error("Specified energyOuput was 0: " + e);
-			System.out.println("Calculate clean industry measure error");
+		catch (Exception e) {
+			throw new Exception("calculateCleanIndustryMeasure function error " + e);
 		}
-		System.out.println("CleanIndustry: " + cleanIndustry);
+		
 		return cleanIndustry;
 	}
 	
-	private long calculateCarbonOutput(double cleanIndustry, long energyOutput) {
-		long carbonOutput;
-		carbonOutput = (long) ((double)energyOutput * (1 - cleanIndustry) ); 
-		System.out.println("CarbonOutput: " + carbonOutput);
+	private double calculateCarbonOutput(double cleanIndustry, double energyOutput) throws Exception {
+		double carbonOutput;
+		
+		try {
+			carbonOutput = energyOutput * (1 - cleanIndustry);
+		}
+		catch (Exception e) {
+			throw new Exception("calculateCarbonOutput error: " + e);
+		}
+		
 		return carbonOutput;
-		// TODO implement exception handling
 	}
 }

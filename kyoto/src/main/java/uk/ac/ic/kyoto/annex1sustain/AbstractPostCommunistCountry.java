@@ -1,6 +1,6 @@
 package uk.ac.ic.kyoto.annex1sustain;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.UUID;
 import java.util.List;
 
@@ -10,7 +10,7 @@ import uk.ac.ic.kyoto.countries.NotEnoughCashException;
 import uk.ac.ic.kyoto.countries.NotEnoughLandException;
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.market.FossilPrices;
-import uk.ac.ic.kyoto.services.TimeService;
+import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
@@ -43,18 +43,17 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	
 	public AbstractPostCommunistCountry(UUID id, String name, String ISO,
 			double landArea, double arableLandArea, double GDP, double GDPRate,
-			long availiableToSpend, long emissionsTarget, long carbonOffset, long energyOutput, long carbonOutput)
+			long availiableToSpend, long carbonOffset, long energyOutput, long carbonOutput)
 	{
-		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, emissionsTarget,
-				carbonOffset, energyOutput);
+		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, carbonOffset, energyOutput);
 		
 		this.internalPrice = Long.MAX_VALUE;
-		this.uncommittedTransactionsCosts = new ArrayList<Double>();
-		this.committedTransactionsCosts = new ArrayList<Double>();
+		this.uncommittedTransactionsCosts = new LinkedList<Double>();
+		this.committedTransactionsCosts = new LinkedList<Double>();
 		this.creditsToSell = 0;
 		this.creditsToSellTarget = 0;
-		this.absorptionInvestmentTarget = Constants.MINIMAL_INVESTMENT;
-		this.reductionInvestmentTarget = Constants.MINIMAL_INVESTMENT;
+		this.absorptionInvestmentTarget = Constants.INVESTMENT_MIN;
+		this.reductionInvestmentTarget = Constants.INVESTMENT_MIN;
 		this.lastYearFactor = 1;	
 	}
 	
@@ -180,24 +179,35 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 * The less ticks till the end, the cheaper we sell.
 	 */
 	private double calculateEndOfRoundFactor() {
-		double endOfRoundFactor = 1;
+		double endOfRoundFactor;
+		int ticksInYear;
+		int currentTick;
+		int tresholdTick;
+		
 		try {
-			// get ticksToEndOfRound from Time service
-			TimeService timeService = getEnvironmentService(TimeService.class);
-			int ticksToEndOfRound = timeService.getTicksInYear() - timeService.getCurrentTick();
+			// Create time service and get the tick variables
+			ParticipantTimeService timeService = getEnvironmentService(ParticipantTimeService.class);
 			
-			if(ticksToEndOfRound < Constants.END_OF_ROUND_MINIMUM_NUMBER_OF_TICKS)
-				endOfRoundFactor = 	Constants.END_OF_ROUND_FACTOR_SLOPE *
-									(
-										Constants.NUMBER_OF_TICKS_IN_ROUND
-										- Constants.END_OF_ROUND_MINIMUM_NUMBER_OF_TICKS
-										- ticksToEndOfRound
-									);
+			ticksInYear = timeService.getTicksInYear();
+			currentTick = timeService.getCurrentTick();
+			tresholdTick = (int) (ticksInYear * Constants.END_OF_ROUND_YEAR_PART);
+			
+			// If in the final part of the year, adjust the constant factor
+			if (currentTick > tresholdTick) {
+				endOfRoundFactor = 1 + ((Constants.END_OF_ROUND_FACTOR_MAX - 1) * 
+										(currentTick - tresholdTick) /
+										(ticksInYear - tresholdTick));
+			}
+			// Else, set factor to default 1
+			else {
+				endOfRoundFactor = 1;
+			}
 		}
 		catch (Exception e) {
 			logger.warn("Problem with calculating endOfRoundFactor: " + e);
 			endOfRoundFactor = 1;
 		}
+		
 		return endOfRoundFactor;
 	}
 	
@@ -225,8 +235,8 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 */
 	private void increaseAbsorptionInvestmentTarget() {
 		absorptionInvestmentTarget = (long) (absorptionInvestmentTarget * Constants.INVESTMENT_SCALING);
-		if (absorptionInvestmentTarget > Constants.MAXIMAL_INVESTMENT) {
-			absorptionInvestmentTarget = Constants.MAXIMAL_INVESTMENT;
+		if (absorptionInvestmentTarget > Constants.INVESTMENT_MAX) {
+			absorptionInvestmentTarget = Constants.INVESTMENT_MAX;
 		}
 	}
 	
@@ -235,8 +245,8 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 */
 	private void decreaseAbsorptionInvestmentTarget() {
 		absorptionInvestmentTarget = (long) (absorptionInvestmentTarget / Constants.INVESTMENT_SCALING);
-		if (absorptionInvestmentTarget < Constants.MINIMAL_INVESTMENT) {
-			absorptionInvestmentTarget = Constants.MINIMAL_INVESTMENT;
+		if (absorptionInvestmentTarget < Constants.INVESTMENT_MIN) {
+			absorptionInvestmentTarget = Constants.INVESTMENT_MIN;
 		}
 	}
 	
@@ -245,8 +255,8 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 */
 	private void increaseReductionInvestmentTarget() {
 		reductionInvestmentTarget = (long) (reductionInvestmentTarget * Constants.INVESTMENT_SCALING);
-		if (reductionInvestmentTarget > Constants.MAXIMAL_INVESTMENT) {
-			reductionInvestmentTarget = Constants.MAXIMAL_INVESTMENT;
+		if (reductionInvestmentTarget > Constants.INVESTMENT_MAX) {
+			reductionInvestmentTarget = Constants.INVESTMENT_MAX;
 		}
 	}
 	
@@ -255,8 +265,8 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 */
 	private void decreaseReductionInvestmentTarget() {
 		reductionInvestmentTarget = (long) (reductionInvestmentTarget / Constants.INVESTMENT_SCALING);
-		if (reductionInvestmentTarget < Constants.MINIMAL_INVESTMENT) {
-			reductionInvestmentTarget = Constants.MINIMAL_INVESTMENT;
+		if (reductionInvestmentTarget < Constants.INVESTMENT_MIN) {
+			reductionInvestmentTarget = Constants.INVESTMENT_MIN;
 		}
 	}
 	
@@ -372,7 +382,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			
 			// Adjust the new target if out of possible range
 			if (newSellingTarget > carbonOffset) {
-				newSellingTarget = carbonOffset;
+				newSellingTarget = Math.round(carbonOffset);
 			}
 		}
 		catch (Exception e) {
@@ -411,7 +421,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		try {			
 			
 			// Get current year from the Time service
-			TimeService timeService = getEnvironmentService(TimeService.class);
+			ParticipantTimeService timeService = getEnvironmentService(ParticipantTimeService.class);
 			int currentYear = timeService.getCurrentYear();
 			
 			// Get the data from the FossilPrices Service
@@ -455,10 +465,10 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			
 			switch (economy.getEconomyState()) {
 				case GROWTH:
-					marketFactor = 1 + Constants.MARKET_STATE_COEFFICIENT;
+					marketFactor = Constants.MARKET_STATE_COEFFICIENT;
 					break;
 				case RECESSION:
-					marketFactor =  1 - Constants.MARKET_STATE_COEFFICIENT;
+					marketFactor =  2 - Constants.MARKET_STATE_COEFFICIENT;
 					break;
 				default:
 					marketFactor = 1;
@@ -500,8 +510,21 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		}
 		
 		try {
-			// Calculate the factor
-			lastYearFactor = 1 + Constants.LAST_YEAR_FACTOR_SLOPE * (lastYearPercentageSold - Constants.LAST_YEAR_FACTOR_OFFSET);
+			// Calculate the lastYearFactor
+			if (lastYearPercentageSold >= Constants.LAST_YEAR_FACTOR_OFFSET) {
+				lastYearFactor = 1 + ((Constants.LAST_YEAR_FACTOR_MAX - 1) *
+									  (lastYearPercentageSold - Constants.LAST_YEAR_FACTOR_OFFSET) /
+									  (1 - Constants.LAST_YEAR_FACTOR_OFFSET));
+			}
+			else {
+				lastYearFactor = 1 - ((1 - Constants.LAST_YEAR_FACTOR_MAX) *
+									  (Constants.LAST_YEAR_FACTOR_OFFSET - lastYearPercentageSold) /
+									  (Constants.LAST_YEAR_FACTOR_OFFSET));
+			}
+		}
+		catch (ArithmeticException e) {
+			logger.warn("LAST_YEAR_FACTOR_OFFSET must be > 0 and < 1");
+			lastYearFactor = 0;
 		}
 		catch (Exception e) {
 			logger.warn("Problem with calculating lastYearFactor: " + e);

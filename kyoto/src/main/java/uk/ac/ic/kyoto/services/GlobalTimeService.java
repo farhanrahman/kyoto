@@ -2,7 +2,7 @@ package uk.ac.ic.kyoto.services;
 
 import com.google.inject.Inject;
 
-import uk.ac.imperial.presage2.core.Time;
+import uk.ac.ic.kyoto.countries.GameConst;
 import uk.ac.imperial.presage2.core.environment.EnvironmentRegistrationRequest;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
@@ -10,29 +10,33 @@ import uk.ac.imperial.presage2.core.event.Event;
 import uk.ac.imperial.presage2.core.event.EventBus;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
-import uk.ac.imperial.presage2.core.simulator.Parameter;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
 
-/** 
- * @author sc1109 & azyzio & Stuart
+/**
+ * 
+ * @author stuart
+ *
  */
-public class TimeService extends EnvironmentService {
 
-	private int tickCounter=0;
-	private int yearCounter=0;
-	private int sessionCounter=0;
+public class GlobalTimeService extends EnvironmentService {
+	
+	public static String name = "GlobalTime";
+	
+	public int tickCounter=0, yearCounter=0, sessionCounter=0;
+
+	//@Parameter(name="ticksInYear")
+	public int ticksInYear=GameConst.TICKS_IN_YEAR;
+	
+	//@Parameter(name="yearsInSession")
+	public int yearsInSession=GameConst.YEARS_IN_SESSION;
 	
 	EventBus eb;
 	
-	//@Parameter(name="ticksInYear")
-	int ticksInYear=365;
-	
-	//@Parameter(name="yearsInSession")
-	int yearsInSession=10;
-	
 	@Inject
-	public TimeService(EnvironmentSharedStateAccess sharedState) {
+	public GlobalTimeService(EnvironmentSharedStateAccess sharedState) {
 		super(sharedState);
+		sharedState.changeGlobal("TicksInYear", ticksInYear);
+		sharedState.changeGlobal("YearsInSession", yearsInSession);
 	}
 	
 	@Inject
@@ -49,7 +53,7 @@ public class TimeService extends EnvironmentService {
 	@EventListener
 	public void updateTickCounter (EndOfTimeCycle e) {
 		tickCounter++;
-		if (getCurrentTick() == ticksInYear) {
+		if (SimTime.get().intValue() - yearCounter * ticksInYear == ticksInYear) {
 			EndOfYearCycle y = new EndOfYearCycle(yearCounter);
 			eb.publish(y);
 		}
@@ -58,7 +62,8 @@ public class TimeService extends EnvironmentService {
 	@EventListener
 	public void updateYearCounter (EndOfYearCycle e) {
 		yearCounter++;
-		if (yearCounter == yearsInSession) {
+		sharedState.changeGlobal("YearCount", yearCounter);
+		if (yearCounter - sessionCounter * yearsInSession == yearsInSession) {
 			EndOfSessionCycle s = new EndOfSessionCycle(sessionCounter);
 			eb.publish(s);
 		}
@@ -67,8 +72,9 @@ public class TimeService extends EnvironmentService {
 	@EventListener
 	public void updateSessionCounter (EndOfSessionCycle e) {
 		sessionCounter++;
+		sharedState.changeGlobal("SessionCount", sessionCounter);
 	}
-
+	
 	//================================================================================
     // Events
     //================================================================================
@@ -89,27 +95,12 @@ public class TimeService extends EnvironmentService {
 		}
 	}
 	
-	//================================================================================
-    // Public getters
-    //================================================================================
-	
-	public int getCurrentTick() {
-		return tickCounter - yearCounter * ticksInYear;
+	public int getYear() {
+		return yearCounter;
 	}
 	
-	public int getCurrentYear() {
-		return yearCounter - sessionCounter * yearsInSession;
-	}
-	
-	public int getCurrentSession() {
+	public int getSession() {
 		return sessionCounter;
 	}
-	
-	public int getTicksInYear() {
-		return ticksInYear;
-	}
-	
-	public int getYearsInSession() {
-		return yearsInSession;
-	}
+
 }

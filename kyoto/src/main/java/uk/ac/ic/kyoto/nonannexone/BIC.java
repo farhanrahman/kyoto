@@ -1,9 +1,19 @@
 package uk.ac.ic.kyoto.nonannexone;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
+import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
-
+import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 import java.util.UUID;
+
+/** author George
+ * 
+ *  
+ *  Updated file soon to be added that uses CarbonAbsorptionHandler,CarbonReductionHandler 
+ *  and EnergyUsageHandler that replaces the below strategy
+ *  
+ *  
+ *  **/
 
 public class BIC extends AbstractCountry {
 	
@@ -17,28 +27,12 @@ public class BIC extends AbstractCountry {
 	protected double GDP_aim; //aim of GDP for a year
 	protected long tree_area; // number of trees
 	
-	//Constants.............................................................................
-	
-	public static final long  nf_en_output = 0; //effect on energy output of normal factory(to be decided)
-	public static final long  ef_en_output=0; //environment friendly factory's effect(to be decided)
-	public static final long  NFactorycost=0; //cost of normal factory
-	public static final long EFactorycost=0; //cost of environmental factory (expensive)
-	public static final long carbon_effect_nf = 0; //effect on carbon output
-	public static final long carbon_effect_ef = 0; //effect on carbon output - less than normal factory
-	public static final long war_industry_unit_cost = 0; // cost of creating a unit of the greatest empire ever in the known world
-	public static final long enough_units_for_war = 0; // constant for estimating if in good position for declaring war.
-	public static final long tree_cost = 0 ; //cost of each tree from availableToSpend
-	public static final long tree_effect_on_carbon_output = 0; //reduction in carbon output
-	
-	
 	//............................................................................................ 
 	
 	public BIC(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
-			double GDPRate, long emissionsTarget, long energyOutput, long carbonOutput)
+			double GDPRate, double energyOutput, double carbonOutput)
 	{
-		super(id, name, ISO, landArea, arableLandArea, GDP,
-				GDPRate, emissionsTarget,
-				energyOutput, carbonOutput);
+		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput);
 
 }
 	
@@ -51,16 +45,28 @@ public class BIC extends AbstractCountry {
 
 	}
 	
+	@EventListener
+	public void TickFunction(EndOfTimeCycle e){
+		//TODO implement functions that are done every tick
+		//trades are done every tick ( CSM offers) 
+		
+	}
+	
 	@Override
 	public void YearlyFunction() {
-		// TODO Auto-generated method stub
+		// TODO implement
+		//the functions that are implemented every year
+				//1)GDP growth
+				//2)Grow GDP
+				//3)Calculate availabletoSpend
+				//4)Recalculate carbonOffset
 		
 	}
 
 	@Override
 	public void SessionFunction() {
-		// TODO Auto-generated method stub
-		
+		// TODO implement 
+		// carbonAbsorption to carbonOffset
 	}
 
 	
@@ -80,16 +86,16 @@ public class BIC extends AbstractCountry {
 	
 	//General functions
 	
-	//Check if the available area is (safe=S,on the limit = L,unsafe=U)  in order to choose decision accordingly for accepting to sell credits or plant trees for own sake.
-	private char currentAvailableArea(){
-		if (this.getArableLandArea() > this.getLandArea()/16)
-			return 'S';
-		else if ((this.getArableLandArea() == this.getLandArea()/16))
-			return 'L';
-		else if (((this.getArableLandArea() < this.getLandArea()/16)))
-			return 'U';
-		return 0;
+	//Check available area  in order to choose decision accordingly for accepting to sell credits or plant trees for own sake.
+	private String currentAvailableArea(){
 		
+		if (this.getArableLandArea() > this.getLandArea()/16)
+			return "Safe";
+		else if ((this.getArableLandArea() == this.getLandArea()/16))
+			return "Limit";
+		else if (this.getArableLandArea() < this.getLandArea()/16)
+			return "Danger";
+		return "";		
 	}
 	
 	
@@ -100,23 +106,23 @@ public class BIC extends AbstractCountry {
 		case 1: //build normal factory 
 			{
 			normal_factory = normal_factory + 1;
-			energyOutput = energyOutput + nf_en_output;
-			availableToSpend = availableToSpend - NFactorycost;
-			carbonOutput = carbonOutput + carbon_effect_nf;
+			energyOutput = energyOutput + Country_constants.nf_en_output;
+			availableToSpend = availableToSpend - Country_constants.NFactorycost;
+			carbonOutput = carbonOutput + Country_constants.carbon_effect_nf;
 			}
 		
 		case 2: //build environment friendly factory
 			{
 			environment_friendly_factory = environment_friendly_factory + 1;
-			energyOutput = energyOutput + ef_en_output;
-			availableToSpend = availableToSpend - EFactorycost;
-			carbonOutput = carbonOutput + carbon_effect_ef;
+			energyOutput = energyOutput + Country_constants.ef_en_output;
+			availableToSpend = availableToSpend - Country_constants.EFactorycost;
+			carbonOutput = carbonOutput + Country_constants.carbon_effect_ef;
 			}
 		
 		case 3: //invest in creating armies!
 			{
 			war_industry = war_industry + 1;
-			availableToSpend = availableToSpend - war_industry_unit_cost;
+			availableToSpend = availableToSpend - Country_constants.war_industry_unit_cost;
 			}
 		}
 	}
@@ -148,8 +154,8 @@ public class BIC extends AbstractCountry {
 				tree_planting(); // more carbonOutput than required, try reducing it by planting forests (reduces arableLandArea)
 		}
 		
-		//.......................................trading................................................
-		//basically search for potential investors in our lands
+		//.......................................trading.CSM...............................................
+		//basically search for potential investors in our lands through clean development mechanism (acquire cash!)
 		private void listen_to_offers(){
 			//to be implemented
 		}
@@ -159,7 +165,7 @@ public class BIC extends AbstractCountry {
 		
 		//bad economic state, therefore either invade other nearby countries or listen_to_offers. Praying an option? :p
 		private void red_alert(){
-			if (war_industry >= enough_units_for_war)
+			if (war_industry >= Country_constants.enough_units_for_war)
 			declare_war(); //to be implemented - if enough war units then declare war to expand and acquire more land
 			else
 			//no money, no tanks
@@ -169,11 +175,11 @@ public class BIC extends AbstractCountry {
 		
 		private void tree_planting()
 		{
-			if (currentAvailableArea() == 'S') //safe to plant
+			if (currentAvailableArea() == "Safe") //safe to plant
 			{
 				tree_area = tree_area + 1;
-				availableToSpend = availableToSpend - tree_cost;
-				carbonOutput = carbonOutput - tree_effect_on_carbon_output;
+				availableToSpend = availableToSpend - Country_constants.tree_cost;
+				carbonOutput = carbonOutput - Country_constants.tree_effect_on_carbon_output;
 			}
 			
 							
@@ -183,7 +189,8 @@ public class BIC extends AbstractCountry {
 		{
 			
 		}
-		
+		//to be continued ...
+	
 	
 	
 	

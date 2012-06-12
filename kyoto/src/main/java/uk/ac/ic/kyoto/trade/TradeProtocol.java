@@ -6,8 +6,8 @@ import java.util.UUID;
 
 import org.apache.log4j.Logger;
 
-import uk.ac.ic.kyoto.tokengen.Token;
-import uk.ac.ic.kyoto.tokengen.SingletonProvider;
+import uk.ac.ic.kyoto.singletonfactory.SingletonProvider;
+import uk.ac.ic.kyoto.singletonfactory.Token;
 import uk.ac.ic.kyoto.tradehistory.TradeHistory;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.EnvironmentConnector;
@@ -219,7 +219,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 							//if(!TradeProtocol.this.tradeHistory.tradeExists(offerMessage.getTradeID())){
 								TradeProtocol.this.tradeHistory.addToHistory(
 										SimTime.get(), offerMessage.getTradeID(), trade);
-								//TODO update the carbon credits of the responder
+								//TODO update the carbon credits of the responder if it's not CDM
 								conv.getNetwork().sendMessage(
 										new UnicastMessage<OfferMessage>(
 												Performative.ACCEPT_PROPOSAL,
