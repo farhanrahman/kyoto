@@ -5,22 +5,22 @@ public final class Constants {
 	// Constants for Internal Price calculation
 	
 	// EndOfRoundFactor calculation
-	public static final double END_OF_ROUND_FACTOR_SLOPE = 2;
-	public static final long END_OF_ROUND_MINIMUM_NUMBER_OF_TICKS = 1000;
-	public static final long NUMBER_OF_TICKS_IN_ROUND = 2000;
+	public static final double END_OF_ROUND_FACTOR_MAX = 2;
+	public static final double END_OF_ROUND_YEAR_PART = 0.5;
 	
 	// LastYearFactor calculation constants
-	public static final double LAST_YEAR_FACTOR_SLOPE = 1;
-	public static final double LAST_YEAR_FACTOR_OFFSET = 50; // expressed in %
+	public static final double LAST_YEAR_FACTOR_MIN = 0.8;
+	public static final double LAST_YEAR_FACTOR_MAX = 1.2;
+	public static final double LAST_YEAR_FACTOR_OFFSET = 0.5;
 	
 	// Constants for The Quantity to be sold
 	public static final double FOSSIL_FUEL_PRICE_COEFFICIENT = 1;
-	public static final double MARKET_STATE_COEFFICIENT = 0.1;
+	public static final double MARKET_STATE_COEFFICIENT = 1.1;
 	public static final double SELL_AMOUNT_COEFFICIENT = 1;
 	
 	// Constants to determine when to invest
-	public static final long MINIMAL_INVESTMENT = 1;
-	public static final long MAXIMAL_INVESTMENT = 16;
+	public static final long INVESTMENT_MIN = 1;
+	public static final long INVESTMENT_MAX = 16;
 	public static final double INVESTMENT_SCALING = 2;
 
 }

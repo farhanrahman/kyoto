@@ -33,7 +33,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * These variables are related to land area for
 	 * dealing with carbon absorption prices
 	 */
-	final protected double 		landArea;
+	final protected	double 		landArea;
+
 	protected 		double 		arableLandArea;
 	
 	/*
@@ -41,6 +42,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * calculating 'effective' carbon output
 	 */
 	protected 		long 		carbonOutput;		// Tons of CO2 produced every year
+	protected		long		carbonAbsorption;	// Tons of CO2 absorbed by forests every year
 	protected 		long 		carbonOffset; 		// Tons of CO2 that the country acquired (by trading or energy absorption)
 	protected 		long		emissionsTarget;	// Number of tons of carbon you SHOULD produce
 	
@@ -89,6 +91,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.carbonOffset = 0;
 		this.availableToSpend = 0;
 		this.carbonOutput = carbonOutput;
+		this.carbonAbsorption = 0;
 		this.carbonEmissionReports = new HashMap<Integer, Long>();
 		this.energyOutput = energyOutput;
 		
@@ -187,7 +190,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	public final long getMonitored() {
 		return carbonOutput;
 	}
-		
+
 	protected Set<ParticipantSharedState> getSharedState(){
 		Set<ParticipantSharedState> s = super.getSharedState();
 		s.add(ParticipantCarbonReportingService.createSharedState(this.getCarbonEmissionReports(), this.getID()));
@@ -276,18 +279,13 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * Adjusts the amount of CarbonOffset depending on the last years usage
 	 */
 	private final void updateCarbonOffsetYearly() {
-		// Check if the emissionTarget for this year was met
-		if (emissionsTarget + carbonOffset - carbonOutput > 0)
-			// Add / Subtract from carbonOffset depending on this year's usage
-			carbonOffset += (emissionsTarget - carbonOutput);
-		else {
-			// Possibly the report to the Monitor can be sent
-		}
+
+		carbonOffset += (emissionsTarget - carbonOutput + carbonAbsorption);
+
 	}
 	
 	private final void resetCarbonOffset() {
 		carbonOffset = 0;
-		// TODO adjust the CarbonOutput so that the forests build through Carbon Absorbtion are being counted.
 	}
 	
 	//================================================================================
@@ -331,7 +329,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	public void setAvailableToSpend(long availableToSpend) {
-		this.availableToSpend = availableToSpend;
+			this.availableToSpend = availableToSpend;
 	}
 
 }
