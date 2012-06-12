@@ -5,7 +5,7 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
-import uk.ac.ic.kyoto.tokengen.SingletonProvider;
+import uk.ac.ic.kyoto.singletonfactory.SingletonProvider;
 import uk.ac.ic.kyoto.trade.Offer;
 import uk.ac.ic.kyoto.trade.OfferMessage;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
@@ -28,7 +28,7 @@ public class EUTest2 extends AbstractCountry{
 			double arableLandArea, double GDP, double GDPRate,
 			long emissionsTarget, long energyOutput, long carbonOutput) {
 		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, emissionsTarget,
-				energyOutput, carbonOutput);
+				energyOutput);
 		// TODO Auto-generated constructor stub
 	}
 
