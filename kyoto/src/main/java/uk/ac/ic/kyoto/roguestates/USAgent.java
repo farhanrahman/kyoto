@@ -83,6 +83,9 @@ public class USAgent extends NonParticipant {
 		}
 	}
 	
+<<<<<<< HEAD
+	private void election() {
+=======
 	/*
 	 * Sets the emissions target for the year after taking into account various factors. 
 	 * Variable will hold an absolute value, but the agent itself will be targeting an
@@ -151,6 +154,7 @@ public class USAgent extends NonParticipant {
 	 * This function only called when country is instantiated. 
 	 */
 	private void SetInitialPoliticalParty() {
+>>>>>>> 5a44f76... Not fully implemented monitoring classes added. Various additions to USAgent.
 		int rand = Random.randomInt(100);
 		if (rand < 50) {
 			democratElected = true;
