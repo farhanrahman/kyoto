@@ -1,15 +1,11 @@
-package uk.ac.ic.kyoto.roguestates;
+package uk.ac.ic.kyoto.trade;
 
 import java.util.Map;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
 
-import uk.ac.ic.kyoto.tokengen.SingletonProvider;
-import uk.ac.ic.kyoto.trade.Offer;
-import uk.ac.ic.kyoto.trade.OfferMessage;
-import uk.ac.ic.kyoto.trade.TradeProtocol;
-import uk.ac.ic.kyoto.trade.TradeType;
+import uk.ac.ic.kyoto.singletonfactory.SingletonProvider;
 import uk.ac.ic.kyoto.tradehistory.TradeHistory;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.messaging.Performative;
@@ -20,9 +16,9 @@ import uk.ac.imperial.presage2.core.simulator.SimTime;
 import uk.ac.imperial.presage2.util.fsm.FSMException;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
-public class FakeCanadaAgent extends AbstractParticipant {
+public class TradeProtocolTestAgent extends AbstractParticipant {
 	
-	Logger logger = Logger.getLogger(FakeCanadaAgent.class);
+	Logger logger = Logger.getLogger(TradeProtocolTestAgent.class);
 	
 	private TradeProtocol tradeProtocol;
 	
@@ -30,7 +26,7 @@ public class FakeCanadaAgent extends AbstractParticipant {
 	private int emissionsTarget;
 	private int carbonOffset;
 	
-	public FakeCanadaAgent(UUID id, String name, String ISO){
+	public TradeProtocolTestAgent(UUID id, String name, String ISO){
 		super(id, name);
 	}
 	
