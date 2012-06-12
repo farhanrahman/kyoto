@@ -33,11 +33,11 @@ public final class GameConst {
 	/**
 	 * The price of reducing carbon reduction by one unit when we have 100% dirty industry
 	 */
-	public static float CARBON_REDUCTION_OFFSET = 1;
+	public static float CARBON_REDUCTION_OFFSET = 990;
 	/**
 	 * Coefficient to calculate the cost of carbon reduction
 	 */
-	public static float CARBON_REDUCTION_COEFF = 1;
+	public static float CARBON_REDUCTION_COEFF = 2000;
 	
 	/**
 	 * Coefficient to calculate the cost of carbon absorption
