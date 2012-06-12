@@ -22,29 +22,14 @@ public class USAgent extends NonParticipant {
 	private long IntensityRatio;				// Units tonnes / million $
 
 	public USAgent(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
-			double GDPRate, long availableToSpend, long emissionsTarget, long carbonOffset,
+			double GDPRate, long emissionsTarget,
 			long energyOutput, long carbonOutput){
 		super(id, name, ISO, landArea, arableLandArea, GDP,
-				GDPRate, availableToSpend, emissionsTarget, carbonOffset,
+				GDPRate, emissionsTarget,
 				energyOutput, carbonOutput);
 		SetInitialPoliticalParty();
 		SetInitialIntensityRatio();
 		// TODO Auto-generated constructor stub
-	}
-	
-	@EventListener
-	private void yearCounter(EndOfYearCycle e) {
-		yearMod4++;
-		if (yearMod4 == 4) {
-			yearMod4 = 0;
-			election();
-		}
-		if (democratElected) {
-			AbsolutionReductionTarget = (long) (carbonOutput*0.95);
-		}
-		else {
-			AbsolutionReductionTarget = carbonOutput;
-		}
 	}
 	
 	@Override
@@ -57,7 +42,7 @@ public class USAgent extends NonParticipant {
 		/*
 		 * Function is executed at the end of every year. 
 		 */
-		if(IsElectionYear) {
+		if(IsElectionYear()) {
 			HoldElection(); // will set democratElected to either true or false
 		}
 		SetEmissionsTarget();
@@ -83,9 +68,6 @@ public class USAgent extends NonParticipant {
 		}
 	}
 	
-<<<<<<< HEAD
-	private void election() {
-=======
 	/*
 	 * Sets the emissions target for the year after taking into account various factors. 
 	 * Variable will hold an absolute value, but the agent itself will be targeting an
@@ -141,20 +123,19 @@ public class USAgent extends NonParticipant {
 		// Choose democrat next election period target intensity ratio reduction. Remember that
 		// this target will be translated into an absolute metric value, thus higher values result
 		// in a greater reduction. 		
-		DemocratCampaignTarget = this.IntensityReductionTarget + Random.randomDouble(5);
+		DemocratCampaignTarget = this.IntensityReductionTarget + Random.randomInt(5);
 		
-		if(this.GDPRate		
+		
 	}
 	
 	private double CalculateTargetRatio(){
 		
-		return(result);
+		return 0;
 	}
 	/*
 	 * This function only called when country is instantiated. 
 	 */
 	private void SetInitialPoliticalParty() {
->>>>>>> 5a44f76... Not fully implemented monitoring classes added. Various additions to USAgent.
 		int rand = Random.randomInt(100);
 		if (rand < 50) {
 			democratElected = true;

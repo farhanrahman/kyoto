@@ -72,14 +72,14 @@ public class Monitor extends EnvironmentService {
 		}
 		
 		// Register for the carbon emission targeting service
-		try {
-			this.carbonTargetingService = provider.getEnvironmentService(CarbonTarget.class);
-		} catch (UnavailableServiceException e) {
-			e.printStackTrace();
-		}
-		if(this.carbonTargetingService == null){
-			System.err.println("PROBLEM");
-		}
+//		try {
+//			this.carbonTargetingService = provider.getEnvironmentService(CarbonTarget.class);
+//		} catch (UnavailableServiceException e) {
+//			e.printStackTrace();
+//		}
+//		if(this.carbonTargetingService == null){
+//			System.err.println("PROBLEM");
+//		}
 	}
 	
 	/**
