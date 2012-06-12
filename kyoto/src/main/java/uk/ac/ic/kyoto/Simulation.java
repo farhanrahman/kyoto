@@ -36,9 +36,6 @@ public class Simulation extends InjectedSimulation {
 //	@Parameter(name="nonParticipantCount")
 //	public int nonParticipantCount = 1;
 	
-	@Parameter(name="pie")
-	public int pie;
-	
 	@Override
 	protected Set<AbstractModule> getModules() {
 		Set<AbstractModule> modules = new HashSet<AbstractModule>();
@@ -53,8 +50,6 @@ public class Simulation extends InjectedSimulation {
 			.addParticipantEnvironmentService(Economy.class)
 //			.addParticipantEnvironmentService(CarbonTarget.class)
 			);
-		
-		System.out.println("Pie: " + pie);
 	
 		modules.add(new RuleModule());
 			//.addClasspathDrlFile("foo.drl")
