@@ -90,6 +90,7 @@ public class CanadaAgent extends NonParticipant {
 				e.printStackTrace();
 			}
 		}
+//		System.out.println(energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(500));
 		System.out.println("I have this much money: " + availableToSpend + ".");
 		System.out.println("My GDPRate is : " + GDPRate);
 		System.out.println("My carbon output is : " + carbonOutput);
