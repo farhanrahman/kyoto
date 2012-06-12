@@ -3,7 +3,6 @@ package uk.ac.ic.kyoto.roguestates;
 import java.util.Set;
 import java.util.UUID;
 
-import uk.ac.ic.kyoto.countries.EnergyUsageHandler;
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
 import uk.ac.imperial.presage2.core.messaging.Input;
 

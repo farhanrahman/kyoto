@@ -155,6 +155,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	//		MonitorTax();
 	//		checkTargets(); //did the countries meet their targets?
 			updateAvailableToSpend();
+	//		updateGDP(); //left out until this runs only every year
 			updateGDPRate();
 			updateCarbonOffsetYearly();
 			YearlyFunction();

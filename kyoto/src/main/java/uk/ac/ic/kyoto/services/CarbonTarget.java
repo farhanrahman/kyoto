@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
-import uk.ac.ic.kyoto.services.ParticipantTimeService.EndOfSessionCycle;
-import uk.ac.ic.kyoto.services.ParticipantTimeService.EndOfYearCycle;
+import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfSessionCycle;
+import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfYearCycle;
 import uk.ac.imperial.presage2.core.environment.EnvironmentRegistrationRequest;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentServiceProvider;
