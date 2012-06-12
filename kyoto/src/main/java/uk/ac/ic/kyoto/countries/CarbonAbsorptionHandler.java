@@ -25,15 +25,15 @@ public final class CarbonAbsorptionHandler {
 	 * 
 	 * @param carbonOffset
 	 */
-	public long getCost(long carbonOffset) throws Exception {
+	public double getCost(double carbonOffset) throws Exception {
 		double neededLand;
 		long noBlocks;
-		long totalCost;
+		double totalCost;
 		double tempLandArea;
 		
 		try {
 			neededLand = carbonOffset / GameConst.FOREST_CARBON_ABSORPTION;
-			noBlocks = (long) (neededLand / GameConst.FOREST_BLOCK_SIZE);
+			noBlocks = Math.round(neededLand / GameConst.FOREST_BLOCK_SIZE);
 			totalCost = 0;
 			tempLandArea = this.country.arableLandArea;
 			
@@ -55,10 +55,10 @@ public final class CarbonAbsorptionHandler {
 	 * 
 	 * @param investment
 	 */
-	public long getCarbonAbsorption(double investment) throws Exception {
-		long totalCost;
+	public double getCarbonAbsorption(double investment) throws Exception {
+		double totalCost;
 		double tempArableLandArea;
-		long carbonAbsorption;
+		double carbonAbsorption;
 		
 		try {
 			totalCost = 0;
@@ -69,13 +69,13 @@ public final class CarbonAbsorptionHandler {
 				tempArableLandArea -= GameConst.FOREST_BLOCK_SIZE;
 			}
 			
-			carbonAbsorption = (long) (GameConst.FOREST_CARBON_ABSORPTION * (country.arableLandArea-tempArableLandArea) );
+			carbonAbsorption = GameConst.FOREST_CARBON_ABSORPTION * (country.arableLandArea-tempArableLandArea);
 		}
 		catch (Exception e) {
 			throw new Exception("getCarbonAbsorption function error: " + e);
 		}
 		
-		carbonAbsorption = (long) (GameConst.FOREST_CARBON_ABSORPTION * (country.arableLandArea - tempArableLandArea) );
+		carbonAbsorption = GameConst.FOREST_CARBON_ABSORPTION * (country.arableLandArea - tempArableLandArea);
 
 		return carbonAbsorption;
 	}
@@ -86,12 +86,12 @@ public final class CarbonAbsorptionHandler {
 	 * 
 	 * @param landArea
 	 */
-	private long getBlockCost(double landArea) throws Exception {
-		long blockCost;
+	private double getBlockCost(double landArea) throws Exception {
+		double blockCost;
 		
 		try {
 			if (landArea > 0) {
-				blockCost = (long) (GameConst.CARBON_ABSORPTION_COEFF * GameConst.FOREST_BLOCK_SIZE / landArea);
+				blockCost = GameConst.CARBON_ABSORPTION_COEFF * GameConst.FOREST_BLOCK_SIZE / landArea;
 			}
 			else {
 				throw new Exception("Trying to find a cost of a block of area for non-positive area left");
@@ -114,7 +114,7 @@ public final class CarbonAbsorptionHandler {
 	 * @throws Exception
 	 */
 	public void invest(double investment) throws Exception, NotEnoughCashException {
-		long additionalAbsorption;
+		double additionalAbsorption;
 		double arableAreaUsed;
 		
 		try {
