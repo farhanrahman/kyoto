@@ -219,7 +219,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 							if(!TradeProtocol.this.tradeHistory.tradeExists(offerMessage.getTradeID())){
 								TradeProtocol.this.tradeHistory.addToHistory(
 										SimTime.get(), offerMessage.getTradeID(), trade);
-								//TODO update the carbon credits of the responder
+								//TODO update the carbon credits of the responder if it's not CDM
 								conv.getNetwork().sendMessage(
 										new UnicastMessage<OfferMessage>(
 												Performative.ACCEPT_PROPOSAL,
