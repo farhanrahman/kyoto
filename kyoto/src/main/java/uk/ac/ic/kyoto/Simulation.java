@@ -2,17 +2,17 @@ package uk.ac.ic.kyoto;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReportHandler;
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.monitor.Monitor;
 import uk.ac.ic.kyoto.roguestates.CanadaAgent;
+//import uk.ac.ic.kyoto.roguestates.TestAbsorptionHandlerAgent;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
+import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
-import uk.ac.ic.kyoto.services.TimeService;
+import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.imperial.presage2.core.simulator.InjectedSimulation;
-import uk.ac.imperial.presage2.core.simulator.Parameter;
 import uk.ac.imperial.presage2.core.simulator.Scenario;
 import uk.ac.imperial.presage2.core.util.random.Random;
 import uk.ac.imperial.presage2.rules.RuleModule;
@@ -42,8 +42,11 @@ public class Simulation extends InjectedSimulation {
 			.addGlobalEnvironmentService(CarbonReportingService.class)
 			.addParticipantEnvironmentService(Monitor.class)
 			.addParticipantEnvironmentService(ParticipantCarbonReportingService.class)
-			.addParticipantEnvironmentService(TimeService.class)
-			.addParticipantEnvironmentService(Economy.class));		
+			.addGlobalEnvironmentService(GlobalTimeService.class)
+			.addParticipantEnvironmentService(ParticipantTimeService.class)
+			.addParticipantEnvironmentService(Economy.class)
+//			.addParticipantEnvironmentService(CarbonTarget.class)
+			);
 	
 		modules.add(new RuleModule());
 			//.addClasspathDrlFile("foo.drl")
@@ -156,9 +159,12 @@ public class Simulation extends InjectedSimulation {
 		 */
 		
 		
-		AbstractParticipant p = new CanadaAgent(Random.randomUUID(),"CANADA","CAN",20000,10000,5000000,3,200000,28000,0,50000,30000);
+		AbstractParticipant p = new CanadaAgent(Random.randomUUID(),"CANADA","CAN",20000,10000,5000000,3,28000,50000,30000);
+		//AbstractParticipant overalTester = new TestAbsorptionHandlerAgent(Random.randomUUID(),"ABSORPTION","ABS",20000, 10000 ,5000000,3,28000,50000,30000);
+		//AbstractParticipant landTester = new TestAbsorptionHandlerAgent(Random.randomUUID(),"LAND","LAN",20000, 0 ,5000000,3,28000,50000,30000);
 		s.addParticipant(p);
-		
+		//s.addParticipant(overalTester);
+		//s.addParticipant(landTester);
 	}
 
 }
