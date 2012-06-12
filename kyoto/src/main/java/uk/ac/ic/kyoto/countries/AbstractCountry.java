@@ -64,9 +64,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	protected 		Map<Integer, Double> carbonEmissionReports;
 	
-	ParticipantCarbonReportingService reportingService; // TODO add visibility
-	Monitor monitor;
-	ParticipantTimeService timeService;
+	protected ParticipantCarbonReportingService reportingService; // TODO add visibility
+	protected Monitor monitor;
+	protected ParticipantTimeService timeService;
 	
 	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
 	
@@ -337,6 +337,26 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	public void setAvailableToSpend(double availableToSpend) {
 			this.availableToSpend = availableToSpend;
+	}
+	
+	//================================================================================
+    // Trade protocol monetary adjustments
+    //================================================================================
+	
+	public final void payMoney(double amount) {
+		availableToSpend -= amount;
+	}
+	
+	public final void receiveMoney(double amount) {
+		availableToSpend += amount;
+	}
+	
+	public final void sellOffset(double amount) {
+		carbonOffset -= amount;
+	}
+	
+	public final void receiveOffset(double amount) {
+		carbonOffset += amount;
 	}
 
 }
