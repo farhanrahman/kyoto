@@ -104,7 +104,7 @@ public final class CarbonReductionHandler{
 	 * 
 	 * @throws Exception
 	 */
-	public final void invest(long investment) throws Exception {
+	public final void invest(long investment) throws Exception, NotEnoughCarbonOutputException, NotEnoughCashException {
 		double carbonOutputChange;
 		
 		try {

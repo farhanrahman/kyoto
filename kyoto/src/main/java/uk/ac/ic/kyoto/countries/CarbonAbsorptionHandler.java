@@ -113,7 +113,7 @@ public final class CarbonAbsorptionHandler {
 	 * @param investment
 	 * @throws Exception
 	 */
-	public void invest(double investment) throws Exception {
+	public void invest(double investment) throws Exception, NotEnoughCashException {
 		long additionalAbsorption;
 		double arableAreaUsed;
 		
