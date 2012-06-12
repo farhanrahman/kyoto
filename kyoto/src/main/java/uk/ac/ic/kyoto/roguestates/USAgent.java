@@ -17,13 +17,18 @@ public class USAgent extends AbstractCountry {
 	private double 		IntensityRatio;				// Units tonnes / million $
 	
 	private double			AverageGDPRate; // to be stored in an array or DB for furhter analysis. 
-	
+
+	private int yearMod4 = 0;
+	private boolean democratElected; 			// chosen at random on class instantiation
+	private double AbsolutionReductionTarget; 	// Units in metric tonnes C02
+												// Can be positive or negative
+	private long IntensityReductionTarget; 	// Units percentage (%)
+	private long IntensityRatio;				// Units tonnes / million $
+
 	public USAgent(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
-			double GDPRate, long emissionsTarget,
-			long energyOutput, long carbonOutput){
+			double GDPRate, double energyOutput, double carbonOutput){
 		super(id, name, ISO, landArea, arableLandArea, GDP,
-				GDPRate, emissionsTarget,
-				energyOutput, carbonOutput);
+				GDPRate, energyOutput, carbonOutput);
 		SetInitialPoliticalParty();
 		SetInitialIntensityRatio();
 	}
@@ -44,7 +49,7 @@ public class USAgent extends AbstractCountry {
 		}
 		SetEmissionsTarget();
 		if (democratElected) {
-			AbsolutionReductionTarget = (carbonOutput*0.95);
+			AbsolutionReductionTarget = carbonOutput*0.95;
 		}
 		else {
 			AbsolutionReductionTarget = carbonOutput;

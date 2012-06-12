@@ -4,7 +4,6 @@ import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
-import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import java.util.UUID;
 
 /** author George
@@ -31,9 +30,9 @@ public class BIC extends AbstractCountry {
 	//............................................................................................ 
 	
 	public BIC(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
-			double GDPRate, long emissionsTarget, long energyOutput, long carbonOutput)
+			double GDPRate, double energyOutput, double carbonOutput)
 	{
-		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, emissionsTarget, energyOutput, carbonOutput);
+		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput);
 
 }
 	

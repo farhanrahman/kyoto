@@ -28,6 +28,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	final protected String 		ISO;		//ISO 3166-1 alpha-3
 	
+	/*
+	 *  Simple boolean to check if the country is a member of Kyoto
+	 *  Defaults to true. Rogue states should set this to false in their constructor
+	 */
+	protected boolean isKyotoMember=true; 
+	
 	// TODO Change visibility of fields
 	/*
 	 * These variables are related to land area for
@@ -58,9 +64,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	protected 		Map<Integer, Double> carbonEmissionReports;
 	
-	ParticipantCarbonReportingService reportingService; // TODO add visibility
-	Monitor monitor;
-	ParticipantTimeService timeService;
+	protected ParticipantCarbonReportingService reportingService; // TODO add visibility
+	protected Monitor monitor;
+	protected ParticipantTimeService timeService;
 	
 	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
 	
@@ -74,9 +80,15 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	//================================================================================
     // Constructors and Initializers
     //================================================================================
+	/*Constructor for testing*/
+	public AbstractCountry(UUID id, String name, String ISO){
+		super(id,name);
+		this.landArea = 0;
+		this.ISO = ISO;
+	}
 	
 	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
-					double GDPRate, double emissionsTarget, double energyOutput, double carbonOutput) {
+					double GDPRate, double energyOutput, double carbonOutput) {
 
 		//TODO Validate parameters
 		
@@ -87,7 +99,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.arableLandArea = arableLandArea;
 		this.GDP = GDP;
 		this.GDPRate = GDPRate;
-		this.emissionsTarget = emissionsTarget;
+		this.emissionsTarget = 0;
 		this.carbonOffset = 0;
 		this.availableToSpend = 0;
 		this.carbonOutput = carbonOutput;
@@ -152,9 +164,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	final public void execute() {
 		super.execute();
 		if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {			
-	//		MonitorTax();
-	//		checkTargets(); //did the countries meet their targets?
+			if (isKyotoMember) {
+				MonitorTax();
+				//checkTargets(); //did the countries meet their targets?
+			}
 			updateAvailableToSpend();
+			updateGDP(); //left out until this runs only every year
 			updateGDPRate();
 			updateCarbonOffsetYearly();
 			YearlyFunction();
@@ -251,6 +266,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		}
 		
 		GDPRate = GDPRate + marketStateFactor + (GameConst.GROWTH_SCALER*(energyOutput))/GDP;
+		GDPRate /= 100; // Needs to be a % for rate formula
 		} catch (UnavailableServiceException e) {
 			System.out.println("Unable to reach economy service.");
 			e.printStackTrace();
@@ -262,7 +278,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * @author sc1109
 	 */
 	private final void updateGDP() {
-		GDP = GDP + GDP * GDPRate;
+		GDP += GDP * GDPRate;
 	}
 	
 	/**
@@ -328,6 +344,26 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	public void setAvailableToSpend(double availableToSpend) {
 			this.availableToSpend = availableToSpend;
+	}
+	
+	//================================================================================
+    // Trade protocol monetary adjustments
+    //================================================================================
+	
+	public final void payMoney(double amount) {
+		availableToSpend -= amount;
+	}
+	
+	public final void receiveMoney(double amount) {
+		availableToSpend += amount;
+	}
+	
+	public final void sellOffset(double amount) {
+		carbonOffset -= amount;
+	}
+	
+	public final void receiveOffset(double amount) {
+		carbonOffset += amount;
 	}
 
 }
