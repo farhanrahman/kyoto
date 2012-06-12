@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import uk.ac.ic.kyoto.services.CarbonReportingService;
-import uk.ac.ic.kyoto.services.TimeService.EndOfYearCycle;
+import uk.ac.ic.kyoto.services.ParticipantTimeService.EndOfYearCycle;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
 import uk.ac.imperial.presage2.core.event.EventListener;

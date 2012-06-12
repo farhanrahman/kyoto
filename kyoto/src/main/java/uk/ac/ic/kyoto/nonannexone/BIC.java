@@ -4,7 +4,7 @@ import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
-import uk.ac.ic.kyoto.services.TimeService;
+import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import java.util.UUID;
 
 /** author George

@@ -8,7 +8,7 @@ import java.util.UUID;
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.monitor.Monitor;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
-import uk.ac.ic.kyoto.services.TimeService;
+import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
@@ -60,7 +60,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	ParticipantCarbonReportingService reportingService; // TODO add visibility
 	Monitor monitor;
-	TimeService timeService;
+	ParticipantTimeService timeService;
 	
 	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
 	
@@ -111,7 +111,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		}
 		// Initialize the Action Handlers DO THEY HAVE TO BE INSTANTIATED ALL THE TIME?
 		try {
-			timeService = getEnvironmentService(TimeService.class);
+			timeService = getEnvironmentService(ParticipantTimeService.class);
 		} catch (UnavailableServiceException e1) {
 			System.out.println("TimeService doesn't work");
 			e1.printStackTrace();
@@ -128,8 +128,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			System.out.println("Unable to reach emission reporting service.");
 			e.printStackTrace();
 		}
-		
-		updateAvailableToSpend();
 		initialiseCountry();
 	}
 	
@@ -153,24 +151,17 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	@Override
 	final public void execute() {
 		super.execute();
-		try {
-			// TODO make sure that the proper getters are used
-			TimeService timeService = getEnvironmentService(TimeService.class);
-			
-			if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
-				MonitorTax();
-				updateGDPRate();
-				updateGDP();
-				updateCarbonOffsetYearly();
-				YearlyFunction();
-			}
-			if (timeService.getCurrentYear() % timeService.getYearsInSession() == 0) {
-				resetCarbonOffset();
-				SessionFunction();
-			}
-		} catch (UnavailableServiceException e) {
-			logger.warn(e.getMessage(), e);
-			e.printStackTrace();
+		if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {			
+	//		MonitorTax();
+	//		checkTargets(); //did the countries meet their targets?
+			updateAvailableToSpend();
+			updateGDPRate();
+			updateCarbonOffsetYearly();
+			YearlyFunction();
+		}
+		if (timeService.getCurrentYear() % timeService.getYearsInSession() == 0) {
+			resetCarbonOffset();
+			SessionFunction();
 		}
 		behaviour();
 	}

@@ -11,6 +11,7 @@ public abstract class NonParticipant extends AbstractCountry {
 			double GDPRate,double emissionsTarget, double energyOutput, double carbonOutput) {
 		super(id, name, ISO, landArea, arableLandArea, GDP,
 				GDPRate, emissionsTarget, energyOutput, carbonOutput);
+
 		// TODO Auto-generated constructor stub
 	}
 }

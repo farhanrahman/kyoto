@@ -33,11 +33,11 @@ public final class GameConst {
 	/**
 	 * The price of reducing carbon reduction by one unit when we have 100% dirty industry
 	 */
-	public static float CARBON_REDUCTION_OFFSET = 1;
+	public static float CARBON_REDUCTION_OFFSET = 990;
 	/**
 	 * Coefficient to calculate the cost of carbon reduction
 	 */
-	public static float CARBON_REDUCTION_COEFF = 1;
+	public static float CARBON_REDUCTION_COEFF = 2000;
 	
 	/**
 	 * Coefficient to calculate the cost of carbon absorption
@@ -69,4 +69,14 @@ public final class GameConst {
 	 * Price for each monitor
 	 */
 	public static double MONITORING_PRICE = 5000;
+	
+	/**
+	 * Number of ticks in a year
+	 */
+	public static int TICKS_IN_YEAR = 365;
+	
+	/**
+	 * Number of years in a session
+	 */
+	public static int YEARS_IN_SESSION = 10;
 }
