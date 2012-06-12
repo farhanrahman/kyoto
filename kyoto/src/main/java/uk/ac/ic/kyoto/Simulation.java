@@ -9,6 +9,7 @@ import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.monitor.Monitor;
 import uk.ac.ic.kyoto.roguestates.CanadaAgent;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
+import uk.ac.ic.kyoto.services.CarbonTarget;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.TimeService;
 import uk.ac.imperial.presage2.core.simulator.InjectedSimulation;

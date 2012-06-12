@@ -17,7 +17,7 @@ import uk.ac.imperial.presage2.core.simulator.SimTime;
 /** 
  * @author sc1109 & azyzio & Stuart
  */
-public class TimeService extends EnvironmentService implements TimeDriven {
+public class TimeService extends EnvironmentService {
 
 	private int tickCounter=0;
 	private int yearCounter=0;
@@ -47,8 +47,17 @@ public class TimeService extends EnvironmentService implements TimeDriven {
 		super.registerParticipant(req);
 	}
 	
-	@Override
-	public void incrementTime() {
+//	@Override
+//	public void incrementTime() {
+//		tickCounter++;
+//		if (getCurrentTick() - yearCounter * ticksInYear == ticksInYear) {
+//			EndOfYearCycle y = new EndOfYearCycle(yearCounter);
+//			eb.publish(y);
+//		}
+//	}
+	
+	@EventListener
+	public void updateTickCounter (EndOfTimeCycle e) {
 		tickCounter++;
 		if (getCurrentTick() == ticksInYear) {
 			EndOfYearCycle y = new EndOfYearCycle(yearCounter);
@@ -56,19 +65,10 @@ public class TimeService extends EnvironmentService implements TimeDriven {
 		}
 	}
 	
-//	@EventListener
-//	public void updateTickCounter (EndOfTimeCycle e) {
-//		tickCounter++;
-//		if (getCurrentTick() == ticksInYear) {
-//			EndOfYearCycle y = new EndOfYearCycle(yearCounter);
-//			eb.publish(y);
-//		}
-//	}
-	
 	@EventListener
 	public void updateYearCounter (EndOfYearCycle e) {
 		yearCounter++;
-		if (yearCounter == yearsInSession) {
+		if (yearCounter - sessionCounter * yearsInSession == yearsInSession) {
 			EndOfSessionCycle s = new EndOfSessionCycle(sessionCounter);
 			eb.publish(s);
 		}
@@ -104,11 +104,11 @@ public class TimeService extends EnvironmentService implements TimeDriven {
     //================================================================================
 	
 	public int getCurrentTick() {
-		return tickCounter - yearCounter * ticksInYear;
+		return SimTime.get().intValue();
 	}
 	
 	public int getCurrentYear() {
-		return yearCounter - sessionCounter * yearsInSession;
+		return yearCounter;
 	}
 	
 	public int getCurrentSession() {
