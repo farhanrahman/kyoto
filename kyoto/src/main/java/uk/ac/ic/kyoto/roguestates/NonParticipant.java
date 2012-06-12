@@ -6,16 +6,12 @@ import uk.ac.ic.kyoto.countries.AbstractCountry;
 
 public abstract class NonParticipant extends AbstractCountry {
 
-	/*Constructor for testing*/
-	public NonParticipant(UUID id, String name, String ISO){
-		super(id,name,ISO);
-	}
-	
-	public NonParticipant(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
-			double GDPRate, long emissionsTarget, long energyOutput, long carbonOutput) {
+
+	public NonParticipant(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
+			double GDPRate,double emissionsTarget, double energyOutput, double carbonOutput) {
 		super(id, name, ISO, landArea, arableLandArea, GDP,
-				GDPRate, emissionsTarget,
-				energyOutput, carbonOutput);
+				GDPRate, emissionsTarget, energyOutput, carbonOutput);
+
 		// TODO Auto-generated constructor stub
 	}
 }

@@ -9,7 +9,6 @@ import alice.tuprolog.SolveInfo;
 import alice.tuprolog.UnknownVarException;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
-import uk.ac.ic.kyoto.monitor.Monitor;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.messaging.Input;
 
@@ -23,12 +22,12 @@ public class EUCountry extends AbstractCountry {
 	final private Prolog engine;
 	private EU eu;
 	
-	public EUCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
-			double GDPRate, long emissionsTarget, long energyOutput, long carbonOutput) {
+	public EUCountry(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
+			double GDPRate, double availiableToSpend, double emissionsTarget, double carbonOffset,
+			double energyOutput, double carbonOutput) {
 		
 		super(id, name, ISO, landArea, arableLandArea, GDP,
-					GDPRate, emissionsTarget,
-					energyOutput, carbonOutput);
+					GDPRate, emissionsTarget, energyOutput, carbonOutput);
 
 		engine = EUBehaviours.getEngine(name);
 	}

@@ -10,15 +10,17 @@ import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.GameConst;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.CarbonTarget;
-import uk.ac.ic.kyoto.services.TimeService.EndOfYearCycle;
+import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfYearCycle;
+import uk.ac.imperial.presage2.core.environment.EnvironmentRegistrationRequest;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentServiceProvider;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
 import uk.ac.imperial.presage2.core.environment.ServiceDependencies;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.event.EventListener;
-import uk.ac.imperial.presage2.core.simulator.Parameter;
+import uk.ac.imperial.presage2.core.event.EventBus;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
+
 
 /**
  * Monitoring service
@@ -37,16 +39,18 @@ public class Monitor extends EnvironmentService {
 	// Structure that counts the number of times the country cheated
 	private Map<AbstractCountry, Integer> sinBin;
 	
+	EventBus eb;
+	
 	/**
 	 * percentage increase in target i.e. 1.05 for 5%
 	 */
-	@Parameter(name="target_penalty")
+	//@Parameter(name="target_penalty")
 	int target_penalty;
 	
 	/**
 	 * percentage decrease in cash i.e. 0.95 for 5%
 	 */
-	@Parameter(name="cash_penalty")
+	//@Parameter(name="cash_penalty")
 	int cash_penalty;
 	
 	private CarbonReportingService carbonReportingService;
@@ -68,14 +72,14 @@ public class Monitor extends EnvironmentService {
 		}
 		
 		// Register for the carbon emission targeting service
-		try {
-			this.carbonTargetingService = provider.getEnvironmentService(CarbonTarget.class);
-		} catch (UnavailableServiceException e) {
-			e.printStackTrace();
-		}
-		if(this.carbonTargetingService == null){
-			System.err.println("PROBLEM");
-		}
+//		try {
+//			this.carbonTargetingService = provider.getEnvironmentService(CarbonTarget.class);
+//		} catch (UnavailableServiceException e) {
+//			e.printStackTrace();
+//		}
+//		if(this.carbonTargetingService == null){
+//			System.err.println("PROBLEM");
+//		}
 	}
 	
 	/**
@@ -85,6 +89,17 @@ public class Monitor extends EnvironmentService {
 	 */
 	public void addMemberState(AbstractCountry state) {
 		memberStates.add(state);
+	}
+	
+	@Inject
+	public void setEB(EventBus eb) {
+		this.eb = eb;
+		eb.subscribe(this);
+	}
+	
+	@Override
+	public void registerParticipant(EnvironmentRegistrationRequest req) {
+		super.registerParticipant(req);
 	}
 	
 	@EventListener
@@ -99,7 +114,7 @@ public class Monitor extends EnvironmentService {
 			double emissionTarget = country.getEmissionsTarget();
 			
 			if (reportedEmission < emissionTarget) {
-				targetSanction(country);
+				targetSanction(country, emissionTarget - reportedEmission);
 			}
 		}
 	}
@@ -109,31 +124,46 @@ public class Monitor extends EnvironmentService {
 		// Find how many countries can be monitored with the available cash
 		int noToMonitor = (int) Math.floor(cash / GameConst.MONITORING_PRICE);
 		
-		// Create a list of countries that were already monitored this year
-		ArrayList<AbstractCountry> monitoredCountries = new ArrayList<AbstractCountry>();
-		
-		// Instantiate random number generator that will be used to pick the countries to monitor
-		Random randGenerator = new Random();
-		
-		for (int i = 0; i < noToMonitor; i++) {
-			// Pick a country that was not yet monitored
-			AbstractCountry pickedCountry;
-			do {
-				int randomCountryIndex = randGenerator.nextInt(memberStates.size());
-				pickedCountry = memberStates.get(randomCountryIndex);
+		// Check if all the countries can be monitored
+		if (noToMonitor >= memberStates.size()) {
+			// monitor all the countries
+			for (AbstractCountry country: memberStates) {
+				double realCarbonOutput = country.getMonitored();
+				cash -= GameConst.MONITORING_PRICE;
+				double reportedCarbonOutput = carbonReportingService.getReport(country.getID(), SimTime.get());
+				if (realCarbonOutput > reportedCarbonOutput)
+					cheatSanction(country);
 			}
-			while (monitoredCountries.contains(pickedCountry) );
+			// TODO log the information about it
+		}
+		else {
+			// Create a list of countries that were already monitored this year
+			ArrayList<AbstractCountry> monitoredCountries = new ArrayList<AbstractCountry>();
 			
-			// Monitor the country
-			long realCarbonOutput = pickedCountry.getMonitored();
-					
-			// Note that the country was monitored
-			monitoredCountries.add(pickedCountry);
+			// Instantiate random number generator that will be used to pick the countries to monitor
+			Random randGenerator = new Random();
 			
-			// Apply sanctions if a country has cheated
-			double reportedCarbonOutput = carbonReportingService.getReport(pickedCountry.getID(), SimTime.get());
-			if (realCarbonOutput > reportedCarbonOutput)
-			cheatSanction(pickedCountry);
+			for (int i = 0; i < noToMonitor; i++) {
+				// Pick a country that was not yet monitored
+				AbstractCountry pickedCountry;
+				do {
+					int randomCountryIndex = randGenerator.nextInt(memberStates.size());
+					pickedCountry = memberStates.get(randomCountryIndex);
+				}
+				while (monitoredCountries.contains(pickedCountry) );
+				
+				// Monitor the country
+				cash -= GameConst.MONITORING_PRICE;
+				double realCarbonOutput = pickedCountry.getMonitored();
+						
+				// Note that the country was monitored
+				monitoredCountries.add(pickedCountry);
+				
+				// Apply sanctions if a country has cheated
+				double reportedCarbonOutput = carbonReportingService.getReport(pickedCountry.getID(), SimTime.get());
+				if (realCarbonOutput > reportedCarbonOutput)
+					cheatSanction(pickedCountry);
+			}
 		}
 	}
 	
@@ -159,19 +189,27 @@ public class Monitor extends EnvironmentService {
 		
 		// Deduct the cash from the country that has cheated
 		// newCash = oldCash - GDP * cash_penalty
-		sanctionee.setAvailableToSpend( (long) (sanctionee.getAvailableToSpend()-sanctionee.getGDP()*(sinCount-1)*cash_penalty));
+		sanctionee.setAvailableToSpend(Math.round((sanctionee.getAvailableToSpend()-sanctionee.getGDP()*(sinCount-1)*cash_penalty)));
 	}
 	
 	/**
 	 * Sanction for not meeting targets
-	 * @param sanctionee
+	 * @param country
 	 * The country to be sanctioned
 	 */
-	public void targetSanction(AbstractCountry sanctionee) {
+	public void targetSanction(AbstractCountry country, double carbonExcess) {
+		double previousEmissionTarget = carbonTargetingService.queryYearTarget(country.getID());
 		
-		//5% higher target regardless of number of sins (compound)
-		//sanctionee.setEmissionsTarget((long) (sanctionee.getEmissionsTarget()*target_penalty));  TODO: Decide on this penalty
-
+		double newEmissionTarget = previousEmissionTarget - carbonExcess * 1.3;
+		/**
+		 * Impossible to implement as the emission targets in the shared state cannot be changed externally
+		 */
+		country.setEmissionsTarget( (long) newEmissionTarget);
+		
+		// Charge the country for not meeting the target
+		
+		country.setAvailableToSpend( (long) (country.getAvailableToSpend() - carbonExcess * cash_penalty) );
+		
 	}
 	
 	/**

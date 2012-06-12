@@ -1,21 +1,26 @@
 package uk.ac.ic.kyoto.roguestates;
 
+import java.util.Set;
 import java.util.UUID;
 
-import uk.ac.ic.kyoto.trade.Offer;
-import uk.ac.ic.kyoto.trade.TradeProtocol;
+import uk.ac.ic.kyoto.countries.AbstractCountry;
+
+import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
 import uk.ac.imperial.presage2.core.messaging.Input;
-import uk.ac.imperial.presage2.core.network.NetworkAddress;
-import uk.ac.imperial.presage2.util.fsm.FSMException;
 
-public class CanadaAgent extends NonParticipant {
+public class CanadaAgent extends AbstractCountry {
 
-	public CanadaAgent(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
-			double GDPRate, long emissionsTarget, long energyOutput, long carbonOutput) {
+	public CanadaAgent(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
+			double GDPRate, double emissionsTarget, double energyOutput, double carbonOutput) {
 		super(id, name, ISO, landArea, arableLandArea, GDP,
-				GDPRate, emissionsTarget,
-				energyOutput, carbonOutput);
+				GDPRate, emissionsTarget, energyOutput, carbonOutput);
+
 		// TODO Auto-generated constructor stub
+	}
+	
+	@Override
+	protected Set<ParticipantSharedState> getSharedState() {
+		return super.getSharedState();
 	}
 
 	@Override
@@ -38,23 +43,22 @@ public class CanadaAgent extends NonParticipant {
 	
 	@Override
 	public void initialiseCountry() {
-		super.initialise();
-		carbonOutput = 80;
-		try {
-			tradeProtocol = new TradeProtocol(getID(), authkey, environment, network) {
-				@Override
-				protected boolean acceptExchange(NetworkAddress from,
-						Offer trade) {
-					if (carbonOutput - emissionsTarget + carbonOffset > 0) {
-						return true;
-					}
-					return true;
-				}
-			};
-		} catch (FSMException e) {
-			logger.warn(e.getMessage(), e);
-			e.printStackTrace();
-		}
+		//carbonOutput = 80;
+//		try {
+//			tradeProtocol = new TradeProtocol(getID(), authkey, environment, network) {
+//				@Override
+//				protected boolean acceptExchange(NetworkAddress from,
+//						Trade trade) {
+//					if (carbonOutput - emissionsTarget + carbonOffset > 0) {
+//						return true;
+//					}
+//					return true;
+//				}
+//			};
+//		} catch (FSMException e) {
+//			logger.warn(e.getMessage(), e);
+//			e.printStackTrace();
+//		}
 	}
 	
 	@Override
@@ -69,13 +73,28 @@ public class CanadaAgent extends NonParticipant {
 //		}
 		if (availableToSpend > 0) {
 			try {
-				carbonReductionHandler.invest((long) (availableToSpend*0.1));
+				carbonReductionHandler.invest(availableToSpend*0.1);
 				System.out.println("Spending " + availableToSpend* 0.1 + " on carbon reduction. Current carbon output is " + carbonOutput + ".");
 			} catch (Exception e) {
 				logger.warn(e.getMessage(), e);
 				e.printStackTrace();
 			}
 		}
+//		if (availableToSpend > 0) {
+//			try {
+//				energyUsageHandler.investInCarbonIndustry((long) (availableToSpend*0.1));
+//				System.out.println("Spending " + availableToSpend* 0.1 + " on industry investment.");
+//				System.out.println();
+//				} catch (Exception e) {
+//				logger.warn(e.getMessage(), e);
+//				e.printStackTrace();
+//			}
+//		}
+//		System.out.println(energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(500));
+		System.out.println("I have this much money: " + availableToSpend + ".");
+		System.out.println("My GDPRate is : " + GDPRate);
+		System.out.println("My carbon output is : " + carbonOutput);
+		System.out.println("My energy output is : " + energyOutput);
 	}
 
 }

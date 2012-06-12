@@ -21,7 +21,7 @@ import uk.ac.imperial.presage2.util.fsm.FSMException;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 public class FakeCanadaAgent extends AbstractParticipant {
-
+	
 	Logger logger = Logger.getLogger(FakeCanadaAgent.class);
 	
 	private TradeProtocol tradeProtocol;
@@ -33,6 +33,13 @@ public class FakeCanadaAgent extends AbstractParticipant {
 	public FakeCanadaAgent(UUID id, String name, String ISO){
 		super(id, name);
 	}
+	
+//	public FakeCanadaAgent(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
+//			double GDPRate, double emissionsTarget, double energyOutput, double carbonOutput){
+//		super(id, name, ISO, landArea, arableLandArea, GDP,
+//				GDPRate, emissionsTarget, energyOutput, carbonOutput);
+//		// TODO Auto-generated constructor stub
+//	}
 	
 	
 	@Override

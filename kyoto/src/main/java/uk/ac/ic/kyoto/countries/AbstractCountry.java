@@ -8,7 +8,7 @@ import java.util.UUID;
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.monitor.Monitor;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
-import uk.ac.ic.kyoto.services.TimeService;
+import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
@@ -33,16 +33,18 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * These variables are related to land area for
 	 * dealing with carbon absorption prices
 	 */
-	final protected double 		landArea;
+	final protected	double 		landArea;
+
 	protected 		double 		arableLandArea;
 	
 	/*
 	 * These variables are related to carbon emissions and 
 	 * calculating 'effective' carbon output
 	 */
-	protected 		long 		carbonOutput;		// Tons of CO2 produced every year
-	protected 		long 		carbonOffset; 		// Tons of CO2 that the country acquired (by trading or energy absorption)
-	protected 		long		emissionsTarget;	// Number of tons of carbon you SHOULD produce
+	protected 		double 		carbonOutput;		// Tons of CO2 produced every year
+	protected		double		carbonAbsorption;	// Tons of CO2 absorbed by forests every year
+	protected 		double 		carbonOffset; 		// Tons of CO2 that the country acquired (by trading or energy absorption)
+	protected 		double		emissionsTarget;	// Number of tons of carbon you SHOULD produce
 	
 	/*
 	 * These variables are related to GDP and
@@ -50,14 +52,15 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 */
 	protected 		double 		GDP;				// GDP of the country in millions of dollars. Changes every year
 	protected 		double 		GDPRate;			// The rate in which the GDP changes in a given year. Expressed in %
-	protected 		long  		energyOutput;		// How much Carbon we would use if the whole industry was carbon based. Measured in Tons of Carbon per year
-	protected 		long 		availableToSpend;	// Measure of cash available to the country in millions of dollars. Note, can NOT be derived from GDP. Initial value can be derived from there, but cash reserves need to be able to lower independently.
+	protected 		double  		energyOutput;		// How much Carbon we would use if the whole industry was carbon based. Measured in Tons of Carbon per year
+	protected 		double 		availableToSpend;	// Measure of cash available to the country in millions of dollars. Note, can NOT be derived from GDP. Initial value can be derived from there, but cash reserves need to be able to lower independently.
 	
 	
-	protected 		Map<Integer, Long> carbonEmissionReports;
+	protected 		Map<Integer, Double> carbonEmissionReports;
 	
-	protected ParticipantCarbonReportingService reportingService;
-	private Monitor monitor;
+	ParticipantCarbonReportingService reportingService; // TODO add visibility
+	Monitor monitor;
+	ParticipantTimeService timeService;
 	
 	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
 	
@@ -79,7 +82,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
-					double GDPRate, long emissionsTarget, long energyOutput, long carbonOutput) {
+					double GDPRate, double energyOutput, double carbonOutput) {
 
 		//TODO Validate parameters
 		
@@ -90,11 +93,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.arableLandArea = arableLandArea;
 		this.GDP = GDP;
 		this.GDPRate = GDPRate;
-		this.emissionsTarget = emissionsTarget;
+		this.emissionsTarget = 0;
 		this.carbonOffset = 0;
 		this.availableToSpend = 0;
 		this.carbonOutput = carbonOutput;
-		this.carbonEmissionReports = new HashMap<Integer, Long>();
+		this.carbonAbsorption = 0;
+		this.carbonEmissionReports = new HashMap<Integer, Double>();
 		this.energyOutput = energyOutput;
 		
 	}
@@ -105,13 +109,20 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		
 		// Add the country to the monitor service
 		try {
-			this.monitor = this.getEnvironmentService(Monitor.class);
-			this.monitor.addMemberState(this);
+			monitor = getEnvironmentService(Monitor.class);
+			monitor.addMemberState(this);
 		} catch (UnavailableServiceException e1) {
 			System.out.println("Unable to reach monitor service.");
 			e1.printStackTrace();
 		}
 		// Initialize the Action Handlers DO THEY HAVE TO BE INSTANTIATED ALL THE TIME?
+		try {
+			timeService = getEnvironmentService(ParticipantTimeService.class);
+		} catch (UnavailableServiceException e1) {
+			System.out.println("TimeService doesn't work");
+			e1.printStackTrace();
+		}
+		// Initialize the Action Handlers
 		carbonAbsorptionHandler = new CarbonAbsorptionHandler(this);
 		carbonReductionHandler = new CarbonReductionHandler(this);
 		energyUsageHandler = new EnergyUsageHandler(this);
@@ -123,8 +134,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			System.out.println("Unable to reach emission reporting service.");
 			e.printStackTrace();
 		}
-		
-		updateAvailableToSpend();
 		initialiseCountry();
 	}
 	
@@ -148,25 +157,18 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	@Override
 	final public void execute() {
 		super.execute();
-		try {
-			// TODO make sure that the proper getters are used
-			TimeService timeService = getEnvironmentService(TimeService.class);
-			
-			if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
-				updateAvailableToSpend();
-				MonitorTax();
-				updateGDP();
-				updateGDPRate();
-				updateCarbonOffsetYearly();
-				YearlyFunction();
-			}
-			if (timeService.getCurrentYear() % timeService.getYearsInSession() == 0) {
-				resetCarbonOffset();
-				SessionFunction();
-			}
-		} catch (UnavailableServiceException e) {
-			logger.warn(e.getMessage(), e);
-			e.printStackTrace();
+		if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {			
+	//		MonitorTax();
+	//		checkTargets(); //did the countries meet their targets?
+			updateAvailableToSpend();
+	//		updateGDP(); //left out until this runs only every year
+			updateGDPRate();
+			updateCarbonOffsetYearly();
+			YearlyFunction();
+		}
+		if (timeService.getCurrentYear() % timeService.getYearsInSession() == 0) {
+			resetCarbonOffset();
+			SessionFunction();
 		}
 		behaviour();
 	}
@@ -191,17 +193,17 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * @return
 	 * Real Carbon Output of a country
 	 */
-	public final long getMonitored() {
+	public final double getMonitored() {
 		return carbonOutput;
 	}
-		
+
 	protected Set<ParticipantSharedState> getSharedState(){
 		Set<ParticipantSharedState> s = super.getSharedState();
 		s.add(ParticipantCarbonReportingService.createSharedState(this.getCarbonEmissionReports(), this.getID()));
 		return s;
 	}
 	
-	public Map<Integer,Long> getCarbonEmissionReports(){
+	public Map<Integer,Double> getCarbonEmissionReports(){
 		return this.carbonEmissionReports;
 	}
 	
@@ -211,7 +213,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * @param emission
 	 * @return
 	 */
-	private Map<Integer,Long> addToReports(Time simTime, Long emission){
+	private Map<Integer,Double> addToReports(Time simTime, double emission){
 		this.carbonEmissionReports.put(simTime.intValue(), emission);
 		return this.carbonEmissionReports;
 	}
@@ -282,18 +284,13 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * Adjusts the amount of CarbonOffset depending on the last years usage
 	 */
 	private final void updateCarbonOffsetYearly() {
-		// Check if the emissionTarget for this year was met
-		if (emissionsTarget + carbonOffset - carbonOutput > 0)
-			// Add / Subtract from carbonOffset depending on this year's usage
-			carbonOffset += (emissionsTarget - carbonOutput);
-		else {
-			// Possibly the report to the Monitor can be sent
-		}
+
+		carbonOffset += (emissionsTarget - carbonOutput + carbonAbsorption);
+
 	}
 	
 	private final void resetCarbonOffset() {
 		carbonOffset = 0;
-		// TODO adjust the CarbonOutput so that the forests build through Carbon Absorbtion are being counted.
 	}
 	
 	//================================================================================
@@ -320,24 +317,24 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return GDPRate;
 	}
 
-	public long getEmissionsTarget() {
+	public double getEmissionsTarget() {
 		return emissionsTarget;
 	}
 
-	public long getCarbonOffset() {
+	public double getCarbonOffset() {
 		return carbonOffset;
 	}
 
-	public long getAvailableToSpend() {
+	public double getAvailableToSpend() {
 		return availableToSpend;
 	}
 	
-	public void setEmissionsTarget(long emissionsTarget) {
+	public void setEmissionsTarget(double emissionsTarget) {
 		this.emissionsTarget = emissionsTarget;
 	}
 	
-	public void setAvailableToSpend(long availableToSpend) {
-		this.availableToSpend = availableToSpend;
+	public void setAvailableToSpend(double availableToSpend) {
+			this.availableToSpend = availableToSpend;
 	}
 
 }
