@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReportHandler;
+import uk.ac.ic.kyoto.annex1reduce.EUTest1;
+import uk.ac.ic.kyoto.annex1reduce.EUTest2;
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.monitor.Monitor;
 import uk.ac.ic.kyoto.roguestates.CanadaAgent;
@@ -162,16 +164,11 @@ public class Simulation extends InjectedSimulation {
 		
 		String endTime = this.getParameter("finishTime");
 		
-		AbstractParticipant p1 = new TradeProtocolTestAgent(Random.randomUUID(), "TEST1", "TST");
-		AbstractParticipant p2 = new TradeProtocolTestAgent(Random.randomUUID(), "TEST2", "TST");
-		SimulationAgent a = new SimulationAgent(Random.randomUUID(), "SimAgent", Integer.parseInt(endTime));
-		//AbstractParticipant overalTester = new TestAbsorptionHandlerAgent(Random.randomUUID(),"ABSORPTION","ABS",20000, 10000 ,5000000,3,28000,50000,30000);
-		//AbstractParticipant landTester = new TestAbsorptionHandlerAgent(Random.randomUUID(),"LAND","LAN",20000, 0 ,5000000,3,28000,50000,30000);
+//		AbstractParticipant p = new CanadaAgent(Random.randomUUID(),"CANADA","CAN",20000,10000,5000000,3,200000,28000,0,50000,30000);
+		AbstractParticipant p1 = new EUTest1(Random.randomUUID(), "Chris Test1", "CS1", 20000, 10000, 5000000, 3, 200000, 28000, 50000);
+		AbstractParticipant p2 = new EUTest2(Random.randomUUID(), "Chris Test2", "CS2", 20000, 10000, 5000000, 3, 200000, 28000, 50000);
 		s.addParticipant(p1);
 		s.addParticipant(p2);
-		//s.addParticipant(a);
-		//s.addParticipant(overalTester);
-		//s.addParticipant(landTester);
 	}
 
 }
