@@ -12,6 +12,7 @@ import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
+import uk.ac.ic.kyoto.trade.TradeProtocolTestAgent;
 import uk.ac.imperial.presage2.core.simulator.InjectedSimulation;
 import uk.ac.imperial.presage2.core.simulator.Scenario;
 import uk.ac.imperial.presage2.core.util.random.Random;
@@ -159,10 +160,12 @@ public class Simulation extends InjectedSimulation {
 		 */
 		
 		
-		AbstractParticipant p = new CanadaAgent(Random.randomUUID(),"CANADA","CAN",20000,10000,5000000,3,28000,50000,30000);
+		AbstractParticipant p1 = new TradeProtocolTestAgent(Random.randomUUID(), "TEST1", "TST");
+		AbstractParticipant p2 = new TradeProtocolTestAgent(Random.randomUUID(), "TEST2", "TST");
 		//AbstractParticipant overalTester = new TestAbsorptionHandlerAgent(Random.randomUUID(),"ABSORPTION","ABS",20000, 10000 ,5000000,3,28000,50000,30000);
 		//AbstractParticipant landTester = new TestAbsorptionHandlerAgent(Random.randomUUID(),"LAND","LAN",20000, 0 ,5000000,3,28000,50000,30000);
-		s.addParticipant(p);
+		s.addParticipant(p1);
+		s.addParticipant(p2);
 		//s.addParticipant(overalTester);
 		//s.addParticipant(landTester);
 	}
