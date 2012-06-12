@@ -1,5 +1,6 @@
 package uk.ac.ic.kyoto.tradehistory;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -13,20 +14,20 @@ import com.google.inject.Singleton;
 public class TradeHistoryImplementation implements TradeHistory{
 	private static Map<Integer, Map<UUID, Offer>> history = new HashMap<Integer,Map<UUID,Offer>>();
 	
-	public Map<Integer,Map<UUID,Offer>> getHistory(){
-		return new HashMap<Integer, Map<UUID,Offer>>(history);
+	public final Map<Integer,Map<UUID,Offer>> getHistory(){
+		return Collections.unmodifiableMap(new HashMap<Integer, Map<UUID,Offer>>(history));
 	}
 
 	public Map<UUID,Offer> getHistoryForTime(Time simTime){
-		return history.get(simTime.intValue());
+		return Collections.unmodifiableMap(history.get(simTime.intValue()));
 	}
 	
 	public boolean tradeExists(UUID id){
 		synchronized(history){
 			for(Integer time : history.keySet()){
 				for(UUID uid : history.get(time).keySet()){
-					uid.equals(id);
-					return true;
+					if(uid.equals(id))
+						return true;
 				}
 			}
 		}
