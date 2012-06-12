@@ -28,7 +28,7 @@ public class EU extends EnvironmentService {
 		super(sharedState);
 	}
 	
-	QueryEmissionsTargetHandler targetHandler = new QueryEmissionsTargetHandler(sharedState, environment);
+	//QueryEmissionsTargetHandler targetHandler = new QueryEmissionsTargetHandler(sharedState, environment);
 	
 	// TODO Allocate target distribution
 	
