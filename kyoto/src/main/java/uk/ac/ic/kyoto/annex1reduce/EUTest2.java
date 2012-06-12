@@ -34,8 +34,16 @@ public class EUTest2 extends AbstractCountry{
 
 	@Override
 	protected void processInput(Input input) {
-		// TODO Auto-generated method stub
-		
+		System.out.print("\nEUTest2 processing input ...");
+		if (this.tradeProtocol != null && this.tradeProtocol.canHandle(input)) {
+			System.out.println("DONE\n");
+			this.tradeProtocol.handle(input);
+		}else {
+			//System.out.println("ERROR");
+			System.out.print("ERROR");
+			System.out.println("(" + (this.tradeProtocol != null) + " ~ " + (this.tradeProtocol.canHandle(input)) + ")");
+			System.out.println();
+		}
 	}
 
 	@Override
@@ -58,6 +66,7 @@ public class EUTest2 extends AbstractCountry{
 				@Override
 				protected boolean acceptExchange(NetworkAddress from, Offer trade) {
 					//TODO Make this smart
+					System.out.println("\nEUTest2 accepting exchange\n");
 					return true;
 				}
 			};
@@ -72,8 +81,13 @@ public class EUTest2 extends AbstractCountry{
 
 	@Override
 	protected void behaviour() {
-		logger.info(this.tradeHistory.getHistoryForTime(SimTime.get()));
-		logger.info("dave");
+//		logger.info(this.tradeHistory.getHistoryForTime(SimTime.get()));
+//		logger.info("dave");
+		
+		System.out.println("\nEUTest2 executing");
+		System.out.println("Available to spend: " + availableToSpend + " Carbon offset: " + carbonOffset);
+		System.out.println();
+		
 //		this.tradeProtocol.incrementTime();	// Why is this incremented here?
 //		
 //		int quantity = 10;

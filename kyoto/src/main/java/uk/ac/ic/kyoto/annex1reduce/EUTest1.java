@@ -1,14 +1,17 @@
 package uk.ac.ic.kyoto.annex1reduce;
 
+import java.util.Random;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
+import uk.ac.ic.kyoto.tokengen.SingletonProvider;
 import uk.ac.ic.kyoto.trade.Offer;
 import uk.ac.ic.kyoto.trade.OfferMessage;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.ic.kyoto.trade.TradeType;
+import uk.ac.ic.kyoto.tradehistory.TradeHistory;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.messaging.Performative;
 import uk.ac.imperial.presage2.core.network.MulticastMessage;
@@ -32,7 +35,15 @@ public class EUTest1 extends AbstractCountry{
 
 	@Override
 	protected void processInput(Input input) {
-		// TODO Auto-generated method stub
+		System.out.print("\nEUTest1 processing input ...");
+		if (this.tradeProtocol != null && this.tradeProtocol.canHandle(input)) {
+			System.out.println("DONE\n");
+			this.tradeProtocol.handle(input);
+		}else {
+			System.out.print("ERROR");
+			System.out.println("(" + (this.tradeProtocol != null) + " ~ " + (this.tradeProtocol.canHandle(input)) + ")");
+			System.out.println();
+		}
 		
 	}
 
@@ -56,6 +67,7 @@ public class EUTest1 extends AbstractCountry{
 				@Override
 				protected boolean acceptExchange(NetworkAddress from, Offer trade) {
 					//TODO Make this smart
+					System.out.println("\nEUTest1 accepting exchange\n");
 					return true;
 				}
 			};
@@ -65,12 +77,12 @@ public class EUTest1 extends AbstractCountry{
 		}
 		
 	}
+	
+	private TradeHistory tradeHistory = SingletonProvider.getTradeHistory();
 
 	@Override
 	protected void behaviour() {
-		
-		this.tradeProtocol.incrementTime();	// Why is this incremented here?
-		
+				
 		int quantity = 10;
 		int unitCost = 2;
 		
@@ -86,6 +98,11 @@ public class EUTest1 extends AbstractCountry{
 							new OfferMessage(trade))
 				);
 		
+		this.tradeProtocol.incrementTime();
+		
+		System.out.println("\nEUTest1 executing");
+		System.out.println("Available to spend: " + availableToSpend + " Carbon offset: " + carbonOffset);
+		System.out.println();
 	}
 
 }
