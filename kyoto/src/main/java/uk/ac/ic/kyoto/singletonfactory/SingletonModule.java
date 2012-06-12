@@ -6,6 +6,8 @@ package uk.ac.ic.kyoto.singletonfactory;
 
 import uk.ac.ic.kyoto.monitor.MonitoredCountries;
 import uk.ac.ic.kyoto.monitor.MonitoredCountriesImp;
+import uk.ac.ic.kyoto.tokengen.Token;
+import uk.ac.ic.kyoto.tokengen.TokenGenerator;
 import uk.ac.ic.kyoto.tradehistory.TradeHistory;
 import uk.ac.ic.kyoto.tradehistory.TradeHistoryImplementation;
 

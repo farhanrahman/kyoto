@@ -1,4 +1,4 @@
-package uk.ac.ic.kyoto.annex1reduce.analysis;
+package uk.ac.ic.kyoto.tradehistory;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -7,6 +7,8 @@ import org.junit.Test;
 
 import uk.ac.ic.kyoto.trade.Offer;
 import uk.ac.ic.kyoto.trade.TradeType;
+import uk.ac.ic.kyoto.tradehistory.SessionHistory;
+import uk.ac.ic.kyoto.tradehistory.TickHistory;
 
 public class SessionHistoryTest {
 
