@@ -122,6 +122,7 @@ public class BIC extends AbstractCountry {
 		if (carbonOutput + energyUsageHandler.calculateCarbonIndustryGrowth(invest) < environment_friendly_target){ //invest but also check if we meet our environment friendly target.
 			try{
 				energyUsageHandler.investInCarbonIndustry(invest);
+				logger.info("Invest in carbon industry successful");
 			} 
 			catch (Exception e) {
 				logger.warn("Invest in carbon industry not successful");
@@ -141,10 +142,18 @@ public class BIC extends AbstractCountry {
 			
 			try{ //also since country exceeds its own carbon target, invests in carbon absorption in order to get carbon offset.
 				carbon_difference = environment_friendly_target - (carbonOutput + energyUsageHandler.calculateCarbonIndustryGrowth(invest));
-				if (carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < availableToSpend )
+				if ((carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < availableToSpend ) && (currentAvailableArea() == "Safe"))
 					{
 					carbonAbsorptionHandler.investInCarbonAbsorption(carbonAbsorptionHandler.getInvestmentRequired(carbon_difference));
-					logger.info("Country ");
+					logger.info("Country invests in carbon absorption to reduce carbon output");
+					}
+				else if ((carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < availableToSpend ) && (currentAvailableArea() == "Danger"))
+					{
+					logger.info("Country reach limit of available pre-set land, does not meet its environment friendly target");
+					}
+				else 
+					{
+					logger.info("Country has insufficient funds to reach environment friendly target");
 					}
 					
 			}
@@ -158,7 +167,7 @@ public class BIC extends AbstractCountry {
 	
 	private void update_energy_aim(double previous_aim,boolean success){
 		if (success){ // country met goal, change goal
-			energy_aim = previous_aim + previous_aim/16; //double aim every year
+			energy_aim = previous_aim + previous_aim/8; //change aim every year
 		}
 	}
 	
@@ -166,7 +175,7 @@ public class BIC extends AbstractCountry {
 	{
 		
 	}
-	//calculates
+	//calculates carbon output every year in order to check environment friendly target.
 	private void yearly_emissions()
 	{
 		carbonOutput = carbonOutput - (carbonAbsorption + carbonOffset);  
@@ -179,17 +188,15 @@ public class BIC extends AbstractCountry {
 		}
 		
 		//Check available area  in order to choose decision accordingly for accepting to sell credits or plant trees for own sake.
-	/*	private String currentAvailableArea(){
+		private String currentAvailableArea(){
 			
-			if (this.getArableLandArea() > this.getLandArea()/16)
+			if (getArableLandArea() > getLandArea()/16)
 				return "Safe";
-			else if ((this.getArableLandArea() == this.getLandArea()/16))
-				return "Limit";
-			else if (this.getArableLandArea() < this.getLandArea()/16)
+			else 
 				return "Danger";
-			return "";		
+		
 		}
-		*/
+		
 		
 }		
 		
