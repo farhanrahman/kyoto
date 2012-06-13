@@ -13,7 +13,7 @@ import java.util.UUID;
  *
  */
 public class OfferMessage {
-	private final Offer offer;
+	private final Offer<?> offer;
 	private final UUID tradeID;
 	
 	public static enum OfferType{
@@ -28,7 +28,7 @@ public class OfferMessage {
 	 * has been started so tradeID is null
 	 * @param offer
 	 */
-	public OfferMessage(Offer offer){
+	public OfferMessage(Offer<?> offer){
 		this.offer = offer;
 		this.tradeID = null;
 		this.offerState = OfferMessage.OfferType.BROADCAST_MESSAGE;
@@ -41,13 +41,13 @@ public class OfferMessage {
 	 * @param offer
 	 * @param id
 	 */
-	public OfferMessage(Offer offer, UUID id){
+	public OfferMessage(Offer<?> offer, UUID id){
 		this.offer = offer;
 		this.tradeID = id;
 		this.offerState = OfferMessage.OfferType.TRADE_PROTOCOL;
 	}
 
-	public Offer getOffer() {
+	public Offer<?> getOffer() {
 		return offer;
 	}
 
