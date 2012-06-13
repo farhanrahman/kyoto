@@ -47,9 +47,7 @@ public class BIC extends AbstractCountry {
 		// TODO implement
 		//functions that are implemented every year
 				economy();
-				//3)Calculate availabletoSpend
-				updateAvailableToSpend();
-				
+				//3)Calculate availabletoSpend				
 				//4)Recalculate carbonOffset
 		
 	}
