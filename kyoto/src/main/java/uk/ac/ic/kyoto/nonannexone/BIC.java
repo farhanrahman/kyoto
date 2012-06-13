@@ -14,9 +14,11 @@ public class BIC extends AbstractCountry {
 	
 	//Variables........................................................................
 	
-	protected double environment_friendly_target; //country environmentally friendly
+	protected double environment_friendly_target; //country environmentally friendly target
 	protected double energy_aim ; // the energy output aim of a country each year.
-	
+	protected boolean green_care = true ; // does the country care about the environment?
+	protected boolean green_lands = false; // variable to check if country met environment target or not. 
+	protected String economic_state; // financial state of the country.
 	
 	//............................................................................................ 
 	
@@ -28,20 +30,20 @@ public class BIC extends AbstractCountry {
 	
 	//Inherited functions......................................................................
 	//.........................................................................................
-	
+/*****************************************************************************************/
 	@Override
 	protected void processInput(Input in) {
 		// TODO Auto-generated method stub
 
 	}
-	
+/*****************************************************************************************/
 	@EventListener
 	public void TickFunction(EndOfTimeCycle e){
 		//TODO implement functions that are done every tick
-		clean_development_mechanism(); 
+		clean_development_mechanism(); //awaiting protocol!
 		
 	}
-	
+/*****************************************************************************************/
 	@Override
 	public void YearlyFunction() {
 		// TODO implement
@@ -55,74 +57,91 @@ public class BIC extends AbstractCountry {
 				} 
 				//calculate carbon output every year
 				yearly_emissions();
-				
-				//3)Calculate availabletoSpend	
-				
-				//4)Recalculate carbonOffset
-		
+										
 	}
-
+/*****************************************************************************************/
+	
 	@Override
 	public void SessionFunction() {
 		// TODO implement 
 		// carbonAbsorption to carbonOffset
 	}
 
+/*****************************************************************************************/
 	
 	protected void behaviour() {
 		// TODO Auto-generated method stub
 		
 	}
 
+/************************************************************************************************/
 	
 	protected void initialiseCountry() {
 		// TODO Auto-generated method stub
-		energy_aim = 0 ; //initialise an aim (to be decided)
+		energy_aim = energyOutput + 30000 ; //initialise an aim (to be decided)
 		environment_friendly_target = 0; //initialise a target (to be decided)
-	}
+		}
 	//.......................................................................................
 	//........................................................................................
 	
 	
 	
-	/************************Functions executed every year
-	 * @throws Exception 
-	 * @throws IllegalArgumentException **************************************/
+/************************Functions executed every year *******************************************/
 	
 	//Every round our countries check current energy output and make decisions
 	
-	private void economy() throws IllegalArgumentException, Exception{
+	private void economy() throws IllegalArgumentException, Exception
+	{
 		double difference;
 		boolean aim_success = false; 
+		
 		difference = energy_aim - energyOutput; //difference in energy aim and current energy output.
 		double invest_money;
 		invest_money = energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(difference) ;
-		if (energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(difference) < availableToSpend){
-			buildIndustry(invest_money); 
-			aim_success = true;
-			logger.info("Country met its yearly energy output goal");
-		}
+				if (invest_money < availableToSpend)
+				{
+					buildIndustry(invest_money); //!!!!!!!
+					aim_success = true;
+					logger.info("Country met its yearly energy output goal");
+				}
 		else{
 			logger.info("Country has insufficient funds to meet its energy output goal");
 			generate_income(); //out of money
+			}
+		update_energy_aim(energy_aim , aim_success); //update the energy aim for the next year.	
+		
 		}
-		update_energy_aim(energy_aim,aim_success); //update the energy aim for the next year.		
-			
-	}
-			
+		
 	
-	/*function that uses EnergyUsageHandler to create factories and increase energy output
+		/*function that uses EnergyUsageHandler to create factories and increase energy output
 	 * however carbon output also increases   
 	*
 	*/
+/************************************************************************************************/
 	
-	private void buildIndustry(double invest) throws IllegalArgumentException, Exception {
-		double carbon_difference; //the difference between environmentally friendly target and actual carbon emission.
+	private void buildIndustry(double invest) throws IllegalArgumentException, Exception 
+	{
+		 //the difference between environmentally friendly target and actual carbon emission.
+		if (green_care == true)
+			energy_increase_with_care(invest);
+		else
+			energy_increase_without_care(invest);
+		
+	}
 	
-		if (carbonOutput + energyUsageHandler.calculateCarbonIndustryGrowth(invest) < environment_friendly_target){ //invest but also check if we meet our environment friendly target.
+/*******************************************************************************************************/	
+	
+	private void energy_increase_with_care(double money_invest) throws IllegalArgumentException, Exception
+	{
+		double carbon_difference; 
+		
+		if (carbonOutput + energyUsageHandler.calculateCarbonIndustryGrowth(money_invest) < environment_friendly_target)
+		{ //invest but also check if we meet our environment friendly target.
 			try{
-				energyUsageHandler.investInCarbonIndustry(invest);
+				energyUsageHandler.investInCarbonIndustry(money_invest);
 				logger.info("Invest in carbon industry successful");
+				logger.info("Country meets its environment friendy target");
+				green_lands = true;
 			} 
 			catch (Exception e) {
 				logger.warn("Invest in carbon industry not successful");
@@ -132,16 +151,16 @@ public class BIC extends AbstractCountry {
 		else
 		{
 			logger.info("Country exceeded its environment friendly goal, invest in carbon industry but also invest in carbon absorption");
-			
+			green_lands = false;
 			try{
-				energyUsageHandler.investInCarbonIndustry(invest);
+				energyUsageHandler.investInCarbonIndustry(money_invest);
 			} 
 			catch (Exception e){
 				logger.warn("Invest in carbon industry not successful");
 			}
 			
 			try{ //also since country exceeds its own carbon target, invests in carbon absorption in order to get carbon offset.
-				carbon_difference = environment_friendly_target - (carbonOutput + energyUsageHandler.calculateCarbonIndustryGrowth(invest));
+				carbon_difference = environment_friendly_target - (carbonOutput + energyUsageHandler.calculateCarbonIndustryGrowth(money_invest));
 				if ((carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < availableToSpend ) && (currentAvailableArea() == "Safe"))
 					{
 					carbonAbsorptionHandler.investInCarbonAbsorption(carbonAbsorptionHandler.getInvestmentRequired(carbon_difference));
@@ -150,10 +169,12 @@ public class BIC extends AbstractCountry {
 				else if ((carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < availableToSpend ) && (currentAvailableArea() == "Danger"))
 					{
 					logger.info("Country reach limit of available pre-set land, does not meet its environment friendly target");
+					green_care = false;
 					}
 				else 
 					{
 					logger.info("Country has insufficient funds to reach environment friendly target");
+					green_care = false;
 					}
 					
 			}
@@ -161,36 +182,72 @@ public class BIC extends AbstractCountry {
 				logger.warn("Problem with investing in carbon absorption: " + e);
 			}
 		}
+		
+		change_emission_target(environment_friendly_target,green_lands);
+		
+		
 	}
 	
-	//Function that updates the energy goal each year.
+/*****************************************************************************************************/	
 	
-	private void update_energy_aim(double previous_aim,boolean success){
-		if (success){ // country met goal, change goal
-			energy_aim = previous_aim + previous_aim/8; //change aim every year
+	private void energy_increase_without_care(double money)
+	{
+		try{
+			energyUsageHandler.investInCarbonIndustry(money);
+			logger.info("Invest in carbon industry successful");
+		} 
+		catch (Exception e) {
+			logger.warn("Invest in carbon industry not successful");
 		}
 	}
 	
+		
+	
+	//Function that updates the energy goal each year.
+/*****************************************************************************************************/
+		
+		private void update_energy_aim(double previous_aim,boolean success){
+			if (success){ // country met goal, change goal
+				energy_aim = previous_aim + previous_aim * CountryConstants.ENERGY_AIM_GROWTH; //change aim every year
+			}
+		}
+/*******************************************************************************************************/
+		
 	private void generate_income()
 	{
 		
 	}
+/*******************************************************************************************************/
+	
 	//calculates carbon output every year in order to check environment friendly target.
 	private void yearly_emissions()
 	{
 		carbonOutput = carbonOutput - (carbonAbsorption + carbonOffset);  
 	}
+	
+/*******************************************************************************************************/
+	//change the emission target every year
+	private void change_emission_target(double previous_target,boolean succeed)
+	{
+		if (succeed) //country met environment target goal, change goal.
 			
+		environment_friendly_target = previous_target + previous_target * CountryConstants.TARGET_AIM_GROWTH;
+		
+	}
+	
+/*******************************************************************************************************/
 	  //.......................................trading.CSM...............................................
 		//basically search for potential investors in our lands through clean development mechanism (acquire cash!)
-		private void clean_development_mechanism(){
+		private void clean_development_mechanism()
+		{
 			//to be implemented
 		}
-		
+	
+/*******************************************************************************************************/
 		//Check available area  in order to choose decision accordingly for accepting to sell credits or plant trees for own sake.
 		private String currentAvailableArea(){
 			
-			if (getArableLandArea() > getLandArea()/16)
+			if (getArableLandArea() > getLandArea()/(CountryConstants.AREA_LIMIT))
 				return "Safe";
 			else 
 				return "Danger";
