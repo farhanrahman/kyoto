@@ -148,7 +148,7 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 		if (carbonReduction <= 0) return 0;
 		
 		//Overestimate a bit
-		carbonReduction*=1.05;
+//		carbonReduction*=1.02;
 		
 		double absorbFrac = 0.5;
 		double reduceFrac = 0.5;
@@ -178,8 +178,8 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 			
 		}
 		
-		absorbFrac = Math.round(1000 * absorbFrac)/1000;
-		reduceFrac = Math.round(1000 * reduceFrac)/1000;
+		absorbFrac = ((double) Math.round(1000 * absorbFrac))/1000;
+		reduceFrac = ((double) Math.round(1000 * reduceFrac))/1000;
 		
 		try {
 			if (absorbFrac == 0) {
@@ -198,6 +198,14 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return 0;
+		}
+		
+		try {
+			System.out.println("absorb,reduce carbon amounts");
+			System.out.println(this.carbonAbsorptionHandler.getCarbonAbsorptionChange(investments[0]));
+			System.out.println(this.carbonReductionHandler.getCarbonOutputChange(investments[1]));
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		
 		return (investments[0] + investments[1]);

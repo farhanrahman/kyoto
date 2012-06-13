@@ -84,6 +84,28 @@ public final class IsolatedCarbonAbsorptionHandler {
 		return getCarbonAbsorptionChange(investmentAmount,country.arableLandArea);
 	}
 	
+//	public final double getCarbonAbsorptionChangeOld(double investmentAmount,double arableLandArea) throws Exception {
+//		double carbonAbsorptionChange;
+//		double tempInvestmentAmount;
+//
+//		try {
+//			// Initialise variables to zero
+//			carbonAbsorptionChange = 0;
+//			tempInvestmentAmount = 0;
+//			
+//			// Increase carbon output until the cost is higher than investment
+//			while (tempInvestmentAmount < investmentAmount) {
+//				carbonAbsorptionChange += 1;
+//				tempInvestmentAmount = getInvestmentRequired(carbonAbsorptionChange, arableLandArea);
+//			}
+//		}
+//		catch (Exception e) {
+//			throw new Exception("getCarbonOutputChange function error: " + e.getMessage());
+//		}
+//		
+//		return carbonAbsorptionChange;
+//	}
+
 	/**
 	 * Returns the additional carbon absorption for given investment amount.
 	 * Rounds down to the nearest integer, which means that actual absorption might be slightly higher.
@@ -95,28 +117,6 @@ public final class IsolatedCarbonAbsorptionHandler {
 	 * @return Change in carbon absorption from specified cost
 	 */
 	public final double getCarbonAbsorptionChange(double investmentAmount,double arableLandArea) throws Exception {
-		double carbonAbsorptionChange;
-		double tempInvestmentAmount;
-
-		try {
-			// Initialise variables to zero
-			carbonAbsorptionChange = 0;
-			tempInvestmentAmount = 0;
-			
-			// Increase carbon output until the cost is higher than investment
-			while (tempInvestmentAmount < investmentAmount) {
-				carbonAbsorptionChange += 1;
-				tempInvestmentAmount = getInvestmentRequired(carbonAbsorptionChange, arableLandArea);
-			}
-		}
-		catch (Exception e) {
-			throw new Exception("getCarbonOutputChange function error: " + e.getMessage());
-		}
-		
-		return carbonAbsorptionChange;
-	}
-	//TODO
-	public final double getCarbonAbsorptionChangeNew(double investmentAmount,double arableLandArea) throws Exception {
 		double carbonAbsorptionChange;
 		
 		try {

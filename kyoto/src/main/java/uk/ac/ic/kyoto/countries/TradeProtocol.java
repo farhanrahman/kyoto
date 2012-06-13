@@ -8,12 +8,9 @@ import org.apache.log4j.Logger;
 
 import uk.ac.ic.kyoto.singletonfactory.SingletonProvider;
 import uk.ac.ic.kyoto.tokengen.Token;
-<<<<<<< HEAD:kyoto/src/main/java/uk/ac/ic/kyoto/trade/TradeProtocol.java
-=======
 import uk.ac.ic.kyoto.trade.Offer;
 import uk.ac.ic.kyoto.trade.OfferMessage;
 import uk.ac.ic.kyoto.trade.TradeType;
->>>>>>> development:kyoto/src/main/java/uk/ac/ic/kyoto/countries/TradeProtocol.java
 import uk.ac.ic.kyoto.tradehistory.TradeHistory;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.EnvironmentConnector;
