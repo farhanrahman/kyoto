@@ -1,7 +1,7 @@
 <class-diagram version="1.0.9" icons="true" always-add-relationships="true" generalizations="true" realizations="true" 
   associations="true" dependencies="true" nesting-relationships="true">  
-  <class id="1" corner="BOTTOM_RIGHT" language="java" name="uk.ac.ic.kyoto.annex1reduce.analysis.TickHistory" 
-    project="kyoto" file="/kyoto/src/main/java/uk/ac/ic/kyoto/annex1reduce/analysis/TickHistory.java" binary="false">    
+  <class id="1" corner="BOTTOM_RIGHT" language="java" name="uk.ac.ic.kyoto.tradehistory.TickHistory" project="kyoto" 
+    file="/kyoto/src/main/java/uk/ac/ic/kyoto/tradehistory/TickHistory.java" binary="false">    
     <position height="449" width="189" x="131" y="-81"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true"/>      

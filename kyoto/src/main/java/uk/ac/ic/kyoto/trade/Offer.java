@@ -16,6 +16,7 @@ public class Offer<DataType>{
 	public static String TRADE_PROPOSAL = "Trade proposal";	
 	
 	public Offer(int quantity, int unitCost, DataType type) {
+
 		this.quantity = quantity;
 		this.unitCost = unitCost;
 		this.type = type;
@@ -34,9 +35,10 @@ public class Offer<DataType>{
 	}
 	
 	public DataType getType(){
+
 		return this.type;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "Trade: "+quantity+" @ "+unitCost; 
