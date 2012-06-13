@@ -14,11 +14,12 @@ public class BIC extends AbstractCountry {
 	
 	//Variables........................................................................
 	
-	protected double environment_friendly_target; //country environmentally friendly
+	protected double environment_friendly_target; //country environmentally friendly target
 	protected double energy_aim ; // the energy output aim of a country each year.
 	protected boolean green_care = true ; // does the country care about the environment?
 	protected boolean green_lands = false; // variable to check if country met environment target or not. 
 	protected String economic_state; // financial state of the country.
+	
 	//............................................................................................ 
 	
 	public BIC(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
@@ -73,7 +74,7 @@ public class BIC extends AbstractCountry {
 		
 	}
 
-/*****************************************************************************************/
+/************************************************************************************************/
 	
 	protected void initialiseCountry() {
 		// TODO Auto-generated method stub
@@ -85,7 +86,7 @@ public class BIC extends AbstractCountry {
 	
 	
 	
-/************************Functions executed every year **************************************/
+/************************Functions executed every year *******************************************/
 	
 	//Every round our countries check current energy output and make decisions
 	
@@ -97,9 +98,9 @@ public class BIC extends AbstractCountry {
 		difference = energy_aim - energyOutput; //difference in energy aim and current energy output.
 		double invest_money;
 		invest_money = energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(difference) ;
-				if (energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(difference) < availableToSpend)
+				if (invest_money < availableToSpend)
 				{
-					buildIndustry(invest_money); 
+					buildIndustry(invest_money); //!!!!!!!
 					aim_success = true;
 					logger.info("Country met its yearly energy output goal");
 				}
@@ -112,13 +113,11 @@ public class BIC extends AbstractCountry {
 		}
 		
 	
-			
-	
-	/*function that uses EnergyUsageHandler to create factories and increase energy output
+		/*function that uses EnergyUsageHandler to create factories and increase energy output
 	 * however carbon output also increases   
 	*
 	*/
-/*****************************************************************************************/
+/************************************************************************************************/
 	
 	private void buildIndustry(double invest) throws IllegalArgumentException, Exception 
 	{
@@ -205,19 +204,20 @@ public class BIC extends AbstractCountry {
 		
 	
 	//Function that updates the energy goal each year.
-	/*****************************************************************************************/
+/*****************************************************************************************************/
 		
 		private void update_energy_aim(double previous_aim,boolean success){
 			if (success){ // country met goal, change goal
 				energy_aim = previous_aim + previous_aim * CountryConstants.ENERGY_AIM_GROWTH; //change aim every year
 			}
 		}
-	/*******************************************************************************************************/
+/*******************************************************************************************************/
 		
 	private void generate_income()
 	{
 		
 	}
+/*******************************************************************************************************/
 	
 	//calculates carbon output every year in order to check environment friendly target.
 	private void yearly_emissions()
@@ -225,6 +225,7 @@ public class BIC extends AbstractCountry {
 		carbonOutput = carbonOutput - (carbonAbsorption + carbonOffset);  
 	}
 	
+/*******************************************************************************************************/
 	//change the emission target every year
 	private void change_emission_target(double previous_target,boolean succeed)
 	{
@@ -233,17 +234,20 @@ public class BIC extends AbstractCountry {
 		environment_friendly_target = previous_target + previous_target * CountryConstants.TARGET_AIM_GROWTH;
 		
 	}
+	
+/*******************************************************************************************************/
 	  //.......................................trading.CSM...............................................
 		//basically search for potential investors in our lands through clean development mechanism (acquire cash!)
 		private void clean_development_mechanism()
 		{
 			//to be implemented
 		}
-		
+	
+/*******************************************************************************************************/
 		//Check available area  in order to choose decision accordingly for accepting to sell credits or plant trees for own sake.
 		private String currentAvailableArea(){
 			
-			if (getArableLandArea() > getLandArea()/16)
+			if (getArableLandArea() > getLandArea()/(CountryConstants.AREA_LIMIT))
 				return "Safe";
 			else 
 				return "Danger";
