@@ -46,7 +46,15 @@ public class BIC extends AbstractCountry {
 	public void YearlyFunction() {
 		// TODO implement
 		//functions that are implemented every year
-				economy();
+				try {
+					economy();
+				} catch (IllegalArgumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} 
 				//3)Calculate availabletoSpend				
 				//4)Recalculate carbonOffset
 		
@@ -75,11 +83,13 @@ public class BIC extends AbstractCountry {
 	
 	
 	
-	/************************Functions executed every year**************************************/
+	/************************Functions executed every year
+	 * @throws Exception 
+	 * @throws IllegalArgumentException **************************************/
 	
 	//Every round our countries check current energy output and make decisions
 	
-	private void economy(){
+	private void economy() throws IllegalArgumentException, Exception{
 		double difference;
 		boolean aim_success = false; 
 		difference = energy_aim - energyOutput; //difference in energy aim and current energy output.
@@ -104,7 +114,7 @@ public class BIC extends AbstractCountry {
 	*
 	*/
 	
-	private void buildIndustry(double invest) {
+	private void buildIndustry(double invest) throws IllegalArgumentException, Exception {
 		double carbon_difference; //the difference between environmentally friendly target and actual carbon emission.
 	
 		if (carbonOutput + energyUsageHandler.calculateCarbonIndustryGrowth(invest) < environment_friendly_target){ //invest but also check if we meet our environment friendly target.
@@ -129,8 +139,8 @@ public class BIC extends AbstractCountry {
 			
 			try{ //also since country exceeds its own carbon target, invests in carbon absorption in order to get carbon offset.
 				carbon_difference = environment_friendly_target - (carbonOutput + energyUsageHandler.calculateCarbonIndustryGrowth(invest));
-				if (carbonAbsorptionHandler.getCost(carbon_difference) < availableToSpend )
-					carbonAbsorptionHandler.invest(carbonAbsorptionHandler.getCost(carbon_difference));
+				if (carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < availableToSpend )
+					carbonAbsorptionHandler.investInCarbonAbsorption(carbonAbsorptionHandler.getInvestmentRequired(carbon_difference));
 			}
 			catch (Exception e){
 				logger.warn("Problem with investing in carbon absorption: " + e);
