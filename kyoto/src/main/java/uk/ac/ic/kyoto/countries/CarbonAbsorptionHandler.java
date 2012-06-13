@@ -28,7 +28,24 @@ public final class CarbonAbsorptionHandler {
 	 * @return
 	 * Cost of absorbing carbon by the specified amount.
 	 */
-	public double getInvestmentRequired(double carbonAbsorptionChange) throws Exception {
+	public double getInvestmentRequired(double carbonOffset) throws Exception {
+		return getInvestmentRequired(carbonOffset, this.country.arableLandArea);
+	}
+	
+	/**
+	 * Returns the investment necessary to increase carbon absorption by specified amount.
+	 * The cost of absorption of a single ton of CO2 is linearly proportional to occupied area measure.
+	 * 
+	 * @param carbonAbsorptionChange
+	 * The amount of carbon absorption which we want to price.
+	 * 
+	 * @param arableLandArea
+	 * The current arable land area.
+	 * 
+	 * @return
+	 * Cost of absorbing carbon by the specified amount.
+	 */
+	public double getInvestmentRequired(double carbonAbsorptionChange, double arableLandArea) throws Exception {
 		double investmentRequired;
 		
 		try {
@@ -36,8 +53,8 @@ public final class CarbonAbsorptionHandler {
 			double forestArea = getForestAreaRequired(carbonAbsorptionChange);
 			
 			// Calculate occupied area measure after and before investment
-			double occupiedAreaMeasureBefore = calculateOccupiedAreaMeasure(country.arableLandArea, country.landArea);
-			double occupiedAreaMeasureAfter = calculateOccupiedAreaMeasure((country.arableLandArea - forestArea), country.landArea);
+			double occupiedAreaMeasureBefore = calculateOccupiedAreaMeasure(arableLandArea, country.landArea);
+			double occupiedAreaMeasureAfter = calculateOccupiedAreaMeasure((arableLandArea - forestArea), country.landArea);
 			
 			// Get average price of single ton of additional carbon absorption
 			double averageUnitPrice = (GameConst.CARBON_ABSORPTION_PRICE_MIN +
@@ -64,19 +81,45 @@ public final class CarbonAbsorptionHandler {
 	 * @return Change in carbon absorption from specified cost
 	 */
 	public final double getCarbonAbsorptionChange(double investmentAmount) throws Exception {
+		return getCarbonAbsorptionChange(investmentAmount, country.arableLandArea);
+	}
+	
+	/**
+	 * Returns the additional carbon absorption for given investment amount.
+	 * Rounds down to the nearest integer, which means that actual absorption might be slightly higher.
+	 * 
+	 * @param Investment amount
+	 * 
+	 * @param arableLandArea current arable land area
+	 * 
+	 * @return Change in carbon absorption from specified cost
+	 */
+	public final double getCarbonAbsorptionChange(double investmentAmount, double arableLandArea) throws Exception {
 		double carbonAbsorptionChange;
-		double tempInvestmentAmount;
-
+		
 		try {
-			// Initialise variables to zero
-			carbonAbsorptionChange = 0;
-			tempInvestmentAmount = 0;
+			double carbonDiff = country.carbonOutput;
 			
-			// Increase carbon output until the cost is higher than investment
-			while (tempInvestmentAmount < investmentAmount) {
-				carbonAbsorptionChange += 1;
-				tempInvestmentAmount = getInvestmentRequired(carbonAbsorptionChange + 1);
+			carbonAbsorptionChange = carbonDiff/2;
+			
+			double tempInvestmentAmount = getInvestmentRequired(carbonAbsorptionChange, arableLandArea);
+
+			for (int i=0; i<20; i++) {
+				carbonDiff/=2;
+				
+				//If value is higher, lower our estimate. Else, increase it.
+
+				if (tempInvestmentAmount < investmentAmount) {
+					carbonAbsorptionChange += carbonDiff;
+					tempInvestmentAmount = getInvestmentRequired(carbonAbsorptionChange, arableLandArea);
+
+				}
+				else if (tempInvestmentAmount > investmentAmount) {
+					carbonAbsorptionChange -= carbonDiff;
+					tempInvestmentAmount = getInvestmentRequired(carbonAbsorptionChange, arableLandArea);
+				}
 			}
+			
 		}
 		catch (Exception e) {
 			throw new Exception("getCarbonAbsorptionChange function error: " + e.getMessage());
@@ -157,16 +200,11 @@ public final class CarbonAbsorptionHandler {
 	private double calculateOccupiedAreaMeasure(double arableArea, double totalArea) throws Exception {
 		double occupiedAreaMeasure;
 		
-		try {
-			if (arableArea <= totalArea) {
-				occupiedAreaMeasure = (1 - (arableArea / totalArea));
-			}
-			else {
-				throw new Exception("arableLandArea is greater than landArea");
-			}
+		if (arableArea <= totalArea) {
+			occupiedAreaMeasure = (1 - (arableArea / totalArea));
 		}
-		catch (Exception e) {
-			throw new Exception("calculateOccupiedAreaMeasure function error " + e.getMessage());
+		else {
+			throw new Exception("calculateOccupiedAreaMeasure function error: arableLandArea is greater than landArea");
 		}
 		
 		return occupiedAreaMeasure;
