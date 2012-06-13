@@ -8,32 +8,32 @@
       <operations public="true" package="true" protected="true" private="true"/>    
     </display>  
   </class>  
-  <enumeration id="2" corner="BOTTOM_RIGHT" language="java" name="uk.ac.ic.kyoto.trade.TradeProtocol.States" 
-    project="kyoto" file="/kyoto/src/main/java/uk/ac/ic/kyoto/trade/TradeProtocol.java" binary="false">    
+  <enumeration id="2" corner="BOTTOM_RIGHT" language="java" name="uk.ac.ic.kyoto.countries.TradeProtocol.States" 
+    project="kyoto" file="/kyoto/src/main/java/uk/ac/ic/kyoto/countries/TradeProtocol.java" binary="false">    
     <position height="194" width="189" x="-89" y="36"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true"/>      
       <operations public="true" package="true" protected="true" private="true"/>    
     </display>  
   </enumeration>  
-  <class id="3" corner="BOTTOM_RIGHT" language="java" name="uk.ac.ic.kyoto.trade.TradeProtocol.TradeSpawnEvent" 
-    project="kyoto" file="/kyoto/src/main/java/uk/ac/ic/kyoto/trade/TradeProtocol.java" binary="false">    
+  <class id="3" corner="BOTTOM_RIGHT" language="java" name="uk.ac.ic.kyoto.countries.TradeProtocol.TradeSpawnEvent" 
+    project="kyoto" file="/kyoto/src/main/java/uk/ac/ic/kyoto/countries/TradeProtocol.java" binary="false">    
     <position height="75" width="321" x="386" y="36"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true"/>      
       <operations public="true" package="true" protected="true" private="true"/>    
     </display>  
   </class>  
-  <enumeration id="4" corner="BOTTOM_RIGHT" language="java" name="uk.ac.ic.kyoto.trade.TradeProtocol.Transitions" 
-    project="kyoto" file="/kyoto/src/main/java/uk/ac/ic/kyoto/trade/TradeProtocol.java" binary="false">    
+  <enumeration id="4" corner="BOTTOM_RIGHT" language="java" name="uk.ac.ic.kyoto.countries.TradeProtocol.Transitions" 
+    project="kyoto" file="/kyoto/src/main/java/uk/ac/ic/kyoto/countries/TradeProtocol.java" binary="false">    
     <position height="194" width="206" x="140" y="36"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true"/>      
       <operations public="true" package="true" protected="true" private="true"/>    
     </display>  
   </enumeration>  
-  <class id="5" corner="BOTTOM_RIGHT" language="java" name="uk.ac.ic.kyoto.trade.TradeProtocol" project="kyoto" 
-    file="/kyoto/src/main/java/uk/ac/ic/kyoto/trade/TradeProtocol.java" binary="false">    
+  <class id="5" corner="BOTTOM_RIGHT" language="java" name="uk.ac.ic.kyoto.countries.TradeProtocol" project="kyoto" 
+    file="/kyoto/src/main/java/uk/ac/ic/kyoto/countries/TradeProtocol.java" binary="false">    
     <position height="194" width="396" x="386" y="-198"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true"/>      
