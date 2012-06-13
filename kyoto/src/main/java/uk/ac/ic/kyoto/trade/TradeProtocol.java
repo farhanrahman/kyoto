@@ -6,8 +6,8 @@ import java.util.UUID;
 
 import org.apache.log4j.Logger;
 
+import uk.ac.ic.kyoto.singletonfactory.SingletonProvider;
 import uk.ac.ic.kyoto.tokengen.Token;
-import uk.ac.ic.kyoto.tokengen.SingletonProvider;
 import uk.ac.ic.kyoto.tradehistory.TradeHistory;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.EnvironmentConnector;
@@ -149,7 +149,10 @@ public abstract class TradeProtocol extends FSMProtocol {
 							@Override
 							public void processMessage(Message<?> message,
 									FSMConversation conv, Transition transition) {
-								// TODO Change the carbon credits of initiator
+								OfferMessage offerMessage = ((OfferMessage) message.getData());
+								Offer trade = offerMessage.getOffer()
+										.reverse();
+								handleTradeCompletion(trade);
 								logger.info("Trade was accepted");
 
 							}
@@ -219,7 +222,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 							if(!TradeProtocol.this.tradeHistory.tradeExists(offerMessage.getTradeID())){
 								TradeProtocol.this.tradeHistory.addToHistory(
 										SimTime.get(), offerMessage.getTradeID(), trade);
-								//TODO update the carbon credits of the responder
+								handleTradeCompletion(trade);
 								conv.getNetwork().sendMessage(
 										new UnicastMessage<OfferMessage>(
 												Performative.ACCEPT_PROPOSAL,
@@ -313,6 +316,16 @@ public abstract class TradeProtocol extends FSMProtocol {
 	protected abstract boolean acceptExchange(NetworkAddress from,
 			Offer trade);
 
+	public void handleTradeCompletion(Offer trade){
+		if(trade.getType().equals(TradeType.BUY)){
+			//receiveOffset(trade.getQuantity());
+			//payMoney(trade.getTotalCost());
+		}else if(trade.getType().equals(TradeType.SELL)){
+			//sellOffset(trade.getQuantity());
+			//receiveMoney(trade.getTotalCost());
+		}		
+	}
+	
 	public UUID getId() {
 		return id;
 	}

@@ -12,8 +12,7 @@ public final class EnergyUsageHandler {
 	 * Specify on which country will the handler operate
 	 */
 	EnergyUsageHandler(AbstractCountry abstractCountry) {
-		this.country = abstractCountry;
-		
+		this.country = abstractCountry;		
 	}
 	
 	/**
@@ -26,35 +25,66 @@ public final class EnergyUsageHandler {
 	 * Amount of energyOuput that should be reduced
 	 * It has to be positive and lower than the total carbonOuput
 	 */
-	protected void reduceEnergyOutput (long amount) throws IllegalArgumentException{
-		if (amount < this.country.carbonOutput && amount > 0) {
-			this.country.energyOutput -= amount;
-			this.country.carbonOutput -= amount;
+	public void reduceEnergyOutput (double amount)
+			throws NotEnoughCarbonOutputException, IllegalArgumentException, Exception {
+		try {
+			if (amount > 0) {
+				if (amount < country.carbonOutput) {
+					country.energyOutput -= amount;
+					country.carbonOutput -= amount;
+				}
+				else
+					throw new NotEnoughCarbonOutputException();
+			}
+			else
+				throw new IllegalArgumentException("Energy cannot be reduced by a negative amount");
 		}
-		else
-			throw new IllegalArgumentException("Specified amount should be > 0 and < carbonOutput");
+		catch (Exception e) {
+			throw new Exception("reduceEnergyOutput function error: " + e.getMessage());
+		}
 	}
 	
 	/**
 	 * Calculates the cost of investing in carbon industry
-	 * @param carbon
+	 * @param growth
 	 * The expected increase in carbon output
 	 * @return
 	 * The cost for the country
 	 */
-	protected long calculateCostOfInvestingInCarbonIndustry (long carbon){
-		return (long) (carbon * GameConst.CARBON_INVESTMENT_PRICE);
+	public double calculateCostOfInvestingInCarbonIndustry (double growth)
+			throws IllegalArgumentException, Exception {
+		double cost;
+		try {
+			if (growth > 0)
+				cost = growth * GameConst.CARBON_INVESTMENT_PRICE;
+			else
+				throw new IllegalArgumentException("It is impossible to invest in negative carbon industry growth");
+		}
+		catch (Exception e) {
+			throw new Exception("calculateCostOfInvestingInCarbonIndustry function error: " + e.getMessage());
+		}
+		return cost;
 	}
 	
 	/**
 	 * Calculates the increase of carbon output
 	 * @param cost
 	 * The amount of money to be spent on carbon industry growth
-	 * @return
-	 * The increase of carbon output
+	 * @return increase of carbon output
 	 */
-	protected long calculateCarbonIndustryGrowth (long cost){
-		return (long) (cost / GameConst.CARBON_INVESTMENT_PRICE);
+	public double calculateCarbonIndustryGrowth (double cost)
+			throws IllegalArgumentException, Exception {
+		double growth;
+		try {
+			if (cost > 0)
+				growth = cost / GameConst.CARBON_INVESTMENT_PRICE;
+			else
+				throw new IllegalArgumentException("It is impossible to invest negative sum in industry growth");
+		}
+		catch (Exception e) {
+			throw new Exception("calculateCarbonIndustryGrowth function error: " + e.getMessage());
+		}
+		return growth;
 	}
 	
 	/**
@@ -63,16 +93,25 @@ public final class EnergyUsageHandler {
 	 * @param carbon
 	 * The increase of the carbon output that will be achieved.
 	 */
-	protected void investInCarbonIndustry(long investment) throws Exception{
-
-		long carbon = calculateCarbonIndustryGrowth(investment);
-		if (investment > this.country.availableToSpend) {
-			this.country.carbonOutput += carbon;
-			this.country.energyOutput += carbon;
-			this.country.availableToSpend -= investment;
+	public final void investInCarbonIndustry(double investment)
+			throws NotEnoughCashException, NotEnoughCarbonOutputException, Exception{
+		double growth;
+		try {
+			growth = calculateCarbonIndustryGrowth(investment);
+			if (investment < country.availableToSpend) {
+				country.carbonOutput += growth;
+				country.energyOutput += growth;
+				country.availableToSpend -= investment;
+			}
+			else {
+				throw new NotEnoughCashException();
+			}
 		}
-		else {
-			throw new NotEnoughCashException();
+		catch (NotEnoughCarbonOutputException e) {
+			throw new NotEnoughCarbonOutputException();
+		}
+		catch (Exception e) {
+			throw new Exception("investInCarbonIndustry function error: " + e.getMessage());
 		}
 	}
 }

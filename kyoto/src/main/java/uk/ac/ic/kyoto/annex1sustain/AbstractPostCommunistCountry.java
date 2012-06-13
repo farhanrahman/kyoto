@@ -1,6 +1,6 @@
 package uk.ac.ic.kyoto.annex1sustain;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.UUID;
 import java.util.List;
 
@@ -10,7 +10,7 @@ import uk.ac.ic.kyoto.countries.NotEnoughCashException;
 import uk.ac.ic.kyoto.countries.NotEnoughLandException;
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.market.FossilPrices;
-import uk.ac.ic.kyoto.services.TimeService;
+import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
@@ -27,13 +27,13 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
     // Private Fields
     //================================================================================
 	
-	protected long	 		internalPrice;					// The price of a single carbon credit that we estimate we will be able to successfully sell at
+	protected double 		internalPrice;					// The price of a single carbon credit that we estimate we will be able to successfully sell at
 	protected List<Double> 	uncommittedTransactionsCosts;	// List of transactions and their prices that were advertised but not completed
 	protected List<Double> 	committedTransactionsCosts;		// List of transactions and their prices that were completed
-	protected long 			creditsToSellTarget;			// Total amount of credits we aim to sell in current year
-	protected long 			creditsToSell;					// Credits left for sale from the current sell target
-	protected long			absorptionInvestmentTarget;		// The amount (in carbon) of a single carbon absorption investment considered this tick  
-	protected long			reductionInvestmentTarget;		// The amount (in carbon) of a single carbon reduction investment considered this tick 
+	protected double		creditsToSellTarget;			// Total amount of credits we aim to sell in current year
+	protected double		creditsToSell;					// Credits left for sale from the current sell target
+	protected double		absorptionInvestmentTarget;		// The amount (in carbon) of a single carbon absorption investment considered this tick  
+	protected double		reductionInvestmentTarget;		// The amount (in carbon) of a single carbon reduction investment considered this tick 
 	protected double		lastYearFactor;					// Coefficient reflecting the percentage of credit sales target that was met, adjusted by a constant
 	
 	
@@ -43,18 +43,17 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	
 	public AbstractPostCommunistCountry(UUID id, String name, String ISO,
 			double landArea, double arableLandArea, double GDP, double GDPRate,
-			long availiableToSpend, long emissionsTarget, long carbonOffset, long energyOutput, long carbonOutput)
+			long energyOutput, long carbonOutput)
 	{
-		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, emissionsTarget,
-				carbonOffset, energyOutput);
+		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput);
 		
-		this.internalPrice = Long.MAX_VALUE;
-		this.uncommittedTransactionsCosts = new ArrayList<Double>();
-		this.committedTransactionsCosts = new ArrayList<Double>();
+		this.internalPrice = Double.MAX_VALUE;
+		this.uncommittedTransactionsCosts = new LinkedList<Double>();
+		this.committedTransactionsCosts = new LinkedList<Double>();
 		this.creditsToSell = 0;
 		this.creditsToSellTarget = 0;
-		this.absorptionInvestmentTarget = Constants.MINIMAL_INVESTMENT;
-		this.reductionInvestmentTarget = Constants.MINIMAL_INVESTMENT;
+		this.absorptionInvestmentTarget = Constants.INVESTMENT_MIN;
+		this.reductionInvestmentTarget = Constants.INVESTMENT_MIN;
 		this.lastYearFactor = 1;	
 	}
 	
@@ -139,10 +138,9 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 * - meeting the sales target from previous year
 	 */
 	private void updateInternalPrice() {
-		internalPrice   = 	(long)
-							( calculateMarketPrice() * 
-							  calculateEndOfRoundFactor() * 
-							  lastYearFactor );
+		internalPrice   = 	calculateMarketPrice() * 
+							calculateEndOfRoundFactor() * 
+							lastYearFactor;
 	}
 	
 	/**
@@ -180,24 +178,35 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 * The less ticks till the end, the cheaper we sell.
 	 */
 	private double calculateEndOfRoundFactor() {
-		double endOfRoundFactor = 1;
+		double endOfRoundFactor;
+		int ticksInYear;
+		int currentTick;
+		int tresholdTick;
+		
 		try {
-			// get ticksToEndOfRound from Time service
-			TimeService timeService = getEnvironmentService(TimeService.class);
-			int ticksToEndOfRound = timeService.getTicksInYear() - timeService.getCurrentTick();
+			// Create time service and get the tick variables
+			ParticipantTimeService timeService = getEnvironmentService(ParticipantTimeService.class);
 			
-			if(ticksToEndOfRound < Constants.END_OF_ROUND_MINIMUM_NUMBER_OF_TICKS)
-				endOfRoundFactor = 	Constants.END_OF_ROUND_FACTOR_SLOPE *
-									(
-										Constants.NUMBER_OF_TICKS_IN_ROUND
-										- Constants.END_OF_ROUND_MINIMUM_NUMBER_OF_TICKS
-										- ticksToEndOfRound
-									);
+			ticksInYear = timeService.getTicksInYear();
+			currentTick = timeService.getCurrentTick();
+			tresholdTick = (int) (ticksInYear * Constants.END_OF_ROUND_YEAR_PART);
+			
+			// If in the final part of the year, adjust the constant factor
+			if (currentTick > tresholdTick) {
+				endOfRoundFactor = 1 + ((Constants.END_OF_ROUND_FACTOR_MAX - 1) * 
+										(currentTick - tresholdTick) /
+										(ticksInYear - tresholdTick));
+			}
+			// Else, set factor to default 1
+			else {
+				endOfRoundFactor = 1;
+			}
 		}
 		catch (Exception e) {
 			logger.warn("Problem with calculating endOfRoundFactor: " + e);
 			endOfRoundFactor = 1;
 		}
+		
 		return endOfRoundFactor;
 	}
 	
@@ -224,9 +233,9 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 * Increases the new carbon absorption investment target. Adjusts it if out of limits.
 	 */
 	private void increaseAbsorptionInvestmentTarget() {
-		absorptionInvestmentTarget = (long) (absorptionInvestmentTarget * Constants.INVESTMENT_SCALING);
-		if (absorptionInvestmentTarget > Constants.MAXIMAL_INVESTMENT) {
-			absorptionInvestmentTarget = Constants.MAXIMAL_INVESTMENT;
+		absorptionInvestmentTarget = absorptionInvestmentTarget * Constants.INVESTMENT_SCALING;
+		if (absorptionInvestmentTarget > Constants.INVESTMENT_MAX) {
+			absorptionInvestmentTarget = Constants.INVESTMENT_MAX;
 		}
 	}
 	
@@ -234,9 +243,9 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 * Decreases the new carbon absorption investment target. Adjusts it if out of limits.
 	 */
 	private void decreaseAbsorptionInvestmentTarget() {
-		absorptionInvestmentTarget = (long) (absorptionInvestmentTarget / Constants.INVESTMENT_SCALING);
-		if (absorptionInvestmentTarget < Constants.MINIMAL_INVESTMENT) {
-			absorptionInvestmentTarget = Constants.MINIMAL_INVESTMENT;
+		absorptionInvestmentTarget = absorptionInvestmentTarget / Constants.INVESTMENT_SCALING;
+		if (absorptionInvestmentTarget < Constants.INVESTMENT_MIN) {
+			absorptionInvestmentTarget = Constants.INVESTMENT_MIN;
 		}
 	}
 	
@@ -244,9 +253,9 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 * Increases the new carbon reduction investment target. Adjusts it if out of limits.
 	 */
 	private void increaseReductionInvestmentTarget() {
-		reductionInvestmentTarget = (long) (reductionInvestmentTarget * Constants.INVESTMENT_SCALING);
-		if (reductionInvestmentTarget > Constants.MAXIMAL_INVESTMENT) {
-			reductionInvestmentTarget = Constants.MAXIMAL_INVESTMENT;
+		reductionInvestmentTarget = reductionInvestmentTarget * Constants.INVESTMENT_SCALING;
+		if (reductionInvestmentTarget > Constants.INVESTMENT_MAX) {
+			reductionInvestmentTarget = Constants.INVESTMENT_MAX;
 		}
 	}
 	
@@ -254,9 +263,9 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 * Decreases the new carbon reduction investment target. Adjusts it if out of limits.
 	 */
 	private void decreaseReductionInvestmentTarget() {
-		reductionInvestmentTarget = (long) (reductionInvestmentTarget / Constants.INVESTMENT_SCALING);
-		if (reductionInvestmentTarget < Constants.MINIMAL_INVESTMENT) {
-			reductionInvestmentTarget = Constants.MINIMAL_INVESTMENT;
+		reductionInvestmentTarget = reductionInvestmentTarget / Constants.INVESTMENT_SCALING;
+		if (reductionInvestmentTarget < Constants.INVESTMENT_MIN) {
+			reductionInvestmentTarget = Constants.INVESTMENT_MIN;
 		}
 	}
 	
@@ -265,8 +274,8 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 * If so, tries to invest. Increases the next investment target on success, decreases on failure.
 	 */
 	private void carbonAbsorptionInvestment () {
-		long investmentCost;
-		long potentialProfit;
+		double investmentCost;
+		double potentialProfit;
 		
 		try {
 			investmentCost = carbonAbsorptionHandler.getCost(absorptionInvestmentTarget);
@@ -300,8 +309,8 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 * If so, tries to invest. Increases the next investment target on success, decreases on failure.
 	 */
 	private void carbonReductionInvestment () {
-		long investmentCost;
-		long potentialProfit;
+		double investmentCost;
+		double potentialProfit;
 		
 		try {
 			investmentCost = carbonReductionHandler.getCost(reductionInvestmentTarget);
@@ -361,24 +370,24 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 * All adjusted with a constant coefficient.
 	 */
 	protected void calculateNewSellingTarget() {
-		long newSellingTarget;
+		double newSellingTarget;
 		
 		try {
 			// Calculate new target based on three factors
-			newSellingTarget =	(long) 
-								( calculateAvailableCreditsFactor() *
-								  calculateFossilFuelsFactor() *
-								  calculateMarketFactor() );
+			newSellingTarget =	calculateAvailableCreditsFactor() *
+								calculateFossilFuelsFactor() *
+								calculateMarketFactor();
 			
 			// Adjust the new target if out of possible range
 			if (newSellingTarget > carbonOffset) {
-				newSellingTarget = carbonOffset;
+				newSellingTarget = Math.round(carbonOffset);
 			}
 		}
 		catch (Exception e) {
 			logger.warn("Problem with calculating newTarget: " + e);
 			newSellingTarget = creditsToSellTarget;
 		}
+		
 		creditsToSellTarget = newSellingTarget;
 	}
 	
@@ -396,6 +405,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			logger.warn("Problem with calculating availableCreditsFactor: " + e);
 			availableCreditsFactor = carbonOffset;
 		}
+		
 		return availableCreditsFactor;
 	}
 	
@@ -408,25 +418,25 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		
 		try {			
 			
-			// get current year from the Time service
-			TimeService timeService = getEnvironmentService(TimeService.class);
+			// Get current year from the Time service
+			ParticipantTimeService timeService = getEnvironmentService(ParticipantTimeService.class);
 			int currentYear = timeService.getCurrentYear();
 			
-			// get the data from the FossilPrices Service
+			// Get the data from the FossilPrices Service
 			FossilPrices fossilPrices = getEnvironmentService(FossilPrices.class);
 			double newOilPrice = fossilPrices.getOilPrice(currentYear);
 			double oldOilPrice = fossilPrices.getOilPrice(currentYear - 1);
 			double newGasPrice = fossilPrices.getGasPrice(currentYear);
 			double oldGasPrice = fossilPrices.getGasPrice(currentYear - 1);
 			
-			// if the data is relevant, calculate the gradients and the coefficient
-			if ((newOilPrice != 0) && (oldOilPrice != 0) && (newGasPrice != 0) && (oldGasPrice != 0) ) {
+			// If values for this and previous year exist, calculate gradient and factor
+			if ((newOilPrice >= 0) && (oldOilPrice >= 0) && (newGasPrice >= 0) && (oldGasPrice >= 0) ) {
 				double oilGradient = (newOilPrice - oldOilPrice) / oldOilPrice;
 				double gasGradient = (newGasPrice - oldGasPrice) / oldGasPrice;
 				fossilFuelsFactor = Constants.FOSSIL_FUEL_PRICE_COEFFICIENT * (oilGradient + gasGradient) / 2;
 			}
 			
-			// if the data is irrelevant, coefficient becomes irrelevant.
+			// If no data exists, return default 1 value.
 			else
 				fossilFuelsFactor = 1;
 		}
@@ -438,6 +448,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			logger.warn("Problem with calculating fossilFuelsFactor: " + e);
 			fossilFuelsFactor = 1;
 		}
+		
 		return fossilFuelsFactor;
 	}
 	
@@ -452,10 +463,10 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			
 			switch (economy.getEconomyState()) {
 				case GROWTH:
-					marketFactor = 1 + Constants.MARKET_STATE_COEFFICIENT;
+					marketFactor = Constants.MARKET_STATE_COEFFICIENT;
 					break;
 				case RECESSION:
-					marketFactor =  1 - Constants.MARKET_STATE_COEFFICIENT;
+					marketFactor =  2 - Constants.MARKET_STATE_COEFFICIENT;
 					break;
 				default:
 					marketFactor = 1;
@@ -466,6 +477,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 			logger.warn("Problem with calculating marketFactor: " + e);
 			marketFactor = 1;
 		}
+		
 		return marketFactor;
 	}
 	
@@ -496,8 +508,21 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 		}
 		
 		try {
-			// Calculate the factor
-			lastYearFactor = 1 + Constants.LAST_YEAR_FACTOR_SLOPE * (lastYearPercentageSold - Constants.LAST_YEAR_FACTOR_OFFSET);
+			// Calculate the lastYearFactor
+			if (lastYearPercentageSold >= Constants.LAST_YEAR_FACTOR_OFFSET) {
+				lastYearFactor = 1 + ((Constants.LAST_YEAR_FACTOR_MAX - 1) *
+									  (lastYearPercentageSold - Constants.LAST_YEAR_FACTOR_OFFSET) /
+									  (1 - Constants.LAST_YEAR_FACTOR_OFFSET));
+			}
+			else {
+				lastYearFactor = 1 - ((1 - Constants.LAST_YEAR_FACTOR_MAX) *
+									  (Constants.LAST_YEAR_FACTOR_OFFSET - lastYearPercentageSold) /
+									  (Constants.LAST_YEAR_FACTOR_OFFSET));
+			}
+		}
+		catch (ArithmeticException e) {
+			logger.warn("LAST_YEAR_FACTOR_OFFSET must be > 0 and < 1");
+			lastYearFactor = 0;
 		}
 		catch (Exception e) {
 			logger.warn("Problem with calculating lastYearFactor: " + e);
