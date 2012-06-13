@@ -10,7 +10,7 @@ import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.GameConst;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.CarbonTarget;
-import uk.ac.ic.kyoto.services.TimeService.EndOfYearCycle;
+import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfYearCycle;
 import uk.ac.imperial.presage2.core.environment.EnvironmentRegistrationRequest;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentServiceProvider;
@@ -72,14 +72,14 @@ public class Monitor extends EnvironmentService {
 		}
 		
 		// Register for the carbon emission targeting service
-		try {
-			this.carbonTargetingService = provider.getEnvironmentService(CarbonTarget.class);
-		} catch (UnavailableServiceException e) {
-			e.printStackTrace();
-		}
-		if(this.carbonTargetingService == null){
-			System.err.println("PROBLEM");
-		}
+//		try {
+//			this.carbonTargetingService = provider.getEnvironmentService(CarbonTarget.class);
+//		} catch (UnavailableServiceException e) {
+//			e.printStackTrace();
+//		}
+//		if(this.carbonTargetingService == null){
+//			System.err.println("PROBLEM");
+//		}
 	}
 	
 	/**
@@ -128,7 +128,7 @@ public class Monitor extends EnvironmentService {
 		if (noToMonitor >= memberStates.size()) {
 			// monitor all the countries
 			for (AbstractCountry country: memberStates) {
-				long realCarbonOutput = country.getMonitored();
+				double realCarbonOutput = country.getMonitored();
 				cash -= GameConst.MONITORING_PRICE;
 				double reportedCarbonOutput = carbonReportingService.getReport(country.getID(), SimTime.get());
 				if (realCarbonOutput > reportedCarbonOutput)
@@ -154,7 +154,7 @@ public class Monitor extends EnvironmentService {
 				
 				// Monitor the country
 				cash -= GameConst.MONITORING_PRICE;
-				long realCarbonOutput = pickedCountry.getMonitored();
+				double realCarbonOutput = pickedCountry.getMonitored();
 						
 				// Note that the country was monitored
 				monitoredCountries.add(pickedCountry);

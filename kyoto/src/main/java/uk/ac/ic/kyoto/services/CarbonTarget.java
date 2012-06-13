@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
-import uk.ac.ic.kyoto.services.TimeService.EndOfSessionCycle;
-import uk.ac.ic.kyoto.services.TimeService.EndOfYearCycle;
+import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfSessionCycle;
+import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfYearCycle;
 import uk.ac.imperial.presage2.core.environment.EnvironmentRegistrationRequest;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentServiceProvider;
@@ -17,7 +17,7 @@ import uk.ac.imperial.presage2.core.event.EventListener;
 import com.google.inject.Inject;
 
 /**
- *  Environment service for setting of carbon targets. Queried by countries via an action.
+ *  Participant environment service for setting of carbon targets. Queried by countries via an action.
  * 
  *  Formula can be found on GoogleDrive.
  *  
@@ -41,13 +41,14 @@ public class CarbonTarget extends EnvironmentService {
 	private long lastSessionTotalEmissions = 0;
 	
 	private EventBus eb;
-	private TimeService TimeService;
+	private ParticipantTimeService timeService;
+
 	
 	@Inject
 	protected CarbonTarget(EnvironmentSharedStateAccess sharedState, EnvironmentServiceProvider provider) {
 		super(sharedState);
 		try {
-			this.TimeService = provider.getEnvironmentService(TimeService.class);
+			this.timeService = provider.getEnvironmentService(ParticipantTimeService.class);
 		} catch (UnavailableServiceException e) {
 			System.out.println("Unable to get environment service 'TimeService'.");
 			e.printStackTrace();
@@ -118,7 +119,7 @@ public class CarbonTarget extends EnvironmentService {
 		double proportionOfWorldEmissions = 0.25;
 		
 		long sessionTarget;
-		if (TimeService.getCurrentSession() == 0) {
+		if (timeService.getCurrentSession() == 0) {
 			sessionTarget = carbonOutput1990 * (long) 0.95;
 		} else {
 			sessionTarget = ( (long) proportionOfWorldEmissions * this.lastSessionTotalEmissions) * (long) 0.95;
@@ -132,8 +133,8 @@ public class CarbonTarget extends EnvironmentService {
 	 */
 	private void generateYearTarget(countryObject country)
 	{
-		int currentYear = TimeService.getCurrentYear();
-		int yearsInSession = TimeService.getYearsInSession();
+		int currentYear = timeService.getCurrentYear();
+		int yearsInSession = timeService.getYearsInSession();
 
 		/*
 		 *  !! This data needs to be loaded from somewhere  !!

@@ -8,7 +8,7 @@ import java.util.UUID;
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.monitor.Monitor;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
-import uk.ac.ic.kyoto.services.TimeService;
+import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
@@ -28,6 +28,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	final protected String 		ISO;		//ISO 3166-1 alpha-3
 	
+	/*
+	 *  Simple boolean to check if the country is a member of Kyoto
+	 *  Defaults to true. Rogue states should set this to false in their constructor
+	 */
+	protected boolean isKyotoMember=true; 
+	
 	// TODO Change visibility of fields
 	/*
 	 * These variables are related to land area for
@@ -41,10 +47,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * These variables are related to carbon emissions and 
 	 * calculating 'effective' carbon output
 	 */
-	protected 		long 		carbonOutput;		// Tons of CO2 produced every year
-	protected		long		carbonAbsorption;	// Tons of CO2 absorbed by forests every year
-	protected 		long 		carbonOffset; 		// Tons of CO2 that the country acquired (by trading or energy absorption)
-	protected 		long		emissionsTarget;	// Number of tons of carbon you SHOULD produce
+	protected 		double 		carbonOutput;		// Tons of CO2 produced every year
+	protected		double		carbonAbsorption;	// Tons of CO2 absorbed by forests every year
+	protected 		double 		carbonOffset; 		// Tons of CO2 that the country acquired (by trading or energy absorption)
+	protected 		double		emissionsTarget;	// Number of tons of carbon you SHOULD produce
 	
 	/*
 	 * These variables are related to GDP and
@@ -52,15 +58,15 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 */
 	protected 		double 		GDP;				// GDP of the country in millions of dollars. Changes every year
 	protected 		double 		GDPRate;			// The rate in which the GDP changes in a given year. Expressed in %
-	protected 		long  		energyOutput;		// How much Carbon we would use if the whole industry was carbon based. Measured in Tons of Carbon per year
-	protected 		long 		availableToSpend;	// Measure of cash available to the country in millions of dollars. Note, can NOT be derived from GDP. Initial value can be derived from there, but cash reserves need to be able to lower independently.
+	protected 		double  		energyOutput;		// How much Carbon we would use if the whole industry was carbon based. Measured in Tons of Carbon per year
+	protected 		double 		availableToSpend;	// Measure of cash available to the country in millions of dollars. Note, can NOT be derived from GDP. Initial value can be derived from there, but cash reserves need to be able to lower independently.
 	
 	
-	protected 		Map<Integer, Long> carbonEmissionReports;
+	protected 		Map<Integer, Double> carbonEmissionReports;
 	
-	ParticipantCarbonReportingService reportingService; // TODO add visibility
-	Monitor monitor;
-	TimeService timeService;
+	protected ParticipantCarbonReportingService reportingService; // TODO add visibility
+	protected Monitor monitor;
+	protected ParticipantTimeService timeService;
 	
 	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
 	
@@ -74,9 +80,15 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	//================================================================================
     // Constructors and Initializers
     //================================================================================
+	/*Constructor for testing*/
+	public AbstractCountry(UUID id, String name, String ISO){
+		super(id,name);
+		this.landArea = 0;
+		this.ISO = ISO;
+	}
 	
 	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
-					double GDPRate, long emissionsTarget, long energyOutput, long carbonOutput) {
+					double GDPRate, double energyOutput, double carbonOutput) {
 
 		//TODO Validate parameters
 		
@@ -87,12 +99,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.arableLandArea = arableLandArea;
 		this.GDP = GDP;
 		this.GDPRate = GDPRate;
-		this.emissionsTarget = emissionsTarget;
+		this.emissionsTarget = 0;
 		this.carbonOffset = 0;
 		this.availableToSpend = 0;
 		this.carbonOutput = carbonOutput;
 		this.carbonAbsorption = 0;
-		this.carbonEmissionReports = new HashMap<Integer, Long>();
+		this.carbonEmissionReports = new HashMap<Integer, Double>();
 		this.energyOutput = energyOutput;
 		
 	}
@@ -111,7 +123,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		}
 		// Initialize the Action Handlers DO THEY HAVE TO BE INSTANTIATED ALL THE TIME?
 		try {
-			timeService = getEnvironmentService(TimeService.class);
+			timeService = getEnvironmentService(ParticipantTimeService.class);
 		} catch (UnavailableServiceException e1) {
 			System.out.println("TimeService doesn't work");
 			e1.printStackTrace();
@@ -128,8 +140,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			System.out.println("Unable to reach emission reporting service.");
 			e.printStackTrace();
 		}
-		
-		updateAvailableToSpend();
 		initialiseCountry();
 	}
 	
@@ -153,24 +163,20 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	@Override
 	final public void execute() {
 		super.execute();
-		try {
-			// TODO make sure that the proper getters are used
-			TimeService timeService = getEnvironmentService(TimeService.class);
-			
-			if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
+		if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {			
+			if (isKyotoMember) {
 				MonitorTax();
-				updateGDPRate();
-				updateGDP();
-				updateCarbonOffsetYearly();
-				YearlyFunction();
+				//checkTargets(); //did the countries meet their targets?
 			}
-			if (timeService.getCurrentYear() % timeService.getYearsInSession() == 0) {
-				resetCarbonOffset();
-				SessionFunction();
-			}
-		} catch (UnavailableServiceException e) {
-			logger.warn(e.getMessage(), e);
-			e.printStackTrace();
+			updateAvailableToSpend();
+			updateGDP(); //left out until this runs only every year
+			updateGDPRate();
+			updateCarbonOffsetYearly();
+			YearlyFunction();
+		}
+		if (timeService.getCurrentYear() % timeService.getYearsInSession() == 0) {
+			resetCarbonOffset();
+			SessionFunction();
 		}
 		behaviour();
 	}
@@ -195,7 +201,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * @return
 	 * Real Carbon Output of a country
 	 */
-	public final long getMonitored() {
+	public final double getMonitored() {
 		return carbonOutput;
 	}
 
@@ -205,7 +211,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return s;
 	}
 	
-	public Map<Integer,Long> getCarbonEmissionReports(){
+	public Map<Integer,Double> getCarbonEmissionReports(){
 		return this.carbonEmissionReports;
 	}
 	
@@ -215,7 +221,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * @param emission
 	 * @return
 	 */
-	private Map<Integer,Long> addToReports(Time simTime, Long emission){
+	private Map<Integer,Double> addToReports(Time simTime, double emission){
 		this.carbonEmissionReports.put(simTime.intValue(), emission);
 		return this.carbonEmissionReports;
 	}
@@ -260,6 +266,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		}
 		
 		GDPRate = GDPRate + marketStateFactor + (GameConst.GROWTH_SCALER*(energyOutput))/GDP;
+		GDPRate /= 100; // Needs to be a % for rate formula
 		} catch (UnavailableServiceException e) {
 			System.out.println("Unable to reach economy service.");
 			e.printStackTrace();
@@ -271,7 +278,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * @author sc1109
 	 */
 	private final void updateGDP() {
-		GDP = GDP + GDP * GDPRate;
+		GDP += GDP * GDPRate;
 	}
 	
 	/**
@@ -319,24 +326,44 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return GDPRate;
 	}
 
-	public long getEmissionsTarget() {
+	public double getEmissionsTarget() {
 		return emissionsTarget;
 	}
 
-	public long getCarbonOffset() {
+	public double getCarbonOffset() {
 		return carbonOffset;
 	}
 
-	public long getAvailableToSpend() {
+	public double getAvailableToSpend() {
 		return availableToSpend;
 	}
 	
-	public void setEmissionsTarget(long emissionsTarget) {
+	public void setEmissionsTarget(double emissionsTarget) {
 		this.emissionsTarget = emissionsTarget;
 	}
 	
-	public void setAvailableToSpend(long availableToSpend) {
+	public void setAvailableToSpend(double availableToSpend) {
 			this.availableToSpend = availableToSpend;
+	}
+	
+	//================================================================================
+    // Trade protocol monetary adjustments
+    //================================================================================
+	
+	public final void payMoney(double amount) {
+		availableToSpend -= amount;
+	}
+	
+	public final void receiveMoney(double amount) {
+		availableToSpend += amount;
+	}
+	
+	public final void sellOffset(double amount) {
+		carbonOffset -= amount;
+	}
+	
+	public final void receiveOffset(double amount) {
+		carbonOffset += amount;
 	}
 
 }

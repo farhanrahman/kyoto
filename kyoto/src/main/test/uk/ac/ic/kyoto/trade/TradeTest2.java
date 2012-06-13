@@ -2,7 +2,7 @@
  * @author cmd08
  *
  */
-package java.uk.ac.ic.kyoto.trade;
+package uk.ac.ic.kyoto.trade;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -12,7 +12,7 @@ import org.junit.Test;
 import uk.ac.ic.kyoto.trade.Offer;
 import uk.ac.ic.kyoto.trade.TradeType;
 
-public class TradeTest {
+public class TradeTest2 {
 
 	@Test
 	public void test() {
