@@ -6,12 +6,11 @@ package uk.ac.ic.kyoto.util.sim.mongo;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 
-import uk.ac.ic.kyoto.util.sim.jsonobjects.simulations.SimulationData;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -19,7 +18,6 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
-import com.mongodb.util.JSON;
 
 /**
  * @author farhanrahman
@@ -38,12 +36,18 @@ public class MongoConnector {
 	private Mongo m;
 	private DB db;
 	
-	private final boolean SHOULD_AUTHENTICATE;
+	private boolean SHOULD_AUTHENTICATE = false;
+	private final String collectionName = "simulations";
 	
 	/**
 	 * 
 	 */
 	
+	/**
+	 * Default constructor. Use this constructor
+	 * when you want to use the default port, host
+	 * and database as listed above.
+	 */
 	public MongoConnector(){
 		this.SHOULD_AUTHENTICATE = false;
 		this.host = this.getHostFromDBProperties();
@@ -57,6 +61,15 @@ public class MongoConnector {
 		
 	}
 	
+	/**
+	 * Constructor that takes in all the parameters to
+	 * set the required fields
+	 * @param host
+	 * @param port
+	 * @param dbName
+	 * @param username
+	 * @param password
+	 */
 	public MongoConnector(String host, String port, String dbName, String username, String password){
 		this.port = Integer.parseInt(port);
 		this.host = host;
@@ -66,6 +79,12 @@ public class MongoConnector {
 		this.SHOULD_AUTHENTICATE = true;		
 	}	
 	
+	/**
+	 * 
+	 * @param host
+	 * @param port
+	 * @param dbName
+	 */
 	public MongoConnector(String host, String port, String dbName) {
 		this.SHOULD_AUTHENTICATE = false;
 		this.port = Integer.parseInt(port);
@@ -92,14 +111,21 @@ public class MongoConnector {
 		}
 	}
 	
-	private void openConnection(){
+	/**
+	 * Opens up a connection with the given details
+	 * returns true if connection opened successfully
+	 * @return
+	 */
+	private boolean openConnection(){
 		try {
 			this.m = new Mongo(this.host,this.port);
+			return true;
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		} catch (MongoException e) {
 			e.printStackTrace();
-		}		
+		}
+		return false;
 	}
 	
 	private void closeConnection(){
@@ -116,42 +142,51 @@ public class MongoConnector {
 		}
 	}
 	
-	public void testConnection(){
-		this.openConnection();
+	/**
+	 * Gets a list of {@DBObject}s from the
+	 * given details for simulation with _id = simID
+	 * and collection = colName
+	 * @param simID
+	 * @param colName
+	 * @return
+	 */
+	public List<DBObject> getDBObjects(Integer simID, String colName){
+		List<DBObject> list = new ArrayList<DBObject>();
+
+		if(this.openConnection() == false){
+			return list;
+		}
+		
 		this.db = m.getDB(this.dbName);
 		
 		if(this.SHOULD_AUTHENTICATE == true){
 			this.authenticate();
-		}
-		/*QUERY AND TEST*/
+		}		
 		
-		Set<String> colls = db.getCollectionNames();
-
-		for (String s : colls) {
-		    System.out.println(s);
-		}
-		
-		DBCollection collection = db.getCollection("simulations");
+		DBCollection collection = db.getCollection(colName);
         BasicDBObject query = new BasicDBObject();
         
-        query.put("_id", 2);
-        DBCursor cur = collection.find(query);
-        
+        query.put("_id", simID);
+        DBCursor cur = collection.find(query);		
+
         while(cur.hasNext()) {
-        	DBObject ob = cur.next();
-        	Gson gson = new GsonBuilder().create();
-        	String json = JSON.serialize(ob);
-        	json = json.replaceAll("\"\"", "0");
-        	System.out.println(json);
-			SimulationData data = gson.fromJson(json, SimulationData.class);
-		    
-			System.out.println(data.toString());        	
+        	list.add(cur.next());
         }
         
 		this.closeConnection();
+        
+		return Collections.unmodifiableList(list);
 	}
 	
-
+	/**
+	 * Uses default collection name "simulations"
+	 * @param simID
+	 * @return
+	 */
+	public List<DBObject> getDBObjects(Integer simID){
+		return this.getDBObjects(simID, this.collectionName);
+	}	
+	
 	/*======GETTERS AND SETTERS=====*/
 	
 	public Integer getPort() {
@@ -183,6 +218,11 @@ public class MongoConnector {
 	}
 
 	public void setUsername(String username) {
+		if(!this.password.equals("")){
+			this.SHOULD_AUTHENTICATE = true;
+		}else{
+			this.SHOULD_AUTHENTICATE = false;
+		}
 		this.username = username;
 	}
 
@@ -191,6 +231,11 @@ public class MongoConnector {
 	}
 
 	public void setPassword(String password) {
+		if(!this.username.equals("")){
+			this.SHOULD_AUTHENTICATE = true;
+		}else{
+			this.SHOULD_AUTHENTICATE = false;
+		}
 		this.password = password;
 	}
 
