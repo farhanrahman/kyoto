@@ -38,7 +38,7 @@ public class BIC extends AbstractCountry {
 	@EventListener
 	public void TickFunction(EndOfTimeCycle e){
 		//TODO implement functions that are done every tick
-		//trades are done every tick ( CSM offers) 
+		clean_development_mechanism(); 
 		
 	}
 	
@@ -49,13 +49,15 @@ public class BIC extends AbstractCountry {
 				try {
 					economy();
 				} catch (IllegalArgumentException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				e.printStackTrace();
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				e.printStackTrace();
 				} 
-				//3)Calculate availabletoSpend				
+				//calculate carbon output every year
+				yearly_emissions();
+				
+				//3)Calculate availabletoSpend	
+				
 				//4)Recalculate carbonOffset
 		
 	}
@@ -93,16 +95,16 @@ public class BIC extends AbstractCountry {
 		double difference;
 		boolean aim_success = false; 
 		difference = energy_aim - energyOutput; //difference in energy aim and current energy output.
-		
+		double invest_money;
+		invest_money = energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(difference) ;
 		if (energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(difference) < availableToSpend){
-			buildIndustry(difference); 
+			buildIndustry(invest_money); 
 			aim_success = true;
 			logger.info("Country met its yearly energy output goal");
 		}
 		else{
-			clean_development_mechanism(); //to be implemented
-			aim_success = false;
-			logger.info("Country failed to met its yearly energy output goal");
+			logger.info("Country has insufficient funds to meet its energy output goal");
+			generate_income(); //out of money
 		}
 		update_energy_aim(energy_aim,aim_success); //update the energy aim for the next year.		
 			
@@ -126,9 +128,9 @@ public class BIC extends AbstractCountry {
 			}
 		}	
 		
-		if (carbonOutput + energyUsageHandler.calculateCarbonIndustryGrowth(invest) >= environment_friendly_target)
+		else
 		{
-			logger.info("Country exceeded its environment friendly goal");
+			logger.info("Country exceeded its environment friendly goal, invest in carbon industry but also invest in carbon absorption");
 			
 			try{
 				energyUsageHandler.investInCarbonIndustry(invest);
@@ -140,7 +142,11 @@ public class BIC extends AbstractCountry {
 			try{ //also since country exceeds its own carbon target, invests in carbon absorption in order to get carbon offset.
 				carbon_difference = environment_friendly_target - (carbonOutput + energyUsageHandler.calculateCarbonIndustryGrowth(invest));
 				if (carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < availableToSpend )
+					{
 					carbonAbsorptionHandler.investInCarbonAbsorption(carbonAbsorptionHandler.getInvestmentRequired(carbon_difference));
+					logger.info("Country ");
+					}
+					
 			}
 			catch (Exception e){
 				logger.warn("Problem with investing in carbon absorption: " + e);
@@ -156,6 +162,15 @@ public class BIC extends AbstractCountry {
 		}
 	}
 	
+	private void generate_income()
+	{
+		
+	}
+	//calculates
+	private void yearly_emissions()
+	{
+		carbonOutput = carbonOutput - (carbonAbsorption + carbonOffset);  
+	}
 			
 	  //.......................................trading.CSM...............................................
 		//basically search for potential investors in our lands through clean development mechanism (acquire cash!)

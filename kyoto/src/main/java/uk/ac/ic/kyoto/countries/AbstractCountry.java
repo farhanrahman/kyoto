@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.market.Economy;
-import uk.ac.ic.kyoto.monitor.Monitor;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.imperial.presage2.core.Time;
@@ -171,20 +170,19 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	@Override
 	final public void execute() {
 		super.execute();
-		if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {			
+		if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {		
+			updateGDPRate();
+			updateGDP();
+			updateAvailableToSpend();
 			if (isKyotoMember) {
-			//	MonitorTax();
-				//checkTargets(); //did the countries meet their targets?
+				MonitorTax();
 			}
-			//updateAvailableToSpend();
-			//updateGDP(); //left out until this runs only every year
-			//updateGDPRate();
-			//updateCarbonOffsetYearly();
-			//YearlyFunction();
+			updateCarbonOffsetYearly();
+			YearlyFunction();
 		}
-		if (timeService.getCurrentYear() % timeService.getYearsInSession() == 0) {
-			//resetCarbonOffset();
-			//SessionFunction();
+		if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
+			resetCarbonOffset();
+			SessionFunction();
 		}
 		behaviour();
 	}
@@ -346,11 +344,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return availableToSpend;
 	}
 	
-	public void setEmissionsTarget(double emissionsTarget) {
+	void setEmissionsTarget(double emissionsTarget) {
 		this.emissionsTarget = emissionsTarget;
 	}
 	
-	public void setAvailableToSpend(double availableToSpend) {
+	void setAvailableToSpend(double availableToSpend) {
 			this.availableToSpend = availableToSpend;
 	}
 	
