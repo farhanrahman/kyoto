@@ -23,8 +23,7 @@ public class AnnexOneReduce extends AbstractCountry {
 	private EU eu;
 	
 	public AnnexOneReduce(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
-			double GDPRate, double availiableToSpend, double carbonOffset,
-			double energyOutput, double carbonOutput) {
+			double GDPRate, double energyOutput, double carbonOutput) {
 		
 		super(id, name, ISO, landArea, arableLandArea, GDP,
 					GDPRate, energyOutput, carbonOutput);
