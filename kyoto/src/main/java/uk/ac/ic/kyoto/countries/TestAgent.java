@@ -43,6 +43,30 @@ public class TestAgent extends AbstractParticipant {
 						return false;
 					}
 				}
+
+				@Override
+				protected void payMoney(double amount) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				protected void receiveMoney(double amount) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void sellOffset(double amount) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void receiveOffset(double amount) {
+					// TODO Auto-generated method stub
+					
+				}
 			};
 		} catch (FSMException e) {
 			// TODO Auto-generated catch block
