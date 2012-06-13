@@ -1,6 +1,7 @@
-package uk.ac.ic.kyoto.trade;
+package uk.ac.ic.kyoto.countries;
 
 import java.util.UUID;
+
 
 /**
  * Wrapper class for Trade
@@ -46,11 +47,19 @@ public class OfferMessage {
 		this.tradeID = id;
 		this.offerState = OfferMessage.OfferType.TRADE_PROTOCOL;
 	}
-
-	public Offer getOffer() {
-		return offer;
+	
+	public TradeType getOfferType(){
+		return offer.getType();
+	}
+	
+	public Integer getOfferQuantity(){
+		return this.offer.getQuantity();
 	}
 
+	public Integer getOfferUnitCost(){
+		return this.offer.getUnitCost();
+	}
+	
 	public UUID getTradeID() {
 		return tradeID;
 	}
