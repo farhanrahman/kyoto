@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import uk.ac.ic.kyoto.trade.Offer;
 import uk.ac.ic.kyoto.trade.OfferMessage;
-import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.messaging.Performative;
@@ -31,7 +30,7 @@ public class TestAgent extends AbstractParticipant {
 		super.initialise();
 		
 		try {
-			this.trade = new TradeProtocol(getID(), this.authkey, environment, network) {
+			this.trade = new TradeProtocol(getID(), this.authkey, environment, network, null) {
 				
 				@Override
 				protected boolean acceptExchange(NetworkAddress from, Offer trade) {
