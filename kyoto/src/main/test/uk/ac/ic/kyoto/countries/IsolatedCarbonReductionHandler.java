@@ -29,7 +29,7 @@ public final class IsolatedCarbonReductionHandler{
 	 * Cost of reducing carbon by the specified amount.
 	 */
 	public final double getInvestmentRequired(double carbonOutputChange) throws Exception {
-		return getInvestmentRequired(carbonOutputChange,country.carbonOutput, country.energyOutput);
+		return getInvestmentRequired(carbonOutputChange, country.carbonOutput, country.energyOutput);
 	}
 	
 	/**
@@ -54,7 +54,7 @@ public final class IsolatedCarbonReductionHandler{
 		try {			
 			// Calculate the clean industry measure after and before investment
 			double cleanIndustryBefore = calculateCleanIndustryMeasure(carbonOutput, energyOutput);
-			double cleanIndustryAfter = calculateCleanIndustryMeasure((carbonOutput - carbonOutputChange), energyOutput);
+			double cleanIndustryAfter = calculateCleanIndustryMeasure((carbonOutput + carbonOutputChange), energyOutput);
 			
 			// Get average price of single ton of carbon output reduction
 			double averageUnitPrice = (GameConst.CARBON_REDUCTION_PRICE_MIN +
@@ -155,6 +155,12 @@ public final class IsolatedCarbonReductionHandler{
 				throw new NotEnoughCashException();
 			}
 		}
+		catch (NotEnoughCarbonOutputException e) {
+			throw e;
+		}
+		catch (NotEnoughCashException e) {
+			throw e;
+		}
 		catch (Exception e) {
 			throw new Exception("investInCarbonReduction function error: " + e.getMessage());
 		}
@@ -170,7 +176,7 @@ public final class IsolatedCarbonReductionHandler{
 			cleanIndustry = (1 - (carbonOutput / energyOutput));
 		}
 		else {
-			throw new Exception("CalculateCleanIndustryMeasure function error: carbonOutput is greater than energyOutput");
+			throw new Exception("calculateCleanIndustryMeasure function error: carbonOutput is greater than energyOutput");
 		}
 		
 		return cleanIndustry;

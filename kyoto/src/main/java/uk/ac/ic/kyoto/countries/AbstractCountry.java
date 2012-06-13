@@ -163,13 +163,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	final public void execute() {
 		super.execute();
 		if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {			
+			updateGDPRate();
+			updateGDP();
+			updateAvailableToSpend();
 			if (isKyotoMember) {
 				MonitorTax();
-				//checkTargets(); //did the countries meet their targets?
 			}
-			updateAvailableToSpend();
-			updateGDP(); //left out until this runs only every year
-			updateGDPRate();
 			updateCarbonOffsetYearly();
 			YearlyFunction();
 		}
