@@ -1,6 +1,5 @@
 package uk.ac.ic.kyoto.annex1reduce;
 
-import static org.junit.Assert.*;
 import org.junit.*;
 
 import java.util.UUID;
@@ -12,18 +11,28 @@ import java.util.UUID;
  */
 public class EUCountryTest {
 
-	static private EUCountry test;
+	static private AnnexOneReduce test;
 	
 	@BeforeClass
 	public static void initEUCountry() {
 		System.out.println("Initialising EUCountry");
-		test  = new EUCountry(UUID.randomUUID(),"JunitTest", "JUT",
-				100, 50, 1000, 10000, 100000, 100, 10, 10, 10);
+		test = new AnnexOneReduce(UUID.randomUUID(), "JunitTest", "JUT",1000000,500000,1000000,1000000,100000,70000);
+		
+		test.initialise();
 	}
 	
 	@Test
 	public void testbehaviour() {
-		test.behaviour();
+		
+		double[] investments = new double[2];
+		double totalcost = test.getAbsorbReduceInvestment(25000,investments);
+		
+		System.out.println(investments[0]);
+		System.out.println(investments[1]);
+		
+		
+		
+//		test.behaviour();
 	}
 
 }

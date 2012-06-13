@@ -2,13 +2,8 @@ package uk.ac.ic.kyoto.annex1reduce;
 
 import java.util.UUID;
 
-import alice.tuprolog.MalformedGoalException;
-import alice.tuprolog.NoSolutionException;
-import alice.tuprolog.Prolog;
-import alice.tuprolog.SolveInfo;
-import alice.tuprolog.UnknownVarException;
-
 import uk.ac.ic.kyoto.countries.AbstractCountry;
+import uk.ac.ic.kyoto.countries.IsolatedAbstractCountry;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.messaging.Input;
 
@@ -17,9 +12,8 @@ import uk.ac.imperial.presage2.core.messaging.Input;
  * @author Nik
  *
  */
-public class AnnexOneReduce extends AbstractCountry {
+public class AnnexOneReduce extends IsolatedAbstractCountry {
 	
-	final private Prolog engine;
 	private EU eu;
 	
 	public AnnexOneReduce(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
@@ -29,7 +23,6 @@ public class AnnexOneReduce extends AbstractCountry {
 		super(id, name, ISO, landArea, arableLandArea, GDP,
 					GDPRate, energyOutput, carbonOutput);
 
-		engine = EUBehaviours.getEngine(name);
 	}
 
 	@Override
@@ -54,54 +47,170 @@ public class AnnexOneReduce extends AbstractCountry {
 		
 	}
 	
+//	@Override
+//	protected void behaviour() {
+//		
+//		//The amount of carbon we need to decrease this year
+//		long carbonDecrease = getEmissionsTarget() - getCarbonOffset() - getCarbonOutput();
+//		
+//		long halfCarbonDecrease = carbonDecrease / 2;
+//		
+//		//Check if we can reach the target by solely offset and reduction
+//		long availableToSpend = getAvailableToSpend();
+//		
+//		long averageAbsorbCost;
+//		try {
+//			averageAbsorbCost = this.carbonAbsorptionHandler.getCost(halfCarbonDecrease)/halfCarbonDecrease;
+//		} catch (Exception e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+//		
+//		long averageReduceCost;
+//		try {
+//			averageReduceCost = this.carbonReductionHandler.getCost(halfCarbonDecrease)/halfCarbonDecrease;
+//		} catch (Exception e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+//		
+//		// x * averageAbsorbCost = y * averageReduceCost
+//		// x + y = 1; y = 1 - x;
+//		// x * averageAbsorbCost = (1-x) * averageReduceCost;
+//		// x*averageAbsorbCost = averageReduceCost - x*averageReduceCost;
+//		//x*(averageAbsorbCost + averageRC) = aRC;
+//		//x = arc/(aac+arc);
+//		
+//		long ratioX = averageReduceCost/(averageAbsorbCost + averageAbsorbCost);
+//		long ratioY = 1 - ratioX;
+//		
+//		//Optimal(ish) ratio of aRC and aAC is ratioX:ratioY
+//		
+//		long estimatedCost = ratioX * averageAbsorbCost + ratioY * averageReduceCost;
+//		
+//		if (estimatedCost < availableToSpend) {
+//			long costAbsorb  = carbonAbsorptionHandler.getCost(ratioX * carbonDecrease);
+//			long costReduce = carbonReductionHandler.getCost(ratioY * carbonDecrease);
+//			
+//			try {
+//				carbonAbsorptionHandler.invest(costAbsorb);
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			try {
+//				carbonReductionHandler.invest(costReduce);
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			
+//			long remainingMoney = availableToSpend - costAbsorb - costReduce;
+//			
+//			this.energyUsageHandler.calculateCarbonIndustryGrowth(remainingMoney /2);
+//			
+//			
+//			
+//			try {
+//				this.energyUsageHandler.investInCarbonIndustry(remainingMoney / 2);
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			
+//			//Offset with more reduction
+//			
+//		}
+//		else {
+//			//Look at the market (NOT IMPLEMENTED YET)
+//			//Buy credits if cheaper
+//			//else buy as much offset as we can and shut down factories to make the difference
+//		}
+//		
+//	}
+	
 	@Override
 	protected void behaviour() {
 		
-		//TODO perform analysis
+	}
+	
+	final private static int NUM_ITERATIONS = 3;
+	
+	/**
+	 * For a given amount of carbon to reduce, return the amount of money we should invest in Absorption and Reduction.
+	 * For safety's sake, will tend to overestimate a bit.
+	 * @param carbonReduction
+	 * @param Pass in a double[2], investments [0] = money to invest in Absorption, [1] = money to invest in Reduction
+	 * @return Total Cost
+	 */
+	public double getAbsorbReduceInvestment(double carbonReduction,double[] investments) {
 		
-		//TODO call prolog functions
-		String term = evaluateString("basicTest(test,X).","X");
-		System.out.println(term);
+		if (carbonReduction <= 0) return 0;
+		
+		//Overestimate a bit
+		carbonReduction*=1.05;
+		
+		double absorbFrac = 0.5;
+		double reduceFrac = 0.5;
+		
+		//Attempt to minimise cost for a given amount of carbon
+		for (int i = 0; i< NUM_ITERATIONS; i++) {
+			
+			double absorbCost;
+			double reduceCost;
+			
+			try {
+				absorbCost = this.carbonAbsorptionHandler.getInvestmentRequired(absorbFrac * carbonReduction);
+				reduceCost = this.carbonReductionHandler.getInvestmentRequired(reduceFrac * carbonReduction);
+			} catch (Exception e) {
+				e.printStackTrace();
+				return 0;
+			}
+			
+			double frac = absorbCost/(absorbCost + reduceCost);
+			absorbFrac*=(1-frac);
+			reduceFrac*=frac;
+			
+			double totalFrac = (absorbFrac + reduceFrac);
+			
+			absorbFrac/=totalFrac;
+			reduceFrac/=totalFrac;
+			
+		}
+		
+		absorbFrac = Math.round(1000 * absorbFrac)/1000;
+		reduceFrac = Math.round(1000 * reduceFrac)/1000;
+		
+		try {
+			if (absorbFrac == 0) {
+				investments[0] = 0;
+			}
+			else {
+				investments[0] = this.carbonAbsorptionHandler.getInvestmentRequired(absorbFrac * carbonReduction);
+			}
+			
+			if (reduceFrac == 0) {
+				investments[1] = 0;
+			}
+			else {
+				investments[1] = this.carbonReductionHandler.getInvestmentRequired(reduceFrac * carbonReduction);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 0;
+		}
+		
+		return (investments[0] + investments[1]);
 	}
 	
 	/**
-	 * Pass in a string for the loaded Prolog engine to evaulate and the term
-	 * we want returned. Will return a maximum of one term containing the action
-	 * that is to be taken by the country
-	 * 
-	 * @param input The string to evaluate
-	 * @param term The term to return
-	 * @return A string containing the returned term
+	 * TODO
+	 * @return
 	 */
-	private String evaluateString(String input, String term){
-		
-		SolveInfo info = null;
-		try {
-			info = engine.solve(input);
-		} catch (MalformedGoalException e) {
-			e.printStackTrace();
-		}
-		
-		String output;
-		
-		if (info.isSuccess()) {
-			try {
-				output = info.getTerm(term).toString();
-			} catch (NoSolutionException e) {
-				e.printStackTrace();
-				output = null;
-			} catch (UnknownVarException e) {
-				e.printStackTrace();
-				output = null;
-			}
-		}
-		else {
-			output = "false";
-		}
-		
-		return output;
-		
+	public double getMarketPrice() {
+		return 0;
 	}
+	
 
 	@Override
 	public void YearlyFunction() {
