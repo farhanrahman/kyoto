@@ -1,13 +1,12 @@
 package uk.ac.ic.kyoto.countries;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.market.Economy;
+import uk.ac.ic.kyoto.services.CarbonTarget;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.imperial.presage2.core.Time;
@@ -15,12 +14,8 @@ import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.messaging.Performative;
-import uk.ac.imperial.presage2.core.network.BroadcastMessage;
-import uk.ac.imperial.presage2.core.network.Message;
 import uk.ac.imperial.presage2.core.network.MulticastMessage;
-import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
-import uk.ac.imperial.presage2.util.fsm.FSMException;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 /**
@@ -72,6 +67,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	protected 		Map<Integer, Double> carbonEmissionReports;
 	
 	protected ParticipantCarbonReportingService reportingService; // TODO add visibility
+	protected CarbonTarget carbonTarget;
 	protected Monitor monitor;
 	protected ParticipantTimeService timeService;
 	
@@ -120,6 +116,14 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	final public void initialise(){
 		super.initialise();
 		
+		// Add the country to the carbonTarget service
+		try {
+			carbonTarget = getEnvironmentService(CarbonTarget.class);
+			carbonTarget.addMemberState(this);
+		} catch (UnavailableServiceException e1) {
+			System.out.println("Unable to reach carbon target service.");
+			e1.printStackTrace();
+		}
 		// Add the country to the monitor service
 		try {
 			monitor = getEnvironmentService(Monitor.class);
@@ -350,6 +354,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	void setAvailableToSpend(double availableToSpend) {
 			this.availableToSpend = availableToSpend;
+	}
+	
+	public boolean getIsKyotoMember() {
+		return this.isKyotoMember;
 	}
 	
 	//================================================================================

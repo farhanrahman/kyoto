@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
+import uk.ac.ic.kyoto.countries.GameConst;
 import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfSessionCycle;
 import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfYearCycle;
-import uk.ac.imperial.presage2.core.environment.EnvironmentRegistrationRequest;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentServiceProvider;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
@@ -19,7 +19,11 @@ import com.google.inject.Inject;
 /**
  *  Participant environment service for setting of carbon targets. Queried by countries via an action.
  * 
- *  Formula can be found on GoogleDrive.
+ *  Formula can be found on github wiki.
+ *  
+ *  TODO:
+ *  1. First session data
+ *  2. Finish year target shiz
  *  
  *  @author Jonathan Ely
  */
@@ -27,23 +31,26 @@ import com.google.inject.Inject;
 public class CarbonTarget extends EnvironmentService {
 
 	private class countryObject  {
-		public UUID countryID;
-		public String countryName;
+		final public AbstractCountry obj;
+		public double proportion;
+		public double penalty = 0;
 		
-		public countryObject(UUID id, String name) {
-			this.countryID = id;
-			this.countryName = name;
+		public countryObject(AbstractCountry country) {
+			this.obj = country;
 		}
 	}
 	
 	private ArrayList<countryObject> participantCountries= new ArrayList<countryObject>();
-	private int session = 0;
-	private long lastSessionTotalEmissions = 0;
+	
+	/*
+	 * Store world session targets 
+	 */
+	private double lastSessionTarget;
+	private double currentSessionTarget;
 	
 	private EventBus eb;
 	private ParticipantTimeService timeService;
 
-	
 	@Inject
 	protected CarbonTarget(EnvironmentSharedStateAccess sharedState, EnvironmentServiceProvider provider) {
 		super(sharedState);
@@ -55,21 +62,12 @@ public class CarbonTarget extends EnvironmentService {
 		}
 	}
 
-	/*
-	 * On registration of Participant, calculate emissions targets.
-	 * 
-	 * (non-Javadoc)
-	 * @see uk.ac.imperial.presage2.core.environment.EnvironmentService#registerParticipant(uk.ac.imperial.presage2.core.environment.EnvironmentRegistrationRequest)
+	/**
+	 * Adds states to the service
 	 */
-	@Override
-	public void registerParticipant(EnvironmentRegistrationRequest req) {
-		super.registerParticipant(req);
-		
-		AbstractCountry agent = (AbstractCountry) req.getParticipant();
-		countryObject countryDetails = new countryObject(agent.getID(), agent.getName());
-		this.participantCountries.add(countryDetails);
-		
-		generateSessionTarget(countryDetails);
+	public void addMemberState(AbstractCountry state) {
+		countryObject memberState = new countryObject(state);
+		this.participantCountries.add(memberState);
 	}
 	
 	@Inject
@@ -78,21 +76,48 @@ public class CarbonTarget extends EnvironmentService {
 		eb.subscribe(this);
 	}
 	
+	public double querySessionTarget(UUID country) {
+		double state = (Double) sharedState.get("EmissionsSessionTarget", country);
+		return state;
+	}
+	
+	public double queryYearTarget(UUID country) {
+		double state = (Double) sharedState.get("EmissionsYearTarget", country);
+		return state;
+	}
+	
+	private double getReportedCarbonOutput(UUID County)
+	{
+		/*
+		 * NEEDS TO BE IMPLEMENTED
+		 */
+		return 0;
+	}
+	
 	/*
 	 * Function that is triggered by the end of session event.
 	 */
 	@EventListener
 	public void updateSessionTarget(EndOfSessionCycle e)
 	{
+		this.lastSessionTarget = this.currentSessionTarget;
+		this.currentSessionTarget = lastSessionTarget * GameConst.TARGET_REDUCTION ; 
+		
+		double rogueCarbonOutput = 0;
+		for (countryObject country : participantCountries) {
+			if(!country.obj.getIsKyotoMember()){
+				rogueCarbonOutput += getReportedCarbonOutput(country.obj.getID());
+			}
+		}
+		
+		double kyotoTarget = this.currentSessionTarget - rogueCarbonOutput;
+		
 		/*
-		 *  !! Needs to be implemented !!
-		 *  
-		 *  Work out end of session total emissions
+		 * TODO: Set country carbon output proportions
 		 */
-		this.lastSessionTotalEmissions = 1000;
 		
 		for (countryObject country : participantCountries) {
-			generateSessionTarget(country);
+			generateSessionTarget(country, kyotoTarget);
 		}
 	}
 	
@@ -107,25 +132,37 @@ public class CarbonTarget extends EnvironmentService {
 		}
 	}
 	
+	private countryObject findCountryObject(UUID countryID){
+		countryObject result = null;
+		for (countryObject country : participantCountries) {
+			if (country.obj.getID() == countryID) {
+				result = country;
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * Applies penalty to year targets for given country 
+	 * 
+	 * @param country
+	 * @param penaltyValue
+	 */
+	public void setCountryPenalty(UUID countryID, double penaltyValue) {
+		countryObject target= findCountryObject(countryID);
+		target.penalty += penaltyValue;
+
+		generateYearTarget(target);
+	}
+	
 	/*
 	 * Generates end of session target (binding) from 1990 data
 	 */
-	private void generateSessionTarget(countryObject country)
-	{
-		/*
-		 *  !! Data needs to be loaded from somewhere  !!
-		 */
-		long carbonOutput1990 = 100;	
-		double proportionOfWorldEmissions = 0.25;
-		
-		long sessionTarget;
-		if (timeService.getCurrentSession() == 0) {
-			sessionTarget = carbonOutput1990 * (long) 0.95;
-		} else {
-			sessionTarget = ( (long) proportionOfWorldEmissions * this.lastSessionTotalEmissions) * (long) 0.95;
-		}
-		
-		sharedState.change("EmissionsSessionTarget", country.countryID, sessionTarget);
+	private void generateSessionTarget(countryObject country, double kyotoTarget)
+	{	
+		country.penalty = 0;
+		double sessionTarget = country.proportion * kyotoTarget;
+		sharedState.change("EmissionsSessionTarget", country.obj.getID(), sessionTarget);
 	}
 	
 	/*
@@ -133,35 +170,19 @@ public class CarbonTarget extends EnvironmentService {
 	 */
 	private void generateYearTarget(countryObject country)
 	{
-		int currentYear = timeService.getCurrentYear();
-		int yearsInSession = timeService.getYearsInSession();
-
-		/*
-		 *  !! This data needs to be loaded from somewhere  !!
-		 */		
-		long carbonOutput1990 = 100; 
-		double proportionOfWorldEmissions = 0.3;
+		double sessionProgress = (timeService.getCurrentYear() % GameConst.YEARS_IN_SESSION) / GameConst.YEARS_IN_SESSION;
 		
-		long yearTarget;
-		if (currentYear == 0)
-		{
-			yearTarget = (long) (carbonOutput1990 * (1 - (currentYear % yearsInSession) * (0.05 / yearsInSession)));
-		} else {
-			yearTarget = (long) (( (long) proportionOfWorldEmissions * this.lastSessionTotalEmissions) * 
-									(1 - (currentYear % yearsInSession) * (0.05 / yearsInSession)));
-		}
-	
-		sharedState.change("EmissionsYearTarget", country.countryID, yearTarget);
+		/*
+		 * NEED TO GET THESE FROM SOMEWHERE
+		 */
+		double lastSessionTarget = 1000; 
+		double currentSessionTarget = 100;
+		
+		double diffTargets = lastSessionTarget - currentSessionTarget;
+		double penalty = country.penalty;
+		
+		double yearTarget = lastSessionTarget - (diffTargets * sessionProgress) - penalty;
+		
+		sharedState.change("EmissionsYearTarget", country.obj.getID(), yearTarget);
 	}	
-	
-	public long querySessionTarget(UUID country) {
-		Long state = (Long) sharedState.get("EmissionsSessionTarget", country);
-		return state.longValue();
-	}
-	
-	public long queryYearTarget(UUID country) {
-		Long state = (Long) sharedState.get("EmissionsYearTarget", country);
-		return state.longValue();
-	}
-	
 }
