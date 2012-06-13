@@ -49,7 +49,7 @@ public final class CarbonAbsorptionHandler {
 			investmentRequired = (averageUnitPrice * carbonAbsorptionChange);
 		}
 		catch (Exception e) {
-			throw new Exception("getCost function error: " + e);
+			throw new Exception("getInvestmentRequired function error: " + e);
 		}
 		
 		return investmentRequired;
@@ -79,7 +79,7 @@ public final class CarbonAbsorptionHandler {
 			}
 		}
 		catch (Exception e) {
-			throw new Exception("getCarbonOutputChange function error: " + e.getMessage());
+			throw new Exception("getCarbonAbsorptionChange function error: " + e.getMessage());
 		}
 		
 		return carbonAbsorptionChange;
@@ -99,7 +99,7 @@ public final class CarbonAbsorptionHandler {
 			forestArea = (carbonAbsorptionChange * GameConst.FOREST_CARBON_ABSORPTION);
 		}
 		catch (Exception e) {
-			throw new Exception("getCarbonAbsorptionChange error: " + e.getMessage());
+			throw new Exception("getForestAreaRequired error: " + e.getMessage());
 		}
 		
 		return forestArea;
@@ -129,6 +129,7 @@ public final class CarbonAbsorptionHandler {
 				if (areaRequired <= this.country.arableLandArea) {
 					this.country.availableToSpend -= investmentAmount;
 					this.country.carbonAbsorption += carbonAbsorptionChange;
+					this.country.arableLandArea -= areaRequired;
 				}
 				else {
 					throw new NotEnoughLandException();
@@ -137,6 +138,12 @@ public final class CarbonAbsorptionHandler {
 			else {
 				throw new NotEnoughCashException();
 			}
+		}
+		catch (NotEnoughLandException e) {
+			throw e;
+		}
+		catch (NotEnoughCashException e) {
+			throw e;
 		}
 		catch (Exception e) {
 			throw new Exception("investInCarbonAbsorption function error: " + e.getMessage());

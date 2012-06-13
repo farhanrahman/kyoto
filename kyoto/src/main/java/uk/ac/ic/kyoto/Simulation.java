@@ -9,7 +9,7 @@ import uk.ac.ic.kyoto.annex1reduce.EUTest2;
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.monitor.Monitor;
 import uk.ac.ic.kyoto.roguestates.CanadaAgent;
-//import uk.ac.ic.kyoto.roguestates.TestAbsorptionHandlerAgent;
+import uk.ac.ic.kyoto.roguestates.TestAbsorptionHandlerAgent;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
@@ -164,11 +164,11 @@ public class Simulation extends InjectedSimulation {
 		
 		String endTime = this.getParameter("finishTime");
 		
-//		AbstractParticipant p = new CanadaAgent(Random.randomUUID(),"CANADA","CAN",20000,10000,5000000,3,200000,28000,0,50000,30000);
-		AbstractParticipant p1 = new EUTest1(Random.randomUUID(), "Chris Test1", "CS1", 20000, 10000, 5000000, 3, 200000, 28000, 50000);
-		AbstractParticipant p2 = new EUTest2(Random.randomUUID(), "Chris Test2", "CS2", 20000, 10000, 5000000, 3, 200000, 28000, 50000);
-		s.addParticipant(p1);
-		s.addParticipant(p2);
+		//AbstractParticipant p = new CanadaAgent(Random.randomUUID(),"CANADA","CAN",20000,10000,5000000,3,200000,28000,0,50000,30000);
+		//AbstractParticipant p1 = new EUTest1(Random.randomUUID(), "Chris Test1", "CS1", 20000, 10000, 5000000, 3, 200000, 28000, 50000);
+		//AbstractParticipant p2 = new EUTest2(Random.randomUUID(), "Chris Test2", "CS2", 20000, 10000, 5000000, 3, 200000, 28000, 50000);
+		//s.addParticipant(p1);
+		//s.addParticipant(p2);
 		
 
 		//AbstractParticipant p3 = new TradeProtocolTestAgent(Random.randomUUID(), "TEST1", "TST");
@@ -181,6 +181,9 @@ public class Simulation extends InjectedSimulation {
 		//s.addParticipant(a);
 		//s.addParticipant(overalTester);
 		//s.addParticipant(landTester);		
+		
+		AbstractParticipant INVESTMAX = new TestAbsorptionHandlerAgent(Random.randomUUID(),"INVESTMAX","MAX", 1000000, 500000, 5000000, 3, 50000, 30000);
+		s.addParticipant(INVESTMAX);
 	}
 
 }

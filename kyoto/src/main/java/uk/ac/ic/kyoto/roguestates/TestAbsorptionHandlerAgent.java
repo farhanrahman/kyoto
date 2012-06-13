@@ -46,33 +46,52 @@ public class TestAbsorptionHandlerAgent extends AbstractCountry {
 	
 	
 	/**
-	 * Plant trees until you have money and land
+	 * Increase carbon absorption as long as you have land area and money
 	 */
-	@Override
-	public void behaviour() {
-		long investmentAmount;
+	private void investMax() {
+		double carbonAbsorptionChange = (carbonAbsorption * 2) + 1; // Increases exponentially from 0
 		
 		try {
-			investmentAmount = (long) (availableToSpend * 0.1);
-			carbonAbsorptionHandler.invest(investmentAmount);
+			double investmentRequired = carbonAbsorptionHandler.getInvestmentRequired(carbonAbsorptionChange);
+			double areaRequired = carbonAbsorptionHandler.getForestAreaRequired(carbonAbsorptionChange);
+			double reverseCarbonAbsorption = carbonAbsorptionHandler.getCarbonAbsorptionChange(investmentRequired);
+			
+			System.out.println("****************************************");
+			
+			System.out.println("* Carbon Absorption before: " + carbonAbsorption);
+			System.out.println("* Money before: " + availableToSpend);
+			System.out.println("* Arable land before: " + arableLandArea);
+			
+			System.out.println("* I want to invest in " + carbonAbsorptionChange + " carbon absorption");
+			System.out.println("* It will cost me: " + investmentRequired);
+			System.out.println("* It will reduce my land by: " + areaRequired);
+			
+			System.out.println("* For that investment, I should get at least " + reverseCarbonAbsorption + " carbon absorption");
+
+			carbonAbsorptionHandler.investInCarbonAbsorption(carbonAbsorptionChange);
+			
+			System.out.println("* Success!");
+			
+			System.out.println("* Carbon Absorption after: " + carbonAbsorption);
+			System.out.println("* Money after: " + availableToSpend);
+			System.out.println("* Arable land after: " + arableLandArea);
+			
+			System.out.println("****************************************");
 		}
 		catch (NotEnoughCashException e) {
-			System.out.println("8======D : " + e);
-			investmentAmount = 0;
+			System.out.println("! I have run out of money");
 		}
 		catch (NotEnoughLandException e) {
-			System.out.println("8======D : " + e);
-			investmentAmount = 0;
+			System.out.println("! I have run out of land");
 		}
 		catch (Exception e) {
-			System.out.println("8======D : " + e);
-			investmentAmount = 0;
+			System.out.println("! 8======D " + e.getMessage());
 		}
-		
-		System.out.println("* Investing " + investmentAmount + " in carbon absorption");
-		System.out.println("* Money: " + availableToSpend);
-		System.out.println("* arableLandArea: " + arableLandArea);
-		System.out.println("* carbonAbsorption: " + carbonAbsorption);
+	}
+	
+	@Override
+	public void behaviour() {
+		investMax();
 	}
 
 }
