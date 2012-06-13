@@ -34,7 +34,7 @@ public final class CarbonReductionHandler{
 		try {			
 			// Calculate the clean industry measure after and before investment
 			double cleanIndustryBefore = calculateCleanIndustryMeasure(country.carbonOutput, country.energyOutput);
-			double cleanIndustryAfter = calculateCleanIndustryMeasure((country.carbonOutput + carbonOutputChange), country.energyOutput);
+			double cleanIndustryAfter = calculateCleanIndustryMeasure((country.carbonOutput - carbonOutputChange), country.energyOutput);
 			
 			// Get average price of single ton of carbon output reduction
 			double averageUnitPrice = (GameConst.CARBON_REDUCTION_PRICE_MIN +
@@ -72,7 +72,7 @@ public final class CarbonReductionHandler{
 			// Increase carbon output until the cost is higher than investment
 			while (tempInvestmentAmount < investmentAmount) {
 				carbonOutputChange += 1;
-				tempInvestmentAmount = getInvestmentRequired(carbonOutputChange);
+				tempInvestmentAmount = getInvestmentRequired(carbonOutputChange + 1);
 			}
 		}
 		catch (Exception e) {
@@ -112,6 +112,12 @@ public final class CarbonReductionHandler{
 				throw new NotEnoughCashException();
 			}
 		}
+		catch (NotEnoughCarbonOutputException e) {
+			throw e;
+		}
+		catch (NotEnoughCashException e) {
+			throw e;
+		}
 		catch (Exception e) {
 			throw new Exception("investInCarbonReduction function error: " + e.getMessage());
 		}
@@ -133,7 +139,7 @@ public final class CarbonReductionHandler{
 			}
 		}
 		catch (Exception e) {
-			throw new Exception("calculateCleanIndustryMeasure function error " + e.getMessage());
+			throw new Exception("calculateCleanIndustryMeasure function error: " + e.getMessage());
 		}
 		
 		return cleanIndustry;

@@ -10,6 +10,7 @@ import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.monitor.Monitor;
 import uk.ac.ic.kyoto.roguestates.CanadaAgent;
 import uk.ac.ic.kyoto.roguestates.TestAbsorptionHandlerAgent;
+import uk.ac.ic.kyoto.roguestates.TestReductionHandlerAgent;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
@@ -182,8 +183,19 @@ public class Simulation extends InjectedSimulation {
 		//s.addParticipant(overalTester);
 		//s.addParticipant(landTester);		
 		
-		AbstractParticipant INVESTMAX = new TestAbsorptionHandlerAgent(Random.randomUUID(),"INVESTMAX","MAX", 1000000, 500000, 5000000, 3, 50000, 30000);
-		s.addParticipant(INVESTMAX);
+		//AbstractParticipant POOR_ABS = new TestAbsorptionHandlerAgent(Random.randomUUID(),"POOR_ABS","PA", 1000000, 500000, 5000000, 3, 50000, 30000);
+		  // Should run out of money in a few ticks with current constants
+		//AbstractParticipant SMALL_ABS = new TestAbsorptionHandlerAgent(Random.randomUUID(),"SMALL_ABS","SA", 1000000, 100, 5000000, 3, 50000, 30000);
+		  // Should run out of land in a few ticks with current constants
+		//AbstractParticipant POOR_RED = new TestReductionHandlerAgent(Random.randomUUID(),"POOR_RED","PR", 1000000, 500000, 5000000, 3, 50000, 30000);
+		 // Should run out of money in a few ticks with current constants
+		//AbstractParticipant CLEAN_RED = new TestReductionHandlerAgent(Random.randomUUID(),"CLEAN_RED","CR", 1000000, 500000, 5000000, 3, 50000, 300);
+		 // Should run out of carbon output in a few ticks with current constants
+		
+		//AbstractParticipant REDVALUETEST = new TestReductionHandlerAgent(Random.randomUUID(),"REDVALUETEST","RT", 1000000, 500000, 5000000, 3, 1000, 700);
+		AbstractParticipant ABSVALUETEST = new TestAbsorptionHandlerAgent(Random.randomUUID(),"ABSVALUETEST","AT", 10000, 1000, 5000000, 3, 1000, 700);
+		
+		s.addParticipant(ABSVALUETEST);
 	}
 
 }

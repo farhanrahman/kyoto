@@ -33,20 +33,20 @@ public final class GameConst {
 	/**
 	 * The price of reducing carbon reduction by one unit when we have 100% dirty industry
 	 */
-	public static double CARBON_REDUCTION_PRICE_MIN = 100;
+	public static double CARBON_REDUCTION_PRICE_MIN = 1;
 	/**
 	 * The price of reducing carbon reduction by one unit when we have 0% dirty industry
 	 */
-	public static double CARBON_REDUCTION_PRICE_MAX = 2000;
+	public static double CARBON_REDUCTION_PRICE_MAX = 10;
 	
 	/**
 	 * The price of increasing carbon absorption by one unit when we have 100% arable area
 	 */
-	public static double CARBON_ABSORPTION_PRICE_MIN = 100;
+	public static double CARBON_ABSORPTION_PRICE_MIN = 1;
 	/**
 	 * The price of increasing carbon absorption by one unit when we have 0% arable area
 	 */
-	public static double CARBON_ABSORPTION_PRICE_MAX = 2000;
+	public static double CARBON_ABSORPTION_PRICE_MAX = 20;
 	/**
 	 * Forest area that absorbs single ton of carbon
 	 */

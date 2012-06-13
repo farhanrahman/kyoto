@@ -37,7 +37,7 @@ public final class CarbonAbsorptionHandler {
 			
 			// Calculate occupied area measure after and before investment
 			double occupiedAreaMeasureBefore = calculateOccupiedAreaMeasure(country.arableLandArea, country.landArea);
-			double occupiedAreaMeasureAfter = calculateOccupiedAreaMeasure((country.arableLandArea + forestArea), country.landArea);
+			double occupiedAreaMeasureAfter = calculateOccupiedAreaMeasure((country.arableLandArea - forestArea), country.landArea);
 			
 			// Get average price of single ton of additional carbon absorption
 			double averageUnitPrice = (GameConst.CARBON_ABSORPTION_PRICE_MIN +
@@ -75,7 +75,7 @@ public final class CarbonAbsorptionHandler {
 			// Increase carbon output until the cost is higher than investment
 			while (tempInvestmentAmount < investmentAmount) {
 				carbonAbsorptionChange += 1;
-				tempInvestmentAmount = getInvestmentRequired(carbonAbsorptionChange);
+				tempInvestmentAmount = getInvestmentRequired(carbonAbsorptionChange + 1);
 			}
 		}
 		catch (Exception e) {
