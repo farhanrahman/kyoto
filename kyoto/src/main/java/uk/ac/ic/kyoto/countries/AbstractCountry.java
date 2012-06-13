@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.monitor.Monitor;
+import uk.ac.ic.kyoto.services.CarbonTarget;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.imperial.presage2.core.Time;
@@ -64,6 +65,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	protected 		Map<Integer, Double> carbonEmissionReports;
 	
 	protected ParticipantCarbonReportingService reportingService; // TODO add visibility
+	protected CarbonTarget carbonTarget;
 	protected Monitor monitor;
 	protected ParticipantTimeService timeService;
 	
@@ -112,6 +114,14 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	final public void initialise(){
 		super.initialise();
 		
+		// Add the country to the carbonTarget service
+		try {
+			carbonTarget = getEnvironmentService(CarbonTarget.class);
+			carbonTarget.addMemberState(this);
+		} catch (UnavailableServiceException e1) {
+			System.out.println("Unable to reach carbon target service.");
+			e1.printStackTrace();
+		}
 		// Add the country to the monitor service
 		try {
 			monitor = getEnvironmentService(Monitor.class);
@@ -343,6 +353,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	public void setAvailableToSpend(double availableToSpend) {
 			this.availableToSpend = availableToSpend;
+	}
+	
+	public boolean getIsKyotoMember() {
+		return this.isKyotoMember;
 	}
 	
 	//================================================================================
