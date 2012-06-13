@@ -1,7 +1,7 @@
 /**
  * 
  */
-package uk.ac.ic.kyoto.singletonfactory;
+package uk.ac.ic.kyoto.tokengen;
 
 import java.util.UUID;
 

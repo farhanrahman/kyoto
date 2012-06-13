@@ -14,7 +14,7 @@ public class Offer{
 	final TradeType type;
 
 	public static String TRADE_PROPOSAL = "Trade proposal";	
-	
+
 	public Offer(int quantity, int unitCost, TradeType type) {
 		this.quantity = quantity;
 		this.unitCost = unitCost;
@@ -32,11 +32,11 @@ public class Offer{
 	public int getTotalCost() {
 		return unitCost * quantity;
 	}
-	
+
 	public TradeType getType(){
 		return this.type;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "Trade: "+quantity+" @ "+unitCost; 
@@ -61,7 +61,7 @@ public class Offer{
 			return false;
 		}
 	}
-	
+
 	public Offer reverse(){
 		TradeType t = this.type.equals(TradeType.BUY)?TradeType.SELL:TradeType.BUY;
 		return new Offer(this.quantity, this.unitCost, t);
