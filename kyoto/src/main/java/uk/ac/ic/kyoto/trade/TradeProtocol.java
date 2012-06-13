@@ -315,22 +315,14 @@ public abstract class TradeProtocol extends FSMProtocol {
 
 	protected abstract boolean acceptExchange(NetworkAddress from,
 			Offer trade);
-	
-	protected abstract void payMoney(double amount);
-	
-	protected abstract void receiveMoney(double amount);
-	
-	public abstract void sellOffset(double amount);
-	
-	public abstract void receiveOffset(double amount);
 
 	public void handleTradeCompletion(Offer trade){
 		if(trade.getType().equals(TradeType.BUY)){
-			receiveOffset(trade.getQuantity());
-			payMoney(trade.getTotalCost());
+			//receiveOffset(trade.getQuantity());
+			//payMoney(trade.getTotalCost());
 		}else if(trade.getType().equals(TradeType.SELL)){
-			sellOffset(trade.getQuantity());
-			receiveMoney(trade.getTotalCost());
+			//sellOffset(trade.getQuantity());
+			//receiveMoney(trade.getTotalCost());
 		}		
 	}
 	
