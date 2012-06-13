@@ -162,7 +162,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	@Override
 	final public void execute() {
 		super.execute();
-		if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {			
+		if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {		
 			updateGDPRate();
 			updateGDP();
 			updateAvailableToSpend();
@@ -172,7 +172,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			updateCarbonOffsetYearly();
 			YearlyFunction();
 		}
-		if (timeService.getCurrentYear() % timeService.getYearsInSession() == 0) {
+		if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
 			resetCarbonOffset();
 			SessionFunction();
 		}
