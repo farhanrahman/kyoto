@@ -24,6 +24,7 @@ public class AnnexOneReduce extends AbstractCountry {
 	
 	public AnnexOneReduce(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
 			double GDPRate, double energyOutput, double carbonOutput) {
+
 		
 		super(id, name, ISO, landArea, arableLandArea, GDP,
 					GDPRate, energyOutput, carbonOutput);
