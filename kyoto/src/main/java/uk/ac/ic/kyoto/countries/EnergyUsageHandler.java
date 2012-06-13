@@ -26,7 +26,7 @@ public final class EnergyUsageHandler {
 	 * Amount of energyOuput that should be reduced
 	 * It has to be positive and lower than the total carbonOuput
 	 */
-	public void reduceEnergyOutput (long amount) throws IllegalArgumentException{
+	public void reduceEnergyOutput (double amount) throws IllegalArgumentException{
 		if (amount < this.country.carbonOutput && amount > 0) {
 			this.country.energyOutput -= amount;
 			this.country.carbonOutput -= amount;
@@ -42,8 +42,8 @@ public final class EnergyUsageHandler {
 	 * @return
 	 * The cost for the country
 	 */
-	public long calculateCostOfInvestingInCarbonIndustry (long carbon){
-		return (long) (carbon * GameConst.CARBON_INVESTMENT_PRICE);
+	public double calculateCostOfInvestingInCarbonIndustry (double carbon){
+		return (double) (carbon * GameConst.CARBON_INVESTMENT_PRICE);
 	}
 	
 	/**
@@ -52,8 +52,8 @@ public final class EnergyUsageHandler {
 	 * The amount of money to be spent on carbon industry growth
 	 * @e increase of carbon output
 	 */
-	public long calculateCarbonIndustryGrowth (long cost){
-		return (long) (cost / GameConst.CARBON_INVESTMENT_PRICE);
+	public double calculateCarbonIndustryGrowth (double cost){
+		return (double) (cost / GameConst.CARBON_INVESTMENT_PRICE);
 	}
 	
 	/**
@@ -62,9 +62,9 @@ public final class EnergyUsageHandler {
 	 * @param carbon
 	 * The increase of the carbon output that will be achieved.
 	 */
-	public final void investInCarbonIndustry(long investment) throws Exception{
+	public final void investInCarbonIndustry(double investment) throws Exception{
 
-		long carbon = calculateCarbonIndustryGrowth(investment);
+		double carbon = calculateCarbonIndustryGrowth(investment);
 		if (investment < this.country.availableToSpend) {
 			this.country.carbonOutput += carbon;
 			this.country.energyOutput += carbon;

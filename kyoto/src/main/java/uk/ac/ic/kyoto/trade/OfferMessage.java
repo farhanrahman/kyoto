@@ -15,12 +15,12 @@ import java.util.UUID;
 public class OfferMessage {
 	private final Offer offer;
 	private final UUID tradeID;
-	
+
 	public static enum OfferType{
 		TRADE_PROTOCOL,
 		BROADCAST_MESSAGE
 	};
-	
+
 	private final OfferType offerState;
 	/**
 	 * Constructor when OfferMessage is sent
@@ -33,7 +33,7 @@ public class OfferMessage {
 		this.tradeID = null;
 		this.offerState = OfferMessage.OfferType.BROADCAST_MESSAGE;
 	}
-	
+
 	/**
 	 * Constructor when OfferMessage is instantiated
 	 * from within TradeProtocol. This instance will
@@ -58,5 +58,5 @@ public class OfferMessage {
 	public OfferType getOfferState() {
 		return offerState;
 	}
-	
+
 }
