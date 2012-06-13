@@ -249,7 +249,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * Calculates GDP rate for the next year
 	 * @author Adam, ct
 	 */
-	protected final void updateGDPRate() {
+	private final void updateGDPRate() {
 		double marketStateFactor = 0;
 		
 		Economy economy;
@@ -277,7 +277,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * Updates GDP using GDPRate for the past year
 	 * @author sc1109
 	 */
-	protected final void updateGDP() {
+	private final void updateGDP() {
 		GDP += GDP * GDPRate;
 	}
 	
@@ -285,20 +285,20 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * Calculate available to spend for the next year as an extra 1% of GDP
 	 * If we haven't spent something last year, it will be available this year too
 	 */
-	protected final void updateAvailableToSpend() {
+	private final void updateAvailableToSpend() {
 		availableToSpend += GDP * GameConst.PERCENTAGE_OF_GDP;
 	}
 	
 	/**
 	 * Adjusts the amount of CarbonOffset depending on the last years usage
 	 */
-	protected final void updateCarbonOffsetYearly() {
+	private final void updateCarbonOffsetYearly() {
 
 		carbonOffset += (emissionsTarget - carbonOutput + carbonAbsorption);
 
 	}
 	
-	protected final void resetCarbonOffset() {
+	private final void resetCarbonOffset() {
 		carbonOffset = 0;
 	}
 	
