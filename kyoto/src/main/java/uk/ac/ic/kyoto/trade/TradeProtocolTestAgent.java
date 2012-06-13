@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.apache.log4j.Logger;
 
+import uk.ac.ic.kyoto.countries.TradeProtocol;
 import uk.ac.ic.kyoto.singletonfactory.SingletonProvider;
 import uk.ac.ic.kyoto.tradehistory.TradeHistory;
 import uk.ac.imperial.presage2.core.messaging.Input;
@@ -77,7 +78,7 @@ public class TradeProtocolTestAgent extends AbstractParticipant {
 		emissionsTarget = 20;
 		carbonOffset = 10;
 		try {
-			tradeProtocol = new TradeProtocol(getID(), authkey, environment, network) {
+			tradeProtocol = new TradeProtocol(getID(), authkey, environment, network, null) {
 				@Override
 				protected boolean acceptExchange(NetworkAddress from,
 						Offer trade) {
