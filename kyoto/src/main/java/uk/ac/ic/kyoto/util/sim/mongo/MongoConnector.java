@@ -134,13 +134,14 @@ public class MongoConnector {
 		DBCollection collection = db.getCollection("simulations");
         BasicDBObject query = new BasicDBObject();
         
-        query.put("_id", 1);
+        query.put("_id", 2);
         DBCursor cur = collection.find(query);
         
         while(cur.hasNext()) {
         	DBObject ob = cur.next();
         	Gson gson = new GsonBuilder().create();
         	String json = JSON.serialize(ob);
+        	json = json.replaceAll("\"\"", "0");
         	System.out.println(json);
 			SimulationData data = gson.fromJson(json, SimulationData.class);
 		    
