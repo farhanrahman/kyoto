@@ -1,4 +1,4 @@
-package uk.ac.ic.kyoto.annex1reduce.analysis;
+package uk.ac.ic.kyoto.tradehistory;
 
 import java.util.Collections;
 import java.util.Map;

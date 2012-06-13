@@ -1,15 +1,15 @@
 <class-diagram version="1.0.9" icons="true" always-add-relationships="true" generalizations="true" realizations="true" 
   associations="true" dependencies="true" nesting-relationships="true">  
-  <class id="1" corner="BOTTOM_RIGHT" language="java" name="uk.ac.ic.kyoto.annex1reduce.analysis.SessionHistory" 
-    project="kyoto" file="/kyoto/src/main/java/uk/ac/ic/kyoto/annex1reduce/analysis/SessionHistory.java" binary="false">    
+  <class id="1" corner="BOTTOM_RIGHT" language="java" name="uk.ac.ic.kyoto.tradehistory.SessionHistory" project="kyoto" 
+    file="/kyoto/src/main/java/uk/ac/ic/kyoto/tradehistory/SessionHistory.java" binary="false">    
     <position height="-1" width="-1" x="486" y="110"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true"/>      
       <operations public="true" package="true" protected="true" private="true"/>    
     </display>  
   </class>  
-  <class id="2" corner="BOTTOM_RIGHT" language="java" name="uk.ac.ic.kyoto.annex1reduce.analysis.TickHistory" 
-    project="kyoto" file="/kyoto/src/main/java/uk/ac/ic/kyoto/annex1reduce/analysis/TickHistory.java" binary="false">    
+  <class id="2" corner="BOTTOM_RIGHT" language="java" name="uk.ac.ic.kyoto.tradehistory.TickHistory" project="kyoto" 
+    file="/kyoto/src/main/java/uk/ac/ic/kyoto/tradehistory/TickHistory.java" binary="false">    
     <position height="-1" width="-1" x="485" y="498"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true"/>      
