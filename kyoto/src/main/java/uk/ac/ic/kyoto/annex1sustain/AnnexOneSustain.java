@@ -20,7 +20,7 @@ import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
  * 
  * @author Adam, Piotr
  */
-public class AbstractPostCommunistCountry extends AbstractCountry {
+public class AnnexOneSustain extends AbstractCountry {
 	
 	
 	//================================================================================
@@ -41,7 +41,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
     // Constructors
     //================================================================================
 	
-	public AbstractPostCommunistCountry(UUID id, String name, String ISO,
+	public AnnexOneSustain(UUID id, String name, String ISO,
 			double landArea, double arableLandArea, double GDP, double GDPRate,
 			long energyOutput, long carbonOutput)
 	{

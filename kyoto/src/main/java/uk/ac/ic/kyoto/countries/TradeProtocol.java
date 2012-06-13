@@ -1,4 +1,4 @@
-package uk.ac.ic.kyoto.trade;
+package uk.ac.ic.kyoto.countries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +8,12 @@ import org.apache.log4j.Logger;
 
 import uk.ac.ic.kyoto.singletonfactory.SingletonProvider;
 import uk.ac.ic.kyoto.tokengen.Token;
+<<<<<<< HEAD:kyoto/src/main/java/uk/ac/ic/kyoto/trade/TradeProtocol.java
+=======
+import uk.ac.ic.kyoto.trade.Offer;
+import uk.ac.ic.kyoto.trade.OfferMessage;
+import uk.ac.ic.kyoto.trade.TradeType;
+>>>>>>> development:kyoto/src/main/java/uk/ac/ic/kyoto/countries/TradeProtocol.java
 import uk.ac.ic.kyoto.tradehistory.TradeHistory;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.EnvironmentConnector;
@@ -49,6 +55,8 @@ public abstract class TradeProtocol extends FSMProtocol {
 	private Token tradeToken;
 
 	private TradeHistory tradeHistory;
+	
+	private AbstractCountry participant;
 
 	public enum ResponderReplies{
 		ACCEPT,REJECT,WAIT
@@ -75,10 +83,10 @@ public abstract class TradeProtocol extends FSMProtocol {
 	}
 
 	public TradeProtocol(final UUID id, final UUID authkey, 
-			final EnvironmentConnector environment, NetworkAdaptor network)
+			final EnvironmentConnector environment, NetworkAdaptor network, AbstractCountry participant)
 					throws FSMException {
 		super("Trade Protocol", FSM.description(), network);
-
+		this.participant = participant;
 		this.id = id;
 		this.authkey = authkey;
 		this.environment = environment;
@@ -317,13 +325,17 @@ public abstract class TradeProtocol extends FSMProtocol {
 			Offer trade);
 
 	public void handleTradeCompletion(Offer trade){
-		if(trade.getType().equals(TradeType.BUY)){
-			//receiveOffset(trade.getQuantity());
-			//payMoney(trade.getTotalCost());
-		}else if(trade.getType().equals(TradeType.SELL)){
-			//sellOffset(trade.getQuantity());
-			//receiveMoney(trade.getTotalCost());
-		}		
+		try{
+			if(trade.getType().equals(TradeType.BUY)){
+				participant.receiveOffset(trade.getQuantity());
+				participant.payMoney(trade.getTotalCost());
+			}else if(trade.getType().equals(TradeType.SELL)){
+				participant.sellOffset(trade.getQuantity());
+				participant.receiveMoney(trade.getTotalCost());
+			}
+		}catch(NullPointerException e){
+			logger.warn(e);
+		}
 	}
 	
 	public UUID getId() {
