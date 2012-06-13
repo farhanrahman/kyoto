@@ -1,6 +1,8 @@
 package uk.ac.ic.kyoto.countries;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -13,6 +15,13 @@ import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.messaging.Input;
+import uk.ac.imperial.presage2.core.messaging.Performative;
+import uk.ac.imperial.presage2.core.network.BroadcastMessage;
+import uk.ac.imperial.presage2.core.network.Message;
+import uk.ac.imperial.presage2.core.network.MulticastMessage;
+import uk.ac.imperial.presage2.core.network.NetworkAddress;
+import uk.ac.imperial.presage2.core.simulator.SimTime;
+import uk.ac.imperial.presage2.util.fsm.FSMException;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 /**
@@ -99,8 +108,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.GDP = GDP;
 		this.GDPRate = GDPRate;
 		this.emissionsTarget = 0;
-		this.carbonOffset = 0;
-		this.availableToSpend = 0;
+		this.carbonOffset = 4000;
+		this.availableToSpend = 45000;
 		this.carbonOutput = carbonOutput;
 		this.carbonAbsorption = 0;
 		this.carbonEmissionReports = new HashMap<Integer, Double>();
@@ -164,18 +173,18 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		super.execute();
 		if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {			
 			if (isKyotoMember) {
-				MonitorTax();
+			//	MonitorTax();
 				//checkTargets(); //did the countries meet their targets?
 			}
-			updateAvailableToSpend();
-			updateGDP(); //left out until this runs only every year
-			updateGDPRate();
-			updateCarbonOffsetYearly();
-			YearlyFunction();
+			//updateAvailableToSpend();
+			//updateGDP(); //left out until this runs only every year
+			//updateGDPRate();
+			//updateCarbonOffsetYearly();
+			//YearlyFunction();
 		}
 		if (timeService.getCurrentYear() % timeService.getYearsInSession() == 0) {
-			resetCarbonOffset();
-			SessionFunction();
+			//resetCarbonOffset();
+			//SessionFunction();
 		}
 		behaviour();
 	}
@@ -346,23 +355,52 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	//================================================================================
-    // Trade protocol monetary adjustments
+    // Trade protocol methods
     //================================================================================
 	
 	final void payMoney(double amount) {
-		availableToSpend -= amount;
+		this.availableToSpend -= amount;
 	}
 	
 	final void receiveMoney(double amount) {
-		availableToSpend += amount;
+		this.availableToSpend += amount;
 	}
 	
 	final void sellOffset(double amount) {
-		carbonOffset -= amount;
+		this.carbonOffset -= amount;
 	}
 	
 	final void receiveOffset(double amount) {
-		carbonOffset += amount;
+		this.carbonOffset += amount;
+	}
+	
+	protected final void broadcastSellOffer(int quantity, int unitCost){
+		Offer trade = new Offer(quantity, unitCost, TradeType.SELL);
+		this.network.sendMessage(
+					new MulticastMessage<OfferMessage>(
+							Performative.PROPOSE, 
+							Offer.TRADE_PROPOSAL, 
+							SimTime.get(), 
+							this.network.getAddress(),
+							this.tradeProtocol.getAgentsNotInConversation(),
+							new OfferMessage(trade))
+				);		
 	}
 
+	protected final void broadcastBuyOffer(int quantity, int unitCost){
+		Offer trade = new Offer(quantity, unitCost, TradeType.BUY);
+		System.out.println();
+		System.out.println(this.tradeProtocol.getActiveConversationMembers().toString());
+		System.out.println(this.network.getConnectedNodes());
+		System.out.println();
+		this.network.sendMessage(
+					new MulticastMessage<OfferMessage>(
+							Performative.PROPOSE, 
+							Offer.TRADE_PROPOSAL, 
+							SimTime.get(), 
+							this.network.getAddress(),
+							this.tradeProtocol.getAgentsNotInConversation(),
+							new OfferMessage(trade))
+				);
+	}
 }

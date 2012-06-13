@@ -9,7 +9,6 @@ import org.apache.log4j.Logger;
 
 import com.google.inject.Inject;
 
-import uk.ac.ic.kyoto.trade.Offer;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
