@@ -6,7 +6,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.market.Economy;
-import uk.ac.ic.kyoto.monitor.Monitor;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.imperial.presage2.core.Time;
@@ -336,11 +335,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return availableToSpend;
 	}
 	
-	public void setEmissionsTarget(double emissionsTarget) {
+	void setEmissionsTarget(double emissionsTarget) {
 		this.emissionsTarget = emissionsTarget;
 	}
 	
-	public void setAvailableToSpend(double availableToSpend) {
+	void setAvailableToSpend(double availableToSpend) {
 			this.availableToSpend = availableToSpend;
 	}
 	
