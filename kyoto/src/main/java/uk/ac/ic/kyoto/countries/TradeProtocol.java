@@ -8,9 +8,6 @@ import org.apache.log4j.Logger;
 
 import uk.ac.ic.kyoto.singletonfactory.SingletonProvider;
 import uk.ac.ic.kyoto.tokengen.Token;
-import uk.ac.ic.kyoto.trade.Offer;
-import uk.ac.ic.kyoto.trade.OfferMessage;
-import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.ic.kyoto.tradehistory.TradeHistory;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.EnvironmentConnector;
@@ -155,8 +152,8 @@ public abstract class TradeProtocol extends FSMProtocol {
 							public void processMessage(Message<?> message,
 									FSMConversation conv, Transition transition) {
 								OfferMessage offerMessage = ((OfferMessage) message.getData());
-								Offer trade = offerMessage.getOffer()
-										.reverse();
+								Offer trade = new Offer(offerMessage.getOfferQuantity(), offerMessage.getOfferUnitCost(), offerMessage.getOfferType());
+										//.reverse();
 								handleTradeCompletion(trade);
 								logger.info("Trade was accepted");
 
@@ -213,8 +210,8 @@ public abstract class TradeProtocol extends FSMProtocol {
 						FSMConversation conv, Transition transition) {
 					if (message.getData() instanceof OfferMessage) {
 						OfferMessage offerMessage = ((OfferMessage) message.getData());
-						Offer trade = offerMessage.getOffer()
-								.reverse();
+						Offer trade = new Offer(offerMessage.getOfferQuantity(), offerMessage.getOfferUnitCost(), offerMessage.getOfferType())
+										.reverse();
 						conv.setEntity(offerMessage);
 						NetworkAddress from = conv.getNetwork()
 								.getAddress();
@@ -295,7 +292,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 		public TradeSpawnEvent(NetworkAddress with, int quantity, int unitCost, TradeType type) {
 			super(with);
 			UUID id = TradeProtocol.this.tradeToken.generate();
-			this.offerMessage = new OfferMessage(new Offer(quantity, unitCost, type),id);
+			this.offerMessage = new OfferMessage(new Offer(quantity, unitCost, type).reverse(),id);
 		}
 
 	}
@@ -317,7 +314,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 			throws FSMException {
 		this.spawnAsInititor(new TradeSpawnEvent(to, quantity, unitPrice, type));
 	}
-
+	
 	protected abstract boolean acceptExchange(NetworkAddress from,
 			Offer trade);
 
@@ -326,9 +323,11 @@ public abstract class TradeProtocol extends FSMProtocol {
 			if(trade.getType().equals(TradeType.BUY)){
 				participant.receiveOffset(trade.getQuantity());
 				participant.payMoney(trade.getTotalCost());
+				logger.info("My name: " + this.participant.getName()+ ", I am buying: " + trade.getQuantity() + " and paying: " + trade.getTotalCost());
 			}else if(trade.getType().equals(TradeType.SELL)){
 				participant.sellOffset(trade.getQuantity());
 				participant.receiveMoney(trade.getTotalCost());
+				logger.info("My name: " + this.participant.getName()+ ", I am selling: " + trade.getQuantity() + " and receiving: " + trade.getTotalCost());
 			}
 		}catch(NullPointerException e){
 			logger.warn(e);

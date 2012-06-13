@@ -3,8 +3,6 @@ package uk.ac.ic.kyoto.countries;
 import java.util.Set;
 import java.util.UUID;
 
-import uk.ac.ic.kyoto.trade.Offer;
-import uk.ac.ic.kyoto.trade.OfferMessage;
 import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.messaging.Performative;
