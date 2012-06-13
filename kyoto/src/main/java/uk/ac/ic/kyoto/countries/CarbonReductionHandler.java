@@ -29,7 +29,7 @@ public final class CarbonReductionHandler{
 	 * Cost of reducing carbon by the specified amount.
 	 */
 	public final double getInvestmentRequired(double carbonOutputChange) throws Exception {
-		return getInvestmentRequired(carbonOutputChange,country.carbonOutput, country.energyOutput);
+		return getInvestmentRequired(carbonOutputChange, country.carbonOutput, country.energyOutput);
 	}
 	
 	/**
@@ -155,6 +155,12 @@ public final class CarbonReductionHandler{
 				throw new NotEnoughCashException();
 			}
 		}
+		catch (NotEnoughCarbonOutputException e) {
+			throw e;
+		}
+		catch (NotEnoughCashException e) {
+			throw e;
+		}
 		catch (Exception e) {
 			throw new Exception("investInCarbonReduction function error: " + e.getMessage());
 		}
@@ -170,7 +176,7 @@ public final class CarbonReductionHandler{
 			cleanIndustry = (1 - (carbonOutput / energyOutput));
 		}
 		else {
-			throw new Exception("CalculateCleanIndustryMeasure function error: carbonOutput is greater than energyOutput");
+			throw new Exception("calculateCleanIndustryMeasure function error: carbonOutput is greater than energyOutput");
 		}
 		
 		return cleanIndustry;
