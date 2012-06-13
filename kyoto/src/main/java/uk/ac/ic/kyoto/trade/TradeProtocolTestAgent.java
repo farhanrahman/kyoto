@@ -1,13 +1,11 @@
 package uk.ac.ic.kyoto.trade;
 
-import java.util.Map;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
 
+import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.TradeProtocol;
-import uk.ac.ic.kyoto.singletonfactory.SingletonProvider;
-import uk.ac.ic.kyoto.tradehistory.TradeHistory;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.messaging.Performative;
 import uk.ac.imperial.presage2.core.network.Message;
@@ -15,29 +13,19 @@ import uk.ac.imperial.presage2.core.network.MulticastMessage;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
 import uk.ac.imperial.presage2.util.fsm.FSMException;
-import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
-public class TradeProtocolTestAgent extends AbstractParticipant {
+public class TradeProtocolTestAgent extends AbstractCountry {
 	
 	Logger logger = Logger.getLogger(TradeProtocolTestAgent.class);
 	
 	private TradeProtocol tradeProtocol;
 	
-	private int carbonOutput;
-	private int emissionsTarget;
-	private int carbonOffset;
-	
-	public TradeProtocolTestAgent(UUID id, String name, String ISO){
-		super(id, name);
+	public TradeProtocolTestAgent(UUID id, String name, String ISO, double landArea,
+			double arableLandArea, double GDP, double GDPRate,
+			long emissionsTarget, long energyOutput, long carbonOutput) {
+		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, emissionsTarget,
+				energyOutput);
 	}
-	
-//	public FakeCanadaAgent(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
-//			double GDPRate, double emissionsTarget, double energyOutput, double carbonOutput){
-//		super(id, name, ISO, landArea, arableLandArea, GDP,
-//				GDPRate, emissionsTarget, energyOutput, carbonOutput);
-//		// TODO Auto-generated constructor stub
-//	}
-	
 	
 	@Override
 	protected void processInput(Input in) {
@@ -71,12 +59,21 @@ public class TradeProtocolTestAgent extends AbstractParticipant {
 		}			
 	}
 	
+
 	@Override
-	public void initialise() {
-		super.initialise();
-		carbonOutput = 80;
-		emissionsTarget = 20;
-		carbonOffset = 10;
+	public void YearlyFunction() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void SessionFunction() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void initialiseCountry() {
 		try {
 			tradeProtocol = new TradeProtocol(getID(), authkey, environment, network, null) {
 				@Override
@@ -91,15 +88,14 @@ public class TradeProtocolTestAgent extends AbstractParticipant {
 			};
 		} catch (FSMException e) {
 			e.printStackTrace();
-		}		
+		}
 		
 	}
 	
-	private int counter = 0;
+	private int counter = 0;	
 
 	@Override
-	public void execute() {
-		super.execute();
+	protected void behaviour() {
 		this.tradeProtocol.incrementTime();
 		//if(counter < 7){
 			int quantity = 10;
@@ -117,6 +113,7 @@ public class TradeProtocolTestAgent extends AbstractParticipant {
 					);
 		counter++;
 		//}
+		
 	}
 	
 }
