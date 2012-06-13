@@ -153,8 +153,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 									FSMConversation conv, Transition transition) {
 								OfferMessage offerMessage = ((OfferMessage) message.getData());
 								Offer trade = new Offer(offerMessage.getOfferQuantity(), offerMessage.getOfferUnitCost(), offerMessage.getOfferType());
-										//.reverse();
-								handleTradeCompletion(trade);
+								handleTradeCompletion(trade.reverse());
 								logger.info("Trade was accepted");
 
 							}
@@ -210,8 +209,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 						FSMConversation conv, Transition transition) {
 					if (message.getData() instanceof OfferMessage) {
 						OfferMessage offerMessage = ((OfferMessage) message.getData());
-						Offer trade = new Offer(offerMessage.getOfferQuantity(), offerMessage.getOfferUnitCost(), offerMessage.getOfferType())
-										.reverse();
+						Offer trade = new Offer(offerMessage.getOfferQuantity(), offerMessage.getOfferUnitCost(), offerMessage.getOfferType());
 						conv.setEntity(offerMessage);
 						NetworkAddress from = conv.getNetwork()
 								.getAddress();
@@ -292,7 +290,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 		public TradeSpawnEvent(NetworkAddress with, int quantity, int unitCost, TradeType type) {
 			super(with);
 			UUID id = TradeProtocol.this.tradeToken.generate();
-			this.offerMessage = new OfferMessage(new Offer(quantity, unitCost, type).reverse(),id);
+			this.offerMessage = new OfferMessage(new Offer(quantity, unitCost, type),id);
 		}
 
 	}
