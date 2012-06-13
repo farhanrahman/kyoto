@@ -54,7 +54,7 @@ public class TestAbsorptionHandlerAgent extends AbstractCountry {
 		
 		try {
 			investmentAmount = (long) (availableToSpend * 0.1);
-			carbonAbsorptionHandler.invest(investmentAmount);
+			//carbonAbsorptionHandler.invest(investmentAmount);
 		}
 		catch (NotEnoughCashException e) {
 			System.out.println("8======D : " + e);
