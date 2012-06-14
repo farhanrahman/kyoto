@@ -80,6 +80,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	protected CarbonAbsorptionHandler 	carbonAbsorptionHandler;
 	protected EnergyUsageHandler		energyUsageHandler;
 	
+	/*Simulation tick counter to stop sub classes from calling execute more than once*/
+	private Integer simTick = 0;
+	
+	/*Flag for single initialisation of AbstractCountry*/
+	private boolean initialised = false;
+	
 	//================================================================================
     // Constructors and Initializers
     //================================================================================
@@ -114,44 +120,53 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	@Override
 	final public void initialise(){
-		super.initialise();
-		
-		// Add the country to the carbonTarget service
-		try {
-			carbonTarget = getEnvironmentService(CarbonTarget.class);
-			carbonTarget.addMemberState(this);
-		} catch (UnavailableServiceException e1) {
-			System.out.println("Unable to reach carbon target service.");
-			e1.printStackTrace();
+		try{
+			if(this.initialised == false){
+				super.initialise();
+				
+				// Add the country to the carbonTarget service
+				try {
+					carbonTarget = getEnvironmentService(CarbonTarget.class);
+					carbonTarget.addMemberState(this);
+				} catch (UnavailableServiceException e1) {
+					System.out.println("Unable to reach carbon target service.");
+					e1.printStackTrace();
+				}
+				// Add the country to the monitor service
+				try {
+					monitor = getEnvironmentService(Monitor.class);
+					monitor.addMemberState(this);
+				} catch (UnavailableServiceException e1) {
+					System.out.println("Unable to reach monitor service.");
+					e1.printStackTrace();
+				}
+				// Initialize the Action Handlers DO THEY HAVE TO BE INSTANTIATED ALL THE TIME?
+				try {
+					timeService = getEnvironmentService(ParticipantTimeService.class);
+				} catch (UnavailableServiceException e1) {
+					System.out.println("TimeService doesn't work");
+					e1.printStackTrace();
+				}
+				// Initialize the Action Handlers
+				carbonAbsorptionHandler = new CarbonAbsorptionHandler(this);
+				carbonReductionHandler = new CarbonReductionHandler(this);
+				energyUsageHandler = new EnergyUsageHandler(this);
+				
+				// Connect to the Reporting Service
+				try {
+					this.reportingService = this.getEnvironmentService(ParticipantCarbonReportingService.class);
+				} catch (UnavailableServiceException e) {
+					System.out.println("Unable to reach emission reporting service.");
+					e.printStackTrace();
+				}
+				this.initialised = true;
+				initialiseCountry();
+			}else{
+				throw new AlreadyInitialisedException();
+			}
+		} catch(AlreadyInitialisedException ex){
+			ex.printStackTrace();
 		}
-		// Add the country to the monitor service
-		try {
-			monitor = getEnvironmentService(Monitor.class);
-			monitor.addMemberState(this);
-		} catch (UnavailableServiceException e1) {
-			System.out.println("Unable to reach monitor service.");
-			e1.printStackTrace();
-		}
-		// Initialize the Action Handlers DO THEY HAVE TO BE INSTANTIATED ALL THE TIME?
-		try {
-			timeService = getEnvironmentService(ParticipantTimeService.class);
-		} catch (UnavailableServiceException e1) {
-			System.out.println("TimeService doesn't work");
-			e1.printStackTrace();
-		}
-		// Initialize the Action Handlers
-		carbonAbsorptionHandler = new CarbonAbsorptionHandler(this);
-		carbonReductionHandler = new CarbonReductionHandler(this);
-		energyUsageHandler = new EnergyUsageHandler(this);
-		
-		// Connect to the Reporting Service
-		try {
-			this.reportingService = this.getEnvironmentService(ParticipantCarbonReportingService.class);
-		} catch (UnavailableServiceException e) {
-			System.out.println("Unable to reach emission reporting service.");
-			e.printStackTrace();
-		}
-		initialiseCountry();
 	}
 	
 	//================================================================================
