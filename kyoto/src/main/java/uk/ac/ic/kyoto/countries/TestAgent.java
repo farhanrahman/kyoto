@@ -12,22 +12,22 @@ import uk.ac.imperial.presage2.core.simulator.SimTime;
 import uk.ac.imperial.presage2.util.fsm.FSMException;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
-public class TestAgent extends AbstractParticipant {
+public class TestAgent extends AbstractCountry {
 	
-	TradeProtocol trade;
 	Set<Offer> trades;
 
-	public TestAgent(UUID id, String name) {
-		super(id, name);
-		// TODO Auto-generated constructor stub
+	public TestAgent(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
+			double GDPRate, double energyOutput, double carbonOutput) {
+		super(id, name, ISO, landArea, arableLandArea, GDP,
+				GDPRate, energyOutput, carbonOutput);
 	}
 	
 	@Override
-	public void initialise(){
+	public void initialiseCountry(){
 		super.initialise();
 		
 		try {
-			this.trade = new TradeProtocol(getID(), this.authkey, environment, network, null) {
+			this.tradeProtocol = new TradeProtocol(getID(), this.authkey, environment, network, null) {
 				
 				@Override
 				protected boolean acceptExchange(NetworkAddress from, Offer trade) {
@@ -66,20 +66,88 @@ public class TestAgent extends AbstractParticipant {
 
 	}
 	
-	public void execute() {
-		super.execute();
-		this.network.sendMessage(
-				new BroadcastMessage<Object>(
-						Performative.PROPOSE, 
-						"TRADE", 
-						SimTime.get(), 
-						network.getAddress(), 
-						new OfferMessage(new Offer(0, 0, TradeType.SELL), authkey)
-				)
-			);
+	@Override
+	public void behaviour() {
+//		this.network.sendMessage(
+//				new BroadcastMessage<Object>(
+//						Performative.PROPOSE, 
+//						"TRADE", 
+//						SimTime.get(), 
+//						network.getAddress(), 
+//						new OfferMessage(new Offer(0, 0, TradeType.SELL), authkey)
+//				)
+//			);
 		
-		//Negotiate over the network here...
+		logger.info("I have this much money: " + availableToSpend);
 		
+		int quantity=400, unitCost=20;
+		broadcastBuyOffer(quantity, unitCost);
+		
+		quantity=400;
+		unitCost = 25;
+		broadcastSellOffer(quantity, unitCost);
+		
+		logger.info("PARTRIDGE IN A PEAR TREE");
+		
+		try {
+			logger.info("I am investing " + carbonAbsorptionHandler.getInvestmentRequired(1) + " in carbon absorption.");
+			carbonAbsorptionHandler.investInCarbonAbsorption(carbonAbsorptionHandler.getInvestmentRequired(1));
+			logger.info("My carbon absorption is " + carbonAbsorption);
+		} catch (NotEnoughCarbonOutputException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NotEnoughCashException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		try {
+			logger.info("I am reducing my energy output by " + energyOutput*0.01);
+			energyUsageHandler.reduceEnergyOutput(energyOutput*0.01);
+			logger.info("My energy output is " + energyOutput);
+			logger.info("I am investing " + availableToSpend*0.01 + " in carbon industry.");
+			energyUsageHandler.investInCarbonIndustry(availableToSpend*0.01);
+			logger.info("My energy output has gone back up by " + energyOutput);
+		} catch (NotEnoughCashException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NotEnoughCarbonOutputException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		try {
+			logger.info("I am investing " + carbonReductionHandler.getInvestmentRequired(1) + " in carbon reduction.");
+			carbonReductionHandler.investInCarbonReduction(carbonReductionHandler.getInvestmentRequired(1));
+			logger.info("My carbon output is " + carbonOutput);
+		} catch (NotEnoughCarbonOutputException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NotEnoughCashException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+
+	@Override
+	public void YearlyFunction() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void SessionFunction() {
+		// TODO Auto-generated method stub
 		
 	};
 
