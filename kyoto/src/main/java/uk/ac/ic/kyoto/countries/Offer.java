@@ -3,6 +3,9 @@
  */
 package uk.ac.ic.kyoto.countries;
 
+import uk.ac.ic.kyoto.trade.InvestmentType;
+import uk.ac.ic.kyoto.trade.TradeType;
+
 /**
  * @author cmd08 and farhanrahman
  *
@@ -15,14 +18,14 @@ public class Offer{
 
 	public static String TRADE_PROPOSAL = "Trade proposal";	
 
-	public Offer(int quantity, int unitCost, TradeType type) {
+	Offer(int quantity, int unitCost, TradeType type) {
 		this.quantity = quantity;
 		this.unitCost = unitCost;
 		this.type = type;
 		this.itype = InvestmentType.INVALID;
 	}
 	
-	public Offer(int quantity, int unitCost, TradeType type, InvestmentType itype) {
+	Offer(int quantity, int unitCost, TradeType type, InvestmentType itype) {
 		this.quantity = quantity;
 		this.unitCost = unitCost;
 		this.type = type;
