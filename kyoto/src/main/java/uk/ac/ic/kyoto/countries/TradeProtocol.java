@@ -174,9 +174,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 							}
 			})			
 			.addTransition(Transitions.TIMEOUT,
-					new AndCondition(
-							new TimeoutCondition(4), 
-							new ConversationCondition()),
+					new TimeoutCondition(4),
 					States.TRADE_PROPOSED,
 					States.TIMED_OUT, 
 					new Action(){
