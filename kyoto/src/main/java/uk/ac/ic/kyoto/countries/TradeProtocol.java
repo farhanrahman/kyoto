@@ -1,4 +1,4 @@
-package uk.ac.ic.kyoto.trade;
+package uk.ac.ic.kyoto.countries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +8,9 @@ import org.apache.log4j.Logger;
 
 import uk.ac.ic.kyoto.singletonfactory.SingletonProvider;
 import uk.ac.ic.kyoto.tokengen.Token;
+import uk.ac.ic.kyoto.trade.Offer;
+import uk.ac.ic.kyoto.trade.OfferMessage;
+import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.ic.kyoto.tradehistory.TradeHistory;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.EnvironmentConnector;
@@ -49,6 +52,8 @@ public abstract class TradeProtocol extends FSMProtocol {
 	private Token tradeToken;
 
 	private TradeHistory tradeHistory;
+	
+	private AbstractCountry participant;
 
 	public enum ResponderReplies{
 		ACCEPT,REJECT,WAIT
@@ -75,10 +80,10 @@ public abstract class TradeProtocol extends FSMProtocol {
 	}
 
 	public TradeProtocol(final UUID id, final UUID authkey, 
-			final EnvironmentConnector environment, NetworkAdaptor network)
+			final EnvironmentConnector environment, NetworkAdaptor network, AbstractCountry participant)
 					throws FSMException {
 		super("Trade Protocol", FSM.description(), network);
-
+		this.participant = participant;
 		this.id = id;
 		this.authkey = authkey;
 		this.environment = environment;
@@ -149,7 +154,10 @@ public abstract class TradeProtocol extends FSMProtocol {
 							@Override
 							public void processMessage(Message<?> message,
 									FSMConversation conv, Transition transition) {
-								// TODO Change the carbon credits of initiator
+								OfferMessage offerMessage = ((OfferMessage) message.getData());
+								Offer trade = offerMessage.getOffer()
+										.reverse();
+								handleTradeCompletion(trade);
 								logger.info("Trade was accepted");
 
 							}
@@ -219,7 +227,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 							if(!TradeProtocol.this.tradeHistory.tradeExists(offerMessage.getTradeID())){
 								TradeProtocol.this.tradeHistory.addToHistory(
 										SimTime.get(), offerMessage.getTradeID(), trade);
-								//TODO update the carbon credits of the responder if it's not CDM
+								handleTradeCompletion(trade);
 								conv.getNetwork().sendMessage(
 										new UnicastMessage<OfferMessage>(
 												Performative.ACCEPT_PROPOSAL,
@@ -313,6 +321,20 @@ public abstract class TradeProtocol extends FSMProtocol {
 	protected abstract boolean acceptExchange(NetworkAddress from,
 			Offer trade);
 
+	public void handleTradeCompletion(Offer trade){
+		try{
+			if(trade.getType().equals(TradeType.BUY)){
+				participant.receiveOffset(trade.getQuantity());
+				participant.payMoney(trade.getTotalCost());
+			}else if(trade.getType().equals(TradeType.SELL)){
+				participant.sellOffset(trade.getQuantity());
+				participant.receiveMoney(trade.getTotalCost());
+			}
+		}catch(NullPointerException e){
+			logger.warn(e);
+		}
+	}
+	
 	public UUID getId() {
 		return id;
 	}

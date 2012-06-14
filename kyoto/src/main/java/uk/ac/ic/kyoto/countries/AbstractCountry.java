@@ -9,7 +9,6 @@ import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.monitor.Monitor;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
-import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
@@ -265,7 +264,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			marketStateFactor = GameConst.RECESSION_MARKET_STATE;
 		}
 		
-		GDPRate = GDPRate + marketStateFactor + (GameConst.GROWTH_SCALER*(energyOutput))/GDP;
+		GDPRate += marketStateFactor + (GameConst.GROWTH_SCALER*(energyOutput))/GDP;
 		GDPRate /= 100; // Needs to be a % for rate formula
 		} catch (UnavailableServiceException e) {
 			System.out.println("Unable to reach economy service.");
@@ -350,19 +349,19 @@ public abstract class AbstractCountry extends AbstractParticipant {
     // Trade protocol monetary adjustments
     //================================================================================
 	
-	public final void payMoney(double amount) {
+	final void payMoney(double amount) {
 		availableToSpend -= amount;
 	}
 	
-	public final void receiveMoney(double amount) {
+	final void receiveMoney(double amount) {
 		availableToSpend += amount;
 	}
 	
-	public final void sellOffset(double amount) {
+	final void sellOffset(double amount) {
 		carbonOffset -= amount;
 	}
 	
-	public final void receiveOffset(double amount) {
+	final void receiveOffset(double amount) {
 		carbonOffset += amount;
 	}
 

@@ -33,26 +33,39 @@ public final class GameConst {
 	/**
 	 * The price of reducing carbon reduction by one unit when we have 100% dirty industry
 	 */
-	public static float CARBON_REDUCTION_OFFSET = 990;
+	public static double CARBON_REDUCTION_PRICE_MIN = 100;
 	/**
-	 * Coefficient to calculate the cost of carbon reduction
+	 * The price of reducing carbon reduction by one unit when we have 0% dirty industry
 	 */
-	public static float CARBON_REDUCTION_COEFF = 2000;
+	public static double CARBON_REDUCTION_PRICE_MAX = 2000;
 	
 	/**
-	 * Coefficient to calculate the cost of carbon absorption
+	 * The price of increasing carbon absorption by one unit when we have 100% arable area
 	 */
-	public static float CARBON_ABSORPTION_COEFF = 1;
-	
+	public static double CARBON_ABSORPTION_PRICE_MIN = 100;
 	/**
-	 * Size of a block of arable land
+	 * The price of increasing carbon absorption by one unit when we have 0% arable area
 	 */
-	public static float FOREST_BLOCK_SIZE = 100;
-	
+	public static double CARBON_ABSORPTION_PRICE_MAX = 2000;
 	/**
-	 * Amount of carbon (in tons) that you offset with a single unit of forest PER YEAR
+	 * Forest area that absorbs single ton of carbon
 	 */
-	public static long FOREST_CARBON_ABSORPTION = 10;
+	public static double FOREST_CARBON_ABSORPTION = 1;
+	
+	///**
+	// * Coefficient to calculate the cost of carbon absorption
+	// */
+	//public static float CARBON_ABSORPTION_COEFF = 1;
+	
+	///**
+	// * Size of a block of arable land
+	// */
+	//public static float FOREST_BLOCK_SIZE = 100;
+	
+	///**
+	// * Amount of carbon (in tons) that you offset with a single unit of forest PER YEAR
+	// */
+	//public static long FOREST_CARBON_ABSORPTION = 10;
 	
 	/**
 	 * Percentage of GDP that is levied from availiableToSpend for monitoring
