@@ -9,6 +9,8 @@ import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
+import uk.ac.ic.kyoto.trade.InvestmentType;
+import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
@@ -188,22 +190,31 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	@Override
 	final public void execute() {
-		super.execute();
-		if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {		
-			updateGDPRate();
-			updateGDP();
-			updateAvailableToSpend();
-			if (isKyotoMember) {
-				MonitorTax();
+		try{
+			if(simTick == SimTime.get().intValue()){
+				super.execute();
+				if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {		
+					updateGDPRate();
+					updateGDP();
+					updateAvailableToSpend();
+					if (isKyotoMember) {
+						MonitorTax();
+					}
+					updateCarbonOffsetYearly();
+					YearlyFunction();
+				}
+				if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
+					resetCarbonOffset();
+					SessionFunction();
+				}
+				simTick++;
+			}else{
+				throw new UnauthorisedExecuteException(SimTime.get().intValue(), this.getID(), this.getName());
 			}
-			updateCarbonOffsetYearly();
-			YearlyFunction();
+			behaviour();
+		} catch(UnauthorisedExecuteException e){
+			e.printStackTrace();
 		}
-		if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
-			resetCarbonOffset();
-			SessionFunction();
-		}
-		behaviour();
 	}
 	
 	/**
@@ -446,17 +457,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		}
 	}
 	
-	protected final void broadcastInvesteeOffer(int quantity, int unitCost){
+	protected final void broadcastInvesteeAbsorbOffer(int quantity, int unitCost){
 		if(this.tradeProtocol != null){
-			Offer trade = new Offer(quantity, unitCost, TradeType.RECEIVE);
-			
-			/*DEBUG*/
-			System.out.println();
-			System.out.println(this.tradeProtocol.getActiveConversationMembers().toString());
-			System.out.println(this.network.getConnectedNodes());
-			System.out.println();
-			/*DEBUG*/
-			
+			Offer trade = new Offer(quantity, unitCost, TradeType.RECEIVE, InvestmentType.ABSORB);
 			this.network.sendMessage(
 						new MulticastMessage<OfferMessage>(
 								Performative.PROPOSE, 
@@ -471,4 +474,22 @@ public abstract class AbstractCountry extends AbstractParticipant {
 					);
 		}
 	}
+	
+	protected final void broadcastInvesteeReduceOffer(int quantity, int unitCost){
+		if(this.tradeProtocol != null){
+			Offer trade = new Offer(quantity, unitCost, TradeType.RECEIVE, InvestmentType.REDUCE);
+			this.network.sendMessage(
+						new MulticastMessage<OfferMessage>(
+								Performative.PROPOSE, 
+								Offer.TRADE_PROPOSAL, 
+								SimTime.get(), 
+								this.network.getAddress(),
+								this.tradeProtocol.getAgentsNotInConversation(),
+								new OfferMessage(
+										trade,
+										this.tradeProtocol.tradeToken.generate(),
+										OfferMessageType.BROADCAST_MESSAGE))
+					);
+		}
+	}	
 }

@@ -3,6 +3,9 @@
  */
 package uk.ac.ic.kyoto.countries;
 
+import uk.ac.ic.kyoto.trade.InvestmentType;
+import uk.ac.ic.kyoto.trade.TradeType;
+
 /**
  * @author cmd08 and farhanrahman
  *
@@ -59,15 +62,18 @@ public class Offer{
 			return true;
 		} else if (	this.quantity == t.getQuantity() && 
 					this.unitCost == t.getUnitCost() && 
-					this.type == t.getType()) {
+					this.type == t.getType() &&
+					this.itype == t.getInvestmentType()) {
 			return true;
 		} else if (	this.quantity == -t.getQuantity() &&
 					this.unitCost == t.getUnitCost() && 
-					this.type == t.reverse().getType()){
+					this.type == t.reverse().getType() &&
+					this.itype == t.getInvestmentType()){
 			return true;
 		} else if ( this.quantity == t.getQuantity() &&
 					this.unitCost == -t.getUnitCost() &&
-					this.type == t.reverse().getType()){
+					this.type == t.reverse().getType() &&
+					this.itype == t.getInvestmentType()){
 			return true;
 		} else {
 			return false;

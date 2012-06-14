@@ -9,6 +9,8 @@ import org.apache.log4j.Logger;
 import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
 import uk.ac.ic.kyoto.singletonfactory.SingletonProvider;
 import uk.ac.ic.kyoto.tokengen.Token;
+import uk.ac.ic.kyoto.trade.InvestmentType;
+import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.ic.kyoto.tradehistory.TradeHistory;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.EnvironmentConnector;
@@ -153,7 +155,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 							public void processMessage(Message<?> message,
 									FSMConversation conv, Transition transition) {
 								OfferMessage offerMessage = ((OfferMessage) message.getData());
-								Offer trade = new Offer(offerMessage.getOfferQuantity(), offerMessage.getOfferUnitCost(), offerMessage.getOfferType());
+								Offer trade = new Offer(offerMessage.getOfferQuantity(), offerMessage.getOfferUnitCost(), offerMessage.getOfferType(), offerMessage.getOfferInvestmentType());
 								handleTradeCompletion(trade.reverse());
 								logger.info("Trade was accepted");
 
@@ -208,7 +210,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 						FSMConversation conv, Transition transition) {
 					if (message.getData() instanceof OfferMessage) {
 						OfferMessage offerMessage = ((OfferMessage) message.getData());
-						Offer trade = new Offer(offerMessage.getOfferQuantity(), offerMessage.getOfferUnitCost(), offerMessage.getOfferType());
+						Offer trade = new Offer(offerMessage.getOfferQuantity(), offerMessage.getOfferUnitCost(), offerMessage.getOfferType(), offerMessage.getOfferInvestmentType());
 						conv.setEntity(offerMessage);
 						NetworkAddress from = conv.getNetwork()
 								.getAddress();
@@ -285,9 +287,9 @@ public abstract class TradeProtocol extends FSMProtocol {
 
 		final OfferMessage offerMessage;
 
-		public TradeSpawnEvent(NetworkAddress with, int quantity, int unitCost, TradeType type, OfferMessage offerMessage) {
+		public TradeSpawnEvent(NetworkAddress with, int quantity, int unitCost, TradeType type, InvestmentType itype, OfferMessage offerMessage) {
 			super(with);
-			this.offerMessage = new OfferMessage(new Offer(quantity, unitCost, type), offerMessage.getTradeID(), OfferMessageType.TRADE_PROTOCOL);
+			this.offerMessage = new OfferMessage(new Offer(quantity, unitCost, type, itype), offerMessage.getTradeID(), OfferMessageType.TRADE_PROTOCOL);
 		}
 
 	}
@@ -305,9 +307,9 @@ public abstract class TradeProtocol extends FSMProtocol {
 		return all;
 	}
 
-	public void offer(NetworkAddress to, int quantity, int unitPrice, TradeType type, OfferMessage offerMessage)
+	public void offer(NetworkAddress to, int quantity, int unitPrice, OfferMessage offerMessage)
 			throws FSMException {
-		this.spawnAsInititor(new TradeSpawnEvent(to, quantity, unitPrice, type, offerMessage));
+		this.spawnAsInititor(new TradeSpawnEvent(to, quantity, unitPrice, offerMessage.getOfferType(), offerMessage.getOfferInvestmentType(), offerMessage));
 	}
 
 	protected abstract boolean acceptExchange(NetworkAddress from,
@@ -328,10 +330,12 @@ public abstract class TradeProtocol extends FSMProtocol {
 
 			case INVEST:	participant.receiveOffset(trade.getQuantity());
 							participant.payMoney(trade.getTotalCost());
-							logger.info("My name: " + this.participant.getName()+ ", I am receiving: " + trade.getQuantity() + " for my investment in absorption of: " + trade.getTotalCost());
+							logger.info("My name: " + this.participant.getName()+ ", I am receiving: " + trade.getQuantity() + " for my investment of: " + trade.getTotalCost());
 							break;
 
-			case RECEIVE:	if (trade.getInvestmentType()==InvestmentType.ABSORB) {
+			case RECEIVE:	participant.receiveMoney(trade.getTotalCost());
+				
+							if (trade.itype.equals(InvestmentType.ABSORB)) {
 								try {
 									participant.carbonAbsorptionHandler.investInCarbonAbsorption(trade.getQuantity());
 								} catch (NotEnoughCarbonOutputException e) {
@@ -341,9 +345,12 @@ public abstract class TradeProtocol extends FSMProtocol {
 								} catch (Exception e) {
 									e.printStackTrace();
 								}
+								
+								logger.info("My name: " + this.participant.getName()+ ", I am generating: " + trade.getQuantity() +
+											" for an investment in absorption of: " + trade.getTotalCost() + ". My new absorption is " + participant.carbonAbsorption);
 							}
-
-							if (trade.getInvestmentType()==InvestmentType.REDUCE) {
+			
+							else if (trade.itype.equals(InvestmentType.REDUCE)) {
 								try {
 									participant.carbonReductionHandler.investInCarbonReduction(trade.getQuantity());
 								} catch (NotEnoughCarbonOutputException e) {
@@ -353,11 +360,10 @@ public abstract class TradeProtocol extends FSMProtocol {
 								} catch (Exception e) {
 									e.printStackTrace();
 								}
+								
+								logger.info("My name: " + this.participant.getName()+ ", I am generating: " + trade.getQuantity() +
+											" for an investment in reduction of: " + trade.getTotalCost() + ". My new output is " + participant.carbonOutput);
 							}
-
-							participant.sellOffset(trade.getQuantity());
-							participant.receiveMoney(trade.getTotalCost());
-							logger.info("My name: " + this.participant.getName()+ ", I am generating: " + trade.getQuantity() + " for an investment of: " + trade.getTotalCost());
 							break;
 			}
 		}catch(NullPointerException e){
