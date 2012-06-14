@@ -102,16 +102,26 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 				int unitCost = 2;
 				this.broadcastBuyOffer(quantity, unitCost);
 			//	counter++;
+			/*
+			 * 	int quantity =10;
+			 * 
+			 *	double unitCost = this.carbonAbsorptionHandler.getInvestmentRequired(quantity);
+			 * 	//or
+			 * 	double unitCost = this.carbonReductionHandler.getInvestmentRequired(quantity);
+			 * 
+			 * 	this.broadcastInvesteeAOffer(quantity, unitCost);
+			 * 	this.broadcastInvesteeROffer(quantity, unitCost);
+			*/
 			//}
 		}
 		
 		this.tradeProtocol.incrementTime();
 		
-		logger.info("Myname: " + this.getName() + ", I have this much money: " + availableToSpend + ".");
+		logger.info("Myname: " + this.getName() + ", I have this much money: " + this.getAvailableToSpend() + ".");
 		//logger.info("Myname: " + this.getName() + ", My GDPRate is : " + GDPRate);
 		//logger.info("Myname: " + this.getName() + ", My carbon output is : " + carbonOutput);
 		//logger.info("Myname: " + this.getName() + ", My energy output is : " + energyOutput);
-		logger.info("Myname: " + this.getName() + ", My carbonOffset is : " + carbonOffset);
+		logger.info("Myname: " + this.getName() + ", My carbonOffset is : " + this.getCarbonOffset());
 	}
 	
 }

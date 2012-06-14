@@ -1,5 +1,5 @@
 package uk.ac.ic.kyoto.countries;
 
 enum TradeType{
-	BUY, SELL
+	BUY, SELL, INVEST, RECEIVE
 }

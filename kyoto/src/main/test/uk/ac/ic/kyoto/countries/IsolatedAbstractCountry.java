@@ -7,7 +7,6 @@ import java.util.UUID;
 
 import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
 import uk.ac.ic.kyoto.market.Economy;
-import uk.ac.ic.kyoto.services.CarbonTarget;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.imperial.presage2.core.Time;
@@ -81,6 +80,12 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 	protected IsolatedCarbonAbsorptionHandler 	carbonAbsorptionHandler;
 	protected IsolatedEnergyUsageHandler		energyUsageHandler;
 	
+	/*Simulation tick counter to stop sub classes from calling execute more than once*/
+	private Integer simTick = 0;
+	
+	/*Flag for single initialisation of AbstractCountry*/
+	private boolean initialised = false;
+	
 	//================================================================================
     // Constructors and Initializers
     //================================================================================
@@ -115,13 +120,20 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 	
 	@Override
 	final public void initialise(){
-
-		// Initialize the Action Handlers
-		carbonAbsorptionHandler = new IsolatedCarbonAbsorptionHandler(this);
-		carbonReductionHandler = new IsolatedCarbonReductionHandler(this);
-		energyUsageHandler = new IsolatedEnergyUsageHandler(this);
-		
-
+		try{
+			if(this.initialised == false){
+				
+				// Initialize the Action Handlers
+				carbonAbsorptionHandler = new IsolatedCarbonAbsorptionHandler(this);
+				carbonReductionHandler = new IsolatedCarbonReductionHandler(this);
+				energyUsageHandler = new IsolatedEnergyUsageHandler(this);
+				this.initialised = true;
+			}else{
+				throw new AlreadyInitialisedException();
+			}
+		} catch(AlreadyInitialisedException ex){
+			ex.printStackTrace();
+		}
 	}
 	
 	//================================================================================
@@ -396,6 +408,32 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 								new OfferMessage(
 										trade, 
 										this.tradeProtocol.tradeToken.generate(), 
+										OfferMessageType.BROADCAST_MESSAGE))
+					);
+		}
+	}
+	
+	protected final void broadcastInvesteeOffer(int quantity, int unitCost){
+		if(this.tradeProtocol != null){
+			Offer trade = new Offer(quantity, unitCost, TradeType.RECEIVE);
+			
+			/*DEBUG*/
+			System.out.println();
+			System.out.println(this.tradeProtocol.getActiveConversationMembers().toString());
+			System.out.println(this.network.getConnectedNodes());
+			System.out.println();
+			/*DEBUG*/
+			
+			this.network.sendMessage(
+						new MulticastMessage<OfferMessage>(
+								Performative.PROPOSE, 
+								Offer.TRADE_PROPOSAL, 
+								SimTime.get(), 
+								this.network.getAddress(),
+								this.tradeProtocol.getAgentsNotInConversation(),
+								new OfferMessage(
+										trade,
+										this.tradeProtocol.tradeToken.generate(),
 										OfferMessageType.BROADCAST_MESSAGE))
 					);
 		}

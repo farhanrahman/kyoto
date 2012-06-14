@@ -7,7 +7,6 @@ import java.util.UUID;
 
 import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
 import uk.ac.ic.kyoto.market.Economy;
-import uk.ac.ic.kyoto.services.CarbonTarget;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.imperial.presage2.core.Time;
@@ -81,6 +80,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	protected CarbonAbsorptionHandler 	carbonAbsorptionHandler;
 	protected EnergyUsageHandler		energyUsageHandler;
 	
+	/*Simulation tick counter to stop sub classes from calling execute more than once*/
+	private Integer simTick = 0;
+	
+	/*Flag for single initialisation of AbstractCountry*/
+	private boolean initialised = false;
+	
 	//================================================================================
     // Constructors and Initializers
     //================================================================================
@@ -115,44 +120,53 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	@Override
 	final public void initialise(){
-		super.initialise();
-		
-		// Add the country to the carbonTarget service
-		try {
-			carbonTarget = getEnvironmentService(CarbonTarget.class);
-			carbonTarget.addMemberState(this);
-		} catch (UnavailableServiceException e1) {
-			System.out.println("Unable to reach carbon target service.");
-			e1.printStackTrace();
+		try{
+			if(this.initialised == false){
+				super.initialise();
+				
+				// Add the country to the carbonTarget service
+				try {
+					carbonTarget = getEnvironmentService(CarbonTarget.class);
+					carbonTarget.addMemberState(this);
+				} catch (UnavailableServiceException e1) {
+					System.out.println("Unable to reach carbon target service.");
+					e1.printStackTrace();
+				}
+				// Add the country to the monitor service
+				try {
+					monitor = getEnvironmentService(Monitor.class);
+					monitor.addMemberState(this);
+				} catch (UnavailableServiceException e1) {
+					System.out.println("Unable to reach monitor service.");
+					e1.printStackTrace();
+				}
+				// Initialize the Action Handlers DO THEY HAVE TO BE INSTANTIATED ALL THE TIME?
+				try {
+					timeService = getEnvironmentService(ParticipantTimeService.class);
+				} catch (UnavailableServiceException e1) {
+					System.out.println("TimeService doesn't work");
+					e1.printStackTrace();
+				}
+				// Initialize the Action Handlers
+				carbonAbsorptionHandler = new CarbonAbsorptionHandler(this);
+				carbonReductionHandler = new CarbonReductionHandler(this);
+				energyUsageHandler = new EnergyUsageHandler(this);
+				
+				// Connect to the Reporting Service
+				try {
+					this.reportingService = this.getEnvironmentService(ParticipantCarbonReportingService.class);
+				} catch (UnavailableServiceException e) {
+					System.out.println("Unable to reach emission reporting service.");
+					e.printStackTrace();
+				}
+				this.initialised = true;
+				initialiseCountry();
+			}else{
+				throw new AlreadyInitialisedException();
+			}
+		} catch(AlreadyInitialisedException ex){
+			ex.printStackTrace();
 		}
-		// Add the country to the monitor service
-		try {
-			monitor = getEnvironmentService(Monitor.class);
-			monitor.addMemberState(this);
-		} catch (UnavailableServiceException e1) {
-			System.out.println("Unable to reach monitor service.");
-			e1.printStackTrace();
-		}
-		// Initialize the Action Handlers DO THEY HAVE TO BE INSTANTIATED ALL THE TIME?
-		try {
-			timeService = getEnvironmentService(ParticipantTimeService.class);
-		} catch (UnavailableServiceException e1) {
-			System.out.println("TimeService doesn't work");
-			e1.printStackTrace();
-		}
-		// Initialize the Action Handlers
-		carbonAbsorptionHandler = new CarbonAbsorptionHandler(this);
-		carbonReductionHandler = new CarbonReductionHandler(this);
-		energyUsageHandler = new EnergyUsageHandler(this);
-		
-		// Connect to the Reporting Service
-		try {
-			this.reportingService = this.getEnvironmentService(ParticipantCarbonReportingService.class);
-		} catch (UnavailableServiceException e) {
-			System.out.println("Unable to reach emission reporting service.");
-			e.printStackTrace();
-		}
-		initialiseCountry();
 	}
 	
 	//================================================================================
@@ -427,6 +441,32 @@ public abstract class AbstractCountry extends AbstractParticipant {
 								new OfferMessage(
 										trade, 
 										this.tradeProtocol.tradeToken.generate(), 
+										OfferMessageType.BROADCAST_MESSAGE))
+					);
+		}
+	}
+	
+	protected final void broadcastInvesteeOffer(int quantity, int unitCost){
+		if(this.tradeProtocol != null){
+			Offer trade = new Offer(quantity, unitCost, TradeType.RECEIVE);
+			
+			/*DEBUG*/
+			System.out.println();
+			System.out.println(this.tradeProtocol.getActiveConversationMembers().toString());
+			System.out.println(this.network.getConnectedNodes());
+			System.out.println();
+			/*DEBUG*/
+			
+			this.network.sendMessage(
+						new MulticastMessage<OfferMessage>(
+								Performative.PROPOSE, 
+								Offer.TRADE_PROPOSAL, 
+								SimTime.get(), 
+								this.network.getAddress(),
+								this.tradeProtocol.getAgentsNotInConversation(),
+								new OfferMessage(
+										trade,
+										this.tradeProtocol.tradeToken.generate(),
 										OfferMessageType.BROADCAST_MESSAGE))
 					);
 		}

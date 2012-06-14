@@ -47,7 +47,7 @@ public final class EnergyUsageHandler {
 	/**
 	 * Calculates the cost of investing in carbon industry
 	 * @param growth
-	 * The expected increase in carbon output
+	 * The increase in carbon output
 	 * @return
 	 * The cost for the country
 	 */

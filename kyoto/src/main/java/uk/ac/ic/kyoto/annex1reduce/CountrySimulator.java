@@ -75,6 +75,10 @@ class CountrySimulator {
 		
 	}
 
+	private CountryState getOptimalState() {
+		return null;
+	}
+
 	/**
 	 * Goes through all states and will cull all but the most useful
 	 * @param reducestates

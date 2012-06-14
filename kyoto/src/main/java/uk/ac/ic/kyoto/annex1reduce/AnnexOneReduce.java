@@ -61,8 +61,6 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 
 	}
 
-	final private static int NUM_ITERATIONS = 10;
-
 	/**
 	 * For a given amount of carbon to reduce, return the amount of money we should invest in Absorption and Reduction.
 	 * For safety's sake, will tend to overestimate a bit.
@@ -98,7 +96,7 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 		double fracDiff = 0.25;
 
 		//Attempt to minimise cost for a given amount of carbon
-		for (int i = 0; i< NUM_ITERATIONS; i++) {
+		for (int i = 0; i< 10; i++) {
 
 			double absorbCost;
 			double reduceCost;
