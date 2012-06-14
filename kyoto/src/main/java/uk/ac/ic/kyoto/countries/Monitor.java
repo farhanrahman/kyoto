@@ -7,7 +7,6 @@ import java.util.Random;
 import com.google.inject.Inject;
 
 import uk.ac.ic.kyoto.services.CarbonReportingService;
-import uk.ac.ic.kyoto.services.CarbonTarget;
 import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfYearCycle;
 import uk.ac.imperial.presage2.core.environment.EnvironmentRegistrationRequest;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
