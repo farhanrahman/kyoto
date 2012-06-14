@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Semaphore;
 
 import uk.ac.ic.kyoto.services.CarbonReportingService;
-import uk.ac.ic.kyoto.services.GlobalTimeService;
-import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfSessionCycle;
 import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfYearCycle;
+import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentServiceProvider;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
@@ -55,7 +55,8 @@ public class CarbonTarget extends EnvironmentService {
 	private EventBus eb;
 	private ParticipantTimeService timeService;
 	private CarbonReportingService reportingService;
-
+	private Semaphore exclusiveAccess = new Semaphore(1);
+	
 	@Inject
 	protected CarbonTarget(EnvironmentSharedStateAccess sharedState, EnvironmentServiceProvider provider) {
 		super(sharedState);
@@ -105,9 +106,18 @@ public class CarbonTarget extends EnvironmentService {
 	}
 	
 	void setCountryPenalty(UUID countryID, double penaltyValue) {
+		try {
+			this.exclusiveAccess.acquire();
+		} catch (InterruptedException e) {
+			System.out.println("Interrupted Exception" + e);
+			e.printStackTrace();
+		}
+		
 		countryObject target= findCountryObject(countryID);
 		target.penalty += penaltyValue;
 		generateYearTarget(target);
+		
+		this.exclusiveAccess.release();
 	}
 	
 	/*
@@ -196,11 +206,20 @@ public class CarbonTarget extends EnvironmentService {
 	
 	public void updateYearTargets()
 	{
+		try {
+			this.exclusiveAccess.acquire();
+		} catch (InterruptedException e) {
+			System.out.println("Interrupted Exception : " + e);
+			e.printStackTrace();
+		}
+		
 		while (this.sessionCounter != timeService.getCurrentSession()) {}
 		
 		for (countryObject country : participantCountries) {
 			generateYearTarget(country);
 		}
+		
+		this.exclusiveAccess.release();
 	}
 	
 	/*
