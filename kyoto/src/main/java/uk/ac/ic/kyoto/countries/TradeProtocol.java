@@ -50,7 +50,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 	Token tradeToken;
 
 	private TradeHistory tradeHistory;
-	
+
 	private AbstractCountry participant;
 
 	public enum ResponderReplies{
@@ -309,7 +309,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 			throws FSMException {
 		this.spawnAsInititor(new TradeSpawnEvent(to, quantity, unitPrice, type, offerMessage));
 	}
-	
+
 	protected abstract boolean acceptExchange(NetworkAddress from,
 			Offer trade);
 
@@ -320,17 +320,17 @@ public abstract class TradeProtocol extends FSMProtocol {
 						participant.payMoney(trade.getTotalCost());
 						logger.info("My name: " + this.participant.getName()+ ", I am buying: " + trade.getQuantity() + " and paying: " + trade.getTotalCost());
 						break;
-			
+
 			case SELL:	participant.sellOffset(trade.getQuantity());
 						participant.receiveMoney(trade.getTotalCost());
 						logger.info("My name: " + this.participant.getName()+ ", I am selling: " + trade.getQuantity() + " and receiving: " + trade.getTotalCost());
 						break;
-			
+
 			case INVEST:	participant.receiveOffset(trade.getQuantity());
 							participant.payMoney(trade.getTotalCost());
 							logger.info("My name: " + this.participant.getName()+ ", I am receiving: " + trade.getQuantity() + " for my investment in absorption of: " + trade.getTotalCost());
 							break;
-				
+
 			case RECEIVE:	if (trade.getInvestmentType()==InvestmentType.ABSORB) {
 								try {
 									participant.carbonAbsorptionHandler.investInCarbonAbsorption(trade.getQuantity());
@@ -342,7 +342,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 									e.printStackTrace();
 								}
 							}
-			
+
 							if (trade.getInvestmentType()==InvestmentType.REDUCE) {
 								try {
 									participant.carbonReductionHandler.investInCarbonReduction(trade.getQuantity());
@@ -354,7 +354,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 									e.printStackTrace();
 								}
 							}
-							
+
 							participant.sellOffset(trade.getQuantity());
 							participant.receiveMoney(trade.getTotalCost());
 							logger.info("My name: " + this.participant.getName()+ ", I am generating: " + trade.getQuantity() + " for an investment of: " + trade.getTotalCost());
@@ -364,7 +364,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 			logger.warn(e);
 		}
 	}
-	
+
 	public UUID getId() {
 		return id;
 	}
