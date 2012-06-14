@@ -15,6 +15,7 @@ import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.event.EventBus;
 import uk.ac.imperial.presage2.core.event.EventListener;
+import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 
 import com.google.inject.Inject;
 
@@ -22,10 +23,6 @@ import com.google.inject.Inject;
  *  Participant environment service for setting of carbon targets. Queried by countries via an action.
  * 
  *  Formula can be found on github wiki.
- *  
- *  TODO:
- *  1. First session data
- *  2. Finish year target shiz
  *  
  *  @author Jonathan Ely
  */
@@ -56,6 +53,7 @@ public class CarbonTarget extends EnvironmentService {
 	
 	private EventBus eb;
 	private ParticipantTimeService timeService;
+	private CarbonReportingService reportingService;
 
 	@Inject
 	protected CarbonTarget(EnvironmentSharedStateAccess sharedState, EnvironmentServiceProvider provider) {
@@ -64,6 +62,12 @@ public class CarbonTarget extends EnvironmentService {
 			this.timeService = provider.getEnvironmentService(ParticipantTimeService.class);
 		} catch (UnavailableServiceException e) {
 			System.out.println("Unable to get environment service 'TimeService'.");
+			e.printStackTrace();
+		}
+		try {
+			this.reportingService = provider.getEnvironmentService(CarbonReportingService.class);
+		} catch (UnavailableServiceException e) {
+			System.out.println("Unable to get environment service 'CarbonReportingService'.");
 			e.printStackTrace();
 		}
 	}
@@ -108,22 +112,24 @@ public class CarbonTarget extends EnvironmentService {
 	/*
 	 * Function to be called after all countries have been added
 	 */
-	private void initialise(){		
-		this.worldCurrentSessionTarget = 0; // 1990 DATA
+	private void initialise(){
+		this.worldCurrentSessionTarget = 0;
 		
 		for (countryObject country : participantCountries) {
-			country.currentSessionTarget = 0; //1990 DATA
+			double data = output1990Data.get(country.obj.getISO());
+			
+			country.currentSessionTarget = data;
+			this.worldCurrentSessionTarget += data;
 		}		
 		
 		updateSessionTargets();
 		updateYearTargets();
 	}
 	
-	private double getReportedCarbonOutput(UUID County){
-		/*
-		 * NEEDS TO BE IMPLEMENTED
-		 */
-		return 0;
+	private double getReportedCarbonOutput(UUID countryID, int year){
+		Map<Integer, Double> reports = reportingService.getReport(countryID);
+		int simTime = timeService.getTicksInYear() * (year +1);
+		return reports.get(simTime);
 	}
 	
 	private countryObject findCountryObject(UUID countryID) {
@@ -137,29 +143,37 @@ public class CarbonTarget extends EnvironmentService {
 	}
 	
 	@EventListener
+	public void onTimeCycle(EndOfTimeCycle e) {
+		if (timeService.getCurrentTick() == 1) {
+			initialise();
+		}
+	}
+	
+	@EventListener
 	public void onEndOfSession(EndOfSessionCycle e) {
-		if (timeService.getCurrentTick() != 0) {
+		if (timeService.getCurrentSession() != 0) {
 			updateSessionTargets();
 		}
 	}
 	
 	@EventListener
 	public void onEndOfYear(EndOfYearCycle e) {
-		if (timeService.getCurrentTick() != 0) {
+		if (timeService.getCurrentYear() != 0) {
 			updateYearTargets();
 		}
 	}
 	
 	private void updateSessionTargets(){
-		this.sessionCounter++;
 		this.worldLastSessionTarget = this.worldCurrentSessionTarget;
 		this.worldCurrentSessionTarget = worldLastSessionTarget * GameConst.TARGET_REDUCTION ; 
 		
 		double worldOutput = 0;
 		double rogueCarbonOutput = 0;
 		
+		int lastYear = timeService.getCurrentYear() - 1;
+		
 		for (countryObject country : participantCountries) {
-			double output = getReportedCarbonOutput(country.obj.getID());
+			double output = getReportedCarbonOutput(country.obj.getID(), lastYear);
 			worldOutput += output;
 			if(!country.obj.getIsKyotoMember()){
 				rogueCarbonOutput += output ;
@@ -170,11 +184,13 @@ public class CarbonTarget extends EnvironmentService {
 		
 		for (countryObject country : participantCountries) {
 			if (country.obj.getIsKyotoMember()){
-				double output = getReportedCarbonOutput(country.obj.getID());
+				double output = getReportedCarbonOutput(country.obj.getID(), lastYear);
 				country.proportion = output / (worldOutput - rogueCarbonOutput);
 				generateSessionTarget(country, kyotoTarget);
 			}
 		}
+		
+		this.sessionCounter++;
 	}
 	
 	public void updateYearTargets()
