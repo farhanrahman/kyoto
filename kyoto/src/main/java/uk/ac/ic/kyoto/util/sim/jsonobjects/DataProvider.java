@@ -47,7 +47,7 @@ public class DataProvider {
 	 * @param simID
 	 * @return
 	 */
-	public JSONObjectContainer<SimulationData> getSimulationData(Integer simID){
+	public JSONObjectContainer<SimulationData> getSimulationData(Long simID){
 		
 		JSONObjectContainer<SimulationData> o = new JSONObjectContainer<SimulationData>();
 		

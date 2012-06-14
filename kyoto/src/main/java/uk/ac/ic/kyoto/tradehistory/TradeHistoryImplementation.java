@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import uk.ac.ic.kyoto.trade.Offer;
+import uk.ac.ic.kyoto.countries.Offer;
 import uk.ac.imperial.presage2.core.Time;
 
 import com.google.inject.Singleton;

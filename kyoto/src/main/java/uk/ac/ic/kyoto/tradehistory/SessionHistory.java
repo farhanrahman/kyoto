@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 
-import uk.ac.ic.kyoto.trade.Offer;
+import uk.ac.ic.kyoto.countries.Offer;
 
 /**
  * Stores and makes available all given TickHistories for current Session
