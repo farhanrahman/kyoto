@@ -52,6 +52,7 @@ public class CarbonTarget extends EnvironmentService {
 	
 	private double worldLastSessionTarget = 0;
 	private double worldCurrentSessionTarget = 0;
+	private int sessionCounter = -1;
 	
 	private EventBus eb;
 	private ParticipantTimeService timeService;
@@ -107,13 +108,15 @@ public class CarbonTarget extends EnvironmentService {
 	/*
 	 * Function to be called after all countries have been added
 	 */
-	private void initialise(){
-		double kyotoTarget = 100;
+	private void initialise(){		
+		this.worldCurrentSessionTarget = 0; // 1990 DATA
 		
 		for (countryObject country : participantCountries) {
-			generateSessionTarget(country, kyotoTarget);
-			generateYearTarget(country);
-		}
+			country.currentSessionTarget = 0; //1990 DATA
+		}		
+		
+		updateSessionTargets();
+		updateYearTargets();
 	}
 	
 	private double getReportedCarbonOutput(UUID County){
@@ -123,50 +126,61 @@ public class CarbonTarget extends EnvironmentService {
 		return 0;
 	}
 	
-	private countryObject findCountryObject(UUID countryID){
+	private countryObject findCountryObject(UUID countryID) {
 		countryObject result = null;
 		for (countryObject country : participantCountries) {
 			if (country.obj.getID() == countryID) {
 				result = country;
 			}
-		}
+		}		
 		return result;
 	}
 	
 	@EventListener
-	public void onEndOfSession(EndOfSessionCycle e){
-		updateSessionTarget();
+	public void onEndOfSession(EndOfSessionCycle e) {
+		if (timeService.getCurrentTick() != 0) {
+			updateSessionTargets();
+		}
 	}
 	
 	@EventListener
-	public void onEndOfYear(EndOfYearCycle e){
-		updateYearTarget();
+	public void onEndOfYear(EndOfYearCycle e) {
+		if (timeService.getCurrentTick() != 0) {
+			updateYearTargets();
+		}
 	}
 	
-	private void updateSessionTarget(){
+	private void updateSessionTargets(){
+		this.sessionCounter++;
 		this.worldLastSessionTarget = this.worldCurrentSessionTarget;
 		this.worldCurrentSessionTarget = worldLastSessionTarget * GameConst.TARGET_REDUCTION ; 
 		
+		double worldOutput = 0;
 		double rogueCarbonOutput = 0;
+		
 		for (countryObject country : participantCountries) {
+			double output = getReportedCarbonOutput(country.obj.getID());
+			worldOutput += output;
 			if(!country.obj.getIsKyotoMember()){
-				rogueCarbonOutput += getReportedCarbonOutput(country.obj.getID());
+				rogueCarbonOutput += output ;
 			}
 		}
 		
 		double kyotoTarget = this.worldCurrentSessionTarget - rogueCarbonOutput;
 		
-		/*
-		 * TODO: Set country carbon output proportions
-		 */
-		
 		for (countryObject country : participantCountries) {
-			generateSessionTarget(country, kyotoTarget);
+			if (country.obj.getIsKyotoMember()){
+				double output = getReportedCarbonOutput(country.obj.getID());
+				country.proportion = output / (worldOutput - rogueCarbonOutput);
+				generateSessionTarget(country, kyotoTarget);
+			}
 		}
 	}
 	
-	public void updateYearTarget()
+	public void updateYearTargets()
 	{
+		while (this.sessionCounter != timeService.getCurrentSession()) {}
+		
 		for (countryObject country : participantCountries) {
 			generateYearTarget(country);
 		}
@@ -178,6 +192,7 @@ public class CarbonTarget extends EnvironmentService {
 	private void generateSessionTarget(countryObject country, double kyotoTarget)
 	{	
 		country.penalty = 0;
+		country.lastSessionTarget = country.currentSessionTarget;
 		country.currentSessionTarget = country.proportion * kyotoTarget;
 	}
 	
