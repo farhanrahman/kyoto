@@ -87,6 +87,8 @@ public class Simulation extends InjectedSimulation {
 		 	foreach (countries as country) {
 		    
 			UUID pid = Random.randomUUID();
+
+			carbonTarget.add1990OutputData(country.ISO, 1990Data)
 			
 			switch(country.type) {
 				case x:  // NonAnnex

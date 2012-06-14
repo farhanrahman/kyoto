@@ -1,6 +1,8 @@
 package uk.ac.ic.kyoto.services;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
@@ -32,7 +34,12 @@ public class CarbonTarget extends EnvironmentService {
 
 	private class countryObject  {
 		final public AbstractCountry obj;
-		public double proportion;
+		
+		public double lastSessionTarget = 0;
+		public double currentSessionTarget = 0;
+		public double currentYearTarget = 0;
+		
+		public double proportion = 0;
 		public double penalty = 0;
 		
 		public countryObject(AbstractCountry country) {
@@ -41,12 +48,10 @@ public class CarbonTarget extends EnvironmentService {
 	}
 	
 	private ArrayList<countryObject> participantCountries= new ArrayList<countryObject>();
+	private Map<String, Double> output1990Data = new HashMap<String, Double>();
 	
-	/*
-	 * Store world session targets 
-	 */
-	private double lastSessionTarget;
-	private double currentSessionTarget;
+	private double worldLastSessionTarget = 0;
+	private double worldCurrentSessionTarget = 0;
 	
 	private EventBus eb;
 	private ParticipantTimeService timeService;
@@ -61,6 +66,12 @@ public class CarbonTarget extends EnvironmentService {
 			e.printStackTrace();
 		}
 	}
+	
+	@Inject
+	public void setEB(EventBus eb) {
+		this.eb = eb;
+		eb.subscribe(this);
+	}
 
 	/**
 	 * Adds states to the service
@@ -70,66 +81,46 @@ public class CarbonTarget extends EnvironmentService {
 		this.participantCountries.add(memberState);
 	}
 	
-	@Inject
-	public void setEB(EventBus eb) {
-		this.eb = eb;
-		eb.subscribe(this);
+	/**
+	 * Adds 1990 output data to carbon target service (used for initial targets)
+	 */
+	public void add1990OutputData(String ISO, double outputData){
+		this.output1990Data.put(ISO, outputData);
 	}
 	
-	public double querySessionTarget(UUID country) {
-		double state = (Double) sharedState.get("EmissionsSessionTarget", country);
-		return state;
+	public double querySessionTarget(UUID countryID) {
+		countryObject obj = findCountryObject(countryID);
+		return obj.currentSessionTarget;
 	}
 	
-	public double queryYearTarget(UUID country) {
-		double state = (Double) sharedState.get("EmissionsYearTarget", country);
-		return state;
+	public double queryYearTarget(UUID countryID) {
+		countryObject obj = findCountryObject(countryID);
+		return obj.currentYearTarget;
 	}
 	
-	private double getReportedCarbonOutput(UUID County)
-	{
+	public void setCountryPenalty(UUID countryID, double penaltyValue) {
+		countryObject target= findCountryObject(countryID);
+		target.penalty += penaltyValue;
+		generateYearTarget(target);
+	}
+	
+	/*
+	 * Function to be called after all countries have been added
+	 */
+	private void initialise(){
+		double kyotoTarget = 100;
+		
+		for (countryObject country : participantCountries) {
+			generateSessionTarget(country, kyotoTarget);
+			generateYearTarget(country);
+		}
+	}
+	
+	private double getReportedCarbonOutput(UUID County){
 		/*
 		 * NEEDS TO BE IMPLEMENTED
 		 */
 		return 0;
-	}
-	
-	/*
-	 * Function that is triggered by the end of session event.
-	 */
-	@EventListener
-	public void updateSessionTarget(EndOfSessionCycle e)
-	{
-		this.lastSessionTarget = this.currentSessionTarget;
-		this.currentSessionTarget = lastSessionTarget * GameConst.TARGET_REDUCTION ; 
-		
-		double rogueCarbonOutput = 0;
-		for (countryObject country : participantCountries) {
-			if(!country.obj.getIsKyotoMember()){
-				rogueCarbonOutput += getReportedCarbonOutput(country.obj.getID());
-			}
-		}
-		
-		double kyotoTarget = this.currentSessionTarget - rogueCarbonOutput;
-		
-		/*
-		 * TODO: Set country carbon output proportions
-		 */
-		
-		for (countryObject country : participantCountries) {
-			generateSessionTarget(country, kyotoTarget);
-		}
-	}
-	
-	/*
-	 * Function that is triggered by the end of year event.
-	 */
-	@EventListener
-	public void updateYearTarget(EndOfYearCycle e)
-	{
-		for (countryObject country : participantCountries) {
-			generateYearTarget(country);
-		}
 	}
 	
 	private countryObject findCountryObject(UUID countryID){
@@ -142,17 +133,43 @@ public class CarbonTarget extends EnvironmentService {
 		return result;
 	}
 	
-	/**
-	 * Applies penalty to year targets for given country 
-	 * 
-	 * @param country
-	 * @param penaltyValue
-	 */
-	public void setCountryPenalty(UUID countryID, double penaltyValue) {
-		countryObject target= findCountryObject(countryID);
-		target.penalty += penaltyValue;
-
-		generateYearTarget(target);
+	@EventListener
+	public void onEndOfSession(EndOfSessionCycle e){
+		updateSessionTarget();
+	}
+	
+	@EventListener
+	public void onEndOfYear(EndOfYearCycle e){
+		updateYearTarget();
+	}
+	
+	private void updateSessionTarget(){
+		this.worldLastSessionTarget = this.worldCurrentSessionTarget;
+		this.worldCurrentSessionTarget = worldLastSessionTarget * GameConst.TARGET_REDUCTION ; 
+		
+		double rogueCarbonOutput = 0;
+		for (countryObject country : participantCountries) {
+			if(!country.obj.getIsKyotoMember()){
+				rogueCarbonOutput += getReportedCarbonOutput(country.obj.getID());
+			}
+		}
+		
+		double kyotoTarget = this.worldCurrentSessionTarget - rogueCarbonOutput;
+		
+		/*
+		 * TODO: Set country carbon output proportions
+		 */
+		
+		for (countryObject country : participantCountries) {
+			generateSessionTarget(country, kyotoTarget);
+		}
+	}
+	
+	public void updateYearTarget()
+	{
+		for (countryObject country : participantCountries) {
+			generateYearTarget(country);
+		}
 	}
 	
 	/*
@@ -161,8 +178,7 @@ public class CarbonTarget extends EnvironmentService {
 	private void generateSessionTarget(countryObject country, double kyotoTarget)
 	{	
 		country.penalty = 0;
-		double sessionTarget = country.proportion * kyotoTarget;
-		sharedState.change("EmissionsSessionTarget", country.obj.getID(), sessionTarget);
+		country.currentSessionTarget = country.proportion * kyotoTarget;
 	}
 	
 	/*
@@ -171,18 +187,7 @@ public class CarbonTarget extends EnvironmentService {
 	private void generateYearTarget(countryObject country)
 	{
 		double sessionProgress = (timeService.getCurrentYear() % GameConst.YEARS_IN_SESSION) / GameConst.YEARS_IN_SESSION;
-		
-		/*
-		 * NEED TO GET THESE FROM SOMEWHERE
-		 */
-		double lastSessionTarget = 1000; 
-		double currentSessionTarget = 100;
-		
-		double diffTargets = lastSessionTarget - currentSessionTarget;
-		double penalty = country.penalty;
-		
-		double yearTarget = lastSessionTarget - (diffTargets * sessionProgress) - penalty;
-		
-		sharedState.change("EmissionsYearTarget", country.obj.getID(), yearTarget);
+		double diffTargets = country.lastSessionTarget - country.currentSessionTarget;
+		country.currentYearTarget = country.lastSessionTarget - (diffTargets * sessionProgress) - country.penalty;
 	}	
 }
