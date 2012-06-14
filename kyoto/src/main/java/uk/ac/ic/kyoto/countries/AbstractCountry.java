@@ -432,9 +432,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		}
 	}
 	
-	protected final void broadcastInvesteeOffer(int quantity, int unitCost){
+	protected final void broadcastInvesteeOffer(int quantity, int unitCost, InvestmentType i){
 		if(this.tradeProtocol != null){
-			Offer trade = new Offer(quantity, unitCost, TradeType.RECEIVE);
+			Offer trade = new Offer(quantity, unitCost, TradeType.RECEIVE, i);
 			
 			/*DEBUG*/
 			System.out.println();

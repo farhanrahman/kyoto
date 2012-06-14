@@ -19,7 +19,7 @@ public class Offer{
 		this.quantity = quantity;
 		this.unitCost = unitCost;
 		this.type = type;
-		this.itype = null;
+		this.itype = InvestmentType.INVALID;
 	}
 	
 	public Offer(int quantity, int unitCost, TradeType type, InvestmentType itype) {
@@ -59,15 +59,18 @@ public class Offer{
 			return true;
 		} else if (	this.quantity == t.getQuantity() && 
 					this.unitCost == t.getUnitCost() && 
-					this.type == t.getType()) {
+					this.type == t.getType() &&
+					this.itype == t.getInvestmentType()) {
 			return true;
 		} else if (	this.quantity == -t.getQuantity() &&
 					this.unitCost == t.getUnitCost() && 
-					this.type == t.reverse().getType()){
+					this.type == t.reverse().getType() &&
+					this.itype == t.getInvestmentType()){
 			return true;
 		} else if ( this.quantity == t.getQuantity() &&
 					this.unitCost == -t.getUnitCost() &&
-					this.type == t.reverse().getType()){
+					this.type == t.reverse().getType() &&
+					this.itype == t.getInvestmentType()){
 			return true;
 		} else {
 			return false;
