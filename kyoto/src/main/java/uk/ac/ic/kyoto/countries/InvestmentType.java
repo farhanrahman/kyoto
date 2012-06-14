@@ -1,5 +1,5 @@
 package uk.ac.ic.kyoto.countries;
 
-enum InvestmentType{
+public enum InvestmentType{
 	ABSORB, REDUCE, INVALID
 }
