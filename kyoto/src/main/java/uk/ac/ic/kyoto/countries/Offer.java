@@ -15,14 +15,14 @@ public class Offer{
 
 	public static String TRADE_PROPOSAL = "Trade proposal";	
 
-	public Offer(int quantity, int unitCost, TradeType type) {
+	Offer(int quantity, int unitCost, TradeType type) {
 		this.quantity = quantity;
 		this.unitCost = unitCost;
 		this.type = type;
 		this.itype = InvestmentType.INVALID;
 	}
 	
-	public Offer(int quantity, int unitCost, TradeType type, InvestmentType itype) {
+	Offer(int quantity, int unitCost, TradeType type, InvestmentType itype) {
 		this.quantity = quantity;
 		this.unitCost = unitCost;
 		this.type = type;
