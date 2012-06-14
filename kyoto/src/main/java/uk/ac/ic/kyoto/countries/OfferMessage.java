@@ -48,6 +48,10 @@ public class OfferMessage {
 		this.offerMessageType = offerMessageType;
 	}
 	
+	public InvestmentType getOfferInvestmentType(){
+		return offer.getInvestmentType();
+	}
+	
 	public TradeType getOfferType(){
 		return offer.getType();
 	}

@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
+import uk.ac.ic.kyoto.countries.InvestmentType;
 import uk.ac.ic.kyoto.countries.Offer;
 import uk.ac.ic.kyoto.countries.OfferMessage;
 import uk.ac.ic.kyoto.countries.TradeProtocol;
@@ -47,6 +48,7 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 								o.getOfferQuantity(), 
 								o.getOfferUnitCost(), 
 								o.getOfferType(),
+								o.getOfferInvestmentType(),
 								o);
 					} catch (FSMException e) {
 						e.printStackTrace();
@@ -102,21 +104,26 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 				int unitCost = 2;
 				this.broadcastBuyOffer(quantity, unitCost);
 			//	counter++;
-			/*
-			 * 	int quantity =10;
-			 * 
-			 *	double unitCost = this.carbonAbsorptionHandler.getInvestmentRequired(quantity);
-			 * 	//or
-			 * 	double unitCost = this.carbonReductionHandler.getInvestmentRequired(quantity);
-			 * 
-			 * 	this.broadcastInvesteeAOffer(quantity, unitCost);
-			 * 	this.broadcastInvesteeROffer(quantity, unitCost);
-			*/
+			
+			  	//int quantity =10;
+			  	//int unitCost =0;
+			  	//InvestmentType i = InvestmentType.ABSORB;
+			 	
+				//try {
+				//	unitCost = (int) this.carbonAbsorptionHandler.getInvestmentRequired(quantity);
+				//} catch (Exception e) {
+				//	e.printStackTrace();
+				//}
+			  	//or
+			  	//InvestmentType i = InvestmentType.REDUCE;
+			  	//double unitCost = this.carbonReductionHandler.getInvestmentRequired(quantity);
+			  
+			  	//this.broadcastInvesteeOffer(quantity, unitCost, i);
+			
 			//}
 		}
 		
 		this.tradeProtocol.incrementTime();
-		
 		logger.info("Myname: " + this.getName() + ", I have this much money: " + this.getAvailableToSpend() + ".");
 		//logger.info("Myname: " + this.getName() + ", My GDPRate is : " + GDPRate);
 		//logger.info("Myname: " + this.getName() + ", My carbon output is : " + carbonOutput);

@@ -188,22 +188,31 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	@Override
 	final public void execute() {
-		super.execute();
-		if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {		
-			updateGDPRate();
-			updateGDP();
-			updateAvailableToSpend();
-			if (isKyotoMember) {
-				MonitorTax();
+		try{
+			if(simTick == SimTime.get().intValue()){
+				super.execute();
+				if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {		
+					updateGDPRate();
+					updateGDP();
+					updateAvailableToSpend();
+					if (isKyotoMember) {
+						MonitorTax();
+					}
+					updateCarbonOffsetYearly();
+					YearlyFunction();
+				}
+				if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
+					resetCarbonOffset();
+					SessionFunction();
+				}
+				simTick++;
+			}else{
+				throw new UnauthorisedExecuteException(SimTime.get().intValue(), this.getID(), this.getName());
 			}
-			updateCarbonOffsetYearly();
-			YearlyFunction();
+			behaviour();
+		} catch(UnauthorisedExecuteException e){
+			e.printStackTrace();
 		}
-		if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
-			resetCarbonOffset();
-			SessionFunction();
-		}
-		behaviour();
 	}
 	
 	/**
@@ -446,9 +455,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		}
 	}
 	
-	protected final void broadcastInvesteeOffer(int quantity, int unitCost){
+	protected final void broadcastInvesteeOffer(int quantity, int unitCost, InvestmentType i){
 		if(this.tradeProtocol != null){
-			Offer trade = new Offer(quantity, unitCost, TradeType.RECEIVE);
+			Offer trade = new Offer(quantity, unitCost, TradeType.RECEIVE, i);
 			
 			/*DEBUG*/
 			System.out.println();
