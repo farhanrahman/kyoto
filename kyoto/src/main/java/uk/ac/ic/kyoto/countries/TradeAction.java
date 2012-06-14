@@ -2,7 +2,6 @@ package uk.ac.ic.kyoto.countries;
 
 import java.util.UUID;
 
-import uk.ac.ic.kyoto.trade.Offer;
 import uk.ac.imperial.presage2.core.Action;
 import uk.ac.imperial.presage2.core.Time;
 

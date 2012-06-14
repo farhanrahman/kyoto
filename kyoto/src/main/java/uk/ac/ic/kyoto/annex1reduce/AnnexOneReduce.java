@@ -17,14 +17,14 @@ import uk.ac.imperial.presage2.core.messaging.Input;
  * @author Nik
  *
  */
-public class EUCountry extends AbstractCountry {
+public class AnnexOneReduce extends AbstractCountry {
 	
 	final private Prolog engine;
 	private EU eu;
 	
-	public EUCountry(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
-			double GDPRate, double availiableToSpend, double carbonOffset,
-			double energyOutput, double carbonOutput) {
+	public AnnexOneReduce(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
+			double GDPRate, double energyOutput, double carbonOutput) {
+
 		
 		super(id, name, ISO, landArea, arableLandArea, GDP,
 					GDPRate, energyOutput, carbonOutput);

@@ -8,7 +8,7 @@ import java.security.InvalidParameterException;
 
 import org.junit.Test;
 
-import uk.ac.ic.kyoto.trade.Offer;
+import uk.ac.ic.kyoto.countries.Offer;
 import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.ic.kyoto.tradehistory.AnalysisUtils;
 import uk.ac.ic.kyoto.tradehistory.AnalysisUtils.TradeActionType;

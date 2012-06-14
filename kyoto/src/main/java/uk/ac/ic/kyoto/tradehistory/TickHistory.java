@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import uk.ac.ic.kyoto.trade.Offer;
+import uk.ac.ic.kyoto.countries.Offer;
 
 /**
  * Stores all messages (trade and investment), and automagically

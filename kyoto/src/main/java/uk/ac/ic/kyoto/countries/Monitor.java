@@ -1,4 +1,4 @@
-package uk.ac.ic.kyoto.monitor;
+package uk.ac.ic.kyoto.countries;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -6,10 +6,7 @@ import java.util.Random;
 
 import com.google.inject.Inject;
 
-import uk.ac.ic.kyoto.countries.AbstractCountry;
-import uk.ac.ic.kyoto.countries.GameConst;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
-import uk.ac.ic.kyoto.services.CarbonTarget;
 import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfYearCycle;
 import uk.ac.imperial.presage2.core.environment.EnvironmentRegistrationRequest;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
@@ -198,13 +195,8 @@ public class Monitor extends EnvironmentService {
 	 * The country to be sanctioned
 	 */
 	public void targetSanction(AbstractCountry country, double carbonExcess) {
-		double previousEmissionTarget = carbonTargetingService.queryYearTarget(country.getID());
-		
-		double newEmissionTarget = previousEmissionTarget - carbonExcess * 1.3;
-		/**
-		 * Impossible to implement as the emission targets in the shared state cannot be changed externally
-		 */
-		country.setEmissionsTarget( (long) newEmissionTarget);
+		double penalty = carbonExcess * 1.3;
+		carbonTargetingService.setCountryPenalty(country.getID(), penalty);
 		
 		// Charge the country for not meeting the target
 		

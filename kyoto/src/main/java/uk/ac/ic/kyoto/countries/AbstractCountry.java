@@ -5,14 +5,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
 import uk.ac.ic.kyoto.market.Economy;
-import uk.ac.ic.kyoto.monitor.Monitor;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.messaging.Input;
+import uk.ac.imperial.presage2.core.messaging.Performative;
+import uk.ac.imperial.presage2.core.network.MulticastMessage;
+import uk.ac.imperial.presage2.core.simulator.SimTime;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 /**
@@ -38,7 +41,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * These variables are related to land area for
 	 * dealing with carbon absorption prices
 	 */
-	final protected	double 		landArea;
+	final double 		landArea;
 
 	protected 		double 		arableLandArea;
 	
@@ -46,24 +49,25 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * These variables are related to carbon emissions and 
 	 * calculating 'effective' carbon output
 	 */
-	protected 		double 		carbonOutput;		// Tons of CO2 produced every year
-	protected		double		carbonAbsorption;	// Tons of CO2 absorbed by forests every year
-	protected 		double 		carbonOffset; 		// Tons of CO2 that the country acquired (by trading or energy absorption)
-	protected 		double		emissionsTarget;	// Number of tons of carbon you SHOULD produce
+	double 		carbonOutput;		// Tons of CO2 produced every year
+	double		carbonAbsorption;	// Tons of CO2 absorbed by forests every year
+	double 		carbonOffset; 		// Tons of CO2 that the country acquired (by trading or energy absorption)
+	double		emissionsTarget;	// Number of tons of carbon you SHOULD produce
 	
 	/*
 	 * These variables are related to GDP and
 	 * available funds to spend on carbon trading and industry.
 	 */
-	protected 		double 		GDP;				// GDP of the country in millions of dollars. Changes every year
-	protected 		double 		GDPRate;			// The rate in which the GDP changes in a given year. Expressed in %
-	protected 		double  		energyOutput;		// How much Carbon we would use if the whole industry was carbon based. Measured in Tons of Carbon per year
-	protected 		double 		availableToSpend;	// Measure of cash available to the country in millions of dollars. Note, can NOT be derived from GDP. Initial value can be derived from there, but cash reserves need to be able to lower independently.
+	double 		GDP;				// GDP of the country in millions of dollars. Changes every year
+	double 		GDPRate;			// The rate in which the GDP changes in a given year. Expressed in %
+	double  		energyOutput;		// How much Carbon we would use if the whole industry was carbon based. Measured in Tons of Carbon per year
+	double 		availableToSpend;	// Measure of cash available to the country in millions of dollars. Note, can NOT be derived from GDP. Initial value can be derived from there, but cash reserves need to be able to lower independently.
 	
 	
 	protected 		Map<Integer, Double> carbonEmissionReports;
 	
-	protected ParticipantCarbonReportingService reportingService; // TODO add visibility
+	protected ParticipantCarbonReportingService reportingService;
+	protected CarbonTarget carbonTarget;
 	protected Monitor monitor;
 	protected ParticipantTimeService timeService;
 	
@@ -75,6 +79,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	protected CarbonReductionHandler 	carbonReductionHandler;
 	protected CarbonAbsorptionHandler 	carbonAbsorptionHandler;
 	protected EnergyUsageHandler		energyUsageHandler;
+	
+	/*Simulation tick counter to stop sub classes from calling execute more than once*/
+	private Integer simTick = 0;
+	
+	/*Flag for single initialisation of AbstractCountry*/
+	private boolean initialised = false;
 	
 	//================================================================================
     // Constructors and Initializers
@@ -110,36 +120,53 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	@Override
 	final public void initialise(){
-		super.initialise();
-		
-		// Add the country to the monitor service
-		try {
-			monitor = getEnvironmentService(Monitor.class);
-			monitor.addMemberState(this);
-		} catch (UnavailableServiceException e1) {
-			System.out.println("Unable to reach monitor service.");
-			e1.printStackTrace();
+		try{
+			if(this.initialised == false){
+				super.initialise();
+				
+				// Add the country to the carbonTarget service
+				try {
+					carbonTarget = getEnvironmentService(CarbonTarget.class);
+					carbonTarget.addMemberState(this);
+				} catch (UnavailableServiceException e1) {
+					System.out.println("Unable to reach carbon target service.");
+					e1.printStackTrace();
+				}
+				// Add the country to the monitor service
+				try {
+					monitor = getEnvironmentService(Monitor.class);
+					monitor.addMemberState(this);
+				} catch (UnavailableServiceException e1) {
+					System.out.println("Unable to reach monitor service.");
+					e1.printStackTrace();
+				}
+				// Initialize the Action Handlers DO THEY HAVE TO BE INSTANTIATED ALL THE TIME?
+				try {
+					timeService = getEnvironmentService(ParticipantTimeService.class);
+				} catch (UnavailableServiceException e1) {
+					System.out.println("TimeService doesn't work");
+					e1.printStackTrace();
+				}
+				// Initialize the Action Handlers
+				carbonAbsorptionHandler = new CarbonAbsorptionHandler(this);
+				carbonReductionHandler = new CarbonReductionHandler(this);
+				energyUsageHandler = new EnergyUsageHandler(this);
+				
+				// Connect to the Reporting Service
+				try {
+					this.reportingService = this.getEnvironmentService(ParticipantCarbonReportingService.class);
+				} catch (UnavailableServiceException e) {
+					System.out.println("Unable to reach emission reporting service.");
+					e.printStackTrace();
+				}
+				this.initialised = true;
+				initialiseCountry();
+			}else{
+				throw new AlreadyInitialisedException();
+			}
+		} catch(AlreadyInitialisedException ex){
+			ex.printStackTrace();
 		}
-		// Initialize the Action Handlers DO THEY HAVE TO BE INSTANTIATED ALL THE TIME?
-		try {
-			timeService = getEnvironmentService(ParticipantTimeService.class);
-		} catch (UnavailableServiceException e1) {
-			System.out.println("TimeService doesn't work");
-			e1.printStackTrace();
-		}
-		// Initialize the Action Handlers
-		carbonAbsorptionHandler = new CarbonAbsorptionHandler(this);
-		carbonReductionHandler = new CarbonReductionHandler(this);
-		energyUsageHandler = new EnergyUsageHandler(this);
-		
-		// Connect to the Reporting Service
-		try {
-			this.reportingService = this.getEnvironmentService(ParticipantCarbonReportingService.class);
-		} catch (UnavailableServiceException e) {
-			System.out.println("Unable to reach emission reporting service.");
-			e.printStackTrace();
-		}
-		initialiseCountry();
 	}
 	
 	//================================================================================
@@ -147,11 +174,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
     //================================================================================
 	
 	@Override
-	protected abstract void processInput(Input input);
+	abstract protected void processInput(Input input);
 	
-	public abstract void YearlyFunction();
+	abstract protected void YearlyFunction();
 	
-	public abstract void SessionFunction();
+	abstract protected void SessionFunction();
 	
 	abstract protected void initialiseCountry();
 	
@@ -162,18 +189,17 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	@Override
 	final public void execute() {
 		super.execute();
-		if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {			
+		if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {		
+			updateGDPRate();
+			updateGDP();
+			updateAvailableToSpend();
 			if (isKyotoMember) {
 				MonitorTax();
-				//checkTargets(); //did the countries meet their targets?
 			}
-			updateAvailableToSpend();
-			updateGDP(); //left out until this runs only every year
-			updateGDPRate();
 			updateCarbonOffsetYearly();
 			YearlyFunction();
 		}
-		if (timeService.getCurrentYear() % timeService.getYearsInSession() == 0) {
+		if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
 			resetCarbonOffset();
 			SessionFunction();
 		}
@@ -189,7 +215,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	/**
 	 * Taxes individual percentage part of their GDP to pay for the monitor
 	 */
-	public void MonitorTax() {
+	final void MonitorTax() {
 		// Give a tax to Monitor agent for monitoring every year
 		this.monitor.applyTaxation(GDP*GameConst.MONITOR_COST_PERCENTAGE); // Take % of GDP for monitoring
 		availableToSpend -= GDP*GameConst.MONITOR_COST_PERCENTAGE;
@@ -305,10 +331,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
     // Public getters
     //================================================================================
 	
-	public Double getCash(){
-		return this.GDP*GameConst.PERCENTAGE_OF_GDP;
+	public String getISO() {
+		return ISO;
 	}
-	
+		
 	public double getLandArea() {
 		return landArea;
 	}
@@ -333,36 +359,116 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return carbonOffset;
 	}
 
+	public double getEnergyOutput(){
+		return energyOutput;
+	}
+	public double getCarbonOutput(){
+		return carbonOutput;
+	}
+	
 	public double getAvailableToSpend() {
 		return availableToSpend;
 	}
 	
-	public void setEmissionsTarget(double emissionsTarget) {
+	void setEmissionsTarget(double emissionsTarget) {
 		this.emissionsTarget = emissionsTarget;
 	}
 	
-	public void setAvailableToSpend(double availableToSpend) {
+	void setAvailableToSpend(double availableToSpend) {
 			this.availableToSpend = availableToSpend;
 	}
 	
+	public boolean getIsKyotoMember() {
+		return this.isKyotoMember;
+	}
+	
 	//================================================================================
-    // Trade protocol monetary adjustments
+    // Trade protocol methods
     //================================================================================
 	
 	final void payMoney(double amount) {
-		availableToSpend -= amount;
+		this.availableToSpend -= amount;
 	}
 	
 	final void receiveMoney(double amount) {
-		availableToSpend += amount;
+		this.availableToSpend += amount;
 	}
 	
 	final void sellOffset(double amount) {
-		carbonOffset -= amount;
+		this.carbonOffset -= amount;
 	}
 	
 	final void receiveOffset(double amount) {
-		carbonOffset += amount;
+		this.carbonOffset += amount;
+	}
+	
+	protected final void broadcastSellOffer(int quantity, int unitCost){
+		if(this.tradeProtocol != null){
+			Offer trade = new Offer(quantity, unitCost, TradeType.SELL);
+			this.network.sendMessage(
+						new MulticastMessage<OfferMessage>(
+								Performative.PROPOSE, 
+								Offer.TRADE_PROPOSAL, 
+								SimTime.get(), 
+								this.network.getAddress(),
+								this.tradeProtocol.getAgentsNotInConversation(),
+								new OfferMessage(
+										trade,
+										this.tradeProtocol.tradeToken.generate(),
+										OfferMessageType.BROADCAST_MESSAGE))
+					);
+		}
 	}
 
+	protected final void broadcastBuyOffer(int quantity, int unitCost){
+		if(this.tradeProtocol != null){
+			Offer trade = new Offer(quantity, unitCost, TradeType.BUY);
+			
+			/*DEBUG*/
+			System.out.println();
+			System.out.println(this.tradeProtocol.getActiveConversationMembers().toString());
+			System.out.println(this.network.getConnectedNodes());
+			System.out.println();
+			/*DEBUG*/
+			
+			this.network.sendMessage(
+						new MulticastMessage<OfferMessage>(
+								Performative.PROPOSE, 
+								Offer.TRADE_PROPOSAL, 
+								SimTime.get(), 
+								this.network.getAddress(),
+								this.tradeProtocol.getAgentsNotInConversation(),
+								new OfferMessage(
+										trade, 
+										this.tradeProtocol.tradeToken.generate(), 
+										OfferMessageType.BROADCAST_MESSAGE))
+					);
+		}
+	}
+	
+	protected final void broadcastInvesteeOffer(int quantity, int unitCost){
+		if(this.tradeProtocol != null){
+			Offer trade = new Offer(quantity, unitCost, TradeType.RECEIVE);
+			
+			/*DEBUG*/
+			System.out.println();
+			System.out.println(this.tradeProtocol.getActiveConversationMembers().toString());
+			System.out.println(this.network.getConnectedNodes());
+			System.out.println();
+			/*DEBUG*/
+			
+			this.network.sendMessage(
+						new MulticastMessage<OfferMessage>(
+								Performative.PROPOSE, 
+								Offer.TRADE_PROPOSAL, 
+								SimTime.get(), 
+								this.network.getAddress(),
+								this.tradeProtocol.getAgentsNotInConversation(),
+								new OfferMessage(
+										trade,
+										this.tradeProtocol.tradeToken.generate(),
+										OfferMessageType.BROADCAST_MESSAGE))
+					);
+		}
+	}
 }
