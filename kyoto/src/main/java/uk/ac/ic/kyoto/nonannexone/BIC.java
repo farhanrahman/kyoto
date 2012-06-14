@@ -78,7 +78,7 @@ public class BIC extends AbstractCountry {
 	
 	protected void initialiseCountry() {
 		// TODO Auto-generated method stub
-		energy_aim = energyOutput + 30000 ; //initialise an aim (to be decided)
+		energy_aim = getEnergyOutput() + 30000 ; //initialise an aim (to be decided)
 		environment_friendly_target = 0; //initialise a target (to be decided)
 		}
 	//.......................................................................................
@@ -95,10 +95,10 @@ public class BIC extends AbstractCountry {
 		double difference;
 		boolean aim_success = false; 
 		
-		difference = energy_aim - energyOutput; //difference in energy aim and current energy output.
+		difference = energy_aim - getEnergyOutput(); //difference in energy aim and current energy output.
 		double invest_money;
 		invest_money = energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(difference) ;
-				if (invest_money < availableToSpend)
+				if (invest_money < getAvailableToSpend())
 				{
 					buildIndustry(invest_money); //!!!!!!!
 					aim_success = true;
@@ -135,7 +135,7 @@ public class BIC extends AbstractCountry {
 	{
 		double carbon_difference; 
 		
-		if (carbonOutput + energyUsageHandler.calculateCarbonIndustryGrowth(money_invest) < environment_friendly_target)
+		if (getCarbonOutput() + energyUsageHandler.calculateCarbonIndustryGrowth(money_invest) < environment_friendly_target)
 		{ //invest but also check if we meet our environment friendly target.
 			try{
 				energyUsageHandler.investInCarbonIndustry(money_invest);
@@ -160,13 +160,13 @@ public class BIC extends AbstractCountry {
 			}
 			
 			try{ //also since country exceeds its own carbon target, invests in carbon absorption in order to get carbon offset.
-				carbon_difference = environment_friendly_target - (carbonOutput + energyUsageHandler.calculateCarbonIndustryGrowth(money_invest));
-				if ((carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < availableToSpend ) && (currentAvailableArea() == "Safe"))
+				carbon_difference = environment_friendly_target - (getCarbonOutput() + energyUsageHandler.calculateCarbonIndustryGrowth(money_invest));
+				if ((carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend() ) && (currentAvailableArea() == "Safe"))
 					{
 					carbonAbsorptionHandler.investInCarbonAbsorption(carbonAbsorptionHandler.getInvestmentRequired(carbon_difference));
 					logger.info("Country invests in carbon absorption to reduce carbon output");
 					}
-				else if ((carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < availableToSpend ) && (currentAvailableArea() == "Danger"))
+				else if ((carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend() ) && (currentAvailableArea() == "Danger"))
 					{
 					logger.info("Country reach limit of available pre-set land, does not meet its environment friendly target");
 					green_care = false;
@@ -222,7 +222,7 @@ public class BIC extends AbstractCountry {
 	//calculates carbon output every year in order to check environment friendly target.
 	private void yearly_emissions()
 	{
-		carbonOutput = carbonOutput - (carbonAbsorption + carbonOffset);  
+		//this.carbonOutput = getCarbonOutput() - (get.carbonAbsorption() + get.carbonOffset());  
 	}
 	
 /*******************************************************************************************************/
