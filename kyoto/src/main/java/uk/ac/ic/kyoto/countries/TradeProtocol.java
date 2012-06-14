@@ -317,14 +317,25 @@ public abstract class TradeProtocol extends FSMProtocol {
 
 	public void handleTradeCompletion(Offer trade){
 		try{
-			if(trade.getType().equals(TradeType.BUY)){
-				participant.receiveOffset(trade.getQuantity());
-				participant.payMoney(trade.getTotalCost());
-				logger.info("My name: " + this.participant.getName()+ ", I am buying: " + trade.getQuantity() + " and paying: " + trade.getTotalCost());
-			}else if(trade.getType().equals(TradeType.SELL)){
-				participant.sellOffset(trade.getQuantity());
-				participant.receiveMoney(trade.getTotalCost());
-				logger.info("My name: " + this.participant.getName()+ ", I am selling: " + trade.getQuantity() + " and receiving: " + trade.getTotalCost());
+			switch(trade.getType()){
+			case BUY:	participant.receiveOffset(trade.getQuantity());
+						participant.payMoney(trade.getTotalCost());
+						logger.info("My name: " + this.participant.getName()+ ", I am buying: " + trade.getQuantity() + " and paying: " + trade.getTotalCost());
+						break;
+			
+			case SELL:	participant.sellOffset(trade.getQuantity());
+						participant.receiveMoney(trade.getTotalCost());
+						logger.info("My name: " + this.participant.getName()+ ", I am selling: " + trade.getQuantity() + " and receiving: " + trade.getTotalCost());
+						break;
+			
+			case INVEST:participant.receiveOffset(trade.getQuantity());
+						participant.payMoney(trade.getTotalCost());
+						logger.info("My name: " + this.participant.getName()+ ", I am receiving: " + trade.getQuantity() + " for my investment of: " + trade.getTotalCost());
+						break;
+				
+			case RECEIVE:participant.receiveMoney(trade.getTotalCost());
+						logger.info("My name: " + this.participant.getName()+ ", I am generating: " + trade.getQuantity() + " for an investment of: " + trade.getTotalCost());
+						break;
 			}
 		}catch(NullPointerException e){
 			logger.warn(e);

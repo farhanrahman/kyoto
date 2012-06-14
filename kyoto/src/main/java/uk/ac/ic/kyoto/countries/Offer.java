@@ -62,7 +62,13 @@ public class Offer{
 	}
 
 	public Offer reverse(){
-		TradeType t = this.type.equals(TradeType.BUY)?TradeType.SELL:TradeType.BUY;
+		TradeType t = this.type;
+		switch (t) {
+			case BUY: t = TradeType.SELL; break;
+			case SELL: t = TradeType.BUY; break;
+			case INVEST: t = TradeType.RECEIVE; break;
+			case RECEIVE: t = TradeType.INVEST; break;
+		}
 		return new Offer(this.quantity, this.unitCost, t);
 	}
 

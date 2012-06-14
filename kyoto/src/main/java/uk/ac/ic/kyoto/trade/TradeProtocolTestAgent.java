@@ -107,11 +107,11 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 		
 		this.tradeProtocol.incrementTime();
 		
-		logger.info("Myname: " + this.getName() + ", I have this much money: " + availableToSpend + ".");
+		logger.info("Myname: " + this.getName() + ", I have this much money: " + this.getAvailableToSpend() + ".");
 		//logger.info("Myname: " + this.getName() + ", My GDPRate is : " + GDPRate);
 		//logger.info("Myname: " + this.getName() + ", My carbon output is : " + carbonOutput);
 		//logger.info("Myname: " + this.getName() + ", My energy output is : " + energyOutput);
-		logger.info("Myname: " + this.getName() + ", My carbonOffset is : " + carbonOffset);
+		logger.info("Myname: " + this.getName() + ", My carbonOffset is : " + this.getCarbonOffset());
 	}
 	
 }
