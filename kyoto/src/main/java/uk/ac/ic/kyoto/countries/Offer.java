@@ -19,7 +19,7 @@ public class Offer{
 		this.quantity = quantity;
 		this.unitCost = unitCost;
 		this.type = type;
-		this.itype = null;
+		this.itype = InvestmentType.INVALID;
 	}
 	
 	public Offer(int quantity, int unitCost, TradeType type, InvestmentType itype) {

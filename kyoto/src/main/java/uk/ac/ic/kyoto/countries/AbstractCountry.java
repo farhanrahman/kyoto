@@ -190,31 +190,21 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	@Override
 	final public void execute() {
 		super.execute();
-		try{
-			if(this.simTick == SimTime.get().intValue()){
-				if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {		
-					updateGDPRate();
-					updateGDP();
-					updateAvailableToSpend();
-					if (isKyotoMember) {
-						MonitorTax();
-					}
-					updateCarbonOffsetYearly();
-					YearlyFunction();
-				}
-				if ((timeService.getCurrentYear() % timeService.getYearsInSession()) 
-						+ (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
-					resetCarbonOffset();
-					SessionFunction();
-				}
-				simTick++;
-			}else {
-				throw new UnauthorisedExecuteException(SimTime.get().intValue(), this.getID(), this.getName());
+		if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {		
+			updateGDPRate();
+			updateGDP();
+			updateAvailableToSpend();
+			if (isKyotoMember) {
+				MonitorTax();
 			}
-			behaviour();
-		} catch(UnauthorisedExecuteException e){
-			e.printStackTrace();
+			updateCarbonOffsetYearly();
+			YearlyFunction();
 		}
+		if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
+			resetCarbonOffset();
+			SessionFunction();
+		}
+		behaviour();
 	}
 	
 	/**
