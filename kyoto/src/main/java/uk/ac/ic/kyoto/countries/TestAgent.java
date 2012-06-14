@@ -24,7 +24,6 @@ public class TestAgent extends AbstractCountry {
 	
 	@Override
 	public void initialiseCountry(){
-		super.initialise();
 		
 		try {
 			this.tradeProtocol = new TradeProtocol(getID(), this.authkey, environment, network, null) {
@@ -90,9 +89,10 @@ public class TestAgent extends AbstractCountry {
 		logger.info("PARTRIDGE IN A PEAR TREE");
 		
 		try {
-			logger.info("I am investing " + carbonAbsorptionHandler.getInvestmentRequired(1) + " in carbon absorption.");
-			carbonAbsorptionHandler.investInCarbonAbsorption(carbonAbsorptionHandler.getInvestmentRequired(1));
-			logger.info("My carbon absorption is " + carbonAbsorption);
+			logger.info("I am investing " + carbonAbsorptionHandler.getInvestmentRequired(1000) + " in carbon absorption.");
+			double bang = carbonAbsorption;
+			carbonAbsorptionHandler.investInCarbonAbsorption(1000);
+			logger.info("My carbon absorption change is " + (carbonAbsorption - bang));
 		} catch (NotEnoughCarbonOutputException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -123,9 +123,10 @@ public class TestAgent extends AbstractCountry {
 		}
 		
 		try {
-			logger.info("I am investing " + carbonReductionHandler.getInvestmentRequired(1) + " in carbon reduction.");
-			carbonReductionHandler.investInCarbonReduction(carbonReductionHandler.getInvestmentRequired(1));
-			logger.info("My carbon output is " + carbonOutput);
+			logger.info("I am investing " + carbonReductionHandler.getInvestmentRequired(100) + " in carbon reduction.");
+			double bang = carbonOutput;
+			carbonReductionHandler.investInCarbonReduction(100);
+			logger.info("My carbon output change is " + (carbonOutput - bang));
 		} catch (NotEnoughCarbonOutputException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
