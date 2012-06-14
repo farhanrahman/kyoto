@@ -102,6 +102,16 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 				int unitCost = 2;
 				this.broadcastBuyOffer(quantity, unitCost);
 			//	counter++;
+			/*
+			 * 	int quantity =10;
+			 * 
+			 *	double unitCost = this.carbonAbsorptionHandler.getInvestmentRequired(quantity);
+			 * 	//or
+			 * 	double unitCost = this.carbonReductionHandler.getInvestmentRequired(quantity);
+			 * 
+			 * 	this.broadcastInvesteeAOffer(quantity, unitCost);
+			 * 	this.broadcastInvesteeROffer(quantity, unitCost);
+			*/
 			//}
 		}
 		
