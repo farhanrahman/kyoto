@@ -46,8 +46,6 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 								m.getFrom(), 
 								o.getOfferQuantity(), 
 								o.getOfferUnitCost(), 
-								o.getOfferType(),
-								o.getOfferInvestmentType(),
 								o);
 					} catch (FSMException e) {
 						e.printStackTrace();

@@ -9,6 +9,8 @@ import org.apache.log4j.Logger;
 import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
 import uk.ac.ic.kyoto.singletonfactory.SingletonProvider;
 import uk.ac.ic.kyoto.tokengen.Token;
+import uk.ac.ic.kyoto.trade.InvestmentType;
+import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.ic.kyoto.tradehistory.TradeHistory;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.EnvironmentConnector;
@@ -305,9 +307,9 @@ public abstract class TradeProtocol extends FSMProtocol {
 		return all;
 	}
 
-	public void offer(NetworkAddress to, int quantity, int unitPrice, TradeType type, InvestmentType itype, OfferMessage offerMessage)
+	public void offer(NetworkAddress to, int quantity, int unitPrice, OfferMessage offerMessage)
 			throws FSMException {
-		this.spawnAsInititor(new TradeSpawnEvent(to, quantity, unitPrice, type, itype, offerMessage));
+		this.spawnAsInititor(new TradeSpawnEvent(to, quantity, unitPrice, offerMessage.getOfferType(), offerMessage.getOfferInvestmentType(), offerMessage));
 	}
 
 	protected abstract boolean acceptExchange(NetworkAddress from,

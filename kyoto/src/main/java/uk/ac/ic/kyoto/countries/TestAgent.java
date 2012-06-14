@@ -3,6 +3,7 @@ package uk.ac.ic.kyoto.countries;
 import java.util.Set;
 import java.util.UUID;
 
+import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.messaging.Performative;
 import uk.ac.imperial.presage2.core.network.BroadcastMessage;
@@ -68,15 +69,6 @@ public class TestAgent extends AbstractParticipant {
 	
 	public void execute() {
 		super.execute();
-		this.network.sendMessage(
-				new BroadcastMessage<Object>(
-						Performative.PROPOSE, 
-						"TRADE", 
-						SimTime.get(), 
-						network.getAddress(), 
-						new OfferMessage(new Offer(0, 0, TradeType.SELL), authkey)
-				)
-			);
 		
 		//Negotiate over the network here...
 		

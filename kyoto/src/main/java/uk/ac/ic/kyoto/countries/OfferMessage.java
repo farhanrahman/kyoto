@@ -2,6 +2,9 @@ package uk.ac.ic.kyoto.countries;
 
 import java.util.UUID;
 
+import uk.ac.ic.kyoto.trade.InvestmentType;
+import uk.ac.ic.kyoto.trade.TradeType;
+
 
 /**
  * Wrapper class for Trade
