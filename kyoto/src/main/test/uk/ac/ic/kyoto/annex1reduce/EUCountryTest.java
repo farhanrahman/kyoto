@@ -23,12 +23,8 @@ public class EUCountryTest {
 	
 	@Test
 	public void testbehaviour() {
-		
-		double[] investments = new double[2];
-		double totalcost = test.getAbsorbReduceInvestment(1,investments);
-		
-		System.out.println(investments[0]);
-		System.out.println(investments[1]);
+		test.behaviour();
+
 		
 	}
 

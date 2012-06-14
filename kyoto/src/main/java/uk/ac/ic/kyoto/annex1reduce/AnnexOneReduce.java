@@ -13,25 +13,25 @@ import uk.ac.imperial.presage2.core.messaging.Input;
  *
  */
 public class AnnexOneReduce extends IsolatedAbstractCountry {
-	
+
 	private EU eu;
-	
+
 	final private CountrySimulator simulator;
-	
+
 	public AnnexOneReduce(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
 			double GDPRate, double energyOutput, double carbonOutput) {
 
-		
+
 		super(id, name, ISO, landArea, arableLandArea, GDP,
-					GDPRate, energyOutput, carbonOutput);
-		
+				GDPRate, energyOutput, carbonOutput);
+
 		simulator = new CountrySimulator(this);
 
 	}
 
 	@Override
 	public void initialiseCountry(){
-		
+
 		// Add the country to the EU service
 		try {
 			this.eu = this.getEnvironmentService(EU.class);
@@ -41,27 +41,27 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Take an input and process the data.
 	 */
 	@Override
 	protected void processInput(Input input) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	@Override
 	protected void behaviour() {
-		
-		simulator.simulate(this.carbonOutput,this.energyOutput,this.carbonOffset,
-				this.emissionsTarget,this.availableToSpend,this.GDP,this.GDPRate,
-				this.arableLandArea);
-		
+
+		simulator.simulate(this.getCarbonOutput(),this.getEnergyOutput(),this.getCarbonOffset(),
+				this.getEmissionsTarget(),this.getAvailableToSpend(),this.getGDP(),this.getGDPRate(),
+				this.getArableLandArea());
+
 	}
-	
-	final private static int NUM_ITERATIONS = 3;
-	
+
+	final private static int NUM_ITERATIONS = 10;
+
 	/**
 	 * For a given amount of carbon to reduce, return the amount of money we should invest in Absorption and Reduction.
 	 * For safety's sake, will tend to overestimate a bit.
@@ -71,42 +71,64 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 	 * @return Total Cost
 	 */
 	public double getAbsorbReduceInvestment(double carbonReduction,CountrySimulator.CountryState state, double[] investments) {
-		
-		if (carbonReduction <= 0) return 0;
+
+		if (carbonReduction <= 0) {
+			investments[0] = 0;
+			investments[1] = 0;
+			return 0;
+		}
 		
 		//Overestimate a bit
 		carbonReduction*=1.02;
 		
+		double prevCost;
+		try {
+			prevCost = this.carbonAbsorptionHandler.getInvestmentRequired(carbonReduction,state.arableLandArea);
+		} catch (Exception e) {
+			e.printStackTrace();
+			investments[0] = 0;
+			investments[1] = 0;
+			return 0;
+		}
+
 		double absorbFrac = 0.5;
 		double reduceFrac = 0.5;
 		
+		double fracDiff = 0.25;
+
 		//Attempt to minimise cost for a given amount of carbon
 		for (int i = 0; i< NUM_ITERATIONS; i++) {
-			
+
 			double absorbCost;
 			double reduceCost;
-			
+
 			try {
 				absorbCost = this.carbonAbsorptionHandler.getInvestmentRequired(absorbFrac * carbonReduction,state.arableLandArea);
 				reduceCost = this.carbonReductionHandler.getInvestmentRequired(reduceFrac * carbonReduction,state.carbonOutput,state.energyOutput);
 			} catch (Exception e) {
 				e.printStackTrace();
+				investments[0] = 0;
+				investments[1] = 0;
 				return 0;
 			}
 			
-			double frac = absorbCost/(absorbCost + reduceCost);
-			absorbFrac*=(1-frac);
-			reduceFrac*=frac;
+			double totalCost = absorbCost + reduceCost;
 			
-			double totalFrac = (absorbFrac + reduceFrac);
-			
-			absorbFrac/=totalFrac;
-			reduceFrac/=totalFrac;
+			if (totalCost < prevCost) {
+				reduceFrac += fracDiff;
+				absorbFrac -= fracDiff;
+			}
+			else {
+				reduceFrac -= fracDiff;
+				absorbFrac += fracDiff;
+			}
+			prevCost = totalCost;
+			fracDiff/=2;
 		}
-		
+
 		absorbFrac = ((double) Math.round(1000 * absorbFrac))/1000;
 		reduceFrac = ((double) Math.round(1000 * reduceFrac))/1000;
-		
+
 		try {
 			if (absorbFrac == 0) {
 				investments[0] = 0;
@@ -114,7 +136,7 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 			else {
 				investments[0] = this.carbonAbsorptionHandler.getInvestmentRequired(absorbFrac * carbonReduction,state.arableLandArea);
 			}
-			
+
 			if (reduceFrac == 0) {
 				investments[1] = 0;
 			}
@@ -126,17 +148,9 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 			return 0;
 		}
 
-//		try {
-//			System.out.println("absorb,reduce carbon amounts");
-//			System.out.println(this.carbonAbsorptionHandler.getCarbonAbsorptionChange(investments[0]));
-//			System.out.println(this.carbonReductionHandler.getCarbonOutputChange(investments[1]));
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-		
 		return (investments[0] + investments[1]);
 	}
-	
+
 	/**
 	 * TODO
 	 * @return
@@ -144,18 +158,18 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 	public double getMarketPrice() {
 		return 0;
 	}
-	
+
 
 	@Override
 	public void YearlyFunction() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void SessionFunction() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }
