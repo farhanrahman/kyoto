@@ -123,9 +123,9 @@ public class TestAgent extends AbstractCountry {
 		}
 		
 		try {
-			logger.info("I am investing " + carbonReductionHandler.getInvestmentRequired(100) + " in carbon reduction.");
+			logger.info("I am investing " + carbonReductionHandler.getInvestmentRequired(5000) + " in carbon reduction.");
 			double bang = carbonOutput;
-			carbonReductionHandler.investInCarbonReduction(100);
+			carbonReductionHandler.investInCarbonReduction(5000);
 			logger.info("My carbon output change is " + (carbonOutput - bang));
 		} catch (NotEnoughCarbonOutputException e) {
 			// TODO Auto-generated catch block
