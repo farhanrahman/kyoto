@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.apache.log4j.Logger;
 
+import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
 import uk.ac.ic.kyoto.singletonfactory.SingletonProvider;
 import uk.ac.ic.kyoto.tokengen.Token;
 import uk.ac.ic.kyoto.tradehistory.TradeHistory;
@@ -46,7 +47,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 	protected final EnvironmentConnector environment;
 	private final Logger logger;
 
-	private Token tradeToken;
+	Token tradeToken;
 
 	private TradeHistory tradeHistory;
 	
@@ -242,7 +243,6 @@ public abstract class TradeProtocol extends FSMProtocol {
 											from, to, null));
 						}
 					} else {
-						// TODO error transition
 						logger.warn("Message type not equal to OfferMessage");
 					}
 				}
@@ -271,7 +271,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 			try{
 				@SuppressWarnings("unchecked")
 				Message<OfferMessage> message = (Message<OfferMessage>) in;
-				if(message.getData().getTradeID() != null)
+				if(message.getData().getOfferMessageType() == OfferMessageType.TRADE_PROTOCOL)
 					return super.canHandle(in);			
 			}
 			catch(ClassCastException e){
@@ -287,10 +287,9 @@ public abstract class TradeProtocol extends FSMProtocol {
 
 		final OfferMessage offerMessage;
 
-		public TradeSpawnEvent(NetworkAddress with, int quantity, int unitCost, TradeType type) {
+		public TradeSpawnEvent(NetworkAddress with, int quantity, int unitCost, TradeType type, OfferMessage offerMessage) {
 			super(with);
-			UUID id = TradeProtocol.this.tradeToken.generate();
-			this.offerMessage = new OfferMessage(new Offer(quantity, unitCost, type),id);
+			this.offerMessage = new OfferMessage(new Offer(quantity, unitCost, type), offerMessage.getTradeID(), OfferMessageType.TRADE_PROTOCOL);
 		}
 
 	}
@@ -308,9 +307,9 @@ public abstract class TradeProtocol extends FSMProtocol {
 		return all;
 	}
 
-	public void offer(NetworkAddress to, int quantity, int unitPrice, TradeType type)
+	public void offer(NetworkAddress to, int quantity, int unitPrice, TradeType type, OfferMessage offerMessage)
 			throws FSMException {
-		this.spawnAsInititor(new TradeSpawnEvent(to, quantity, unitPrice, type));
+		this.spawnAsInititor(new TradeSpawnEvent(to, quantity, unitPrice, type, offerMessage));
 	}
 	
 	protected abstract boolean acceptExchange(NetworkAddress from,

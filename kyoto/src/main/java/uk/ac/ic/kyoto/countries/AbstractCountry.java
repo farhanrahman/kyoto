@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.services.CarbonTarget;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
@@ -381,32 +382,46 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	protected final void broadcastSellOffer(int quantity, int unitCost){
-		Offer trade = new Offer(quantity, unitCost, TradeType.SELL);
-		this.network.sendMessage(
-					new MulticastMessage<OfferMessage>(
-							Performative.PROPOSE, 
-							Offer.TRADE_PROPOSAL, 
-							SimTime.get(), 
-							this.network.getAddress(),
-							this.tradeProtocol.getAgentsNotInConversation(),
-							new OfferMessage(trade))
-				);		
+		if(this.tradeProtocol != null){
+			Offer trade = new Offer(quantity, unitCost, TradeType.SELL);
+			this.network.sendMessage(
+						new MulticastMessage<OfferMessage>(
+								Performative.PROPOSE, 
+								Offer.TRADE_PROPOSAL, 
+								SimTime.get(), 
+								this.network.getAddress(),
+								this.tradeProtocol.getAgentsNotInConversation(),
+								new OfferMessage(
+										trade,
+										this.tradeProtocol.tradeToken.generate(),
+										OfferMessageType.BROADCAST_MESSAGE))
+					);
+		}
 	}
 
 	protected final void broadcastBuyOffer(int quantity, int unitCost){
-		Offer trade = new Offer(quantity, unitCost, TradeType.BUY);
-		System.out.println();
-		System.out.println(this.tradeProtocol.getActiveConversationMembers().toString());
-		System.out.println(this.network.getConnectedNodes());
-		System.out.println();
-		this.network.sendMessage(
-					new MulticastMessage<OfferMessage>(
-							Performative.PROPOSE, 
-							Offer.TRADE_PROPOSAL, 
-							SimTime.get(), 
-							this.network.getAddress(),
-							this.tradeProtocol.getAgentsNotInConversation(),
-							new OfferMessage(trade))
-				);
+		if(this.tradeProtocol != null){
+			Offer trade = new Offer(quantity, unitCost, TradeType.BUY);
+			
+			/*DEBUG*/
+			System.out.println();
+			System.out.println(this.tradeProtocol.getActiveConversationMembers().toString());
+			System.out.println(this.network.getConnectedNodes());
+			System.out.println();
+			/*DEBUG*/
+			
+			this.network.sendMessage(
+						new MulticastMessage<OfferMessage>(
+								Performative.PROPOSE, 
+								Offer.TRADE_PROPOSAL, 
+								SimTime.get(), 
+								this.network.getAddress(),
+								this.tradeProtocol.getAgentsNotInConversation(),
+								new OfferMessage(
+										trade, 
+										this.tradeProtocol.tradeToken.generate(), 
+										OfferMessageType.BROADCAST_MESSAGE))
+					);
+		}
 	}
 }
