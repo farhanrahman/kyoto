@@ -455,17 +455,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		}
 	}
 	
-	protected final void broadcastInvesteeOffer(int quantity, int unitCost, InvestmentType i){
+	protected final void broadcastInvesteeAbsorbOffer(int quantity, int unitCost){
 		if(this.tradeProtocol != null){
-			Offer trade = new Offer(quantity, unitCost, TradeType.RECEIVE, i);
-			
-			/*DEBUG*/
-			System.out.println();
-			System.out.println(this.tradeProtocol.getActiveConversationMembers().toString());
-			System.out.println(this.network.getConnectedNodes());
-			System.out.println();
-			/*DEBUG*/
-			
+			Offer trade = new Offer(quantity, unitCost, TradeType.RECEIVE, InvestmentType.ABSORB);
 			this.network.sendMessage(
 						new MulticastMessage<OfferMessage>(
 								Performative.PROPOSE, 
@@ -480,4 +472,22 @@ public abstract class AbstractCountry extends AbstractParticipant {
 					);
 		}
 	}
+	
+	protected final void broadcastInvesteeReduceOffer(int quantity, int unitCost){
+		if(this.tradeProtocol != null){
+			Offer trade = new Offer(quantity, unitCost, TradeType.RECEIVE, InvestmentType.REDUCE);
+			this.network.sendMessage(
+						new MulticastMessage<OfferMessage>(
+								Performative.PROPOSE, 
+								Offer.TRADE_PROPOSAL, 
+								SimTime.get(), 
+								this.network.getAddress(),
+								this.tradeProtocol.getAgentsNotInConversation(),
+								new OfferMessage(
+										trade,
+										this.tradeProtocol.tradeToken.generate(),
+										OfferMessageType.BROADCAST_MESSAGE))
+					);
+		}
+	}	
 }
