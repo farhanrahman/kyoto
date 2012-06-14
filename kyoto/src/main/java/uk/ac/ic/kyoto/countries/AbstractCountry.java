@@ -67,7 +67,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	protected 		Map<Integer, Double> carbonEmissionReports;
 	
-	protected ParticipantCarbonReportingService reportingService; // TODO add visibility
+	protected ParticipantCarbonReportingService reportingService;
 	protected CarbonTarget carbonTarget;
 	protected Monitor monitor;
 	protected ParticipantTimeService timeService;
