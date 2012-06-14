@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import uk.ac.ic.kyoto.trade.Offer;
+import uk.ac.ic.kyoto.countries.Offer;
 
 public class TradeTest {
 
