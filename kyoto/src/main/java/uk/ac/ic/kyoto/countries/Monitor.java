@@ -195,13 +195,8 @@ public class Monitor extends EnvironmentService {
 	 * The country to be sanctioned
 	 */
 	public void targetSanction(AbstractCountry country, double carbonExcess) {
-		double previousEmissionTarget = carbonTargetingService.queryYearTarget(country.getID());
-		
-		double newEmissionTarget = previousEmissionTarget - carbonExcess * 1.3;
-		/**
-		 * Emissions targets penalties will probably be set in carbonTarget
-		 */
-//		country.setEmissionsTarget( (long) newEmissionTarget);
+		double penalty = carbonExcess * 1.3;
+		carbonTargetingService.setCountryPenalty(country.getID(), penalty);
 		
 		// Charge the country for not meeting the target
 		
