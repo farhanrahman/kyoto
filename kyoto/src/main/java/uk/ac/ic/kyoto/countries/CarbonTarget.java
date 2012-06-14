@@ -220,6 +220,8 @@ public class CarbonTarget extends EnvironmentService {
 	{
 		double sessionProgress = (timeService.getCurrentYear() % GameConst.YEARS_IN_SESSION) / GameConst.YEARS_IN_SESSION;
 		double diffTargets = country.lastSessionTarget - country.currentSessionTarget;
-		country.currentYearTarget = country.lastSessionTarget - (diffTargets * sessionProgress) - country.penalty;
+		double newTarget = country.lastSessionTarget - (diffTargets * sessionProgress) - country.penalty;
+		country.currentYearTarget = newTarget;
+		country.obj.emissionsTarget = newTarget;
 	}	
 }
