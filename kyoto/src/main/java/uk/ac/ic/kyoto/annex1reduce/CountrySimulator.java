@@ -25,19 +25,19 @@ class CountrySimulator {
 	
 	private static CountryState startState;
 
-	public void simulate(double carbonOutput, double energyOutput, double carbonOffset, double emissionsTarget, double availableToSpend,
+	public CountryState simulate(double carbonOutput, double energyOutput, double carbonOffset, double emissionsTarget, double availableToSpend,
 			double GDP, double GDPRate, double arableLandArea) {
 		
 		//Initialise the starting point in the simulation
 		startState = new CountryState(carbonOutput,energyOutput,
 				carbonOffset,emissionsTarget,availableToSpend,
 				GDP,GDPRate,arableLandArea);
-		
-		double[] investments = new double[2];
-		double totalcost = country.getAbsorbReduceInvestment(1000,startState,investments);
-		
-		System.out.println(investments[0]);
-		System.out.println(investments[1]);
+//		
+//		double[] investments = new double[2];
+//		double totalcost = country.getAbsorbReduceInvestment(1000,startState,investments);
+//		
+//		System.out.println(investments[0]);
+//		System.out.println(investments[1]);
 
 		//Reset old simulation data
 		for (int i=0; i<LOOK_AHEAD_YEARS; i++) {
@@ -67,11 +67,19 @@ class CountrySimulator {
 					stateList[i].reduceStates.get(j).reduceCarbon();
 				}
 			}
-			
 		}
+		
+		CountryState optimalState = getOptimalState();
+		
+		return optimalState;
+		
 	}
 
-	private void cullStates(ArrayList<CountryState> reducestates) {
+	/**
+	 * Goes through all states and will cull all but the most useful
+	 * @param reducestates
+	 */
+	private void cullStates(ArrayList<CountryState> states) {
 		
 	}
 

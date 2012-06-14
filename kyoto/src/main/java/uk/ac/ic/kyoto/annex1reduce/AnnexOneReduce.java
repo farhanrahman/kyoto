@@ -54,9 +54,10 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 	@Override
 	protected void behaviour() {
 
-		simulator.simulate(this.getCarbonOutput(),this.getEnergyOutput(),this.getCarbonOffset(),
-				this.getEmissionsTarget(),this.getAvailableToSpend(),this.getGDP(),this.getGDPRate(),
-				this.getArableLandArea());
+		CountrySimulator.CountryState optimalState = 
+				simulator.simulate(getCarbonOutput(),getEnergyOutput(),
+				getCarbonOffset(), getEmissionsTarget(), getAvailableToSpend(),
+				getGDP(),getGDPRate(),getArableLandArea());
 
 	}
 
