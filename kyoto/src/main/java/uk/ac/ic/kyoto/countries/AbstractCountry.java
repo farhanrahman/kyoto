@@ -345,6 +345,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return carbonOffset;
 	}
 
+	public double getEnergyOutput(){
+		return energyOutput;
+	}
 	public double getCarbonOutput(){
 		return carbonOutput;
 	}
