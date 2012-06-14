@@ -2,25 +2,24 @@ package uk.ac.ic.kyoto.countries;
 
 /**
  * 
- * @author Stuart, Adam, Piotr
+ * @author Piotr, Nikunj
  */
 public final class CarbonAbsorptionHandler {
 	
 	private final AbstractCountry country;
 
 	/**
-	 * Create instance of CarbonAbsorbtionHandler
+	 * Create instance of CarbonAbsorbtionHandler.
 	 * 
 	 * @param abstractCountry
-	 * Specify on which country will the handler operate
+	 * Specify on which country will the handler operate.
 	 */
 	CarbonAbsorptionHandler(AbstractCountry abstractCountry) {
 		this.country = abstractCountry;
 	}
 	
 	/**
-	 * Returns the investment necessary to increase carbon absorption by specified amount.
-	 * The cost of absorption of a single ton of CO2 is linearly proportional to occupied area measure.
+	 * Calls getInvestmentRequired function with actual arableLandArea of a country.
 	 * 
 	 * @param carbonAbsorptionChange
 	 * The amount of carbon absorption which we want to price.
@@ -28,24 +27,24 @@ public final class CarbonAbsorptionHandler {
 	 * @return
 	 * Cost of absorbing carbon by the specified amount.
 	 */
-	public double getInvestmentRequired(double carbonOffset) throws Exception {
+	public final double getInvestmentRequired(double carbonOffset) throws Exception {
 		return getInvestmentRequired(carbonOffset, this.country.arableLandArea);
 	}
 	
 	/**
-	 * Returns the investment necessary to increase carbon absorption by specified amount.
+	 * Returns the investment necessary to increase carbon absorption by specified amount, given arable land.
 	 * The cost of absorption of a single ton of CO2 is linearly proportional to occupied area measure.
 	 * 
 	 * @param carbonAbsorptionChange
 	 * The amount of carbon absorption which we want to price.
 	 * 
 	 * @param arableLandArea
-	 * The current arable land area.
+	 * Current arable land area for which we do the calculations. 
 	 * 
 	 * @return
 	 * Cost of absorbing carbon by the specified amount.
 	 */
-	public double getInvestmentRequired(double carbonAbsorptionChange, double arableLandArea) throws Exception {
+	public final double getInvestmentRequired(double carbonAbsorptionChange, double arableLandArea) throws Exception {
 		double investmentRequired;
 		
 		try {
@@ -66,33 +65,38 @@ public final class CarbonAbsorptionHandler {
 			investmentRequired = (averageUnitPrice * carbonAbsorptionChange);
 		}
 		catch (Exception e) {
-			throw new Exception("getInvestmentRequired function error: " + e);
+			throw new Exception("getInvestmentRequired function error: " + e.getMessage());
 		}
 		
 		return investmentRequired;
 	}
 	
 	/**
-	 * Returns the additional carbon absorption for given investment amount.
-	 * Rounds down to the nearest integer, which means that actual absorption might be slightly higher.
+	 * Calls getCarbonAbsorptionChange with actual arableLandArea of the country.
 	 * 
 	 * @param Investment amount
+	 * Amount of money that we want to spend on investment.
 	 * 
-	 * @return Change in carbon absorption from specified cost
+	 * @return
+	 * Change in carbon absorption achieved with specified investment.
 	 */
 	public final double getCarbonAbsorptionChange(double investmentAmount) throws Exception {
 		return getCarbonAbsorptionChange(investmentAmount, country.arableLandArea);
 	}
 	
 	/**
-	 * Returns the additional carbon absorption for given investment amount.
-	 * Rounds down to the nearest integer, which means that actual absorption might be slightly higher.
+	 * Returns the additional carbon absorption for given investment amount, given arable land.
+	 * Uses binary search, which is efficient.
+	 * The result might not be 100% accurate - this is only an approximation function.
 	 * 
-	 * @param Investment amount
+	 * @param investmentAmount
+	 * Amount of money that we want to spend on investment.
 	 * 
-	 * @param arableLandArea current arable land area
+	 * @param arableLandArea
+	 * Current arable land area for which we do the calculations. 
 	 * 
-	 * @return Change in carbon absorption from specified cost
+	 * @return
+	 * Change in carbon absorption achieved with specified investment.
 	 */
 	public final double getCarbonAbsorptionChange(double investmentAmount, double arableLandArea) throws Exception {
 		double carbonAbsorptionChange;
@@ -100,15 +104,14 @@ public final class CarbonAbsorptionHandler {
 		try {
 			double carbonDiff = country.carbonOutput;
 			
-			carbonAbsorptionChange = carbonDiff/2;
+			carbonAbsorptionChange = carbonDiff / 2;
 			
 			double tempInvestmentAmount = getInvestmentRequired(carbonAbsorptionChange, arableLandArea);
 
-			for (int i=0; i<20; i++) {
-				carbonDiff/=2;
+			for (int i = 0; i < 20; i++) {
+				carbonDiff /= 2;
 				
-				//If value is higher, lower our estimate. Else, increase it.
-
+				//If value is higher, lower our estimate, else increase it
 				if (tempInvestmentAmount < investmentAmount) {
 					carbonAbsorptionChange += carbonDiff;
 					tempInvestmentAmount = getInvestmentRequired(carbonAbsorptionChange, arableLandArea);
@@ -131,9 +134,11 @@ public final class CarbonAbsorptionHandler {
 	/**
 	 * Calculates the forest area needed to increase absorption by a given amount.
 	 * 
-	 * @param Change in carbon absorption
+	 * @param carbonAbsorptionChange
+	 * Change in carbon absorption.
 	 * 
-	 * @return Forest area required
+	 * @return
+	 * Forest area required.
 	 */
 	public final double getForestAreaRequired(double carbonAbsorptionChange) throws Exception {
 		double forestArea;
@@ -153,9 +158,8 @@ public final class CarbonAbsorptionHandler {
 	 * On success, will increase carbon absorption of a country.
 	 * On failure, will throw exception.
 	 * 
-	 * @param Carbon absorption increase
-	 * 
-	 * @throws Exception
+	 * @param carbonAbsorptionChange
+	 * Increase in carbon absorption.
 	 */
 	public final void investInCarbonAbsorption(double carbonAbsorptionChange) throws Exception, NotEnoughCarbonOutputException, NotEnoughCashException {
 		double investmentAmount;
@@ -196,6 +200,15 @@ public final class CarbonAbsorptionHandler {
 	
 	/**
 	 * Calculates the occupied area rate for specified arable land area and total land area.
+	 * 
+	 * @param arableArea
+	 * Area of the country that is potentially arable.
+	 * 
+	 * @param totalArea
+	 * Total area of the country.
+	 * 
+	 * @return
+	 * Measure of occupied area of the country.
 	 */
 	private double calculateOccupiedAreaMeasure(double arableArea, double totalArea) throws Exception {
 		double occupiedAreaMeasure;

@@ -2,25 +2,24 @@ package uk.ac.ic.kyoto.countries;
 
 /**
  * 
- * @author Stuart, Adam, Piotr
+ * @author Piotr, Nikunj
  */
 public final class CarbonReductionHandler{
 	
 	private final AbstractCountry country;
 
 	/**
-	 * Create instance of CarbonReductionHandler
+	 * Create instance of CarbonReductionHandler.
 	 * 
 	 * @param abstractCountry
-	 * Specify on which country will the handler operate
+	 * Specify on which country will the handler operate.
 	 */
 	CarbonReductionHandler(AbstractCountry abstractCountry) {
 		this.country = abstractCountry;
 	}
 	
 	/**
-	 * Returns the investment necessary to reduce carbon output by specified amount.
-	 * The cost of reduction by a single ton of CO2 is linearly proportional to clean industry measure.
+	 * Calls getInvestmentRequired function with actual carbonOutput and energyOutput of a country.
 	 * 
 	 * @param carbonOutputChange
 	 * The amount of carbon reduction which we want to price.
@@ -33,17 +32,17 @@ public final class CarbonReductionHandler{
 	}
 	
 	/**
-	 * Returns the investment necessary to reduce carbon output by specified amount.
+	 * Returns the investment necessary to reduce carbon output by specified amount, given carbon and energy output.
 	 * The cost of reduction by a single ton of CO2 is linearly proportional to clean industry measure.
 	 * 
 	 * @param carbonOutputChange
-	 * The amount of carbon reduction which we want to price
+	 * The amount of carbon reduction which we want to price.
 	 * 
 	 * @param carbonOutput
-	 * The current country carbon output
+	 * The current country carbon output.
 	 * 
 	 * @param energyOutput
-	 * The current country energy output
+	 * The current country energy output.
 	 * 
 	 * @return
 	 * Cost of reducing carbon by the specified amount.
@@ -73,12 +72,13 @@ public final class CarbonReductionHandler{
 	}
 	
 	/**
-	 * Returns the reduction of carbon output for given investment amount.
-	 * Rounds down to the nearest integer, which means that actual reduction might be slightly higher.
+	 * Calls getCarbonAbsorptionChange with actual carbonOutput and energyOutput of the country.
 	 * 
 	 * @param Investment amount
+	 * Amount of money that we want to spend on investment.
 	 * 
-	 * @return Change in carbon output from specified cost
+	 * @return
+	 * Change in carbon output from specified cost.
 	 */
 	public final double getCarbonOutputChange(double investmentAmount) throws Exception {
 		return getCarbonOutputChange(investmentAmount, country.carbonOutput, country.energyOutput);
@@ -86,13 +86,20 @@ public final class CarbonReductionHandler{
 	
 	/**
 	 * Returns the reduction of carbon output for given investment amount.
-	 * Rounds down to the nearest integer, which means that actual reduction might be slightly higher.
+	 * Uses binary search, which is efficient.
+	 * The result might not be 100% accurate - this is only an approximation function.
 	 * 
-	 * @param Investment amount to invest
-	 * @param carbonOutput current carbon output
-	 * @param energyOutput current energy output
+	 * @param investmentAmount
+	 * Amount of money that we want to spend on investment.
 	 * 
-	 * @return Change in carbon output from specified cost
+	 * @param carbonOutput
+	 * Current carbon output of a country for which we do the calculations.
+	 * 
+	 * @param energyOutput
+	 * Current energy output of a country for which we do the calculations.
+	 * 
+	 * @return
+	 * Change in carbon output achieved with specified investment.
 	 */
 	public final double getCarbonOutputChange(double investmentAmount, double carbonOutput, double energyOutput) throws Exception {
 		double carbonOutputChange;
@@ -100,14 +107,14 @@ public final class CarbonReductionHandler{
 		try {
 			double carbonDiff = carbonOutput;
 			
-			carbonOutputChange = carbonDiff/2;
+			carbonOutputChange = carbonDiff / 2;
 			
-			double tempInvestmentAmount = getInvestmentRequired(carbonOutputChange,carbonOutput,energyOutput);
+			double tempInvestmentAmount = getInvestmentRequired(carbonOutputChange, carbonOutput, energyOutput);
 			
-			for (int i=0; i<20; i++) {
-				carbonDiff/=2;
+			for (int i = 0; i < 20; i++) {
+				carbonDiff /= 2;
 				
-				//If value is higher, lower our estimate. Else, increase it.
+				// If value is higher, lower our estimate, else increase it
 				if (tempInvestmentAmount < investmentAmount) {
 					carbonOutputChange += carbonDiff;
 					tempInvestmentAmount = getInvestmentRequired(carbonOutputChange,carbonOutput,energyOutput);
@@ -130,9 +137,8 @@ public final class CarbonReductionHandler{
 	 * On success, will reduce carbon output of a country keeping the energy output constant.
 	 * On failure, will throw exception.
 	 * 
-	 * @param Carbon output reduction
-	 * 
-	 * @throws Exception
+	 * @param carbonOutputChange
+	 * Decrease in carbon output.
 	 */
 	public final void investInCarbonReduction(double carbonOutputChange) throws Exception, NotEnoughCarbonOutputException, NotEnoughCashException {
 		double investmentAmount;
@@ -168,6 +174,15 @@ public final class CarbonReductionHandler{
 	
 	/**
 	 * Calculates the clean industry rate for specified carbon output and energy output.
+	 * 
+	 * @param carbonOutput
+	 * Carbon output of the country.
+	 * 
+	 * @param energyOutput
+	 * Total energy output of the country.
+	 * 
+	 * @return
+	 * Measure of clean industry of the country.
 	 */
 	private double calculateCleanIndustryMeasure(double carbonOutput, double energyOutput) throws Exception {
 		double cleanIndustry;
