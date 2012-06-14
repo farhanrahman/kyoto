@@ -42,11 +42,11 @@ public final class GameConst {
 	/**
 	 * The price of increasing carbon absorption by one unit when we have 100% arable area
 	 */
-	public static double CARBON_ABSORPTION_PRICE_MIN = 1;
+	public static double CARBON_ABSORPTION_PRICE_MIN = 100;
 	/**
 	 * The price of increasing carbon absorption by one unit when we have 0% arable area
 	 */
-	public static double CARBON_ABSORPTION_PRICE_MAX = 20;
+	public static double CARBON_ABSORPTION_PRICE_MAX = 2000;
 	/**
 	 * Forest area that absorbs single ton of carbon
 	 */
@@ -92,4 +92,9 @@ public final class GameConst {
 	 * Number of years in a session
 	 */
 	public static int YEARS_IN_SESSION = 10;
+	
+	/**
+	 * Session to session world target reduction
+	 */
+	public static double TARGET_REDUCTION = 0.95;
 }

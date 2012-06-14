@@ -1,12 +1,13 @@
 package uk.ac.ic.kyoto.trade;
 
-import java.util.Map;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
 
-import uk.ac.ic.kyoto.singletonfactory.SingletonProvider;
-import uk.ac.ic.kyoto.tradehistory.TradeHistory;
+import uk.ac.ic.kyoto.countries.AbstractCountry;
+import uk.ac.ic.kyoto.countries.Offer;
+import uk.ac.ic.kyoto.countries.OfferMessage;
+import uk.ac.ic.kyoto.countries.TradeProtocol;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.messaging.Performative;
 import uk.ac.imperial.presage2.core.network.Message;
@@ -14,51 +15,39 @@ import uk.ac.imperial.presage2.core.network.MulticastMessage;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
 import uk.ac.imperial.presage2.util.fsm.FSMException;
-import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
-public class TradeProtocolTestAgent extends AbstractParticipant {
+public class TradeProtocolTestAgent extends AbstractCountry {
 	
 	Logger logger = Logger.getLogger(TradeProtocolTestAgent.class);
 	
-	private TradeProtocol tradeProtocol;
-	
-	private int carbonOutput;
-	private int emissionsTarget;
-	private int carbonOffset;
-	
-	public TradeProtocolTestAgent(UUID id, String name, String ISO){
-		super(id, name);
+	public TradeProtocolTestAgent(UUID id, String name, String ISO, double landArea,
+			double arableLandArea, double GDP, double GDPRate,
+			long emissionsTarget, long energyOutput, long carbonOutput) {
+		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, emissionsTarget,
+				energyOutput);
 	}
-	
-//	public FakeCanadaAgent(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
-//			double GDPRate, double emissionsTarget, double energyOutput, double carbonOutput){
-//		super(id, name, ISO, landArea, arableLandArea, GDP,
-//				GDPRate, emissionsTarget, energyOutput, carbonOutput);
-//		// TODO Auto-generated constructor stub
-//	}
-	
 	
 	@Override
 	protected void processInput(Input in) {
 		if (this.tradeProtocol.canHandle(in)) {
 			this.tradeProtocol.handle(in);
 		}
-		
+
 		if(in instanceof Message){
 			try{
 				@SuppressWarnings("unchecked")
 				Message<OfferMessage> m = (Message<OfferMessage>) in;
-				Offer t = m.getData().getOffer();
-
+				OfferMessage o = m.getData();
 				if(!this.tradeProtocol
 						.getActiveConversationMembers()
 							.contains(m.getFrom())){
 					try {
 						this.tradeProtocol.offer(
 								m.getFrom(), 
-								t.getQuantity(), 
-								t.getUnitCost(), 
-								t.reverse().getType());
+								o.getOfferQuantity(), 
+								o.getOfferUnitCost(), 
+								o.getOfferType(),
+								o);
 					} catch (FSMException e) {
 						e.printStackTrace();
 					}
@@ -70,14 +59,23 @@ public class TradeProtocolTestAgent extends AbstractParticipant {
 		}			
 	}
 	
+
 	@Override
-	public void initialise() {
-		super.initialise();
-		carbonOutput = 80;
-		emissionsTarget = 20;
-		carbonOffset = 10;
+	public void YearlyFunction() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void SessionFunction() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void initialiseCountry() {
 		try {
-			tradeProtocol = new TradeProtocol(getID(), authkey, environment, network) {
+			tradeProtocol = new TradeProtocol(getID(), authkey, environment, network, this) {
 				@Override
 				protected boolean acceptExchange(NetworkAddress from,
 						Offer trade) {
@@ -90,32 +88,30 @@ public class TradeProtocolTestAgent extends AbstractParticipant {
 			};
 		} catch (FSMException e) {
 			e.printStackTrace();
-		}		
+		}
 		
 	}
 	
-	private int counter = 0;
+	private int counter = 0;	
 
 	@Override
-	public void execute() {
-		super.execute();
+	protected void behaviour() {
+		if(this.getName().equals("Stuart")){
+			//if(counter == 0){
+				int quantity = 10;
+				int unitCost = 2;
+				this.broadcastBuyOffer(quantity, unitCost);
+			//	counter++;
+			//}
+		}
+		
 		this.tradeProtocol.incrementTime();
-		//if(counter < 7){
-			int quantity = 10;
-			int unitCost = 2;
-			Offer trade = new Offer(quantity, unitCost, TradeType.SELL);
-			this.network.sendMessage(
-						new MulticastMessage<OfferMessage>(
-								Performative.PROPOSE, 
-								Offer.TRADE_PROPOSAL, 
-								SimTime.get(), 
-								this.network.getAddress(),
-								this.tradeProtocol.getAgentsNotInConversation(),
-								new OfferMessage(trade))
-			//TODO might need to acquire Trade ID here
-					);
-		counter++;
-		//}
+		
+		logger.info("Myname: " + this.getName() + ", I have this much money: " + availableToSpend + ".");
+		//logger.info("Myname: " + this.getName() + ", My GDPRate is : " + GDPRate);
+		//logger.info("Myname: " + this.getName() + ", My carbon output is : " + carbonOutput);
+		//logger.info("Myname: " + this.getName() + ", My energy output is : " + energyOutput);
+		logger.info("Myname: " + this.getName() + ", My carbonOffset is : " + carbonOffset);
 	}
 	
 }

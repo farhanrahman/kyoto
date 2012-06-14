@@ -150,7 +150,7 @@ public class MongoConnector {
 	 * @param colName
 	 * @return
 	 */
-	public List<DBObject> getDBObjects(Integer simID, String colName){
+	public List<DBObject> getDBObjects(Long simID, String colName){
 		List<DBObject> list = new ArrayList<DBObject>();
 
 		if(this.openConnection() == false){
@@ -183,7 +183,7 @@ public class MongoConnector {
 	 * @param simID
 	 * @return
 	 */
-	public List<DBObject> getDBObjects(Integer simID){
+	public List<DBObject> getDBObjects(Long simID){
 		return this.getDBObjects(simID, this.collectionName);
 	}	
 	

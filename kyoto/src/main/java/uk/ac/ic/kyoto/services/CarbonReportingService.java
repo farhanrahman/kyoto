@@ -90,4 +90,28 @@ public class CarbonReportingService extends EnvironmentService {
 			return null;
 		}
 	}
+	
+	/**
+	 * Returns null if report does
+	 * not exist for participant at all
+	 * @param id
+	 * @return
+	 */
+	public Map<Integer, Double> getReport(UUID id) {
+		try{
+			@SuppressWarnings("unchecked")
+			Map<Integer,Double> reportForParticipant = 
+								(Map<Integer,Double>)this.sharedState.get(
+											CarbonReportingService.name, 
+											id);
+			if(reportForParticipant == null){
+				return null;
+			}else{
+				return reportForParticipant;
+			}
+		}catch(ClassCastException e){
+			logger.warn(e);
+			return null;
+		}
+	}	
 }

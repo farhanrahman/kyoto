@@ -20,20 +20,20 @@ import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
  * 
  * @author Adam, Piotr
  */
-public class AbstractPostCommunistCountry extends AbstractCountry {
+public class AnnexOneSustain extends AbstractCountry {
 	
 	
 	//================================================================================
     // Private Fields
     //================================================================================
 	
-	protected long	 		internalPrice;					// The price of a single carbon credit that we estimate we will be able to successfully sell at
+	protected double 		internalPrice;					// The price of a single carbon credit that we estimate we will be able to successfully sell at
 	protected List<Double> 	uncommittedTransactionsCosts;	// List of transactions and their prices that were advertised but not completed
 	protected List<Double> 	committedTransactionsCosts;		// List of transactions and their prices that were completed
-	protected long 			creditsToSellTarget;			// Total amount of credits we aim to sell in current year
-	protected long 			creditsToSell;					// Credits left for sale from the current sell target
-	protected long			absorptionInvestmentTarget;		// The amount (in carbon) of a single carbon absorption investment considered this tick  
-	protected long			reductionInvestmentTarget;		// The amount (in carbon) of a single carbon reduction investment considered this tick 
+	protected double		creditsToSellTarget;			// Total amount of credits we aim to sell in current year
+	protected double		creditsToSell;					// Credits left for sale from the current sell target
+	protected double		absorptionInvestmentTarget;		// The amount (in carbon) of a single carbon absorption investment considered this tick  
+	protected double		reductionInvestmentTarget;		// The amount (in carbon) of a single carbon reduction investment considered this tick 
 	protected double		lastYearFactor;					// Coefficient reflecting the percentage of credit sales target that was met, adjusted by a constant
 	
 	
@@ -41,13 +41,13 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
     // Constructors
     //================================================================================
 	
-	public AbstractPostCommunistCountry(UUID id, String name, String ISO,
+	public AnnexOneSustain(UUID id, String name, String ISO,
 			double landArea, double arableLandArea, double GDP, double GDPRate,
-			long availiableToSpend, long carbonOffset, long energyOutput, long carbonOutput)
+			long energyOutput, long carbonOutput)
 	{
-		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, carbonOffset, energyOutput);
+		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput);
 		
-		this.internalPrice = Long.MAX_VALUE;
+		this.internalPrice = Double.MAX_VALUE;
 		this.uncommittedTransactionsCosts = new LinkedList<Double>();
 		this.committedTransactionsCosts = new LinkedList<Double>();
 		this.creditsToSell = 0;
@@ -138,10 +138,9 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 * - meeting the sales target from previous year
 	 */
 	private void updateInternalPrice() {
-		internalPrice   = 	(long)
-							( calculateMarketPrice() * 
-							  calculateEndOfRoundFactor() * 
-							  lastYearFactor );
+		internalPrice   = 	calculateMarketPrice() * 
+							calculateEndOfRoundFactor() * 
+							lastYearFactor;
 	}
 	
 	/**
@@ -234,7 +233,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 * Increases the new carbon absorption investment target. Adjusts it if out of limits.
 	 */
 	private void increaseAbsorptionInvestmentTarget() {
-		absorptionInvestmentTarget = (long) (absorptionInvestmentTarget * Constants.INVESTMENT_SCALING);
+		absorptionInvestmentTarget = absorptionInvestmentTarget * Constants.INVESTMENT_SCALING;
 		if (absorptionInvestmentTarget > Constants.INVESTMENT_MAX) {
 			absorptionInvestmentTarget = Constants.INVESTMENT_MAX;
 		}
@@ -244,7 +243,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 * Decreases the new carbon absorption investment target. Adjusts it if out of limits.
 	 */
 	private void decreaseAbsorptionInvestmentTarget() {
-		absorptionInvestmentTarget = (long) (absorptionInvestmentTarget / Constants.INVESTMENT_SCALING);
+		absorptionInvestmentTarget = absorptionInvestmentTarget / Constants.INVESTMENT_SCALING;
 		if (absorptionInvestmentTarget < Constants.INVESTMENT_MIN) {
 			absorptionInvestmentTarget = Constants.INVESTMENT_MIN;
 		}
@@ -254,7 +253,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 * Increases the new carbon reduction investment target. Adjusts it if out of limits.
 	 */
 	private void increaseReductionInvestmentTarget() {
-		reductionInvestmentTarget = (long) (reductionInvestmentTarget * Constants.INVESTMENT_SCALING);
+		reductionInvestmentTarget = reductionInvestmentTarget * Constants.INVESTMENT_SCALING;
 		if (reductionInvestmentTarget > Constants.INVESTMENT_MAX) {
 			reductionInvestmentTarget = Constants.INVESTMENT_MAX;
 		}
@@ -264,7 +263,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 * Decreases the new carbon reduction investment target. Adjusts it if out of limits.
 	 */
 	private void decreaseReductionInvestmentTarget() {
-		reductionInvestmentTarget = (long) (reductionInvestmentTarget / Constants.INVESTMENT_SCALING);
+		reductionInvestmentTarget = reductionInvestmentTarget / Constants.INVESTMENT_SCALING;
 		if (reductionInvestmentTarget < Constants.INVESTMENT_MIN) {
 			reductionInvestmentTarget = Constants.INVESTMENT_MIN;
 		}
@@ -276,7 +275,7 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 */
 	private void carbonAbsorptionInvestment () {
 		double investmentCost;
-		long potentialProfit;
+		double potentialProfit;
 		
 		try {
 			investmentCost = carbonAbsorptionHandler.getCost(absorptionInvestmentTarget);
@@ -310,8 +309,8 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 * If so, tries to invest. Increases the next investment target on success, decreases on failure.
 	 */
 	private void carbonReductionInvestment () {
-		long investmentCost;
-		long potentialProfit;
+		double investmentCost;
+		double potentialProfit;
 		
 		try {
 			investmentCost = carbonReductionHandler.getCost(reductionInvestmentTarget);
@@ -371,14 +370,13 @@ public class AbstractPostCommunistCountry extends AbstractCountry {
 	 * All adjusted with a constant coefficient.
 	 */
 	protected void calculateNewSellingTarget() {
-		long newSellingTarget;
+		double newSellingTarget;
 		
 		try {
 			// Calculate new target based on three factors
-			newSellingTarget =	(long) 
-								( calculateAvailableCreditsFactor() *
-								  calculateFossilFuelsFactor() *
-								  calculateMarketFactor() );
+			newSellingTarget =	calculateAvailableCreditsFactor() *
+								calculateFossilFuelsFactor() *
+								calculateMarketFactor();
 			
 			// Adjust the new target if out of possible range
 			if (newSellingTarget > carbonOffset) {

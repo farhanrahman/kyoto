@@ -5,15 +5,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
 import uk.ac.ic.kyoto.market.Economy;
-import uk.ac.ic.kyoto.monitor.Monitor;
+import uk.ac.ic.kyoto.services.CarbonTarget;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
-import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.messaging.Input;
+import uk.ac.imperial.presage2.core.messaging.Performative;
+import uk.ac.imperial.presage2.core.network.MulticastMessage;
+import uk.ac.imperial.presage2.core.simulator.SimTime;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 /**
@@ -64,7 +67,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	protected 		Map<Integer, Double> carbonEmissionReports;
 	
-	protected ParticipantCarbonReportingService reportingService; // TODO add visibility
+	protected ParticipantCarbonReportingService reportingService;
+	protected CarbonTarget carbonTarget;
 	protected Monitor monitor;
 	protected ParticipantTimeService timeService;
 	
@@ -100,8 +104,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.GDP = GDP;
 		this.GDPRate = GDPRate;
 		this.emissionsTarget = 0;
-		this.carbonOffset = 0;
-		this.availableToSpend = 0;
+		this.carbonOffset = 4000;
+		this.availableToSpend = 45000;
 		this.carbonOutput = carbonOutput;
 		this.carbonAbsorption = 0;
 		this.carbonEmissionReports = new HashMap<Integer, Double>();
@@ -113,6 +117,14 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	final public void initialise(){
 		super.initialise();
 		
+		// Add the country to the carbonTarget service
+		try {
+			carbonTarget = getEnvironmentService(CarbonTarget.class);
+			carbonTarget.addMemberState(this);
+		} catch (UnavailableServiceException e1) {
+			System.out.println("Unable to reach carbon target service.");
+			e1.printStackTrace();
+		}
 		// Add the country to the monitor service
 		try {
 			monitor = getEnvironmentService(Monitor.class);
@@ -163,18 +175,17 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	@Override
 	final public void execute() {
 		super.execute();
-		if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {			
+		if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {		
+			updateGDPRate();
+			updateGDP();
+			updateAvailableToSpend();
 			if (isKyotoMember) {
 				MonitorTax();
-				//checkTargets(); //did the countries meet their targets?
 			}
-			updateAvailableToSpend();
-			updateGDP(); //left out until this runs only every year
-			updateGDPRate();
 			updateCarbonOffsetYearly();
 			YearlyFunction();
 		}
-		if (timeService.getCurrentYear() % timeService.getYearsInSession() == 0) {
+		if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
 			resetCarbonOffset();
 			SessionFunction();
 		}
@@ -338,32 +349,79 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return availableToSpend;
 	}
 	
-	public void setEmissionsTarget(double emissionsTarget) {
+	void setEmissionsTarget(double emissionsTarget) {
 		this.emissionsTarget = emissionsTarget;
 	}
 	
-	public void setAvailableToSpend(double availableToSpend) {
+	void setAvailableToSpend(double availableToSpend) {
 			this.availableToSpend = availableToSpend;
 	}
 	
+	public boolean getIsKyotoMember() {
+		return this.isKyotoMember;
+	}
+	
 	//================================================================================
-    // Trade protocol monetary adjustments
+    // Trade protocol methods
     //================================================================================
 	
-	public final void payMoney(double amount) {
-		availableToSpend -= amount;
+	final void payMoney(double amount) {
+		this.availableToSpend -= amount;
 	}
 	
-	public final void receiveMoney(double amount) {
-		availableToSpend += amount;
+	final void receiveMoney(double amount) {
+		this.availableToSpend += amount;
 	}
 	
-	public final void sellOffset(double amount) {
-		carbonOffset -= amount;
+	final void sellOffset(double amount) {
+		this.carbonOffset -= amount;
 	}
 	
-	public final void receiveOffset(double amount) {
-		carbonOffset += amount;
+	final void receiveOffset(double amount) {
+		this.carbonOffset += amount;
+	}
+	
+	protected final void broadcastSellOffer(int quantity, int unitCost){
+		if(this.tradeProtocol != null){
+			Offer trade = new Offer(quantity, unitCost, TradeType.SELL);
+			this.network.sendMessage(
+						new MulticastMessage<OfferMessage>(
+								Performative.PROPOSE, 
+								Offer.TRADE_PROPOSAL, 
+								SimTime.get(), 
+								this.network.getAddress(),
+								this.tradeProtocol.getAgentsNotInConversation(),
+								new OfferMessage(
+										trade,
+										this.tradeProtocol.tradeToken.generate(),
+										OfferMessageType.BROADCAST_MESSAGE))
+					);
+		}
 	}
 
+	protected final void broadcastBuyOffer(int quantity, int unitCost){
+		if(this.tradeProtocol != null){
+			Offer trade = new Offer(quantity, unitCost, TradeType.BUY);
+			
+			/*DEBUG*/
+			System.out.println();
+			System.out.println(this.tradeProtocol.getActiveConversationMembers().toString());
+			System.out.println(this.network.getConnectedNodes());
+			System.out.println();
+			/*DEBUG*/
+			
+			this.network.sendMessage(
+						new MulticastMessage<OfferMessage>(
+								Performative.PROPOSE, 
+								Offer.TRADE_PROPOSAL, 
+								SimTime.get(), 
+								this.network.getAddress(),
+								this.tradeProtocol.getAgentsNotInConversation(),
+								new OfferMessage(
+										trade, 
+										this.tradeProtocol.tradeToken.generate(), 
+										OfferMessageType.BROADCAST_MESSAGE))
+					);
+		}
+	}
 }

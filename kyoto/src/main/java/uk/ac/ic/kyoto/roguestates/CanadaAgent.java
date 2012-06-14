@@ -73,7 +73,7 @@ public class CanadaAgent extends AbstractCountry {
 //		}
 		if (availableToSpend > 0) {
 			try {
-				carbonReductionHandler.invest(availableToSpend*0.1);
+				//carbonReductionHandler.invest(availableToSpend*0.1);
 				System.out.println("Spending " + availableToSpend* 0.1 + " on carbon reduction. Current carbon output is " + carbonOutput + ".");
 			} catch (Exception e) {
 				logger.warn(e.getMessage(), e);

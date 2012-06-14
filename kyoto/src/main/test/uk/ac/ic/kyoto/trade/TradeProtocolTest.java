@@ -8,6 +8,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import uk.ac.ic.kyoto.countries.Offer;
+
 /**
  * @author cmd08
  *

@@ -1,6 +1,7 @@
-package uk.ac.ic.kyoto.trade;
+package uk.ac.ic.kyoto.countries;
 
 import java.util.UUID;
+
 
 /**
  * Wrapper class for Trade
@@ -15,25 +16,25 @@ import java.util.UUID;
 public class OfferMessage {
 	private final Offer offer;
 	private final UUID tradeID;
-	
-	public static enum OfferType{
+
+	enum OfferMessageType{
 		TRADE_PROTOCOL,
 		BROADCAST_MESSAGE
 	};
-	
-	private final OfferType offerState;
+
+	private final OfferMessageType offerMessageType;
 	/**
 	 * Constructor when OfferMessage is sent
 	 * as a MultiCast message. No conversation
 	 * has been started so tradeID is null
 	 * @param offer
 	 */
-	public OfferMessage(Offer offer){
+	public OfferMessage(Offer offer, OfferMessageType offerMessageType){
 		this.offer = offer;
 		this.tradeID = null;
-		this.offerState = OfferMessage.OfferType.BROADCAST_MESSAGE;
+		this.offerMessageType = offerMessageType;
 	}
-	
+
 	/**
 	 * Constructor when OfferMessage is instantiated
 	 * from within TradeProtocol. This instance will
@@ -41,22 +42,30 @@ public class OfferMessage {
 	 * @param offer
 	 * @param id
 	 */
-	public OfferMessage(Offer offer, UUID id){
+	public OfferMessage(Offer offer, UUID id, OfferMessageType offerMessageType){
 		this.offer = offer;
 		this.tradeID = id;
-		this.offerState = OfferMessage.OfferType.TRADE_PROTOCOL;
+		this.offerMessageType = offerMessageType;
+	}
+	
+	public TradeType getOfferType(){
+		return offer.getType();
+	}
+	
+	public Integer getOfferQuantity(){
+		return this.offer.getQuantity();
 	}
 
-	public Offer getOffer() {
-		return offer;
+	public Integer getOfferUnitCost(){
+		return this.offer.getUnitCost();
 	}
-
+	
 	public UUID getTradeID() {
 		return tradeID;
 	}
 
-	public OfferType getOfferState() {
-		return offerState;
+	public OfferMessageType getOfferMessageType() {
+		return offerMessageType;
 	}
-	
+
 }

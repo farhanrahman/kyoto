@@ -77,6 +77,9 @@ public class TestAbsorptionHandlerAgent extends AbstractCountry {
 			System.out.println("* " + this.getName() + ": Arable land after: " + arableLandArea);
 			
 			System.out.println("****************************************");
+
+			//investmentAmount = (long) (availableToSpend * 0.1);
+			//carbonAbsorptionHandler.invest(investmentAmount);
 		}
 		catch (NotEnoughCashException e) {
 			System.out.println("! " + this.getName() + ": I have run out of money");

@@ -1,8 +1,7 @@
 /**
  * 
  */
-package uk.ac.ic.kyoto.trade;
-
+package uk.ac.ic.kyoto.countries;
 
 /**
  * @author cmd08 and farhanrahman
