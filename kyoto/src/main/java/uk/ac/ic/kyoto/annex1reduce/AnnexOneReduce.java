@@ -16,12 +16,16 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 	
 	private EU eu;
 	
+	final private CountrySimulator simulator;
+	
 	public AnnexOneReduce(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
 			double GDPRate, double energyOutput, double carbonOutput) {
 
 		
 		super(id, name, ISO, landArea, arableLandArea, GDP,
 					GDPRate, energyOutput, carbonOutput);
+		
+		simulator = new CountrySimulator(this);
 
 	}
 
@@ -47,90 +51,12 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 		
 	}
 	
-//	@Override
-//	protected void behaviour() {
-//		
-//		//The amount of carbon we need to decrease this year
-//		long carbonDecrease = getEmissionsTarget() - getCarbonOffset() - getCarbonOutput();
-//		
-//		long halfCarbonDecrease = carbonDecrease / 2;
-//		
-//		//Check if we can reach the target by solely offset and reduction
-//		long availableToSpend = getAvailableToSpend();
-//		
-//		long averageAbsorbCost;
-//		try {
-//			averageAbsorbCost = this.carbonAbsorptionHandler.getCost(halfCarbonDecrease)/halfCarbonDecrease;
-//		} catch (Exception e1) {
-//			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		}
-//		
-//		long averageReduceCost;
-//		try {
-//			averageReduceCost = this.carbonReductionHandler.getCost(halfCarbonDecrease)/halfCarbonDecrease;
-//		} catch (Exception e1) {
-//			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		}
-//		
-//		// x * averageAbsorbCost = y * averageReduceCost
-//		// x + y = 1; y = 1 - x;
-//		// x * averageAbsorbCost = (1-x) * averageReduceCost;
-//		// x*averageAbsorbCost = averageReduceCost - x*averageReduceCost;
-//		//x*(averageAbsorbCost + averageRC) = aRC;
-//		//x = arc/(aac+arc);
-//		
-//		long ratioX = averageReduceCost/(averageAbsorbCost + averageAbsorbCost);
-//		long ratioY = 1 - ratioX;
-//		
-//		//Optimal(ish) ratio of aRC and aAC is ratioX:ratioY
-//		
-//		long estimatedCost = ratioX * averageAbsorbCost + ratioY * averageReduceCost;
-//		
-//		if (estimatedCost < availableToSpend) {
-//			long costAbsorb  = carbonAbsorptionHandler.getCost(ratioX * carbonDecrease);
-//			long costReduce = carbonReductionHandler.getCost(ratioY * carbonDecrease);
-//			
-//			try {
-//				carbonAbsorptionHandler.invest(costAbsorb);
-//			} catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//			try {
-//				carbonReductionHandler.invest(costReduce);
-//			} catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//			
-//			long remainingMoney = availableToSpend - costAbsorb - costReduce;
-//			
-//			this.energyUsageHandler.calculateCarbonIndustryGrowth(remainingMoney /2);
-//			
-//			
-//			
-//			try {
-//				this.energyUsageHandler.investInCarbonIndustry(remainingMoney / 2);
-//			} catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//			
-//			//Offset with more reduction
-//			
-//		}
-//		else {
-//			//Look at the market (NOT IMPLEMENTED YET)
-//			//Buy credits if cheaper
-//			//else buy as much offset as we can and shut down factories to make the difference
-//		}
-//		
-//	}
-	
 	@Override
 	protected void behaviour() {
+		
+		simulator.simulate(this.carbonOutput,this.energyOutput,this.carbonOffset,
+				this.emissionsTarget,this.availableToSpend,this.GDP,this.GDPRate,
+				this.arableLandArea);
 		
 	}
 	
@@ -139,16 +65,17 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 	/**
 	 * For a given amount of carbon to reduce, return the amount of money we should invest in Absorption and Reduction.
 	 * For safety's sake, will tend to overestimate a bit.
-	 * @param carbonReduction
-	 * @param Pass in a double[2], investments [0] = money to invest in Absorption, [1] = money to invest in Reduction
+	 * @param carbonReduction Amount to reduce carbon by
+	 * @param state A given country state
+	 * @param investments Pass in a double[2], returned [0] = money to invest in Absorption, [1] = money to invest in Reduction
 	 * @return Total Cost
 	 */
-	public double getAbsorbReduceInvestment(double carbonReduction,double[] investments) {
+	public double getAbsorbReduceInvestment(double carbonReduction,CountrySimulator.CountryState state, double[] investments) {
 		
 		if (carbonReduction <= 0) return 0;
 		
 		//Overestimate a bit
-//		carbonReduction*=1.02;
+		carbonReduction*=1.02;
 		
 		double absorbFrac = 0.5;
 		double reduceFrac = 0.5;
@@ -160,8 +87,8 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 			double reduceCost;
 			
 			try {
-				absorbCost = this.carbonAbsorptionHandler.getInvestmentRequired(absorbFrac * carbonReduction);
-				reduceCost = this.carbonReductionHandler.getInvestmentRequired(reduceFrac * carbonReduction);
+				absorbCost = this.carbonAbsorptionHandler.getInvestmentRequired(absorbFrac * carbonReduction,state.arableLandArea);
+				reduceCost = this.carbonReductionHandler.getInvestmentRequired(reduceFrac * carbonReduction,state.carbonOutput,state.energyOutput);
 			} catch (Exception e) {
 				e.printStackTrace();
 				return 0;
@@ -175,7 +102,6 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 			
 			absorbFrac/=totalFrac;
 			reduceFrac/=totalFrac;
-			
 		}
 		
 		absorbFrac = ((double) Math.round(1000 * absorbFrac))/1000;
@@ -186,27 +112,27 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 				investments[0] = 0;
 			}
 			else {
-				investments[0] = this.carbonAbsorptionHandler.getInvestmentRequired(absorbFrac * carbonReduction);
+				investments[0] = this.carbonAbsorptionHandler.getInvestmentRequired(absorbFrac * carbonReduction,state.arableLandArea);
 			}
 			
 			if (reduceFrac == 0) {
 				investments[1] = 0;
 			}
 			else {
-				investments[1] = this.carbonReductionHandler.getInvestmentRequired(reduceFrac * carbonReduction);
+				investments[1] = this.carbonReductionHandler.getInvestmentRequired(reduceFrac * carbonReduction,state.carbonOutput,state.energyOutput);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			return 0;
 		}
-		
-		try {
-			System.out.println("absorb,reduce carbon amounts");
-			System.out.println(this.carbonAbsorptionHandler.getCarbonAbsorptionChange(investments[0]));
-			System.out.println(this.carbonReductionHandler.getCarbonOutputChange(investments[1]));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+
+//		try {
+//			System.out.println("absorb,reduce carbon amounts");
+//			System.out.println(this.carbonAbsorptionHandler.getCarbonAbsorptionChange(investments[0]));
+//			System.out.println(this.carbonReductionHandler.getCarbonOutputChange(investments[1]));
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 		
 		return (investments[0] + investments[1]);
 	}

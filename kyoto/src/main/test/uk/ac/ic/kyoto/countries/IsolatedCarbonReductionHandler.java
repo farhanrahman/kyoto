@@ -54,7 +54,7 @@ public final class IsolatedCarbonReductionHandler{
 		try {			
 			// Calculate the clean industry measure after and before investment
 			double cleanIndustryBefore = calculateCleanIndustryMeasure(carbonOutput, energyOutput);
-			double cleanIndustryAfter = calculateCleanIndustryMeasure((carbonOutput + carbonOutputChange), energyOutput);
+			double cleanIndustryAfter = calculateCleanIndustryMeasure((carbonOutput - carbonOutputChange), energyOutput);
 			
 			// Get average price of single ton of carbon output reduction
 			double averageUnitPrice = (GameConst.CARBON_REDUCTION_PRICE_MIN +
