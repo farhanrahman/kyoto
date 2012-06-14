@@ -7,7 +7,6 @@ import java.util.UUID;
 
 import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
 import uk.ac.ic.kyoto.market.Economy;
-import uk.ac.ic.kyoto.services.CarbonTarget;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.imperial.presage2.core.Time;
