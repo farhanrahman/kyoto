@@ -328,14 +328,39 @@ public abstract class TradeProtocol extends FSMProtocol {
 						logger.info("My name: " + this.participant.getName()+ ", I am selling: " + trade.getQuantity() + " and receiving: " + trade.getTotalCost());
 						break;
 			
-			case INVEST:participant.receiveOffset(trade.getQuantity());
-						participant.payMoney(trade.getTotalCost());
-						logger.info("My name: " + this.participant.getName()+ ", I am receiving: " + trade.getQuantity() + " for my investment of: " + trade.getTotalCost());
-						break;
+			case INVEST:	participant.receiveOffset(trade.getQuantity());
+							participant.payMoney(trade.getTotalCost());
+							logger.info("My name: " + this.participant.getName()+ ", I am receiving: " + trade.getQuantity() + " for my investment in absorption of: " + trade.getTotalCost());
+							break;
 				
-			case RECEIVE:participant.receiveMoney(trade.getTotalCost());
-						logger.info("My name: " + this.participant.getName()+ ", I am generating: " + trade.getQuantity() + " for an investment of: " + trade.getTotalCost());
-						break;
+			case RECEIVE:	if (trade.getInvestmentType()==InvestmentType.ABSORB) {
+								try {
+									participant.carbonAbsorptionHandler.investInCarbonAbsorption(trade.getQuantity());
+								} catch (NotEnoughCarbonOutputException e) {
+									e.printStackTrace();
+								} catch (NotEnoughCashException e) {
+									e.printStackTrace();
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+							}
+			
+							if (trade.getInvestmentType()==InvestmentType.REDUCE) {
+								try {
+									participant.carbonReductionHandler.investInCarbonReduction(trade.getQuantity());
+								} catch (NotEnoughCarbonOutputException e) {
+									e.printStackTrace();
+								} catch (NotEnoughCashException e) {
+									e.printStackTrace();
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+							}
+							
+							participant.sellOffset(trade.getQuantity());
+							participant.receiveMoney(trade.getTotalCost());
+							logger.info("My name: " + this.participant.getName()+ ", I am generating: " + trade.getQuantity() + " for an investment of: " + trade.getTotalCost());
+							break;
 			}
 		}catch(NullPointerException e){
 			logger.warn(e);
