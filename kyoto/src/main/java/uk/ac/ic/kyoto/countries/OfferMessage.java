@@ -63,7 +63,7 @@ public class OfferMessage {
 		return this.offer.getQuantity();
 	}
 
-	public Integer getOfferUnitCost(){
+	public Double getOfferUnitCost(){
 		return this.offer.getUnitCost();
 	}
 	

@@ -329,9 +329,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * Adjusts the amount of CarbonOffset depending on the last years usage
 	 */
 	private final void updateCarbonOffsetYearly() {
-
-		carbonOffset += (emissionsTarget - carbonOutput + carbonAbsorption);
-
+		if (carbonOffset > 0) {
+			if ((emissionsTarget - carbonOutput + carbonAbsorption)  > carbonOffset)
+				carbonOffset = 0;
+			else
+				carbonOffset += (emissionsTarget - carbonOutput + carbonAbsorption);
+		}
 	}
 	
 	private final void resetCarbonOffset() {
@@ -413,7 +416,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.carbonOffset += amount;
 	}
 	
-	protected final void broadcastSellOffer(int quantity, int unitCost){
+	protected final void broadcastSellOffer(int quantity, double unitCost){
 		if(this.tradeProtocol != null){
 			Offer trade = new Offer(quantity, unitCost, TradeType.SELL);
 			this.network.sendMessage(
@@ -431,7 +434,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		}
 	}
 
-	protected final void broadcastBuyOffer(int quantity, int unitCost){
+	protected final void broadcastBuyOffer(int quantity, double unitCost){
 		if(this.tradeProtocol != null){
 			Offer trade = new Offer(quantity, unitCost, TradeType.BUY);
 			
@@ -457,27 +460,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		}
 	}
 	
-	protected final void broadcastInvesteeAbsorbOffer(int quantity, int unitCost){
+	protected final void broadcastInvesteeOffer(int quantity, double unitCost, InvestmentType itype){
 		if(this.tradeProtocol != null){
-			Offer trade = new Offer(quantity, unitCost, TradeType.RECEIVE, InvestmentType.ABSORB);
-			this.network.sendMessage(
-						new MulticastMessage<OfferMessage>(
-								Performative.PROPOSE, 
-								Offer.TRADE_PROPOSAL, 
-								SimTime.get(), 
-								this.network.getAddress(),
-								this.tradeProtocol.getAgentsNotInConversation(),
-								new OfferMessage(
-										trade,
-										this.tradeProtocol.tradeToken.generate(),
-										OfferMessageType.BROADCAST_MESSAGE))
-					);
-		}
-	}
-	
-	protected final void broadcastInvesteeReduceOffer(int quantity, int unitCost){
-		if(this.tradeProtocol != null){
-			Offer trade = new Offer(quantity, unitCost, TradeType.RECEIVE, InvestmentType.REDUCE);
+			Offer trade = new Offer(quantity, unitCost, TradeType.RECEIVE, itype);
 			this.network.sendMessage(
 						new MulticastMessage<OfferMessage>(
 								Performative.PROPOSE, 
