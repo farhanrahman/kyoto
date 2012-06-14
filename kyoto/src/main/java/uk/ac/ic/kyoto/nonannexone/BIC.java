@@ -18,8 +18,7 @@ public class BIC extends AbstractCountry {
 	protected double energy_aim ; // the energy output aim of a country each year.
 	protected boolean green_care = true ; // does the country care about the environment?
 	protected boolean green_lands = false; // variable to check if country met environment target or not. 
-	protected String economic_state; // financial state of the country.
-	
+	int times_aim_met = 0; //the consecutive times the energy aim is met.
 	//............................................................................................ 
 	
 	public BIC(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
@@ -78,7 +77,7 @@ public class BIC extends AbstractCountry {
 	
 	protected void initialiseCountry() {
 		// TODO Auto-generated method stub
-		energy_aim = getEnergyOutput() + 30000 ; //initialise an aim (to be decided)
+		energy_aim = getEnergyOutput() + CountryConstants.INITIAL_ENERGY_THRESHOLD ; //initialise an aim (to be decided)
 		environment_friendly_target = 0; //initialise a target (to be decided)
 		}
 	//.......................................................................................
@@ -94,21 +93,22 @@ public class BIC extends AbstractCountry {
 	{
 		double difference;
 		boolean aim_success = false; 
-		
 		difference = energy_aim - getEnergyOutput(); //difference in energy aim and current energy output.
 		double invest_money;
 		invest_money = energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(difference) ;
 				if (invest_money < getAvailableToSpend())
 				{
 					buildIndustry(invest_money); //!!!!!!!
-					aim_success = true;
+					aim_success = true; // energy target met
+					times_aim_met +=1; //how many consecutive times the target was met.
 					logger.info("Country met its yearly energy output goal");
 				}
 		else{
+			times_aim_met = 0; //reset the counter.
 			logger.info("Country has insufficient funds to meet its energy output goal");
 			generate_income(); //out of money
 			}
-		update_energy_aim(energy_aim , aim_success); //update the energy aim for the next year.	
+		update_energy_aim(energy_aim , aim_success,times_aim_met); //update the energy aim for the next year.	
 		
 		}
 		
@@ -206,10 +206,48 @@ public class BIC extends AbstractCountry {
 	//Function that updates the energy goal each year.
 /*****************************************************************************************************/
 		
-		private void update_energy_aim(double previous_aim,boolean success){
-			if (success){ // country met goal, change goal
-				energy_aim = previous_aim + previous_aim * CountryConstants.ENERGY_AIM_GROWTH; //change aim every year
+		private void update_energy_aim(double previous_aim,boolean success,int counter)
+		{
+			if (success)
+			{ // country met goal, change goal
+				
+					switch (counter)
+					{
+					case 0:
+					{
+						energy_aim = previous_aim + previous_aim * CountryConstants.NORMAL_ENERGY_AIM_GROWTH; //change aim every year	
+						logger.info("Country in NORMAL state, normal energy growth");
+						break;
+					}
+					case 1:
+					{
+						energy_aim = previous_aim + previous_aim * CountryConstants.GROW_ENERGY_AIM_GROWTH; //change aim every year	
+						logger.info("Country in GROW state, grow energy growth");	
+						break;
+					}
+					case 2:
+					{
+						energy_aim = previous_aim + previous_aim * CountryConstants.BIG_ENERGY_AIM_GROWTH; //change aim every year	
+						logger.info("Country in BIG state, big energy growth");	
+						break;
+					}
+					case 3:
+					{
+						energy_aim = previous_aim + previous_aim * CountryConstants.HUGE_ENERGY_AIM_GROWTH; //change aim every year	
+						logger.info("Country in HUGE state, huge energy growth");	
+						break;
+					}
+					default:
+					{
+						energy_aim = previous_aim + previous_aim * CountryConstants.FREE_ENERGY_AIM_GROWTH; //change aim every year	
+						logger.info("Country in FREE state, energy growth");	
+						break;
+					}	
+					
+					}
 			}
+				
+			
 		}
 /*******************************************************************************************************/
 		
