@@ -2,7 +2,7 @@ package uk.ac.ic.kyoto.actions;
 
 import java.util.UUID;
 
-import uk.ac.ic.kyoto.services.CarbonTarget;
+import uk.ac.ic.kyoto.countries.CarbonTarget;
 import uk.ac.imperial.presage2.core.Action;
 import uk.ac.imperial.presage2.core.environment.ActionHandler;
 import uk.ac.imperial.presage2.core.environment.ActionHandlingException;

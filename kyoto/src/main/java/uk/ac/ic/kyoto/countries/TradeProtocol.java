@@ -50,7 +50,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 	Token tradeToken;
 
 	private TradeHistory tradeHistory;
-	
+
 	private AbstractCountry participant;
 
 	public enum ResponderReplies{
@@ -174,9 +174,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 							}
 			})			
 			.addTransition(Transitions.TIMEOUT,
-					new AndCondition(
-							new TimeoutCondition(4), 
-							new ConversationCondition()),
+					new TimeoutCondition(4),
 					States.TRADE_PROPOSED,
 					States.TIMED_OUT, 
 					new Action(){
@@ -311,7 +309,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 			throws FSMException {
 		this.spawnAsInititor(new TradeSpawnEvent(to, quantity, unitPrice, type, itype, offerMessage));
 	}
-	
+
 	protected abstract boolean acceptExchange(NetworkAddress from,
 			Offer trade);
 
@@ -322,17 +320,17 @@ public abstract class TradeProtocol extends FSMProtocol {
 						participant.payMoney(trade.getTotalCost());
 						logger.info("My name: " + this.participant.getName()+ ", I am buying: " + trade.getQuantity() + " and paying: " + trade.getTotalCost());
 						break;
-			
+
 			case SELL:	participant.sellOffset(trade.getQuantity());
 						participant.receiveMoney(trade.getTotalCost());
 						logger.info("My name: " + this.participant.getName()+ ", I am selling: " + trade.getQuantity() + " and receiving: " + trade.getTotalCost());
 						break;
-			
+
 			case INVEST:	participant.receiveOffset(trade.getQuantity());
 							participant.payMoney(trade.getTotalCost());
 							logger.info("My name: " + this.participant.getName()+ ", I am receiving: " + trade.getQuantity() + " for my investment of: " + trade.getTotalCost());
 							break;
-				
+
 			case RECEIVE:	participant.receiveMoney(trade.getTotalCost());
 				
 							if (trade.itype.equals(InvestmentType.ABSORB)) {
@@ -364,14 +362,13 @@ public abstract class TradeProtocol extends FSMProtocol {
 								logger.info("My name: " + this.participant.getName()+ ", I am generating: " + trade.getQuantity() +
 											" for an investment in reduction of: " + trade.getTotalCost() + ". My new output is " + participant.carbonOutput);
 							}
-							
 							break;
 			}
 		}catch(NullPointerException e){
 			logger.warn(e);
 		}
 	}
-	
+
 	public UUID getId() {
 		return id;
 	}
