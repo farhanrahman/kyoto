@@ -14,6 +14,7 @@ import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.ic.kyoto.tradehistory.TradeHistory;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.messaging.Performative;
+import uk.ac.imperial.presage2.core.network.Message;
 import uk.ac.imperial.presage2.core.network.MulticastMessage;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
@@ -34,17 +35,35 @@ public class EUTest1 extends AbstractCountry{
 	}
 
 	@Override
-	protected void processInput(Input input) {
-		System.out.print("\nEUTest1 processing input ...");
-		if (this.tradeProtocol != null && this.tradeProtocol.canHandle(input)) {
-			System.out.println("DONE\n");
-			this.tradeProtocol.handle(input);
-		}else {
-			System.out.print("ERROR");
-			System.out.println("(" + (this.tradeProtocol != null) + " ~ " + (this.tradeProtocol.canHandle(input)) + ")");
-			System.out.println();
+	protected void processInput(Input in) {
+		if (this.tradeProtocol.canHandle(in)) {
+			this.tradeProtocol.handle(in);
 		}
 		
+		if(in instanceof Message){
+			try{
+				@SuppressWarnings("unchecked")
+				Message<OfferMessage> m = (Message<OfferMessage>) in;
+				Offer t = m.getData().getOffer();
+
+				if(!this.tradeProtocol
+						.getActiveConversationMembers()
+							.contains(m.getFrom())){
+					try {
+						this.tradeProtocol.offer(
+								m.getFrom(), 
+								t.getQuantity(), 
+								t.getUnitCost(), 
+								t.reverse().getType());
+					} catch (FSMException e) {
+						e.printStackTrace();
+					}
+				}
+			}catch(ClassCastException e){
+				logger.warn("Class cast exception");
+				logger.warn(e);
+			}
+		}			
 	}
 
 	@Override
