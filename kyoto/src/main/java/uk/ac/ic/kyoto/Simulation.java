@@ -7,9 +7,11 @@ import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReportHandler;
 import uk.ac.ic.kyoto.annex1reduce.EUTest1;
 import uk.ac.ic.kyoto.annex1reduce.EUTest2;
 import uk.ac.ic.kyoto.countries.Monitor;
+import uk.ac.ic.kyoto.countries.TestAgent;
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.roguestates.CanadaAgent;
-//import uk.ac.ic.kyoto.roguestates.TestAbsorptionHandlerAgent;
+import uk.ac.ic.kyoto.roguestates.TestAbsorptionHandlerAgent;
+import uk.ac.ic.kyoto.roguestates.TestReductionHandlerAgent;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
@@ -164,13 +166,19 @@ public class Simulation extends InjectedSimulation {
 		 * 
 		 */
 		
-		String endTime = this.getParameter("finishTime");
-		
+		//String endTime = this.getParameter("finishTime");
+		//AbstractParticipant p = new CanadaAgent(Random.randomUUID(),"CANADA","CAN",20000,10000,5000000,3,200000,28000,0,50000,30000);
+		//AbstractParticipant p1 = new EUTest1(Random.randomUUID(), "Chris Test1", "CS1", 20000, 10000, 5000000, 3, 200000, 28000, 50000);
+		//AbstractParticipant p2 = new EUTest2(Random.randomUUID(), "Chris Test2", "CS2", 20000, 10000, 5000000, 3, 200000, 28000, 50000);
+		//s.addParticipant(p1);
+		//s.addParticipant(p2);
 //		AbstractParticipant p = new CanadaAgent(Random.randomUUID(),"CANADA","CAN",20000,10000,5000000,3,200000,28000,0,50000,30000);
-		AbstractParticipant p1 = new TradeProtocolTestAgent(Random.randomUUID(), "Stuart", "CS1", 20000, 10000, 5000000, 3, 200000, 28000, 50000);
-		AbstractParticipant p2 = new TradeProtocolTestAgent(Random.randomUUID(), "Farhan", "CS2", 20000, 10000, 5000000, 3, 200000, 28000, 50000);
+		//AbstractParticipant p1 = new TradeProtocolTestAgent(Random.randomUUID(), "Stuart", "CS1", 20000, 10000, 5000000, 3, 200000, 28000, 50000);
+		//AbstractParticipant p2 = new TradeProtocolTestAgent(Random.randomUUID(), "Farhan", "CS2", 20000, 10000, 5000000, 3, 200000, 28000, 50000);
+		AbstractParticipant p1 = new TestAgent(Random.randomUUID(), "Stuart", "LOL", 2000000, 1500000, 99999999999.00, 0.03, 70000, 50000);
+		//AbstractParticipant p2 = new TestAgent(Random.randomUUID(), "Lolocaust", "LOL2", 500000, 200000, 100000, 0.07, 10000, 7000);
 		s.addParticipant(p1);
-		s.addParticipant(p2);
+		//s.addParticipant(p2);
 		
 
 		//AbstractParticipant p3 = new TradeProtocolTestAgent(Random.randomUUID(), "TEST1", "TST");
@@ -183,6 +191,20 @@ public class Simulation extends InjectedSimulation {
 		//s.addParticipant(a);
 		//s.addParticipant(overalTester);
 		//s.addParticipant(landTester);		
+		
+		//AbstractParticipant POOR_ABS = new TestAbsorptionHandlerAgent(Random.randomUUID(),"POOR_ABS","PA", 1000000, 500000, 5000000, 3, 50000, 30000);
+		  // Should run out of money in a few ticks with current constants
+		//AbstractParticipant SMALL_ABS = new TestAbsorptionHandlerAgent(Random.randomUUID(),"SMALL_ABS","SA", 1000000, 100, 5000000, 3, 50000, 30000);
+		  // Should run out of land in a few ticks with current constants
+		//AbstractParticipant POOR_RED = new TestReductionHandlerAgent(Random.randomUUID(),"POOR_RED","PR", 1000000, 500000, 5000000, 3, 50000, 30000);
+		 // Should run out of money in a few ticks with current constants
+		//AbstractParticipant CLEAN_RED = new TestReductionHandlerAgent(Random.randomUUID(),"CLEAN_RED","CR", 1000000, 500000, 5000000, 3, 50000, 300);
+		 // Should run out of carbon output in a few ticks with current constants
+		
+		//AbstractParticipant REDVALUETEST = new TestReductionHandlerAgent(Random.randomUUID(),"REDVALUETEST","RT", 1000000, 500000, 5000000, 3, 1000, 700);
+		//AbstractParticipant ABSVALUETEST = new TestAbsorptionHandlerAgent(Random.randomUUID(),"ABSVALUETEST","AT", 10000, 1000, 5000000, 3, 1000, 700);
+		
+		//s.addParticipant(ABSVALUETEST);
 	}
 
 }

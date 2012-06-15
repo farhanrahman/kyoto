@@ -102,5 +102,15 @@ public class GlobalTimeService extends EnvironmentService {
 	public int getSession() {
 		return sessionCounter;
 	}
+	
+	
+	/**
+	 * 
+	 * @param year - the year you want the information for
+	 * @return - the tick number of the first turn in the year AFTER
+	 */
+	public int yearToSimTime(int year) {
+		return (ticksInYear * year);
+	}
 
 }

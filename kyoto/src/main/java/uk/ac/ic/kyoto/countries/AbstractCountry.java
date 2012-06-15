@@ -36,7 +36,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 *  Simple boolean to check if the country is a member of Kyoto
 	 *  Defaults to true. Rogue states should set this to false in their constructor
 	 */
-	protected boolean isKyotoMember=true; 
+	private boolean isKyotoMember=true; 
 	
 	// TODO Change visibility of fields
 	/*
@@ -477,4 +477,35 @@ public abstract class AbstractCountry extends AbstractParticipant {
 					);
 		}
 	}	
+	//================================================================================
+    // Kyoto membership functions
+    //================================================================================
+	
+	public boolean isKyotoMember() {
+		return isKyotoMember;
+	}
+	
+	private int leaveTime=0, joinTime=0;
+	
+	protected final boolean leaveKyoto() {
+		if (timeService.getCurrentTick() == 0) {
+			isKyotoMember = false;
+			return true;
+		}
+		else if (timeService.getCurrentTick() - joinTime >= timeService.getTicksInYear()*GameConst.MINIMUM_KYOTO_MEMBERSHIP_DURATION) {
+			isKyotoMember=false;
+			leaveTime=timeService.getCurrentTick();
+			return true;
+		}
+		return false;
+	}
+	
+	protected final boolean joinKyoto() {
+		if (timeService.getCurrentTick() - leaveTime >= timeService.getTicksInYear()*GameConst.MINIMUM_KYOTO_REJOIN_TIME) {
+			isKyotoMember=true;
+			joinTime = timeService.getCurrentTick();
+			return true;
+		}
+		return false;
+	}
 }
