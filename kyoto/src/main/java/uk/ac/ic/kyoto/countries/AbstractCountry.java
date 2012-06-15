@@ -439,10 +439,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			Offer trade = new Offer(quantity, unitCost, TradeType.BUY);
 			
 			/*DEBUG*/
-			System.out.println();
-			System.out.println(this.tradeProtocol.getActiveConversationMembers().toString());
-			System.out.println(this.network.getConnectedNodes());
-			System.out.println();
+//			System.out.println();
+//			System.out.println(this.tradeProtocol.getActiveConversationMembers().toString());
+//			System.out.println(this.network.getConnectedNodes());
+//			System.out.println();
 			/*DEBUG*/
 			
 			this.network.sendMessage(
