@@ -13,11 +13,8 @@ import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
 import uk.ac.imperial.presage2.core.environment.ServiceDependencies;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.event.EventBus;
-<<<<<<< HEAD
-import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
-=======
 import uk.ac.imperial.presage2.core.event.EventListener;
->>>>>>> MonitorBug
+import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
 
 import com.google.inject.Inject;
