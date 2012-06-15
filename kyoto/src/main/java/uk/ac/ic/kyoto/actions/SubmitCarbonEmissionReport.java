@@ -2,6 +2,7 @@ package uk.ac.ic.kyoto.actions;
 
 import uk.ac.imperial.presage2.core.Action;
 import uk.ac.imperial.presage2.core.Time;
+import uk.ac.imperial.presage2.core.simulator.SimTime;
 
 /**
  * 
@@ -13,9 +14,9 @@ public class SubmitCarbonEmissionReport implements Action {
 
 	final private Time simTime;
 	
-	public SubmitCarbonEmissionReport(final Double carbonEmission, final Time simTime){
+	public SubmitCarbonEmissionReport(final Double carbonEmission){
 		this.carbonEmission = carbonEmission;
-		this.simTime = simTime;
+		this.simTime = SimTime.get();
 	}
 	
 	@Override
