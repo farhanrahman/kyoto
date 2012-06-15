@@ -95,12 +95,34 @@ public class GlobalTimeService extends EnvironmentService {
 		}
 	}
 	
-	public int getYear() {
+	public int getCurrentYear() {
 		return yearCounter;
 	}
 	
-	public int getSession() {
+	public int getCurrentSession() {
 		return sessionCounter;
+	}
+	
+	
+	/**
+	 * 
+	 * @param year - the year you want the information for
+	 * @return - the tick number of the first turn in the year AFTER
+	 */
+	public int yearToSimTime(int year) {
+		return (ticksInYear * year);
+	}
+	
+	public int getCurrentTick() {		
+		return SimTime.get().intValue();
+	}
+	
+	public int getTicksInYear() {
+		return ticksInYear;
+	}
+	
+	public int getYearsInSession() {
+		return yearsInSession;
 	}
 
 }

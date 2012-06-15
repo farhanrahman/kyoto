@@ -33,20 +33,20 @@ public final class GameConst {
 	/**
 	 * The price of reducing carbon reduction by one unit when we have 100% dirty industry
 	 */
-	public static double CARBON_REDUCTION_PRICE_MIN = 100;
+	public static double CARBON_REDUCTION_PRICE_MIN = 10;
 	/**
 	 * The price of reducing carbon reduction by one unit when we have 0% dirty industry
 	 */
-	public static double CARBON_REDUCTION_PRICE_MAX = 2000;
+	public static double CARBON_REDUCTION_PRICE_MAX = 200;
 	
 	/**
 	 * The price of increasing carbon absorption by one unit when we have 100% arable area
 	 */
-	public static double CARBON_ABSORPTION_PRICE_MIN = 100;
+	public static double CARBON_ABSORPTION_PRICE_MIN = 10;
 	/**
 	 * The price of increasing carbon absorption by one unit when we have 0% arable area
 	 */
-	public static double CARBON_ABSORPTION_PRICE_MAX = 2000;
+	public static double CARBON_ABSORPTION_PRICE_MAX = 200;
 	/**
 	 * Forest area that absorbs single ton of carbon
 	 */
@@ -97,4 +97,14 @@ public final class GameConst {
 	 * Session to session world target reduction
 	 */
 	public static double TARGET_REDUCTION = 0.95;
+	
+	/**
+	 * The minimum amount of time, in years, that a country must wait before rejoining Kyoto after leaving
+	 */
+	public static int MINIMUM_KYOTO_REJOIN_TIME = 4;
+	
+	/**
+	 * The minimum amount of time, in years, that a country must be a member of Kyoto before it can leave
+	 */
+	public static int MINIMUM_KYOTO_MEMBERSHIP_DURATION = 10;
 }
