@@ -329,9 +329,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * Adjusts the amount of CarbonOffset depending on the last years usage
 	 */
 	private final void updateCarbonOffsetYearly() {
-
-		carbonOffset += (emissionsTarget - carbonOutput + carbonAbsorption);
-
+		if (carbonOffset > 0) {
+			if ((emissionsTarget - carbonOutput + carbonAbsorption)  > carbonOffset)
+				carbonOffset = 0;
+			else
+				carbonOffset += (emissionsTarget - carbonOutput + carbonAbsorption);
+		}
 	}
 	
 	private final void resetCarbonOffset() {
