@@ -105,7 +105,7 @@ public class CarbonTarget extends EnvironmentService {
 		return obj.currentYearTarget;
 	}
 	
-	void setCountryPenalty(UUID countryID, double penaltyValue) {
+	void addCountryPenalty(UUID countryID, double penaltyValue) {
 		try {
 			this.exclusiveAccess.acquire();
 		} catch (InterruptedException e) {
