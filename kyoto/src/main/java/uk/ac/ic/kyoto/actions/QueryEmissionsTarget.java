@@ -15,7 +15,7 @@ public class QueryEmissionsTarget implements Action {
 	}
 
 	private targetType TargetPeriod;
-	private long emmisionsTarget = 0;
+	private double emmisionsTarget = 0;
 	
 	public QueryEmissionsTarget(targetType Period) {
 		this.TargetPeriod = Period;
@@ -25,11 +25,11 @@ public class QueryEmissionsTarget implements Action {
 		return this.TargetPeriod;
 	}
 	
-	public long getEmissionsTarget() {
+	public double getEmissionsTarget() {
 		return this.emmisionsTarget;
 	}
 	
-	public void setEmissionsTarget(long target) {
+	public void setEmissionsTarget(double target) {
 		this.emmisionsTarget = target;
 	}
 }
