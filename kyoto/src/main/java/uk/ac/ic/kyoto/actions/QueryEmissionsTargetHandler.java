@@ -37,7 +37,7 @@ public class QueryEmissionsTargetHandler implements ActionHandler {
 	public Input handle(Action action, UUID countryID) throws ActionHandlingException {
 		QueryEmissionsTarget actionObject = (QueryEmissionsTarget) action;
 		
-		long target = 0;
+		double target = 0;
 		
 		switch (actionObject.getTargetPeriod()) {
 			case SESSION:
