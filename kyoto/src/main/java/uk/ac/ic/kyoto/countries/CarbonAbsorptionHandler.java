@@ -27,8 +27,8 @@ public final class CarbonAbsorptionHandler {
 	 * @return
 	 * Cost of absorbing carbon by the specified amount.
 	 */
-	public final double getInvestmentRequired(double carbonOffset) throws Exception {
-		return getInvestmentRequired(carbonOffset, this.country.arableLandArea);
+	public final double getInvestmentRequired(double carbonAbsorptionChange) throws Exception {
+		return getInvestmentRequired(carbonAbsorptionChange, this.country.arableLandArea);
 	}
 	
 	/**
