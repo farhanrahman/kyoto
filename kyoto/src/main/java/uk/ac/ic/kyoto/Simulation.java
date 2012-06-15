@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import uk.ac.ic.kyoto.actions.AddToCarbonTargetHandler;
-import uk.ac.ic.kyoto.actions.QueryEmissionsTarget;
+import uk.ac.ic.kyoto.actions.AddToMonitorHandler;
 import uk.ac.ic.kyoto.actions.QueryEmissionsTargetHandler;
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReportHandler;
 import uk.ac.ic.kyoto.annex1reduce.EUTest1;
@@ -51,8 +51,9 @@ public class Simulation extends InjectedSimulation {
 			.addActionHandler(SubmitCarbonEmissionReportHandler.class)
 			.addActionHandler(AddToCarbonTargetHandler.class)
 			.addActionHandler(QueryEmissionsTargetHandler.class)
+			.addActionHandler(AddToMonitorHandler.class)
 			.addGlobalEnvironmentService(CarbonReportingService.class)
-			.addParticipantEnvironmentService(Monitor.class)
+			.addGlobalEnvironmentService(Monitor.class)
 			.addParticipantEnvironmentService(ParticipantCarbonReportingService.class)
 			.addGlobalEnvironmentService(GlobalTimeService.class)
 			.addParticipantEnvironmentService(ParticipantTimeService.class)

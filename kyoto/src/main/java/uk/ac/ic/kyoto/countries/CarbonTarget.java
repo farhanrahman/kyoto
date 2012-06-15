@@ -137,7 +137,7 @@ public class CarbonTarget extends EnvironmentService {
 		for (countryObject country : participantCountries) {
 			double data = 0;
 			try {
-				double data = output1990Data.get(country.obj.getISO());
+				data = output1990Data.get(country.obj.getISO());
 			} catch (Exception e) {
 				System.out.println("1990 Data not Loaded for country: " + country.obj.getName());
 				e.printStackTrace();
