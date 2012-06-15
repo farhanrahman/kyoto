@@ -10,8 +10,6 @@ import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfSessionCycle;
 import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfYearCycle;
-import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
-import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentServiceProvider;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
@@ -38,7 +36,8 @@ public class CarbonTarget extends EnvironmentService {
 		
 		public double lastSessionTarget = 0;
 		public double currentSessionTarget = 0;
-		public double currentYearTarget = 0;
+		
+		public Map<Integer, Double> yearTargets = new HashMap<Integer, Double>();
 		
 		public double proportion = 0;
 		public double penalty = 0;
@@ -95,9 +94,9 @@ public class CarbonTarget extends EnvironmentService {
 		return obj.currentSessionTarget;
 	}
 	
-	public double queryYearTarget(UUID countryID) {
+	public double queryYearTarget(UUID countryID, int year) {
 		countryObject obj = findCountryObject(countryID);
-		return obj.currentYearTarget;
+		return obj.yearTargets.get(year);
 	}
 	
 	void addCountryPenalty(UUID countryID, double penaltyValue) {
@@ -254,7 +253,7 @@ public class CarbonTarget extends EnvironmentService {
 		double sessionProgress = (timeService.getCurrentYear() % GameConst.YEARS_IN_SESSION) / GameConst.YEARS_IN_SESSION;
 		double diffTargets = country.lastSessionTarget - country.currentSessionTarget;
 		double newTarget = country.lastSessionTarget - (diffTargets * sessionProgress) - country.penalty;
-		country.currentYearTarget = newTarget;
+		country.yearTargets.put(timeService.getCurrentYear(), newTarget);
 		country.obj.emissionsTarget = newTarget;
 	}	
 }

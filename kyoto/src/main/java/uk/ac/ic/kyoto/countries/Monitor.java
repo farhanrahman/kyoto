@@ -4,24 +4,24 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Random;
 
-import com.google.inject.Inject;
-
 import uk.ac.ic.kyoto.services.CarbonReportingService;
+import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfYearCycle;
-import uk.ac.imperial.presage2.core.environment.EnvironmentRegistrationRequest;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentServiceProvider;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
 import uk.ac.imperial.presage2.core.environment.ServiceDependencies;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
-import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.event.EventBus;
+import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
+
+import com.google.inject.Inject;
 
 
 /**
  * Monitoring service
- * @author ov109, Stuart, sc1109, Adam
+ * @author ov109, Stuart, sc1109, Adam, Jonathan Ely
  *
  */
 @ServiceDependencies({CarbonReportingService.class})
@@ -37,7 +37,8 @@ public class Monitor extends EnvironmentService {
 	private Map<AbstractCountry, Integer> sinBin;
 	
 	EventBus eb;
-		
+
+	private GlobalTimeService timeService;
 	private CarbonReportingService carbonReportingService;
 	private CarbonTarget carbonTargetingService;
 	
@@ -45,6 +46,13 @@ public class Monitor extends EnvironmentService {
 	public Monitor(EnvironmentSharedStateAccess sharedState,
 					EnvironmentServiceProvider provider) {
 		super(sharedState);
+	
+		try {
+			this.timeService = provider.getEnvironmentService(GlobalTimeService.class);
+		} catch (UnavailableServiceException e) {
+			System.out.println("Unable to get environment service 'TimeService'.");
+			e.printStackTrace();
+		}
 		
 		// Register for the carbon reporting service
 		try {
@@ -91,13 +99,14 @@ public class Monitor extends EnvironmentService {
 	private void checkReports () {
 		for (AbstractCountry country : memberStates) {
 			double reportedEmission = carbonReportingService.getReport(country.getID(), SimTime.get());
-			double emissionTarget = country.getEmissionsTarget();
-			
-			if (reportedEmission < emissionTarget) {
+			double emissionTarget = carbonTargetingService.queryYearTarget(country.getID(), (timeService.getCurrentYear() - 1));
+
+			if (reportedEmission > emissionTarget) {
 				targetSanction(country, emissionTarget - reportedEmission);
 			}
 		}
 	}
+
 	
 	// TODO add logging
 	private void monitorCountries () {
@@ -139,10 +148,15 @@ public class Monitor extends EnvironmentService {
 				// Note that the country was monitored
 				monitoredCountries.add(pickedCountry);
 				
-				// Apply sanctions if a country has cheated
+				// Apply sanctions if a country has cheated and rechecks against target
 				double reportedCarbonOutput = carbonReportingService.getReport(pickedCountry.getID(), SimTime.get());
-				if (realCarbonOutput > reportedCarbonOutput)
+				if (realCarbonOutput != reportedCarbonOutput)
+				{
 					cheatSanction(pickedCountry);
+					double targetDiff = realCarbonOutput - carbonTargetingService.queryYearTarget(pickedCountry.getID(), (timeService.getCurrentYear() - 1));
+					if (targetDiff > 0)
+						targetSanction(pickedCountry, targetDiff);
+				}
 			}
 		}
 	}
