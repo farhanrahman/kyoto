@@ -2,6 +2,9 @@ package uk.ac.ic.kyoto.countries;
 
 import java.util.UUID;
 
+import uk.ac.ic.kyoto.trade.InvestmentType;
+import uk.ac.ic.kyoto.trade.TradeType;
+
 
 /**
  * Wrapper class for Trade
@@ -48,6 +51,10 @@ public class OfferMessage {
 		this.offerMessageType = offerMessageType;
 	}
 	
+	public InvestmentType getOfferInvestmentType(){
+		return offer.getInvestmentType();
+	}
+	
 	public TradeType getOfferType(){
 		return offer.getType();
 	}
@@ -56,7 +63,7 @@ public class OfferMessage {
 		return this.offer.getQuantity();
 	}
 
-	public Integer getOfferUnitCost(){
+	public Double getOfferUnitCost(){
 		return this.offer.getUnitCost();
 	}
 	

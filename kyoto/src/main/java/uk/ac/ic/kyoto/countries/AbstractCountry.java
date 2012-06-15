@@ -9,6 +9,8 @@ import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
+import uk.ac.ic.kyoto.trade.InvestmentType;
+import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
@@ -188,22 +190,31 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	@Override
 	final public void execute() {
-		super.execute();
-		if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {		
-			updateGDPRate();
-			updateGDP();
-			updateAvailableToSpend();
-			if (isKyotoMember) {
-				MonitorTax();
+		try{
+			if(simTick == SimTime.get().intValue()){
+				super.execute();
+				if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {		
+					updateGDPRate();
+					updateGDP();
+					updateAvailableToSpend();
+					if (isKyotoMember) {
+						MonitorTax();
+					}
+					updateCarbonOffsetYearly();
+					YearlyFunction();
+				}
+				if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
+					resetCarbonOffset();
+					SessionFunction();
+				}
+				simTick++;
+			}else{
+				throw new UnauthorisedExecuteException(SimTime.get().intValue(), this.getID(), this.getName());
 			}
-			updateCarbonOffsetYearly();
-			YearlyFunction();
+			behaviour();
+		} catch(UnauthorisedExecuteException e){
+			e.printStackTrace();
 		}
-		if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
-			resetCarbonOffset();
-			SessionFunction();
-		}
-		behaviour();
 	}
 	
 	/**
@@ -318,9 +329,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * Adjusts the amount of CarbonOffset depending on the last years usage
 	 */
 	private final void updateCarbonOffsetYearly() {
-
-		carbonOffset += (emissionsTarget - carbonOutput + carbonAbsorption);
-
+		if (carbonOffset > 0) {
+			if ((emissionsTarget - carbonOutput + carbonAbsorption)  > carbonOffset)
+				carbonOffset = 0;
+			else
+				carbonOffset += (emissionsTarget - carbonOutput + carbonAbsorption);
+		}
 	}
 	
 	private final void resetCarbonOffset() {
@@ -402,7 +416,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.carbonOffset += amount;
 	}
 	
-	protected final void broadcastSellOffer(int quantity, int unitCost){
+	protected final void broadcastSellOffer(int quantity, double unitCost){
 		if(this.tradeProtocol != null){
 			Offer trade = new Offer(quantity, unitCost, TradeType.SELL);
 			this.network.sendMessage(
@@ -420,7 +434,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		}
 	}
 
-	protected final void broadcastBuyOffer(int quantity, int unitCost){
+	protected final void broadcastBuyOffer(int quantity, double unitCost){
 		if(this.tradeProtocol != null){
 			Offer trade = new Offer(quantity, unitCost, TradeType.BUY);
 			
@@ -446,17 +460,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		}
 	}
 	
-	protected final void broadcastInvesteeOffer(int quantity, int unitCost){
+	protected final void broadcastInvesteeOffer(int quantity, double unitCost, InvestmentType itype){
 		if(this.tradeProtocol != null){
-			Offer trade = new Offer(quantity, unitCost, TradeType.RECEIVE);
-			
-			/*DEBUG*/
-			System.out.println();
-			System.out.println(this.tradeProtocol.getActiveConversationMembers().toString());
-			System.out.println(this.network.getConnectedNodes());
-			System.out.println();
-			/*DEBUG*/
-			
+			Offer trade = new Offer(quantity, unitCost, TradeType.RECEIVE, itype);
 			this.network.sendMessage(
 						new MulticastMessage<OfferMessage>(
 								Performative.PROPOSE, 
@@ -470,5 +476,5 @@ public abstract class AbstractCountry extends AbstractParticipant {
 										OfferMessageType.BROADCAST_MESSAGE))
 					);
 		}
-	}
+	}	
 }
