@@ -156,7 +156,15 @@ public abstract class TradeProtocol extends FSMProtocol {
 									FSMConversation conv, Transition transition) {
 								OfferMessage offerMessage = ((OfferMessage) message.getData());
 								Offer trade = new Offer(offerMessage.getOfferQuantity(), offerMessage.getOfferUnitCost(), offerMessage.getOfferType(), offerMessage.getOfferInvestmentType());
-								handleTradeCompletion(trade.reverse());
+								try {
+									handleTradeCompletion(trade.reverse());
+								} catch (NotEnoughCarbonOutputException e) {
+									e.printStackTrace();
+								} catch (NotEnoughCashException e) {
+									e.printStackTrace();
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
 								logger.info("Trade was accepted");
 
 							}
@@ -167,6 +175,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 								   new ConversationCondition()), 
 						   States.TRADE_PROPOSED,
 						   States.TRADE_DONE, 
+						  /*new MessageAction(){*/
 						   new Action(){
 
 							@Override
@@ -174,6 +183,17 @@ public abstract class TradeProtocol extends FSMProtocol {
 									Transition transition) {
 								logger.info("Trade was rejected");
 							}
+							
+							/*@Override
+							public void processMessage(Message<?> message,
+									FSMConversation conv, Transition transition) {
+								OfferMessage offerMessage = ((OfferMessage) message.getData());
+								Offer trade = new Offer(offerMessage.getOfferQuantity(), offerMessage.getOfferUnitCost(), offerMessage.getOfferType(), offerMessage.getOfferInvestmentType());
+								rejectionRefund(trade);
+								logger.info("Trade was rejected");
+
+							}*/
+							
 			})			
 			.addTransition(Transitions.TIMEOUT,
 					new TimeoutCondition(4),
@@ -218,17 +238,52 @@ public abstract class TradeProtocol extends FSMProtocol {
 						Time t = SimTime.get();
 						if (acceptExchange(to, trade)) {
 							// send accept message
-							logger.debug("Accepting exchange proposal: "
-									+ trade);
+							
 							if(!TradeProtocol.this.tradeHistory.tradeExists(offerMessage.getTradeID())){
 								TradeProtocol.this.tradeHistory.addToHistory(
 										SimTime.get(), offerMessage.getTradeID(), trade);
-								handleTradeCompletion(trade);
-								conv.getNetwork().sendMessage(
-										new UnicastMessage<OfferMessage>(
-												Performative.ACCEPT_PROPOSAL,
-												ResponderReplies.ACCEPT.name(), t,
-												from, to, offerMessage));								
+								try {
+									handleTradeCompletion(trade);
+									logger.debug("Accepting exchange proposal: "
+											+ trade);
+									conv.getNetwork().sendMessage(
+											new UnicastMessage<OfferMessage>(
+													Performative.ACCEPT_PROPOSAL,
+													ResponderReplies.ACCEPT.name(), t,
+													from, to, offerMessage));
+								} catch (NotEnoughCarbonOutputException e) {
+									rejectionRefund(trade);
+									logger.debug("Rejecting exchange proposal: "
+											+ trade);
+									conv.getNetwork().sendMessage(
+											new UnicastMessage<Object>(
+													Performative.REJECT_PROPOSAL,
+													ResponderReplies.REJECT.name(), t,
+													from, to, null));
+									e.printStackTrace();
+								} catch (NotEnoughCashException e) {
+									System.out.println("Rejection 2 happened");
+									rejectionRefund(trade);
+									logger.debug("Rejecting exchange proposal: "
+											+ trade);
+									conv.getNetwork().sendMessage(
+											new UnicastMessage<Object>(
+													Performative.REJECT_PROPOSAL,
+													ResponderReplies.REJECT.name(), t,
+													from, to, null));
+									e.printStackTrace();
+								} catch (Exception e) {
+									rejectionRefund(trade);
+									logger.debug("Rejecting exchange proposal: "
+											+ trade);
+									conv.getNetwork().sendMessage(
+											new UnicastMessage<Object>(
+													Performative.REJECT_PROPOSAL,
+													ResponderReplies.REJECT.name(), t,
+													from, to, null));
+									e.printStackTrace();
+								}
+										
 							}else{
 								logger.warn("Trade already happened");
 							}
@@ -289,6 +344,8 @@ public abstract class TradeProtocol extends FSMProtocol {
 
 		public TradeSpawnEvent(NetworkAddress with, int quantity, double unitCost, TradeType type, InvestmentType itype, OfferMessage offerMessage) {
 			super(with);
+			System.out.println("Money out at offer");
+			participant.payMoney(unitCost*quantity);
 			this.offerMessage = new OfferMessage(new Offer(quantity, unitCost, type, itype), offerMessage.getTradeID(), OfferMessageType.TRADE_PROTOCOL);
 		}
 
@@ -315,7 +372,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 	protected abstract boolean acceptExchange(NetworkAddress from,
 			Offer trade);
 
-	public void handleTradeCompletion(Offer trade){
+	public void handleTradeCompletion (Offer trade) throws NotEnoughCarbonOutputException, NotEnoughCashException, Exception{
 		try{
 			switch(trade.getType()){
 			case BUY:	participant.receiveOffset(trade.getQuantity());
@@ -329,37 +386,20 @@ public abstract class TradeProtocol extends FSMProtocol {
 						break;
 
 			case INVEST:	participant.receiveOffset(trade.getQuantity());
-							participant.payMoney(trade.getTotalCost());
 							logger.info("My name: " + this.participant.getName()+ ", I am receiving: " + trade.getQuantity() + " for my investment of: " + trade.getTotalCost());
 							break;
 
 			case RECEIVE:	participant.receiveMoney(trade.getTotalCost());
 				
 							if (trade.itype.equals(InvestmentType.ABSORB)) {
-								try {
-									participant.carbonAbsorptionHandler.investInCarbonAbsorption(trade.getQuantity());
-								} catch (NotEnoughCarbonOutputException e) {
-									e.printStackTrace();
-								} catch (NotEnoughCashException e) {
-									e.printStackTrace();
-								} catch (Exception e) {
-									e.printStackTrace();
-								}
+								participant.carbonAbsorptionHandler.investInCarbonAbsorption(trade.getQuantity());
 								
 								logger.info("My name: " + this.participant.getName()+ ", I am generating: " + trade.getQuantity() +
 											" for an investment in absorption of: " + trade.getTotalCost() + ". My new absorption is " + participant.carbonAbsorption);
 							}
 			
 							else if (trade.itype.equals(InvestmentType.REDUCE)) {
-								try {
-									participant.carbonReductionHandler.investInCarbonReduction(trade.getQuantity());
-								} catch (NotEnoughCarbonOutputException e) {
-									e.printStackTrace();
-								} catch (NotEnoughCashException e) {
-									e.printStackTrace();
-								} catch (Exception e) {
-									e.printStackTrace();
-								}
+								participant.carbonReductionHandler.investInCarbonReduction(trade.getQuantity());
 								
 								logger.info("My name: " + this.participant.getName()+ ", I am generating: " + trade.getQuantity() +
 											" for an investment in reduction of: " + trade.getTotalCost() + ". My new output is " + participant.carbonOutput);
@@ -369,6 +409,25 @@ public abstract class TradeProtocol extends FSMProtocol {
 		}catch(NullPointerException e){
 			logger.warn(e);
 		}
+	}
+	
+	public void rejectionRefund (Offer trade) {
+		try{
+			switch(trade.getType()){
+				case INVEST:	System.out.println("I ran INVEST!");
+								participant.receiveMoney(trade.getTotalCost());
+								logger.info("My name: " + this.participant.getName() + " I am reversing my investment");
+								break;
+
+				case RECEIVE:	System.out.println("I ran RECEIVE!");
+								participant.payMoney(trade.getTotalCost());
+								logger.info("My name: " + this.participant.getName() + " I am giving back my received investment");
+								break;
+			}
+		} catch(NullPointerException e){
+			logger.warn(e);
+		}
+			
 	}
 
 	public UUID getId() {

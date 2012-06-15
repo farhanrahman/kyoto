@@ -190,8 +190,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	@Override
 	final public void execute() {
-		try{
-			if(simTick == SimTime.get().intValue()){
+//		try{
+//			if(simTick == SimTime.get().intValue()){
 				super.execute();
 				if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {		
 					updateGDPRate();
@@ -208,13 +208,13 @@ public abstract class AbstractCountry extends AbstractParticipant {
 					SessionFunction();
 				}
 				simTick++;
-			}else{
-				throw new UnauthorisedExecuteException(SimTime.get().intValue(), this.getID(), this.getName());
-			}
+//			}else{
+//				throw new UnauthorisedExecuteException(SimTime.get().intValue(), this.getID(), this.getName());
+//			}
 			behaviour();
-		} catch(UnauthorisedExecuteException e){
-			e.printStackTrace();
-		}
+//		} catch(UnauthorisedExecuteException e){
+//			e.printStackTrace();
+//		}
 	}
 	
 	/**

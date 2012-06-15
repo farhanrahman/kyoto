@@ -12,7 +12,6 @@ import uk.ac.ic.kyoto.countries.TestAgent;
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.roguestates.CanadaAgent;
 import uk.ac.ic.kyoto.roguestates.TestAbsorptionHandlerAgent;
-import uk.ac.ic.kyoto.roguestates.TestReductionHandlerAgent;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
@@ -47,15 +46,15 @@ public class Simulation extends InjectedSimulation {
 		modules.add(new AbstractEnvironmentModule()
 			.addActionHandler(SubmitCarbonEmissionReportHandler.class)
 			.addGlobalEnvironmentService(CarbonReportingService.class)
-			.addParticipantEnvironmentService(Monitor.class)
+			//.addParticipantEnvironmentService(Monitor.class)
 			.addParticipantEnvironmentService(ParticipantCarbonReportingService.class)
 			.addGlobalEnvironmentService(GlobalTimeService.class)
 			.addParticipantEnvironmentService(ParticipantTimeService.class)
 			.addParticipantEnvironmentService(Economy.class)
-			.addGlobalEnvironmentService(CarbonTarget.class)
+			//.addGlobalEnvironmentService(CarbonTarget.class)
 			);
 	
-		modules.add(new RuleModule());
+		//modules.add(new RuleModule());
 			//.addClasspathDrlFile("foo.drl")
 		
 		modules.add(NetworkModule.fullyConnectedNetworkModule().withNodeDiscovery());
@@ -174,10 +173,10 @@ public class Simulation extends InjectedSimulation {
 		//s.addParticipant(p1);
 		//s.addParticipant(p2);
 //		AbstractParticipant p = new CanadaAgent(Random.randomUUID(),"CANADA","CAN",20000,10000,5000000,3,200000,28000,0,50000,30000);
-		//AbstractParticipant p1 = new TradeProtocolTestAgent(Random.randomUUID(), "Stuart", "CS1", 20000, 10000, 5000000, 3, 200000, 28000, 50000);
-		//AbstractParticipant p2 = new TradeProtocolTestAgent(Random.randomUUID(), "Farhan", "CS2", 20000, 10000, 5000000, 3, 200000, 28000, 50000);
-		AbstractParticipant p1 = new TestAgent(Random.randomUUID(), "Stuart", "LOL", 2000000, 1500000, 99999999999.00, 0.03, 70000, 50000);
-		AbstractParticipant p2 = new TestAgent(Random.randomUUID(), "Lolocaust", "LOL2", 500000, 200000, 100000, 0.07, 10000, 7000);
+		AbstractParticipant p1 = new TradeProtocolTestAgent(Random.randomUUID(), "Stuart", "CS1", 20000, 10000, /*5000000*/2, 3, 200000, 28000, 50000);
+		AbstractParticipant p2 = new TradeProtocolTestAgent(Random.randomUUID(), "Farhan", "CS2", 20000, 10000, 5000000, 3, 200000, 28000, 50000);
+		//AbstractParticipant p1 = new TestAgent(Random.randomUUID(), "Stuart", "LOL", 2000000, 1500000, 99999999999.00, 0.03, 70000, 50000);
+		//AbstractParticipant p2 = new TestAgent(Random.randomUUID(), "Lolocaust", "LOL2", 500000, 200000, 100000, 0.07, 10000, 7000);
 		s.addParticipant(p1);
 		s.addParticipant(p2);
 		
