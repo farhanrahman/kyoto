@@ -3,6 +3,7 @@ package uk.ac.ic.kyoto.countries;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
@@ -36,7 +37,7 @@ public class Monitor extends EnvironmentService {
 
 	// Structure that counts the number of times the country cheated
 	private Map<AbstractCountry, Integer> sinBin;
-	
+
 	EventBus eb;
 	
 	private EnvironmentServiceProvider provider;
@@ -121,16 +122,24 @@ public class Monitor extends EnvironmentService {
 	private void monitorCountries () {
 		// Find how many countries can be monitored with the available cash
 		int noToMonitor = (int) Math.floor(cash / GameConst.MONITORING_PRICE);
-		
+
+		ArrayList<UUID> cheaters = new ArrayList<UUID>();
+
 		// Check if all the countries can be monitored
 		if (noToMonitor >= memberStates.size()) {
 			// monitor all the countries
+			
 			for (AbstractCountry country: memberStates) {
 				double realCarbonOutput = country.getMonitored();
 				cash -= GameConst.MONITORING_PRICE;
 				double reportedCarbonOutput = carbonReportingService.getReport(country.getID(), SimTime.get());
-				if (realCarbonOutput > reportedCarbonOutput)
+				if (realCarbonOutput != reportedCarbonOutput) {
+					cheaters.add(country.getID());
 					cheatSanction(country);
+					double targetDiff = realCarbonOutput - carbonTargetingService.queryYearTarget(country.getID(), (timeService.getCurrentYear() - 1));
+					if (targetDiff > 0)
+						targetSanction(country, targetDiff);
+				}
 			}
 			// TODO log the information about it
 		}
@@ -161,6 +170,7 @@ public class Monitor extends EnvironmentService {
 				double reportedCarbonOutput = carbonReportingService.getReport(pickedCountry.getID(), SimTime.get());
 				if (realCarbonOutput != reportedCarbonOutput)
 				{
+					cheaters.add(pickedCountry.getID());
 					cheatSanction(pickedCountry);
 					double targetDiff = realCarbonOutput - carbonTargetingService.queryYearTarget(pickedCountry.getID(), (timeService.getCurrentYear() - 1));
 					if (targetDiff > 0)
@@ -168,6 +178,8 @@ public class Monitor extends EnvironmentService {
 				}
 			}
 		}
+		if (!cheaters.isEmpty())
+			carbonTargetingService.retargetDueToCheaters(cheaters);
 	}
 	
 	// TODO add emissionTarget change to sanctioning
