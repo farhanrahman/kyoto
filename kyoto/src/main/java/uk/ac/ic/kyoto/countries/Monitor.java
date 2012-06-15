@@ -16,6 +16,7 @@ import uk.ac.imperial.presage2.core.environment.ServiceDependencies;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.event.EventBus;
+import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
 
 
@@ -37,6 +38,8 @@ public class Monitor extends EnvironmentService {
 	private Map<AbstractCountry, Integer> sinBin;
 	
 	EventBus eb;
+	
+	private EnvironmentServiceProvider provider;
 		
 	private CarbonReportingService carbonReportingService;
 	private CarbonTarget carbonTargetingService;
@@ -46,25 +49,7 @@ public class Monitor extends EnvironmentService {
 					EnvironmentServiceProvider provider) {
 		super(sharedState);
 		
-		// Register for the carbon reporting service
-		try {
-			this.carbonReportingService = provider.getEnvironmentService(CarbonReportingService.class);
-		} catch (UnavailableServiceException e) {
-			e.printStackTrace();
-		}
-		if(this.carbonReportingService == null){
-			System.err.println("PROBLEM");
-		}
-		
-		// Register for the carbon emissions targeting service
-		try {
-			this.carbonTargetingService = provider.getEnvironmentService(CarbonTarget.class);
-		} catch (UnavailableServiceException e) {
-			e.printStackTrace();
-		}
-		if(this.carbonTargetingService == null){
-			System.err.println("PROBLEM");
-		}
+		this.provider = provider;
 	}
 	
 	/**
@@ -95,6 +80,31 @@ public class Monitor extends EnvironmentService {
 			
 			if (reportedEmission < emissionTarget) {
 				targetSanction(country, emissionTarget - reportedEmission);
+			}
+		}
+	}
+	
+	@EventListener
+	private void initialize(EndOfTimeCycle E) {
+		if (SimTime.get().intValue() == 1) {
+			// Register for the carbon reporting service
+			try {
+				this.carbonReportingService = provider.getEnvironmentService(CarbonReportingService.class);
+			} catch (UnavailableServiceException e) {
+				e.printStackTrace();
+			}
+			if(this.carbonReportingService == null){
+				System.err.println("PROBLEM");
+			}
+			
+			// Register for the carbon emissions targeting service
+			try {
+				this.carbonTargetingService = provider.getEnvironmentService(CarbonTarget.class);
+			} catch (UnavailableServiceException e) {
+				e.printStackTrace();
+			}
+			if(this.carbonTargetingService == null){
+				System.err.println("PROBLEM");
 			}
 		}
 	}
