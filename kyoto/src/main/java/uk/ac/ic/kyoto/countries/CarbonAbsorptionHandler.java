@@ -102,7 +102,7 @@ public final class CarbonAbsorptionHandler {
 		double carbonAbsorptionChange;
 		
 		try {
-			double carbonDiff = country.carbonOutput;
+			double carbonDiff = country.carbonOutput - country.carbonAbsorption;
 			
 			carbonAbsorptionChange = carbonDiff / 2;
 			
