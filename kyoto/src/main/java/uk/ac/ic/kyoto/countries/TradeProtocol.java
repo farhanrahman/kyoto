@@ -287,7 +287,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 
 		final OfferMessage offerMessage;
 
-		public TradeSpawnEvent(NetworkAddress with, int quantity, int unitCost, TradeType type, InvestmentType itype, OfferMessage offerMessage) {
+		public TradeSpawnEvent(NetworkAddress with, int quantity, double unitCost, TradeType type, InvestmentType itype, OfferMessage offerMessage) {
 			super(with);
 			this.offerMessage = new OfferMessage(new Offer(quantity, unitCost, type, itype), offerMessage.getTradeID(), OfferMessageType.TRADE_PROTOCOL);
 		}
@@ -307,7 +307,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 		return all;
 	}
 
-	public void offer(NetworkAddress to, int quantity, int unitPrice, OfferMessage offerMessage)
+	public void offer(NetworkAddress to, int quantity, double unitPrice, OfferMessage offerMessage)
 			throws FSMException {
 		this.spawnAsInititor(new TradeSpawnEvent(to, quantity, unitPrice, offerMessage.getOfferType(), offerMessage.getOfferInvestmentType(), offerMessage));
 	}
