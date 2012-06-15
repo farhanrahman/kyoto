@@ -49,10 +49,11 @@ public class CarbonTarget extends EnvironmentService {
 	
 	private ArrayList<countryObject> participantCountries= new ArrayList<countryObject>();
 	private Map<String, Double> output1990Data = new HashMap<String, Double>();
+	private ArrayList<UUID> cheatersList = new ArrayList<UUID>();
 	
 	private double worldLastSessionTarget = 0;
 	private double worldCurrentSessionTarget = 0;
-	private int sessionCounter = -1;
+	private int sessionCounter = 0;
 	
 	private EventBus eb;
 	private GlobalTimeService timeService;
@@ -114,6 +115,17 @@ public class CarbonTarget extends EnvironmentService {
 		this.exclusiveAccess.release();
 	}
 	
+	void retargetDueToCheaters(ArrayList<UUID> theCheaters) {
+		this.cheatersList = theCheaters;
+
+		if ((timeService.getCurrentYear() % GameConst.YEARS_IN_SESSION) == 0) {
+			updateSessionTargets();
+			updateYearTargets();
+		}
+
+		this.cheatersList.clear();
+	}
+
 	/*
 	 * Function to be called after all countries have been added
 	 */
@@ -146,14 +158,23 @@ public class CarbonTarget extends EnvironmentService {
 			this.worldCurrentSessionTarget += data;
 		}		
 		
+		this.worldLastSessionTarget = this.worldCurrentSessionTarget;
+		this.worldCurrentSessionTarget = worldLastSessionTarget * GameConst.TARGET_REDUCTION ; 
+
 		updateSessionTargets();
 		updateYearTargets();
 	}
 	
 	private double getReportedCarbonOutput(UUID countryID, int year){
-		Map<Integer, Double> reports = reportingService.getReport(countryID);
-		int simTime = timeService.getTicksInYear() * (year +1);
-		return reports.get(simTime);
+		double result;
+		if (cheatersList.contains(countryID)){
+			result = findCountryObject(countryID).obj.getMonitored();
+		} else {
+			Map<Integer, Double> reports = reportingService.getReport(countryID);
+			int simTime = timeService.getTicksInYear() * (year +1);
+			result = reports.get(simTime);
+		}
+		return result;
 	}
 	
 	private countryObject findCountryObject(UUID countryID) {
@@ -176,7 +197,10 @@ public class CarbonTarget extends EnvironmentService {
 	@EventListener
 	public void onEndOfSession(EndOfSessionCycle e) {
 		if (timeService.getCurrentSession() != 0) {
+			this.worldLastSessionTarget = this.worldCurrentSessionTarget;
+			this.worldCurrentSessionTarget = worldLastSessionTarget * GameConst.TARGET_REDUCTION ; 
 			updateSessionTargets();
+			this.sessionCounter++;
 		}
 	}
 	
@@ -188,9 +212,6 @@ public class CarbonTarget extends EnvironmentService {
 	}
 	
 	private void updateSessionTargets(){
-		this.worldLastSessionTarget = this.worldCurrentSessionTarget;
-		this.worldCurrentSessionTarget = worldLastSessionTarget * GameConst.TARGET_REDUCTION ; 
-		
 		double worldOutput = 0;
 		double rogueCarbonOutput = 0;
 		
@@ -213,8 +234,6 @@ public class CarbonTarget extends EnvironmentService {
 				generateSessionTarget(country, kyotoTarget);
 			}
 		}
-		
-		this.sessionCounter++;
 	}
 	
 	public void updateYearTargets()
