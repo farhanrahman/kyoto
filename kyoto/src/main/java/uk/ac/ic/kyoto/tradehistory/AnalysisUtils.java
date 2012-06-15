@@ -306,7 +306,7 @@ public class AnalysisUtils {
 		
 		for (Entry<Integer, Map<UUID, Offer>> e : tradeHistory.entrySet()) {
 			
-			int year = e.getKey()/(GameConst.YEARS_IN_SESSION * GameConst.TICKS_IN_YEAR);
+			int year = e.getKey()/(GameConst.getYearsInSession() * GameConst.getTicksInYear());
 			
 			for (Entry<UUID, Offer> offer : e.getValue().entrySet()) {
 				try {
