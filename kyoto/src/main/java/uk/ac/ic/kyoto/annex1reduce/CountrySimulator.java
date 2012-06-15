@@ -23,8 +23,6 @@ class CountrySimulator {
 
 	private StateList[] stateList = new StateList[LOOK_AHEAD_YEARS];
 	
-	private ArrayList<CountryState> tempList = new ArrayList<CountryState>(10000);
-	
 	private static CountryState startState;
 
 	public CountryState simulate(double carbonOutput, double energyOutput, double carbonOffset,double carbonAbsorption, double emissionsTarget, double availableToSpend,
@@ -49,12 +47,12 @@ class CountrySimulator {
 		//Fill up the first array in the table
 		startState.reduceCarbon();
 		
-		System.out.println("initialSize = " + tempList.size());
+		System.out.println("initialSize = " + stateList[0].reduceStates.size());
 		
 		//For all years to look ahead
 		for (int i=0; i<LOOK_AHEAD_YEARS; i++) {
 			//Cull the reduce states
-			cullStates(tempList,stateList[i].reduceStates);
+			stateList[i].reduceStates = cullStates(stateList[i].reduceStates);
 			System.out.println("reduceSize " + i + " = " + stateList[i].reduceStates.size());
 			
 			//Branch off all unculled reduce states by performing a maintain action		
@@ -64,7 +62,7 @@ class CountrySimulator {
 			}
 						
 			//Cull the maintain states
-			cullStates(tempList,stateList[i].maintainStates);
+			stateList[i].maintainStates = cullStates(stateList[i].maintainStates);
 			
 			System.out.println("maintainSize " + i + " = " + stateList[i].maintainStates.size());
 			
@@ -88,19 +86,20 @@ class CountrySimulator {
 	 * Look at the given array of countryStates and return the best one
 	 * @return
 	 */
-	private CountryState getOptimalState(HashSet<CountryState> maintainStates) {
+	private CountryState getOptimalState(ArrayList<CountryState> maintainStates) {
 		return null;
 	}
 
 	/**
 	 * Goes through all states and will cull all but the most useful
 	 * @param states
+	 * @return The culled list of input states
 	 */
-	private void cullStates(final ArrayList<CountryState> tempStates, final HashSet<CountryState> states) {
+	private ArrayList<CountryState> cullStates(ArrayList<CountryState> states) {
 		
 		//Firstly, remove all states with invalid attributes
 		
-		Iterator<CountryState> iterator = tempStates.iterator();
+		Iterator<CountryState> iterator = states.iterator();
 		
 		while(iterator.hasNext()) {
 			CountryState state = iterator.next();
@@ -111,53 +110,43 @@ class CountrySimulator {
 				iterator.remove();
 			}
 		}
+
+		boolean hasBeenReplaced = true;
 		
-		//Add all unculled objects to the set
-		for (int i = 0; i<tempStates.size(); i++) {
-			states.add(tempStates.get(i));
-		}
-		tempStates.clear();
+		while (hasBeenReplaced) {
+			hasBeenReplaced = false;
 			
-		//Keep only the states with the best performance in every combination of categories
-		//1 = (carbonOutput-carbonAbsorption)
-		//2 = energyOutput
-		//3 = carbonOffset
-		//4 = availableToSpend
-		//5 = arableLandArea
+			ArrayList<CountryState> bestList = new ArrayList<CountryState>(states.size());
+			
+			bestList.add(states.get(0));
+			
+			for(int i = 1; i<states.size(); i++) {
+				CountryState testState = states.get(i);
+				
+				boolean needsAdding = true;
+				
+				for (int j = 0; j<bestList.size(); j++) {
+					CountryState bestState = bestList.get(j);
+					
+					if (testState.isWorse(bestState)) {
+						needsAdding = false;
+						break;
+					}
+					else if (testState.isBetter(bestState)) {
+						bestList.set(j, testState);
+						needsAdding = false;
+						hasBeenReplaced = true;
+						break;
+					}
+				}
+				if (needsAdding) {
+					bestList.add(testState);
+				}
+			}
+			states = bestList;
+		}	
 		
-//		CountryState best1 = reduceStates.
-//		CountryState best2 = reduceStates.get(0);
-//		CountryState best3 = reduceStates.get(0);
-//		CountryState best4 = reduceStates.get(0);
-//		CountryState best5 = reduceStates.get(0);
-//		
-//		CountryState best12 = reduceStates.get(0);
-//		CountryState best13 = reduceStates.get(0);
-//		CountryState best14 = reduceStates.get(0);
-//		CountryState best15 = reduceStates.get(0);
-//		CountryState best23 = reduceStates.get(0);
-//		CountryState best24 = reduceStates.get(0);
-//		CountryState best25 = reduceStates.get(0);
-//		CountryState best34 = reduceStates.get(0);
-//		CountryState best35 = reduceStates.get(0);
-//		CountryState best45 = reduceStates.get(0);
-//		
-//		CountryState best123 = reduceStates.get(0);
-//		CountryState best124 = reduceStates.get(0);
-//		CountryState best125 = reduceStates.get(0);
-//		CountryState best134 = reduceStates.get(0);
-//		CountryState best135 = reduceStates.get(0);
-//		CountryState best145 = reduceStates.get(0);
-//		CountryState best234 = reduceStates.get(0);
-//		CountryState best235 = reduceStates.get(0);
-//		CountryState best345 = reduceStates.get(0);
-//		
-//		CountryState best1234 = reduceStates.get(0);
-//		CountryState best1235 = reduceStates.get(0);
-//		CountryState best1245 = reduceStates.get(0);
-//		CountryState best1345 = reduceStates.get(0);
-//		CountryState best2345 = reduceStates.get(0);
-//			
+		return states;
 		
 	}
 
@@ -209,6 +198,16 @@ class CountrySimulator {
 			this.action = null;
 		}
 		
+		private boolean isBetter(CountryState bestState) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		private boolean isWorse(CountryState countryState) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
 		/**
 		 * 
 		 * @param previousState The state that performs the action
@@ -220,7 +219,7 @@ class CountrySimulator {
 
 			this.year = previousState.year + 1;
 			
-			tempList.add(this);
+			stateList[this.year-1].addReduce(this);
 			
 			double oldCarbonDifference = previousState.getCarbonDifference();
 
@@ -259,8 +258,6 @@ class CountrySimulator {
 			
 			this.arableLandArea = previousState.arableLandArea - arableLandCost;
 			
-			//TODO
-//			System.out.println(numInstant++);
 		}
 		
 		private CountryState(CountryState previousState,MaintainAction action) {
@@ -269,7 +266,7 @@ class CountrySimulator {
 
 			this.year = previousState.year;
 			
-			tempList.add(this);
+			stateList[this.year].addMaintain(this);
 
 			// TODO some maintain actions here!
 		}
@@ -320,8 +317,15 @@ class CountrySimulator {
 	 *
 	 */
 	private static class StateList {
-		private HashSet<CountryState> reduceStates = new HashSet<CountryState>();
-		private HashSet<CountryState> maintainStates = new HashSet<CountryState>();	
+		private ArrayList<CountryState> reduceStates = new ArrayList<CountryState>();
+		private ArrayList<CountryState> maintainStates = new ArrayList<CountryState>();
+		
+		public void addReduce(CountryState countryState) {
+			reduceStates.add(countryState);
+		}
+		public void addMaintain(CountryState countryState) {
+			maintainStates.add(countryState);			
+		}	
 	}
 
 	/**
