@@ -37,19 +37,7 @@ public class Monitor extends EnvironmentService {
 	private Map<AbstractCountry, Integer> sinBin;
 	
 	EventBus eb;
-	
-	/**
-	 * percentage increase in target i.e. 1.05 for 5%
-	 */
-	//@Parameter(name="target_penalty")
-	int target_penalty;
-	
-	/**
-	 * percentage decrease in cash i.e. 0.95 for 5%
-	 */
-	//@Parameter(name="cash_penalty")
-	int cash_penalty;
-	
+		
 	private CarbonReportingService carbonReportingService;
 	private CarbonTarget carbonTargetingService;
 	
@@ -68,15 +56,15 @@ public class Monitor extends EnvironmentService {
 			System.err.println("PROBLEM");
 		}
 		
-		// Register for the carbon emission targeting service
-//		try {
-//			this.carbonTargetingService = provider.getEnvironmentService(CarbonTarget.class);
-//		} catch (UnavailableServiceException e) {
-//			e.printStackTrace();
-//		}
-//		if(this.carbonTargetingService == null){
-//			System.err.println("PROBLEM");
-//		}
+		// Register for the carbon emissions targeting service
+		try {
+			this.carbonTargetingService = provider.getEnvironmentService(CarbonTarget.class);
+		} catch (UnavailableServiceException e) {
+			e.printStackTrace();
+		}
+		if(this.carbonTargetingService == null){
+			System.err.println("PROBLEM");
+		}
 	}
 	
 	/**
@@ -92,11 +80,6 @@ public class Monitor extends EnvironmentService {
 	public void setEB(EventBus eb) {
 		this.eb = eb;
 		eb.subscribe(this);
-	}
-	
-	@Override
-	public void registerParticipant(EnvironmentRegistrationRequest req) {
-		super.registerParticipant(req);
 	}
 	
 	@EventListener
@@ -186,7 +169,7 @@ public class Monitor extends EnvironmentService {
 		
 		// Deduct the cash from the country that has cheated
 		// newCash = oldCash - GDP * cash_penalty
-		sanctionee.setAvailableToSpend(Math.round((sanctionee.getAvailableToSpend()-sanctionee.getGDP()*(sinCount-1)*cash_penalty)));
+		sanctionee.setAvailableToSpend(Math.round((sanctionee.getAvailableToSpend()-sanctionee.getGDP()*(sinCount-1)* GameConst.SANCTION_RATE)));
 	}
 	
 	/**
@@ -196,11 +179,10 @@ public class Monitor extends EnvironmentService {
 	 */
 	public void targetSanction(AbstractCountry country, double carbonExcess) {
 		double penalty = carbonExcess * 1.3;
-		carbonTargetingService.setCountryPenalty(country.getID(), penalty);
+		carbonTargetingService.addCountryPenalty(country.getID(), penalty);
 		
 		// Charge the country for not meeting the target
-		
-		country.setAvailableToSpend( (long) (country.getAvailableToSpend() - carbonExcess * cash_penalty) );
+		country.setAvailableToSpend( Math.round( (country.getAvailableToSpend() - carbonExcess * GameConst.SANCTION_RATE)) );
 		
 	}
 	
