@@ -7,6 +7,7 @@ import java.util.UUID;
 import java.util.concurrent.Semaphore;
 
 import uk.ac.ic.kyoto.services.CarbonReportingService;
+import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfSessionCycle;
 import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfYearCycle;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
@@ -53,7 +54,7 @@ public class CarbonTarget extends EnvironmentService {
 	private int sessionCounter = -1;
 	
 	private EventBus eb;
-	private ParticipantTimeService timeService;
+	private GlobalTimeService timeService;
 	private CarbonReportingService reportingService;
 	private Semaphore exclusiveAccess = new Semaphore(1);
 	
@@ -61,7 +62,7 @@ public class CarbonTarget extends EnvironmentService {
 	protected CarbonTarget(EnvironmentSharedStateAccess sharedState, EnvironmentServiceProvider provider) {
 		super(sharedState);
 		try {
-			this.timeService = provider.getEnvironmentService(ParticipantTimeService.class);
+			this.timeService = provider.getEnvironmentService(GlobalTimeService.class);
 		} catch (UnavailableServiceException e) {
 			System.out.println("Unable to get environment service 'TimeService'.");
 			e.printStackTrace();
