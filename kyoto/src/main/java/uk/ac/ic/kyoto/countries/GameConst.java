@@ -97,4 +97,14 @@ public final class GameConst {
 	 * Session to session world target reduction
 	 */
 	public static double TARGET_REDUCTION = 0.95;
+	
+	/**
+	 * The minimum amount of time, in years, that a country must wait before rejoining Kyoto after leaving
+	 */
+	public static int MINIMUM_KYOTO_REJOIN_TIME = 4;
+	
+	/**
+	 * The minimum amount of time, in years, that a country must be a member of Kyoto before it can leave
+	 */
+	public static int MINIMUM_KYOTO_MEMBERSHIP_DURATION = 10;
 }
