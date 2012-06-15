@@ -56,7 +56,7 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 
 		CountrySimulator.CountryState optimalState = 
 				simulator.simulate(getCarbonOutput(),getEnergyOutput(),
-				getCarbonOffset(), getEmissionsTarget(), getAvailableToSpend(),
+				getCarbonOffset(),getCarbonAbsorption(), getEmissionsTarget(), getAvailableToSpend(),
 				getGDP(),getGDPRate(),getArableLandArea());
 
 	}
@@ -149,13 +149,29 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 
 		return (investments[0] + investments[1]);
 	}
+	
+	public double getArableLandCost(double absorbInvestment, double arableLandArea) throws Exception {
+		double carbonAbsorptionChange = carbonAbsorptionHandler.getCarbonAbsorptionChange(absorbInvestment,arableLandArea);
+		return carbonAbsorptionHandler.getForestAreaRequired(carbonAbsorptionChange);
+	}
+	
+	public double getCarbonAbsorptionChange(double investmentAmount, double arableLandArea) throws Exception {
+		return carbonAbsorptionHandler.getCarbonAbsorptionChange(investmentAmount, arableLandArea);
+	}
 
 	/**
-	 * TODO
-	 * @return
+	 * 
+	 * @param carbonOffset The amount of carbon we want to offset by buying credits
+	 * @param year The year we want to get the estimated price for. Year = 1 is current year, Year = 2 is next year etc.
+	 * @return Cost of purchasing credits. Returns a very, very large number if not enough credits available.
 	 */
-	public double getMarketPrice() {
-		return 0;
+	public double getMarketPrice(double carbonOffset, int year) {
+		
+		if (carbonOffset==0) {
+			return 0;
+		}
+		//TODO return something other than a very big number
+		return (Double.MAX_VALUE / 1000000);
 	}
 
 
