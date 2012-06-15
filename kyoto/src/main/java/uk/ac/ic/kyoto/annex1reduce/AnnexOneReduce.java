@@ -150,13 +150,43 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 		return (investments[0] + investments[1]);
 	}
 	
-	public double getArableLandCost(double absorbInvestment, double arableLandArea) throws Exception {
-		double carbonAbsorptionChange = carbonAbsorptionHandler.getCarbonAbsorptionChange(absorbInvestment,arableLandArea);
-		return carbonAbsorptionHandler.getForestAreaRequired(carbonAbsorptionChange);
+	public double getArableLandCost(double absorbInvestment, double arableLandArea){
+		
+		if (absorbInvestment == 0) {
+			return 0;
+		}
+		
+		double carbonAbsorptionChange;
+		double cost;
+		
+		try {
+			carbonAbsorptionChange = carbonAbsorptionHandler.getCarbonAbsorptionChange(absorbInvestment,arableLandArea);
+			
+			cost = carbonAbsorptionHandler.getForestAreaRequired(carbonAbsorptionChange);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 0;
+		}
+
+		return cost;
 	}
 	
-	public double getCarbonAbsorptionChange(double investmentAmount, double arableLandArea) throws Exception {
-		return carbonAbsorptionHandler.getCarbonAbsorptionChange(investmentAmount, arableLandArea);
+	public double getCarbonAbsorptionChange(double investmentAmount, double arableLandArea){
+		
+		if (investmentAmount == 0) {
+			return 0;
+		}
+		
+		double change;
+		
+		try {
+			change = carbonAbsorptionHandler.getCarbonAbsorptionChange(investmentAmount, arableLandArea);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 0;
+		}
+		
+		return change;
 	}
 
 	/**
@@ -165,7 +195,7 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 	 * @param year The year we want to get the estimated price for. Year = 1 is current year, Year = 2 is next year etc.
 	 * @return Cost of purchasing credits. Returns a very, very large number if not enough credits available.
 	 */
-	public double getMarketPrice(double carbonOffset, int year) {
+	public double getMarketBuyPrice(double carbonOffset, int year) {
 		
 		if (carbonOffset==0) {
 			return 0;
@@ -173,7 +203,34 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 		//TODO return something other than a very big number
 		return (Double.MAX_VALUE / 1000000);
 	}
-
+	
+	//TODO
+	public double getMarketSellPrice(double carbonOffset, int year) {
+		return 0;
+	}
+	
+	public double getCarbonEnergyIncrease(double industryInvestment){
+	
+		if (industryInvestment == 0) {
+			return 0;
+		}
+		
+		double increase;
+		
+		try {
+			increase = energyUsageHandler.calculateCarbonIndustryGrowth(industryInvestment);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 0;
+		}
+			
+		return increase;
+	}
+	
+	public double getNextEmissionTarget(double emissionsTarget) {
+		// TODO Auto-generated method stub
+		return emissionsTarget * 0.95;
+	}
 
 	@Override
 	public void YearlyFunction() {
@@ -186,5 +243,4 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 		// TODO Auto-generated method stub
 
 	}
-
 }
