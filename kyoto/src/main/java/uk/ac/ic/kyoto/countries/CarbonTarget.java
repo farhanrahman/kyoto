@@ -10,7 +10,6 @@ import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfSessionCycle;
 import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfYearCycle;
-import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentServiceProvider;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
@@ -18,6 +17,7 @@ import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.event.EventBus;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
+import uk.ac.imperial.presage2.core.simulator.SimTime;
 
 import com.google.inject.Inject;
 
@@ -36,7 +36,8 @@ public class CarbonTarget extends EnvironmentService {
 		
 		public double lastSessionTarget = 0;
 		public double currentSessionTarget = 0;
-		public double currentYearTarget = 0;
+		
+		public Map<Integer, Double> yearTargets = new HashMap<Integer, Double>();
 		
 		public double proportion = 0;
 		public double penalty = 0;
@@ -58,21 +59,13 @@ public class CarbonTarget extends EnvironmentService {
 	private CarbonReportingService reportingService;
 	private Semaphore exclusiveAccess = new Semaphore(1);
 	
+	private EnvironmentServiceProvider provider;
+	
 	@Inject
-	protected CarbonTarget(EnvironmentSharedStateAccess sharedState, EnvironmentServiceProvider provider) {
+	public CarbonTarget(EnvironmentSharedStateAccess sharedState, EnvironmentServiceProvider provider) {
 		super(sharedState);
-		try {
-			this.timeService = provider.getEnvironmentService(GlobalTimeService.class);
-		} catch (UnavailableServiceException e) {
-			System.out.println("Unable to get environment service 'TimeService'.");
-			e.printStackTrace();
-		}
-		try {
-			this.reportingService = provider.getEnvironmentService(CarbonReportingService.class);
-		} catch (UnavailableServiceException e) {
-			System.out.println("Unable to get environment service 'CarbonReportingService'.");
-			e.printStackTrace();
-		}
+		
+		this.provider = provider;
 	}
 	
 	@Inject
@@ -101,12 +94,12 @@ public class CarbonTarget extends EnvironmentService {
 		return obj.currentSessionTarget;
 	}
 	
-	public double queryYearTarget(UUID countryID) {
+	public double queryYearTarget(UUID countryID, int year) {
 		countryObject obj = findCountryObject(countryID);
-		return obj.currentYearTarget;
+		return obj.yearTargets.get(year);
 	}
 	
-	void setCountryPenalty(UUID countryID, double penaltyValue) {
+	void addCountryPenalty(UUID countryID, double penaltyValue) {
 		try {
 			this.exclusiveAccess.acquire();
 		} catch (InterruptedException e) {
@@ -125,10 +118,29 @@ public class CarbonTarget extends EnvironmentService {
 	 * Function to be called after all countries have been added
 	 */
 	private void initialise(){
+		try {
+			this.timeService = provider.getEnvironmentService(GlobalTimeService.class);
+		} catch (UnavailableServiceException e) {
+			System.out.println("Unable to get environment service 'TimeService'.");
+			e.printStackTrace();
+		}
+		try {
+			this.reportingService = provider.getEnvironmentService(CarbonReportingService.class);
+		} catch (UnavailableServiceException e) {
+			System.out.println("Unable to get environment service 'CarbonReportingService'.");
+			e.printStackTrace();
+		}
+		
 		this.worldCurrentSessionTarget = 0;
 		
 		for (countryObject country : participantCountries) {
-			double data = output1990Data.get(country.obj.getISO());
+			double data = 0;
+			try {
+				data = output1990Data.get(country.obj.getISO());
+			} catch (Exception e) {
+				System.out.println("1990 Data not Loaded for country: " + country.obj.getName());
+				e.printStackTrace();
+			}
 			
 			country.currentSessionTarget = data;
 			this.worldCurrentSessionTarget += data;
@@ -156,7 +168,7 @@ public class CarbonTarget extends EnvironmentService {
 	
 	@EventListener
 	public void onTimeCycle(EndOfTimeCycle e) {
-		if (timeService.getCurrentTick() == 1) {
+		if (SimTime.get().intValue() == 1) {
 			initialise();
 		}
 	}
@@ -241,7 +253,7 @@ public class CarbonTarget extends EnvironmentService {
 		double sessionProgress = (timeService.getCurrentYear() % GameConst.YEARS_IN_SESSION) / GameConst.YEARS_IN_SESSION;
 		double diffTargets = country.lastSessionTarget - country.currentSessionTarget;
 		double newTarget = country.lastSessionTarget - (diffTargets * sessionProgress) - country.penalty;
-		country.currentYearTarget = newTarget;
+		country.yearTargets.put(timeService.getCurrentYear(), newTarget);
 		country.obj.emissionsTarget = newTarget;
 	}	
 }

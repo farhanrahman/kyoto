@@ -4,24 +4,25 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Random;
 
-import com.google.inject.Inject;
-
 import uk.ac.ic.kyoto.services.CarbonReportingService;
+import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfYearCycle;
-import uk.ac.imperial.presage2.core.environment.EnvironmentRegistrationRequest;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentServiceProvider;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
 import uk.ac.imperial.presage2.core.environment.ServiceDependencies;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
-import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.event.EventBus;
+import uk.ac.imperial.presage2.core.event.EventListener;
+import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
+
+import com.google.inject.Inject;
 
 
 /**
  * Monitoring service
- * @author ov109, Stuart, sc1109, Adam
+ * @author ov109, Stuart, sc1109, Adam, Jonathan Ely
  *
  */
 @ServiceDependencies({CarbonReportingService.class})
@@ -38,18 +39,8 @@ public class Monitor extends EnvironmentService {
 	
 	EventBus eb;
 	
-	/**
-	 * percentage increase in target i.e. 1.05 for 5%
-	 */
-	//@Parameter(name="target_penalty")
-	int target_penalty;
-	
-	/**
-	 * percentage decrease in cash i.e. 0.95 for 5%
-	 */
-	//@Parameter(name="cash_penalty")
-	int cash_penalty;
-	
+	private EnvironmentServiceProvider provider;
+	private GlobalTimeService timeService;
 	private CarbonReportingService carbonReportingService;
 	private CarbonTarget carbonTargetingService;
 	
@@ -57,26 +48,15 @@ public class Monitor extends EnvironmentService {
 	public Monitor(EnvironmentSharedStateAccess sharedState,
 					EnvironmentServiceProvider provider) {
 		super(sharedState);
-		
-		// Register for the carbon reporting service
+	
 		try {
-			this.carbonReportingService = provider.getEnvironmentService(CarbonReportingService.class);
+			this.timeService = provider.getEnvironmentService(GlobalTimeService.class);
 		} catch (UnavailableServiceException e) {
+			System.out.println("Unable to get environment service 'TimeService'.");
 			e.printStackTrace();
 		}
-		if(this.carbonReportingService == null){
-			System.err.println("PROBLEM");
-		}
 		
-		// Register for the carbon emission targeting service
-//		try {
-//			this.carbonTargetingService = provider.getEnvironmentService(CarbonTarget.class);
-//		} catch (UnavailableServiceException e) {
-//			e.printStackTrace();
-//		}
-//		if(this.carbonTargetingService == null){
-//			System.err.println("PROBLEM");
-//		}
+		this.provider = provider;
 	}
 	
 	/**
@@ -94,11 +74,6 @@ public class Monitor extends EnvironmentService {
 		eb.subscribe(this);
 	}
 	
-	@Override
-	public void registerParticipant(EnvironmentRegistrationRequest req) {
-		super.registerParticipant(req);
-	}
-	
 	@EventListener
 	public void yearlyFunction(EndOfYearCycle e) {
 		checkReports();
@@ -108,10 +83,36 @@ public class Monitor extends EnvironmentService {
 	private void checkReports () {
 		for (AbstractCountry country : memberStates) {
 			double reportedEmission = carbonReportingService.getReport(country.getID(), SimTime.get());
-			double emissionTarget = country.getEmissionsTarget();
-			
-			if (reportedEmission < emissionTarget) {
+			double emissionTarget = carbonTargetingService.queryYearTarget(country.getID(), (timeService.getCurrentYear() - 1));
+
+			if (reportedEmission > emissionTarget) {
 				targetSanction(country, emissionTarget - reportedEmission);
+			}
+		}
+	}
+
+	
+	@EventListener
+	private void initialize(EndOfTimeCycle E) {
+		if (SimTime.get().intValue() == 1) {
+			// Register for the carbon reporting service
+			try {
+				this.carbonReportingService = provider.getEnvironmentService(CarbonReportingService.class);
+			} catch (UnavailableServiceException e) {
+				e.printStackTrace();
+			}
+			if(this.carbonReportingService == null){
+				System.err.println("PROBLEM");
+			}
+			
+			// Register for the carbon emissions targeting service
+			try {
+				this.carbonTargetingService = provider.getEnvironmentService(CarbonTarget.class);
+			} catch (UnavailableServiceException e) {
+				e.printStackTrace();
+			}
+			if(this.carbonTargetingService == null){
+				System.err.println("PROBLEM");
 			}
 		}
 	}
@@ -156,10 +157,15 @@ public class Monitor extends EnvironmentService {
 				// Note that the country was monitored
 				monitoredCountries.add(pickedCountry);
 				
-				// Apply sanctions if a country has cheated
+				// Apply sanctions if a country has cheated and rechecks against target
 				double reportedCarbonOutput = carbonReportingService.getReport(pickedCountry.getID(), SimTime.get());
-				if (realCarbonOutput > reportedCarbonOutput)
+				if (realCarbonOutput != reportedCarbonOutput)
+				{
 					cheatSanction(pickedCountry);
+					double targetDiff = realCarbonOutput - carbonTargetingService.queryYearTarget(pickedCountry.getID(), (timeService.getCurrentYear() - 1));
+					if (targetDiff > 0)
+						targetSanction(pickedCountry, targetDiff);
+				}
 			}
 		}
 	}
@@ -186,7 +192,7 @@ public class Monitor extends EnvironmentService {
 		
 		// Deduct the cash from the country that has cheated
 		// newCash = oldCash - GDP * cash_penalty
-		sanctionee.setAvailableToSpend(Math.round((sanctionee.getAvailableToSpend()-sanctionee.getGDP()*(sinCount-1)*cash_penalty)));
+		sanctionee.setAvailableToSpend(Math.round((sanctionee.getAvailableToSpend()-sanctionee.getGDP()*(sinCount-1)* GameConst.SANCTION_RATE)));
 	}
 	
 	/**
@@ -196,11 +202,10 @@ public class Monitor extends EnvironmentService {
 	 */
 	public void targetSanction(AbstractCountry country, double carbonExcess) {
 		double penalty = carbonExcess * 1.3;
-		carbonTargetingService.setCountryPenalty(country.getID(), penalty);
+		carbonTargetingService.addCountryPenalty(country.getID(), penalty);
 		
 		// Charge the country for not meeting the target
-		
-		country.setAvailableToSpend( (long) (country.getAvailableToSpend() - carbonExcess * cash_penalty) );
+		country.setAvailableToSpend( Math.round( (country.getAvailableToSpend() - carbonExcess * GameConst.SANCTION_RATE)) );
 		
 	}
 	
