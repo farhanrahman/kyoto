@@ -53,11 +53,11 @@ public class ParticipantTimeService extends EnvironmentService {
 	}
 	
 	public int getCurrentYear() {
-		return globalTimeService.getYear();
+		return globalTimeService.getCurrentYear();
 	}
 	
 	public int getCurrentSession() {
-		return globalTimeService.getSession();
+		return globalTimeService.getCurrentSession();
 	}
 	
 	public int getTicksInYear() {
