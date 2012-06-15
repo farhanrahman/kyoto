@@ -49,7 +49,7 @@ public class DoNothing extends AbstractCountry {
 		/*
 		 * Do nothing: basic test.
 		 */
-		this.leaveKyoto();
+		this.setKyotoMemberLevel(KyotoMember.ROGUE);
 	}
 
 	@Override

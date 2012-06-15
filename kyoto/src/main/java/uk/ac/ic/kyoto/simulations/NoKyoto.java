@@ -77,9 +77,9 @@ public class NoKyoto extends InjectedSimulation {
 		final double carbonOutput = 70000;
 		final double GDPRate = 0.03;
 		
-		for(; countries >= 0; countries--){
-			String name = "Country"+countries;
-			String ISO = "DN"+countries;
+		for(int i = 0; i < countries; i++){
+			String name = "Country"+i;
+			String ISO = "DN"+i;
 			AbstractParticipant p = new DoNothing(Random.randomUUID(), name, ISO, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput);
 			s.addParticipant(p);
 			CarbonData1990.addCountry(ISO, energyOutput);

@@ -172,7 +172,7 @@ public class CarbonTarget extends EnvironmentService {
 				result = CarbonData1990.get(findCountryObject(countryID).obj.getISO());
 			} else {
 				Map<Integer, Double> reports = reportingService.getReport(countryID);
-				int simTime = timeService.getTicksInYear() * (year +1);
+				int simTime = (timeService.getTicksInYear() * (year +1)) - 3;
 				result = reports.get(simTime);
 			}
 		}
