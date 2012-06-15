@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.actions.AddToCarbonTarget;
+import uk.ac.ic.kyoto.actions.AddToMonitor;
 import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
@@ -133,13 +134,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				} catch (ActionHandlingException e2) {
 					e2.printStackTrace();
 				}
-				// Add the country to the monitor service
 				try {
-					monitor = getEnvironmentService(Monitor.class);
-					monitor.addMemberState(this);
-				} catch (UnavailableServiceException e1) {
-					System.out.println("Unable to reach monitor service.");
-					e1.printStackTrace();
+					environment.act(new AddToMonitor(this), getID(), authkey);
+				} catch (ActionHandlingException e2) {
+					e2.printStackTrace();
 				}
 				// Initialize the Action Handlers DO THEY HAVE TO BE INSTANTIATED ALL THE TIME?
 				try {

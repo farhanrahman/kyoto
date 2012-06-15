@@ -3,7 +3,9 @@ package uk.ac.ic.kyoto.countries;
 import java.util.Set;
 import java.util.UUID;
 
+import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
 import uk.ac.ic.kyoto.trade.TradeType;
+import uk.ac.imperial.presage2.core.environment.ActionHandlingException;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.messaging.Performative;
 import uk.ac.imperial.presage2.core.network.BroadcastMessage;
@@ -79,6 +81,12 @@ public class TestAgent extends AbstractCountry {
 //			);
 		
 		logger.info("I have this much money: " + availableToSpend);
+		
+		try {
+			environment.act(new SubmitCarbonEmissionReport(carbonOutput), getID(), authkey);
+		} catch (ActionHandlingException e1) {
+			e1.printStackTrace();
+		}
 		
 		int quantity=400, unitCost=20;
 		broadcastBuyOffer(quantity, unitCost);
