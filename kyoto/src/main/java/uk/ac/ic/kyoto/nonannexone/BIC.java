@@ -39,8 +39,7 @@ public class BIC extends AbstractCountry {
 	@EventListener
 	public void TickFunction(EndOfTimeCycle e){
 		//TODO implement functions that are done every tick
-		clean_development_mechanism(); //awaiting protocol!
-		
+				
 	}
 /*****************************************************************************************/
 	@Override
@@ -91,12 +90,15 @@ public class BIC extends AbstractCountry {
 	
 	private void economy() throws IllegalArgumentException, Exception
 	{
-		double difference;
-		boolean aim_success = false; 
-		difference = energy_aim - getEnergyOutput(); //difference in energy aim and current energy output.
+		double energy_difference;
+		double financial_difference;
+		boolean aim_success = false;
 		double invest_money;
-		invest_money = energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(difference) ;
-				if (invest_money < getAvailableToSpend())
+		
+		energy_difference = energy_aim - getEnergyOutput(); //difference in energy aim and current energy output.
+		invest_money = energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(energy_difference) ;
+		
+		if (invest_money <= getAvailableToSpend())
 				{
 					buildIndustry(invest_money); //!!!!!!!
 					aim_success = true; // energy target met
@@ -106,7 +108,8 @@ public class BIC extends AbstractCountry {
 		else{
 			times_aim_met = 0; //reset the counter.
 			logger.info("Country has insufficient funds to meet its energy output goal");
-			generate_income(); //out of money
+			financial_difference = invest_money - getAvailableToSpend();
+			generate_income(financial_difference); //out of money, generate money through CDM ;)
 			}
 		update_energy_aim(energy_aim , aim_success,times_aim_met); //update the energy aim for the next year.	
 		
@@ -249,10 +252,15 @@ public class BIC extends AbstractCountry {
 				
 			
 		}
-/*******************************************************************************************************/
+/**
+ * @throws Exception *****************************************************************************************************/
+	//uses the Clean Development Mechanism in order to sell carbon credits
 		
-	private void generate_income()
+	private void generate_income(double money_to_generate) throws Exception
 	{
+
+		CDM_absorption(money_to_generate);
+		CDM_reduction(money_to_generate);
 		
 	}
 /*******************************************************************************************************/
@@ -273,16 +281,36 @@ public class BIC extends AbstractCountry {
 		
 	}
 	
+		
+/**
+ * @throws Exception *****************************************************************************************************/
+
+private void CDM_absorption(double acquire_cash) throws Exception
+{
+
+double change_required; // change in carbon absorption in order to acquire the amount of money specified.
+double cost_of_each_unit_changed ; // unit cost of each carbon
+
+change_required = carbonAbsorptionHandler.getCarbonAbsorptionChange(acquire_cash);
+
+cost_of_each_unit_changed = acquire_cash / change_required ;
+
+broadcastSellOffer(change_required,cost_of_each_unit_changed);
+
+
+
+}
+		
+		
 /*******************************************************************************************************/
-	  //.......................................trading.CSM...............................................
-		//basically search for potential investors in our lands through clean development mechanism (acquire cash!)
-		private void clean_development_mechanism()
-		{
-			//to be implemented
-		}
+private void CDM_reduction(double acquire_cash)
+{
 	
+}		
+		
 /*******************************************************************************************************/
-		//Check available area  in order to choose decision accordingly for accepting to sell credits or plant trees for own sake.
+
+//Check available area  in order to choose decision accordingly for accepting to sell credits or plant trees for own sake.
 		private String currentAvailableArea(){
 			
 			if (getArableLandArea() > getLandArea()/(CountryConstants.AREA_LIMIT))
