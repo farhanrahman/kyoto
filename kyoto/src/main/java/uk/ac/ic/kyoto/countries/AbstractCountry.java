@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import uk.ac.ic.kyoto.actions.AddToCarbonTarget;
 import uk.ac.ic.kyoto.actions.AddToMonitor;
+import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
 import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
@@ -198,6 +199,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
 						MonitorTax();
 					}
 					updateCarbonOffsetYearly();
+					try {
+						reportCarbonOutput();
+					} catch (ActionHandlingException e) {
+						e.printStackTrace();
+					}
 					YearlyFunction();
 				}
 				if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
@@ -212,6 +218,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		} catch(UnauthorisedExecuteException e){
 			e.printStackTrace();
 		}
+	}
+	
+	protected void reportCarbonOutput() throws ActionHandlingException {
+		environment.act(new SubmitCarbonEmissionReport(carbonOutput), getID(), authkey);
 	}
 	
 	/**
