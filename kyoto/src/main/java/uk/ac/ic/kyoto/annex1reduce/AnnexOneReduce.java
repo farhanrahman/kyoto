@@ -152,7 +152,7 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 	
 	public double getArableLandCost(double absorbInvestment, double arableLandArea){
 		
-		if (absorbInvestment == 0) {
+		if (absorbInvestment <= 0) {
 			return 0;
 		}
 		
@@ -173,7 +173,7 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 	
 	public double getCarbonAbsorptionChange(double investmentAmount, double arableLandArea){
 		
-		if (investmentAmount == 0) {
+		if (investmentAmount <= 0) {
 			return 0;
 		}
 		
@@ -191,7 +191,7 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 	
 	public double getCarbonReduction(double reductionCost,CountrySimulator.CountryState state) {
 		
-		if (reductionCost == 0) {
+		if (reductionCost <= 0) {
 			return 0;
 		}
 		double reduction;
@@ -226,7 +226,7 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 	
 	public double getCarbonEnergyIncrease(double industryInvestment){
 	
-		if (industryInvestment == 0) {
+		if (industryInvestment <= 0) {
 			return 0;
 		}
 		
