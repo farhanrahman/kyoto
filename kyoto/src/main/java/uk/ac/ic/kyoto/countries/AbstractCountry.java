@@ -444,36 +444,45 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	private int leaveTime=0, joinTime=0;
 	
 	protected final boolean leaveKyoto() {
-		try {
-			environment.act(new AddRemoveFromMonitor(this, addRemoveType.REMOVE), getID(), authkey);
-		} catch (ActionHandlingException e) {
-			System.out.println("Exception wilst removing from monitor: " + e);
-			e.printStackTrace();
-		}
-		
 		if (timeService.getCurrentTick() == 0) {
 			isKyotoMember = false;
+			
+			try {
+				environment.act(new AddRemoveFromMonitor(this, addRemoveType.REMOVE), getID(), authkey);
+			} catch (ActionHandlingException e) {
+				System.out.println("Exception wilst removing from monitor: " + e);
+				e.printStackTrace();
+			}
+			
 			return true;
 		}
 		else if (timeService.getCurrentTick() - joinTime >= timeService.getTicksInYear()*GameConst.getMinimumKyotoMembershipDuration()) {
 			isKyotoMember=false;
 			leaveTime=timeService.getCurrentTick();
+			
+			try {
+				environment.act(new AddRemoveFromMonitor(this, addRemoveType.REMOVE), getID(), authkey);
+			} catch (ActionHandlingException e) {
+				System.out.println("Exception wilst removing from monitor: " + e);
+				e.printStackTrace();
+			}
+			
 			return true;
 		}
 		return false;
 	}
 	
 	protected final boolean joinKyoto() {
-		try {
-			environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
-		} catch (ActionHandlingException e) {
-			System.out.println("Exception wilst adding to monitor: " + e);
-			e.printStackTrace();
-		}
-		
 		if (timeService.getCurrentTick() - leaveTime >= timeService.getTicksInYear()*GameConst.getMinimumKyotoRejoinTime()) {
 			isKyotoMember=true;
 			joinTime = timeService.getCurrentTick();
+			
+			try {
+				environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
+			} catch (ActionHandlingException e) {
+				System.out.println("Exception wilst adding to monitor: " + e);
+				e.printStackTrace();
+			}
 			return true;
 		}
 		return false;
