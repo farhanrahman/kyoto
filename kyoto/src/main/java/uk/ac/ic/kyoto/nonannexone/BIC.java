@@ -1,6 +1,7 @@
 package uk.ac.ic.kyoto.nonannexone;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
+import uk.ac.ic.kyoto.trade.InvestmentType;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
@@ -108,12 +109,17 @@ public class BIC extends AbstractCountry {
 		else{
 			times_aim_met = 0; //reset the counter.
 			logger.info("Country has insufficient funds to meet its energy output goal");
-			financial_difference = invest_money - getAvailableToSpend();
-			generate_income(financial_difference); //out of money, generate money through CDM ;)
 			}
 		update_energy_aim(energy_aim , aim_success,times_aim_met); //update the energy aim for the next year.	
 		
+		//clean development mechanism only if country cares for environment
+		if (green_care)
+		{
+		financial_difference = invest_money - getAvailableToSpend();
+		clean_development_mechanism(financial_difference);
 		}
+		
+	}
 		
 	
 		/*function that uses EnergyUsageHandler to create factories and increase energy output
@@ -256,11 +262,11 @@ public class BIC extends AbstractCountry {
  * @throws Exception *****************************************************************************************************/
 	//uses the Clean Development Mechanism in order to sell carbon credits
 		
-	private void generate_income(double money_to_generate) throws Exception
+	private void clean_development_mechanism(double money_to_invest) throws Exception
 	{
 
-		CDM_absorption(money_to_generate);
-		CDM_reduction(money_to_generate);
+		CDM_absorption(money_to_invest);
+		CDM_reduction(money_to_invest);
 		
 	}
 /*******************************************************************************************************/
@@ -289,23 +295,27 @@ private void CDM_absorption(double acquire_cash) throws Exception
 {
 
 double change_required; // change in carbon absorption in order to acquire the amount of money specified.
-double cost_of_each_unit_changed ; // unit cost of each carbon
 
 change_required = carbonAbsorptionHandler.getCarbonAbsorptionChange(acquire_cash);
 
-cost_of_each_unit_changed = acquire_cash / change_required ;
 
-broadcastSellOffer(change_required,cost_of_each_unit_changed);
+broadcastInvesteeOffer(change_required,InvestmentType.ABSORB);
 
 
 
 }
 		
 		
-/*******************************************************************************************************/
-private void CDM_reduction(double acquire_cash)
+/**
+ * @throws Exception *****************************************************************************************************/
+private void CDM_reduction(double acquire_cash) throws Exception
 {
-	
+	double change_required; // change in carbon absorption in order to acquire the amount of money specified.
+
+	change_required = carbonReductionHandler.getCarbonOutputChange(acquire_cash, getCarbonOutput(), getEnergyOutput());
+
+
+broadcastInvesteeOffer(change_required,InvestmentType.REDUCE);	
 }		
 		
 /*******************************************************************************************************/
