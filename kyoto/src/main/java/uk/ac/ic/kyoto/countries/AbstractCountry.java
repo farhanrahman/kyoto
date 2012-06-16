@@ -435,6 +435,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
     // Kyoto membership functions
     //================================================================================
 	
+	//TODO: These should either throw exceptions, or be renamed to "try to leave/join" etc.
+	
 	public boolean isKyotoMember() {
 		return isKyotoMember;
 	}
