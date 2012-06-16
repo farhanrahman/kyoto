@@ -229,15 +229,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		} // Take % of GDP for monitoring
 	}
 
-	/**
-	 * Method used for monitoring. It is called by the Monitor
-	 * @return
-	 * Real Carbon Output of a country
-	 */
-	public final double getMonitored() {
-		return carbonOutput;
-	}
-
 	protected Set<ParticipantSharedState> getSharedState(){
 		Set<ParticipantSharedState> s = super.getSharedState();
 		s.add(ParticipantCarbonReportingService.createSharedState(this.getCarbonEmissionReports(), this.getID()));
