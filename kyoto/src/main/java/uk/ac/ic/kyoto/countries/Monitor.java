@@ -46,13 +46,6 @@ public class Monitor extends EnvironmentService {
 	@Inject
 	public Monitor(EnvironmentSharedStateAccess sharedState, EnvironmentServiceProvider provider) {
 		super(sharedState);
-	
-		try {
-			this.timeService = provider.getEnvironmentService(GlobalTimeService.class);
-		} catch (UnavailableServiceException e) {
-			System.out.println("Unable to get environment service 'TimeService'.");
-			e.printStackTrace();
-		}
 		
 		this.provider = provider;
 	}
@@ -80,8 +73,10 @@ public class Monitor extends EnvironmentService {
 	
 	@EventListener
 	public void yearlyFunction(EndOfYearCycle e) {
-		checkReports();
-		monitorCountries();
+		if (timeService.getCurrentYear() != 0) {
+			checkReports();
+			monitorCountries();
+		}
 	}
 	
 	private void checkReports () {
@@ -89,7 +84,7 @@ public class Monitor extends EnvironmentService {
 			double reportedEmission = carbonReportingService.getReport(country.getID(), SimTime.get());
 			double emissionTarget = carbonTargetingService.queryYearTarget(country.getID(), (timeService.getCurrentYear() - 1));
 
-			if (reportedEmission > emissionTarget) {
+			if (Math.round(reportedEmission) > Math.round(emissionTarget)) {
 				targetSanction(country, emissionTarget - reportedEmission);
 			}
 		}
@@ -100,6 +95,13 @@ public class Monitor extends EnvironmentService {
 	@EventListener
 	private void initialize(EndOfTimeCycle E) {
 		if (SimTime.get().intValue() == 1) {
+			try {
+				this.timeService = provider.getEnvironmentService(GlobalTimeService.class);
+			} catch (UnavailableServiceException e) {
+				System.out.println("Unable to get environment service 'TimeService'.");
+				e.printStackTrace();
+			}
+			
 			// Register for the carbon reporting service
 			try {
 				this.carbonReportingService = provider.getEnvironmentService(CarbonReportingService.class);
@@ -133,14 +135,14 @@ public class Monitor extends EnvironmentService {
 			// monitor all the countries
 			
 			for (AbstractCountry country: memberStates.values()) {
-				double realCarbonOutput = country.getMonitored();
+				double realCarbonOutput = country.getCarbonOutput();
 				cash -= GameConst.getMonitoringPrice();
 				double reportedCarbonOutput = carbonReportingService.getReport(country.getID(), SimTime.get());
-				if (realCarbonOutput != reportedCarbonOutput) {
+				if (Math.round(realCarbonOutput) != Math.round(reportedCarbonOutput)) {
 					cheaters.add(country.getID());
 					cheatSanction(country);
 					double targetDiff = realCarbonOutput - carbonTargetingService.queryYearTarget(country.getID(), (timeService.getCurrentYear()-1));
-					if (targetDiff > 0) {
+					if (Math.round(targetDiff) > 0) {
 						targetSanction(country, targetDiff);
 					}
 				}
@@ -163,17 +165,17 @@ public class Monitor extends EnvironmentService {
 				
 				// Monitor the country
 				cash -= GameConst.getMonitoringPrice();
-				double realCarbonOutput = pickedCountry.getMonitored();
+				double realCarbonOutput = pickedCountry.getCarbonOutput();
 						
 				// Note that the country was monitored
 				monitoredCountries.add(pickedCountry);
 				
 				// Apply sanctions if a country has cheated and rechecks against target
 				double reportedCarbonOutput = carbonReportingService.getReport(pickedCountry.getID(), SimTime.get());
-				if (realCarbonOutput != reportedCarbonOutput) {
+				if ( Math.round(realCarbonOutput) != Math.round(reportedCarbonOutput)) {
 					cheaters.add(pickedCountry.getID());
 					cheatSanction(pickedCountry);
-					double targetDiff = realCarbonOutput - carbonTargetingService.queryYearTarget(pickedCountry.getID(), (timeService.getCurrentYear() - 1));
+					double targetDiff = Math.round(realCarbonOutput - carbonTargetingService.queryYearTarget(pickedCountry.getID(), (timeService.getCurrentYear() - 1)));
 					if (targetDiff > 0) {
 						targetSanction(pickedCountry, targetDiff);
 					}
@@ -219,7 +221,7 @@ public class Monitor extends EnvironmentService {
 		carbonTargetingService.addCountryPenalty(country.getID(), penalty);
 		
 		// Charge the country for not meeting the target
-		country.setAvailableToSpend( Math.round( (country.getAvailableToSpend() - carbonExcess * GameConst.getSanctionRate())) );
+		country.setAvailableToSpend(Math.round((country.getAvailableToSpend() - carbonExcess * GameConst.getSanctionRate())));
 		
 	}
 	

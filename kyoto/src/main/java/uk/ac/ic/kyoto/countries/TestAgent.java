@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
 import uk.ac.ic.kyoto.trade.TradeType;
+import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.ActionHandlingException;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.messaging.Performative;
@@ -67,6 +68,11 @@ public class TestAgent extends AbstractCountry {
 		}
 
 	}
+	
+	@Override
+	public void reportCarbonOutput() throws ActionHandlingException {
+		environment.act(new SubmitCarbonEmissionReport(0.0), getID(), authkey);
+	};
 	
 	@Override
 	public void behaviour() {
@@ -150,13 +156,13 @@ public class TestAgent extends AbstractCountry {
 	}
 
 	@Override
-	public void YearlyFunction() {
+	public void yearlyFunction() {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void SessionFunction() {
+	public void sessionFunction() {
 		// TODO Auto-generated method stub
 		
 	};

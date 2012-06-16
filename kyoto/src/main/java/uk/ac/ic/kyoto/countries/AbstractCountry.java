@@ -7,6 +7,7 @@ import java.util.UUID;
 import uk.ac.ic.kyoto.actions.AddRemoveFromMonitor;
 import uk.ac.ic.kyoto.actions.AddRemoveFromMonitor.addRemoveType;
 import uk.ac.ic.kyoto.actions.AddToCarbonTarget;
+import uk.ac.ic.kyoto.actions.ApplyMonitorTax;
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
 import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
 import uk.ac.ic.kyoto.market.Economy;
@@ -77,8 +78,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	/* Environment Services */
 	
 	protected ParticipantCarbonReportingService reportingService;
-	protected CarbonTarget carbonTarget;
-	protected Monitor monitor;
 	protected ParticipantTimeService timeService;
 	
 	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
@@ -95,6 +94,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	/*Flag for single initialisation of AbstractCountry*/
 	private boolean initialised = false;
+
+	private double prevEnergyOutput; //Keeps track of the previous years EnergyOutput to calculate GDP
 	
 	//================================================================================
     // Constructors and Initializers
@@ -190,11 +191,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
 					} catch (ActionHandlingException e) {
 						e.printStackTrace();
 					}
-					YearlyFunction();
+					yearlyFunction();
 				}
 				if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
 					resetCarbonOffset();
-					SessionFunction();
+					sessionFunction();
 				}
 				simTick++;
 //			}else{
@@ -221,17 +222,13 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 */
 	final void MonitorTax() {
 		// Give a tax to Monitor agent for monitoring every year
-		this.monitor.applyTaxation(GDP*GameConst.getMonitorCostPercentage()); // Take % of GDP for monitoring
-		availableToSpend -= GDP*GameConst.getMonitorCostPercentage();
-	}
-
-	/**
-	 * Method used for monitoring. It is called by the Monitor
-	 * @return
-	 * Real Carbon Output of a country
-	 */
-	public final double getMonitored() {
-		return carbonOutput;
+		try {
+			environment.act(new ApplyMonitorTax(GDP*GameConst.getMonitorCostPercentage()), getID(), authkey);
+			availableToSpend -= GDP*GameConst.getMonitorCostPercentage();
+		} catch (ActionHandlingException e) {
+			logger.warn(e.getMessage(), e);
+			e.printStackTrace();
+		} // Take % of GDP for monitoring
 	}
 
 	protected Set<ParticipantSharedState> getSharedState(){
@@ -272,8 +269,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 
 	@Override
 	abstract protected void processInput(Input input);
-	abstract protected void YearlyFunction();
-	abstract protected void SessionFunction();
+	abstract protected void yearlyFunction();
+	abstract protected void sessionFunction();
 	abstract protected void initialiseCountry();
 	
 	//================================================================================
@@ -300,7 +297,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			marketStateFactor = GameConst.getRecessionMarketState();
 		}
 		
-		GDPRate += marketStateFactor + (GameConst.getGrowthScaler()*(energyOutput))/GDP;
+		GDPRate += marketStateFactor + GameConst.getGrowthScaler()*(energyOutput-prevEnergyOutput)/(2*GDP);
 		GDPRate /= 100; // Needs to be a % for rate formula
 		} catch (UnavailableServiceException e) {
 			System.out.println("Unable to reach economy service.");
@@ -437,6 +434,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	//================================================================================
     // Kyoto membership functions
     //================================================================================
+	
+	//TODO: These should either throw exceptions, or be renamed to "try to leave/join" etc.
 	
 	public boolean isKyotoMember() {
 		return isKyotoMember;

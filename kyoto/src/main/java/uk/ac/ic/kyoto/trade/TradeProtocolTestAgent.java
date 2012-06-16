@@ -61,13 +61,13 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 	
 
 	@Override
-	public void YearlyFunction() {
+	public void yearlyFunction() {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void SessionFunction() {
+	public void sessionFunction() {
 		// TODO Auto-generated method stub
 		
 	}
