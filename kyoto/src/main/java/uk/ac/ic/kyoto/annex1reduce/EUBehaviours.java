@@ -3,7 +3,6 @@ package uk.ac.ic.kyoto.annex1reduce;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-
 import alice.tuprolog.InvalidTheoryException;
 import alice.tuprolog.Prolog;
 import alice.tuprolog.Theory;
@@ -17,26 +16,19 @@ import alice.tuprolog.Theory;
 final class EUBehaviours {
 	
 	private EUBehaviours() {}
-	
 	final private static String DEFAULT_THEORY_PATH = "src/main/resources/prolog/EUBehaviour/";
-	
 	final private static Theory DEFAULT_EU_BEHAVIOUR = loadDefaultBehaviour();
-	
 
 	public static Prolog getEngine(final String name) {
-		
-		
-		Prolog engine = new Prolog();
-
 		//TODO make this return something other than the default theory
 
+		Prolog engine = new Prolog();
 		try {
 			engine.setTheory(DEFAULT_EU_BEHAVIOUR);
 		}catch (InvalidTheoryException e) {
 			System.out.println("The prolog theory for " + name + " is invalid. Please correct it and try again.");
 		}
 		return engine;
-		
 	}
 
 	private static Theory loadDefaultBehaviour() {
@@ -51,5 +43,4 @@ final class EUBehaviours {
 		}
 		return t;
 	}
-	
 }
