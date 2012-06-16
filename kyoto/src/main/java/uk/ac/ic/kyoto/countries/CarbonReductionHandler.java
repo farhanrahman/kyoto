@@ -56,10 +56,9 @@ public final class CarbonReductionHandler{
 			double cleanIndustryAfter = calculateCleanIndustryMeasure((carbonOutput - carbonOutputChange), energyOutput);
 			
 			// Get average price of single ton of carbon output reduction
-			double averageUnitPrice = (GameConst.CARBON_REDUCTION_PRICE_MIN +
-									    ( (GameConst.CARBON_REDUCTION_PRICE_MAX - GameConst.CARBON_REDUCTION_PRICE_MIN) * 
-									      (cleanIndustryBefore + cleanIndustryAfter) /
-									      (2) ) );
+			double averageUnitPrice = GameConst.CARBON_REDUCTION_PRICE_MIN +
+										(GameConst.CARBON_REDUCTION_PRICE_MAX - GameConst.CARBON_REDUCTION_PRICE_MIN) * 
+									    (cleanIndustryBefore + cleanIndustryAfter)/2;
 			
 			// Calculate the investment that is required
 			investmentRequired = (averageUnitPrice * carbonOutputChange);

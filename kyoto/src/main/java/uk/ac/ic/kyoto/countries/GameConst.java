@@ -108,7 +108,7 @@ public final class GameConst {
 	 */
 	public static final int MINIMUM_KYOTO_MEMBERSHIP_DURATION = 10;
 	
-	public GameConst() {
+	private GameConst() {
 		
 	}
 }

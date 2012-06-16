@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
-
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfSessionCycle;
@@ -18,7 +17,6 @@ import uk.ac.imperial.presage2.core.event.EventBus;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
-
 import com.google.inject.Inject;
 
 /**
@@ -55,6 +53,7 @@ public class CarbonTarget extends EnvironmentService {
 	private double worldCurrentSessionTarget = 0;
 	private int sessionCounter = 0;
 	
+	@SuppressWarnings(value = {"unused"})
 	private EventBus eb;
 	private GlobalTimeService timeService;
 	private CarbonReportingService reportingService;
