@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
+
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfSessionCycle;
@@ -17,6 +19,7 @@ import uk.ac.imperial.presage2.core.event.EventBus;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
+
 import com.google.inject.Inject;
 
 /**
@@ -46,7 +49,7 @@ public class CarbonTarget extends EnvironmentService {
 	}
 	
 	private ArrayList<countryObject> participantCountries= new ArrayList<countryObject>();
-	private Map<String, Double> output1990Data = new HashMap<String, Double>();
+	private Map<String, Double> output1990Data = new ConcurrentHashMap<String, Double>();
 	private ArrayList<UUID> cheatersList = new ArrayList<UUID>();
 	
 	private double worldLastSessionTarget = 0;
@@ -173,9 +176,13 @@ public class CarbonTarget extends EnvironmentService {
 		if (cheatersList.contains(countryID)){
 			result = findCountryObject(countryID).obj.getMonitored();
 		} else {
-			Map<Integer, Double> reports = reportingService.getReport(countryID);
-			int simTime = timeService.getTicksInYear() * (year +1);
-			result = reports.get(simTime);
+			if (year < 0) {
+				result = output1990Data.get(findCountryObject(countryID).obj.getISO());
+			} else {
+				Map<Integer, Double> reports = reportingService.getReport(countryID);
+				int simTime = timeService.getTicksInYear() * (year +1);
+				result = reports.get(simTime);
+			}
 		}
 		return result;
 	}
