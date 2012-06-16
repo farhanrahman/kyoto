@@ -20,6 +20,7 @@ public class USAgent extends AbstractCountry {
 			double GDPRate, double energyOutput, double carbonOutput){
 		super(id, name, ISO, landArea, arableLandArea, GDP,
 				GDPRate, energyOutput, carbonOutput);
+		leaveKyoto();
 		SetInitialPoliticalParty();
 		SetInitialIntensityRatio();
 	}
