@@ -2,23 +2,16 @@ package uk.ac.ic.kyoto;
 
 import java.util.HashSet;
 import java.util.Set;
-<<<<<<< HEAD
-
-=======
 import uk.ac.ic.kyoto.actions.AddToCarbonTargetHandler;
 import uk.ac.ic.kyoto.actions.AddRemoveFromMonitorHandler;
 import uk.ac.ic.kyoto.actions.QueryEmissionsTargetHandler;
->>>>>>> development
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReportHandler;
 import uk.ac.ic.kyoto.countries.CarbonTarget;
 import uk.ac.ic.kyoto.countries.Monitor;
 import uk.ac.ic.kyoto.countries.TestAgent;
 import uk.ac.ic.kyoto.market.Economy;
-<<<<<<< HEAD
 import uk.ac.ic.kyoto.roguestates.CanadaAgent;
 import uk.ac.ic.kyoto.roguestates.TestAbsorptionHandlerAgent;
-=======
->>>>>>> development
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
