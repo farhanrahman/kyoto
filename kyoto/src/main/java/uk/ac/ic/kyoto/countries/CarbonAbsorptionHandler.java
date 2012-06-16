@@ -161,7 +161,7 @@ public final class CarbonAbsorptionHandler {
 	 * @param carbonAbsorptionChange
 	 * Increase in carbon absorption.
 	 */
-	public final void investInCarbonAbsorption(double carbonAbsorptionChange) throws Exception, NotEnoughCarbonOutputException, NotEnoughCashException {
+	public final void investInCarbonAbsorption(double carbonAbsorptionChange) throws Exception, NotEnoughLandException, NotEnoughCashException {
 		double investmentAmount;
 		
 		try {

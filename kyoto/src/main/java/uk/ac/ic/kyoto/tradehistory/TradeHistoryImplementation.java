@@ -42,4 +42,15 @@ public class TradeHistoryImplementation implements TradeHistory{
 		}
 	}
 	
+	public void removeTradeHistoryWithID(UUID id){
+		synchronized(history){
+			for(Integer time : history.keySet()){
+				for(UUID uid : history.get(time).keySet()){
+					if(uid.equals(id))
+						history.get(time).remove(uid);
+				}
+			}
+		}		
+	}
+	
 }

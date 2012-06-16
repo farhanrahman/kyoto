@@ -173,7 +173,7 @@ public class Simulation extends InjectedSimulation {
 		//s.addParticipant(p1);
 		//s.addParticipant(p2);
 //		AbstractParticipant p = new CanadaAgent(Random.randomUUID(),"CANADA","CAN",20000,10000,5000000,3,200000,28000,0,50000,30000);
-		AbstractParticipant p1 = new TradeProtocolTestAgent(Random.randomUUID(), "Stuart", "CS1", 20000, 10000, /*5000000*/2, 3, 200000, 28000, 50000);
+		AbstractParticipant p1 = new TradeProtocolTestAgent(Random.randomUUID(), "Stuart", "CS1", 20000, 10000, 5000000, 3, 200000, 28000, 50000);
 		AbstractParticipant p2 = new TradeProtocolTestAgent(Random.randomUUID(), "Farhan", "CS2", 20000, 10000, 5000000, 3, 200000, 28000, 50000);
 		//AbstractParticipant p1 = new TestAgent(Random.randomUUID(), "Stuart", "LOL", 2000000, 1500000, 99999999999.00, 0.03, 70000, 50000);
 		//AbstractParticipant p2 = new TestAgent(Random.randomUUID(), "Lolocaust", "LOL2", 500000, 200000, 100000, 0.07, 10000, 7000);
