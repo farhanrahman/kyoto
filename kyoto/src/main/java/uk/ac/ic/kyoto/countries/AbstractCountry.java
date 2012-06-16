@@ -306,7 +306,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			marketStateFactor = GameConst.getRecessionMarketState();
 		}
 		
-		GDPRate += marketStateFactor + GameConst.getGrowthScaler()*(energyOutput-prevEnergyOutput)/(2*GDP);
+		double sum = ((((energyOutput-prevEnergyOutput)/prevEnergyOutput)*GameConst.getEnergyGrowthScaler() +marketStateFactor)+GDPRate)/2;
+		GDPRate = (GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler()));
 		GDPRate /= 100; // Needs to be a % for rate formula
 		} catch (UnavailableServiceException e) {
 			System.out.println("Unable to reach economy service.");

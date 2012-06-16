@@ -22,8 +22,11 @@ public final class GameConst {
 	/**
 	 * Normalises value of GDP rate increase
 	 */
-	private static double GROWTH_SCALER = 1;
+	private static double GROWTH_SCALER = 0.25;
 	
+	private static double ENERGY_GROWTH_SCALER = 50;
+	
+	private static double MAX_GDP_GROWTH = 7;
 	/**
 	 * Percentage of GDP available to spend on development
 	 */
@@ -162,7 +165,15 @@ public final class GameConst {
 	public static double getGrowthScaler() {
 		return GROWTH_SCALER;
 	}
+	
+	public static double getEnergyGrowthScaler(){
+		return ENERGY_GROWTH_SCALER;
+	}
 
+	public static double getMaxGDPGrowth() {
+		return MAX_GDP_GROWTH;
+	}
+	
 	public static double getPercentageOfGdp() {
 		return PERCENTAGE_OF_GDP;
 	}
