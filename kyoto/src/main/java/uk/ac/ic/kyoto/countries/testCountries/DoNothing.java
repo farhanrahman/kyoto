@@ -47,6 +47,7 @@ public class DoNothing extends AbstractCountry {
 		/*
 		 * Do nothing: basic test.
 		 */
+		this.leaveKyoto();
 	}
 
 	@Override
