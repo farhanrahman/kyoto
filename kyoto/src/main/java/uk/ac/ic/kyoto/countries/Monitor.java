@@ -89,7 +89,7 @@ public class Monitor extends EnvironmentService {
 			double reportedEmission = carbonReportingService.getReport(country.getID(), SimTime.get());
 			double emissionTarget = carbonTargetingService.queryYearTarget(country.getID(), (timeService.getCurrentYear() - 1));
 
-			if (reportedEmission > emissionTarget) {
+			if (Math.round(reportedEmission) > Math.round(emissionTarget)) {
 				targetSanction(country, emissionTarget - reportedEmission);
 			}
 		}
@@ -136,11 +136,11 @@ public class Monitor extends EnvironmentService {
 				double realCarbonOutput = country.getMonitored();
 				cash -= GameConst.getMonitoringPrice();
 				double reportedCarbonOutput = carbonReportingService.getReport(country.getID(), SimTime.get());
-				if (realCarbonOutput != reportedCarbonOutput) {
+				if (Math.round(realCarbonOutput) != Math.round(reportedCarbonOutput)) {
 					cheaters.add(country.getID());
 					cheatSanction(country);
 					double targetDiff = realCarbonOutput - carbonTargetingService.queryYearTarget(country.getID(), (timeService.getCurrentYear()-1));
-					if (targetDiff > 0) {
+					if (Math.round(targetDiff) > 0) {
 						targetSanction(country, targetDiff);
 					}
 				}
@@ -170,10 +170,10 @@ public class Monitor extends EnvironmentService {
 				
 				// Apply sanctions if a country has cheated and rechecks against target
 				double reportedCarbonOutput = carbonReportingService.getReport(pickedCountry.getID(), SimTime.get());
-				if (realCarbonOutput != reportedCarbonOutput) {
+				if ( Math.round(realCarbonOutput) != Math.round(reportedCarbonOutput)) {
 					cheaters.add(pickedCountry.getID());
 					cheatSanction(pickedCountry);
-					double targetDiff = realCarbonOutput - carbonTargetingService.queryYearTarget(pickedCountry.getID(), (timeService.getCurrentYear() - 1));
+					double targetDiff = Math.round(realCarbonOutput - carbonTargetingService.queryYearTarget(pickedCountry.getID(), (timeService.getCurrentYear() - 1)));
 					if (targetDiff > 0) {
 						targetSanction(pickedCountry, targetDiff);
 					}
@@ -219,7 +219,7 @@ public class Monitor extends EnvironmentService {
 		carbonTargetingService.addCountryPenalty(country.getID(), penalty);
 		
 		// Charge the country for not meeting the target
-		country.setAvailableToSpend( Math.round( (country.getAvailableToSpend() - carbonExcess * GameConst.getSanctionRate())) );
+		country.setAvailableToSpend(Math.round((country.getAvailableToSpend() - carbonExcess * GameConst.getSanctionRate())));
 		
 	}
 	
