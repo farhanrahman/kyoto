@@ -112,7 +112,7 @@ public class AnnexOneSustain extends AbstractCountry {
 	 * - Updates the internal variables.
 	 */
 	@Override
-	public void YearlyFunction() {
+	public void yearlyFunction() {
 		calculateLastYearFactor();
 		calculateNewSellingTarget();
 		logger.info("Internal Yearly Data of Post-Communist Country " + this.getName() + " was updated");
@@ -122,7 +122,7 @@ public class AnnexOneSustain extends AbstractCountry {
 	 * Function called at the end of each session.
 	 */
 	@Override
-	public void SessionFunction() {
+	public void sessionFunction() {
 		// TODO implement
 	}
 	

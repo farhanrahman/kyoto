@@ -29,7 +29,7 @@ public class EU extends EnvironmentService {
 	@EventListener
 	public void monitorCountries (EndOfYearCycle e) {
 		for (AnnexOneReduce a : euMemberStates) {
-			double realCarbonOutput = a.getMonitored();
+			double realCarbonOutput = a.getCarbonOutput();
 			Serializable state = sharedState.get(CarbonReportingService.name, a.getID());
 			@SuppressWarnings("unchecked")
 			Map<Integer, Double> reports = (Map<Integer, Double>)state;

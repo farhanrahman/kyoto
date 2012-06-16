@@ -61,13 +61,13 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 	
 
 	@Override
-	public void YearlyFunction() {
+	public void yearlyFunction() {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void SessionFunction() {
+	public void sessionFunction() {
 		// TODO Auto-generated method stub
 		
 	}
@@ -112,7 +112,7 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 		}
 		
 		
-		this.tradeProtocol.incrementTime();
+		//this.tradeProtocol.incrementTime();
 		logger.info("Myname: " + this.getName() + ", I have this much money: " + this.getAvailableToSpend() + ".");
 		//logger.info("Myname: " + this.getName() + ", My GDPRate is : " + GDPRate);
 		//logger.info("Myname: " + this.getName() + ", My carbon output is : " + carbonOutput);

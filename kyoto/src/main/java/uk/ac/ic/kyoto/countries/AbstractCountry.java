@@ -191,11 +191,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
 					} catch (ActionHandlingException e) {
 						e.printStackTrace();
 					}
-					YearlyFunction();
+					yearlyFunction();
 				}
 				if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
 					resetCarbonOffset();
-					SessionFunction();
+					sessionFunction();
 				}
 				simTick++;
 //			}else{
@@ -229,15 +229,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			logger.warn(e.getMessage(), e);
 			e.printStackTrace();
 		} // Take % of GDP for monitoring
-	}
-
-	/**
-	 * Method used for monitoring. It is called by the Monitor
-	 * @return
-	 * Real Carbon Output of a country
-	 */
-	public final double getMonitored() {
-		return carbonOutput;
 	}
 
 	protected Set<ParticipantSharedState> getSharedState(){
@@ -278,8 +269,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 
 	@Override
 	abstract protected void processInput(Input input);
-	abstract protected void YearlyFunction();
-	abstract protected void SessionFunction();
+	abstract protected void yearlyFunction();
+	abstract protected void sessionFunction();
 	abstract protected void initialiseCountry();
 	
 	//================================================================================
@@ -445,46 +436,55 @@ public abstract class AbstractCountry extends AbstractParticipant {
     // Kyoto membership functions
     //================================================================================
 	
+	//TODO: These should either throw exceptions, or be renamed to "try to leave/join" etc.
+	
 	public boolean isKyotoMember() {
 		return isKyotoMember;
 	}
 	
 	private int leaveTime=0, joinTime=0;
 	
-	protected final boolean leaveKyoto() {
-		try {
-			environment.act(new AddRemoveFromMonitor(this, addRemoveType.REMOVE), getID(), authkey);
-		} catch (ActionHandlingException e) {
-			System.out.println("Exception wilst removing from monitor: " + e);
-			e.printStackTrace();
-		}
-		
+	protected final void leaveKyoto() throws IllegalStateException {
 		if (timeService.getCurrentTick() == 0) {
 			isKyotoMember = false;
-			return true;
+			
+			try {
+				environment.act(new AddRemoveFromMonitor(this, addRemoveType.REMOVE), getID(), authkey);
+			} catch (ActionHandlingException e) {
+				System.out.println("Exception wilst removing from monitor: " + e);
+				e.printStackTrace();
+			}
+			return;
 		}
 		else if (timeService.getCurrentTick() - joinTime >= timeService.getTicksInYear()*GameConst.getMinimumKyotoMembershipDuration()) {
 			isKyotoMember=false;
 			leaveTime=timeService.getCurrentTick();
-			return true;
+			
+			try {
+				environment.act(new AddRemoveFromMonitor(this, addRemoveType.REMOVE), getID(), authkey);
+			} catch (ActionHandlingException e) {
+				System.out.println("Exception wilst removing from monitor: " + e);
+				e.printStackTrace();
+			}
+			return;
 		}
-		return false;
+		throw new IllegalStateException("Cannot leave Kyoto Protocol.");
 	}
 	
-	protected final boolean joinKyoto() {
-		try {
-			environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
-		} catch (ActionHandlingException e) {
-			System.out.println("Exception wilst adding to monitor: " + e);
-			e.printStackTrace();
-		}
-		
+	protected final void joinKyoto() throws IllegalStateException {
 		if (timeService.getCurrentTick() - leaveTime >= timeService.getTicksInYear()*GameConst.getMinimumKyotoRejoinTime()) {
 			isKyotoMember=true;
 			joinTime = timeService.getCurrentTick();
-			return true;
+			
+			try {
+				environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
+			} catch (ActionHandlingException e) {
+				System.out.println("Exception whilst adding to monitor: " + e);
+				e.printStackTrace();
+			}
+			return;
 		}
-		return false;
+		throw new IllegalStateException("Cannot join Kyoto Protocol.");
 	}
 	
 	//================================================================================

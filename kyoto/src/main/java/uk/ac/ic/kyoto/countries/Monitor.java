@@ -135,7 +135,7 @@ public class Monitor extends EnvironmentService {
 			// monitor all the countries
 			
 			for (AbstractCountry country: memberStates.values()) {
-				double realCarbonOutput = country.getMonitored();
+				double realCarbonOutput = country.getCarbonOutput();
 				cash -= GameConst.getMonitoringPrice();
 				double reportedCarbonOutput = carbonReportingService.getReport(country.getID(), SimTime.get());
 				if (Math.round(realCarbonOutput) != Math.round(reportedCarbonOutput)) {
@@ -165,7 +165,7 @@ public class Monitor extends EnvironmentService {
 				
 				// Monitor the country
 				cash -= GameConst.getMonitoringPrice();
-				double realCarbonOutput = pickedCountry.getMonitored();
+				double realCarbonOutput = pickedCountry.getCarbonOutput();
 						
 				// Note that the country was monitored
 				monitoredCountries.add(pickedCountry);

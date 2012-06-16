@@ -30,12 +30,12 @@ public class CanadaAgent extends AbstractCountry {
 	}
 	
 	@Override
-	public void YearlyFunction() {
+	public void yearlyFunction() {
 		// TODO Auto-generated method stub
 	}
 	
 	@Override
-	public void SessionFunction() {
+	public void sessionFunction() {
 		if (getCarbonOutput() - getCarbonOffset() > getEmissionsTarget()) {
 			// leave Kyoto here
 		}

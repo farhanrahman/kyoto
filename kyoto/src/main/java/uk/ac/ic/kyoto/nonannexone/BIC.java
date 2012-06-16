@@ -44,7 +44,7 @@ public class BIC extends AbstractCountry {
 	}
 /*****************************************************************************************/
 	@Override
-	public void YearlyFunction() {
+	public void yearlyFunction() {
 		// TODO implement
 		//functions that are implemented every year
 				try {
@@ -61,7 +61,7 @@ public class BIC extends AbstractCountry {
 /*****************************************************************************************/
 	
 	@Override
-	public void SessionFunction() {
+	public void sessionFunction() {
 		// TODO implement 
 		// carbonAbsorption to carbonOffset
 	}
