@@ -31,31 +31,32 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 	protected void processInput(Input in) {
 		if (this.tradeProtocol.canHandle(in)) {
 			this.tradeProtocol.handle(in);
-		}
+		}else{
 
-		if(in instanceof Message){
-			try{
-				@SuppressWarnings("unchecked")
-				Message<OfferMessage> m = (Message<OfferMessage>) in;
-				OfferMessage o = m.getData();
-				if(!this.tradeProtocol
-						.getActiveConversationMembers()
-							.contains(m.getFrom())){
-					try {
-						this.tradeProtocol.offer(
-								m.getFrom(), 
-								o.getOfferQuantity(), 
-								o.getOfferUnitCost(), 
-								o);
-					} catch (FSMException e) {
-						e.printStackTrace();
+			if(in instanceof Message){
+				try{
+					@SuppressWarnings("unchecked")
+					Message<OfferMessage> m = (Message<OfferMessage>) in;
+					OfferMessage o = m.getData();
+					if(!this.tradeProtocol
+							.getActiveConversationMembers()
+								.contains(m.getFrom())){
+						try {
+							this.tradeProtocol.offer(
+									m.getFrom(), 
+									o.getOfferQuantity(), 
+									o.getOfferUnitCost(), 
+									o);
+						} catch (FSMException e) {
+							e.printStackTrace();
+						}
 					}
+				}catch(ClassCastException e){
+					logger.warn("Class cast exception");
+					logger.warn(e);
 				}
-			}catch(ClassCastException e){
-				logger.warn("Class cast exception");
-				logger.warn(e);
 			}
-		}			
+		}
 	}
 	
 
@@ -98,26 +99,18 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 		if(this.getName().equals("Stuart")){
 			//if(counter == 0){
 				int quantity = 10;
-				double unitCost = 2;
-				this.broadcastBuyOffer(quantity, unitCost);
+				//double unitCost = 2;
+				//this.broadcastBuyOffer(quantity, unitCost);
 			//	counter++;
 			
-			  	//int quantity =10;
-			  	//double unitCost =0;
-			  	//InvestmentType i = InvestmentType.ABSORB;
+			  	InvestmentType i = InvestmentType.ABSORB;
 			  	//InvestmentType i = InvestmentType.REDUCE;
-			 	
-				//try {
-					//unitCost = this.carbonAbsorptionHandler.getInvestmentRequired(quantity)/quantity;
-					//unitCost = this.carbonReductionHandler.getInvestmentRequired(quantity)/quantity;
-				//} catch (Exception e) {
-				//	e.printStackTrace();
-				//}
-			  
-			  	//this.broadcastInvesteeOffer(quantity, unitCost, i);
+		  
+			  	this.broadcastInvesteeOffer(quantity, i);
 			
 			//}
 		}
+		
 		
 		this.tradeProtocol.incrementTime();
 		logger.info("Myname: " + this.getName() + ", I have this much money: " + this.getAvailableToSpend() + ".");
