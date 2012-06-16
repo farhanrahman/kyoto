@@ -443,7 +443,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	private int leaveTime=0, joinTime=0;
 	
-	protected final boolean leaveKyoto() {
+	protected final void leaveKyoto() throws IllegalStateException {
 		if (timeService.getCurrentTick() == 0) {
 			isKyotoMember = false;
 			
@@ -453,8 +453,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				System.out.println("Exception wilst removing from monitor: " + e);
 				e.printStackTrace();
 			}
-			
-			return true;
+			return;
 		}
 		else if (timeService.getCurrentTick() - joinTime >= timeService.getTicksInYear()*GameConst.getMinimumKyotoMembershipDuration()) {
 			isKyotoMember=false;
@@ -466,13 +465,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				System.out.println("Exception wilst removing from monitor: " + e);
 				e.printStackTrace();
 			}
-			
-			return true;
+			return;
 		}
-		return false;
+		throw new IllegalStateException("Cannot leave Kyoto Protocol.");
 	}
 	
-	protected final boolean joinKyoto() {
+	protected final void joinKyoto() throws IllegalStateException {
 		if (timeService.getCurrentTick() - leaveTime >= timeService.getTicksInYear()*GameConst.getMinimumKyotoRejoinTime()) {
 			isKyotoMember=true;
 			joinTime = timeService.getCurrentTick();
@@ -480,12 +478,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			try {
 				environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
 			} catch (ActionHandlingException e) {
-				System.out.println("Exception wilst adding to monitor: " + e);
+				System.out.println("Exception whilst adding to monitor: " + e);
 				e.printStackTrace();
 			}
-			return true;
+			return;
 		}
-		return false;
+		throw new IllegalStateException("Cannot join Kyoto Protocol.");
 	}
 	
 	//================================================================================
