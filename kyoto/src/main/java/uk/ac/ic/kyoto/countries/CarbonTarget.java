@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 
+import uk.ac.ic.kyoto.CarbonData1990;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfSessionCycle;
@@ -49,7 +49,6 @@ public class CarbonTarget extends EnvironmentService {
 	}
 	
 	private ArrayList<countryObject> participantCountries= new ArrayList<countryObject>();
-	private Map<String, Double> output1990Data = new ConcurrentHashMap<String, Double>();
 	private ArrayList<UUID> cheatersList = new ArrayList<UUID>();
 	
 	private double worldLastSessionTarget = 0;
@@ -83,18 +82,6 @@ public class CarbonTarget extends EnvironmentService {
 	public void addMemberState(AbstractCountry state) {
 		countryObject memberState = new countryObject(state);
 		this.participantCountries.add(memberState);
-		
-		double Min = -1000.00;
-		double Max = 1000.00;
-		
-		add1990OutputData(state.getISO(), state.getCarbonOutput() + Min + (Math.random() * ((Max - Min) + 1)));
-	}
-	
-	/**
-	 * Adds 1990 output data to carbon target service (used for initial targets)
-	 */
-	public void add1990OutputData(String ISO, double outputData){
-		this.output1990Data.put(ISO, outputData);
 	}
 	
 	public double querySessionTarget(UUID countryID) {
@@ -159,7 +146,7 @@ public class CarbonTarget extends EnvironmentService {
 		for (countryObject country : participantCountries) {
 			double data = 0;
 			try {
-				data = output1990Data.get(country.obj.getISO());
+				data = CarbonData1990.get(country.obj.getISO());
 			} catch (Exception e) {
 				System.out.println("1990 Data not Loaded for country: " + country.obj.getName());
 				e.printStackTrace();
@@ -182,7 +169,7 @@ public class CarbonTarget extends EnvironmentService {
 			result = findCountryObject(countryID).obj.getMonitored();
 		} else {
 			if (year < 0) {
-				result = output1990Data.get(findCountryObject(countryID).obj.getISO());
+				result = CarbonData1990.get(findCountryObject(countryID).obj.getISO());
 			} else {
 				Map<Integer, Double> reports = reportingService.getReport(countryID);
 				int simTime = timeService.getTicksInYear() * (year +1);
