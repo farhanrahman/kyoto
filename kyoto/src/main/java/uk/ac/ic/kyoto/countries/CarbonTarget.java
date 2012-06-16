@@ -166,7 +166,7 @@ public class CarbonTarget extends EnvironmentService {
 	private double getReportedCarbonOutput(UUID countryID, int year){
 		double result;
 		if (cheatersList.contains(countryID)){
-			result = findCountryObject(countryID).obj.getMonitored();
+			result = findCountryObject(countryID).obj.getCarbonOutput();
 		} else {
 			if (year < 0) {
 				result = CarbonData1990.get(findCountryObject(countryID).obj.getISO());

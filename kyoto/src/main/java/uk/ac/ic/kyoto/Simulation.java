@@ -24,6 +24,7 @@ import uk.ac.imperial.presage2.util.environment.AbstractEnvironmentModule;
 import uk.ac.imperial.presage2.util.network.NetworkModule;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
 
 public class Simulation extends InjectedSimulation {
 	
@@ -92,7 +93,7 @@ public class Simulation extends InjectedSimulation {
 		super(modules);
 		// TODO Auto-generated constructor stub
 	}
-
+	
 	@Override
 	protected void addToScenario(Scenario s) {
 		// TODO Auto-generated method stub
@@ -204,13 +205,13 @@ public class Simulation extends InjectedSimulation {
 		//new TestAgent(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput)
 		AbstractParticipant p1 = new TestAgent(Random.randomUUID(), "Stuart", "LOL", 2000000, 1500000, 99999999999.00, 0.03, 70000, 50000);
 		AbstractParticipant p2 = new TestAgent(Random.randomUUID(), "Lolocaust", "LOL2", 500000, 200000, 100000, 0.07, 10000, 7000);
+		
 		s.addParticipant(p1);
 		s.addParticipant(p2);
 		CarbonData1990.addCountry("LOL", 50000);
 		CarbonData1990.addCountry("LOL2", 50000);
 		
 		
-
 		//AbstractParticipant p3 = new TradeProtocolTestAgent(Random.randomUUID(), "TEST1", "TST");
 		//AbstractParticipant p4 = new TradeProtocolTestAgent(Random.randomUUID(), "TEST2", "TST");
 		//SimulationAgent a = new SimulationAgent(Random.randomUUID(), "SimAgent", Integer.parseInt(endTime));
@@ -236,5 +237,4 @@ public class Simulation extends InjectedSimulation {
 		
 		//s.addParticipant(ABSVALUETEST);
 	}
-
 }
