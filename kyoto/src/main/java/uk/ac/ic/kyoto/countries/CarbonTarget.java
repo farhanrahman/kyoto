@@ -100,6 +100,10 @@ public class CarbonTarget extends EnvironmentService {
 		return obj.yearTargets.get(year);
 	}
 	
+	public double queryYearTarget(UUID countryID) {
+		return queryYearTarget(countryID, timeService.getCurrentYear());
+	}
+	
 	void addCountryPenalty(UUID countryID, double penaltyValue) {
 		try {
 			this.exclusiveAccess.acquire();
