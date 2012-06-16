@@ -18,8 +18,8 @@ public class TickHistory{
 	
 	private ArrayList<Offer> messages;
 	
-	private int tradeHigh;
-	private int tradeLow;
+	private double tradeHigh;
+	private double tradeLow;
 	private int tradeNo;
 	private int tradeSum;
 	
@@ -63,7 +63,7 @@ public class TickHistory{
 	 */
 	public void addMessage(Offer m) throws Exception{
 	
-		int unitCost = m.getUnitCost();
+		double unitCost = m.getUnitCost();
 		
 		if (unitCost > tradeHigh){
 			tradeHigh = unitCost;
@@ -83,11 +83,11 @@ public class TickHistory{
 		return Collections.unmodifiableList(messages);
 	}
 
-	public int getTradeHigh() {
+	public double getTradeHigh() {
 		return tradeHigh;
 	}
 
-	public int getTradeLow() {
+	public double getTradeLow() {
 		return tradeLow;
 	}
 
@@ -140,7 +140,7 @@ public class TickHistory{
 	
 	@Override
 	public int hashCode() {
-		int result = 73;
+		double result = 73;
 		
 		result = 57 * result + this.investmentHigh;
 		result = 57 * result + this.investmentLow;
@@ -156,7 +156,7 @@ public class TickHistory{
 		
 		result = 57 * result + this.messages.hashCode();
 		
-		return result;
+		return (int) result;
 	}
 	
 }
