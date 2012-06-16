@@ -80,8 +80,10 @@ public class Monitor extends EnvironmentService {
 	
 	@EventListener
 	public void yearlyFunction(EndOfYearCycle e) {
-		checkReports();
-		monitorCountries();
+		if (timeService.getCurrentYear() != 0) {
+			checkReports();
+			monitorCountries();
+		}
 	}
 	
 	private void checkReports () {
