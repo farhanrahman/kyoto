@@ -191,11 +191,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
 					} catch (ActionHandlingException e) {
 						e.printStackTrace();
 					}
-					YearlyFunction();
+					yearlyFunction();
 				}
 				if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
 					resetCarbonOffset();
-					SessionFunction();
+					sessionFunction();
 				}
 				simTick++;
 //			}else{
@@ -269,8 +269,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 
 	@Override
 	abstract protected void processInput(Input input);
-	abstract protected void YearlyFunction();
-	abstract protected void SessionFunction();
+	abstract protected void yearlyFunction();
+	abstract protected void sessionFunction();
 	abstract protected void initialiseCountry();
 	
 	//================================================================================
