@@ -45,6 +45,7 @@ public final class CarbonAbsorptionHandler {
 	 * Cost of absorbing carbon by the specified amount.
 	 */
 	public final double getInvestmentRequired(double carbonAbsorptionChange, double arableLandArea) throws Exception {
+
 		double investmentRequired;
 		
 		try {
@@ -56,18 +57,16 @@ public final class CarbonAbsorptionHandler {
 			double occupiedAreaMeasureAfter = calculateOccupiedAreaMeasure((arableLandArea - forestArea), country.landArea);
 			
 			// Get average price of single ton of additional carbon absorption
-			double averageUnitPrice = (GameConst.CARBON_ABSORPTION_PRICE_MIN +
-										( (GameConst.CARBON_ABSORPTION_PRICE_MAX - GameConst.CARBON_ABSORPTION_PRICE_MIN) *
+			double averageUnitPrice = (GameConst.getCarbonAbsorptionPriceMin() +
+										( (GameConst.getCarbonAbsorptionPriceMax() - GameConst.getCarbonAbsorptionPriceMin()) *
 										  (occupiedAreaMeasureBefore + occupiedAreaMeasureAfter) /
 										  (2) ) );
 			
 			// Calculate the investment that is required
 			investmentRequired = (averageUnitPrice * carbonAbsorptionChange);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new Exception("getInvestmentRequired function error: " + e.getMessage());
 		}
-		
 		return investmentRequired;
 	}
 	
@@ -144,7 +143,7 @@ public final class CarbonAbsorptionHandler {
 		double forestArea;
 		
 		try {
-			forestArea = (carbonAbsorptionChange * GameConst.FOREST_CARBON_ABSORPTION);
+			forestArea = (carbonAbsorptionChange * GameConst.getForestCarbonAbsorption());
 		}
 		catch (Exception e) {
 			throw new Exception("getForestAreaRequired error: " + e.getMessage());
@@ -161,41 +160,30 @@ public final class CarbonAbsorptionHandler {
 	 * @param carbonAbsorptionChange
 	 * Increase in carbon absorption.
 	 */
+
 	public final void investInCarbonAbsorption(double carbonAbsorptionChange) throws Exception, NotEnoughLandException, NotEnoughCashException {
 		double investmentAmount;
 		
-		try {
-			// Calculate the investment necessary to increase carbon absorption by specified amount
-			investmentAmount = getInvestmentRequired(carbonAbsorptionChange);
-			
-			// Calculate the forest area needed to plant required number of trees
-			double areaRequired = getForestAreaRequired(carbonAbsorptionChange);
-			
-			// If enough cash and arable land, proceed with the investment
-			if (investmentAmount <= this.country.availableToSpend){
-				if (areaRequired <= this.country.arableLandArea) {
-					this.country.availableToSpend -= investmentAmount;
-					this.country.carbonAbsorption += carbonAbsorptionChange;
-					this.country.arableLandArea -= areaRequired;
-				}
-				else {
-					throw new NotEnoughLandException();
-				}
+		// Calculate the investment necessary to increase carbon absorption by specified amount
+		investmentAmount = getInvestmentRequired(carbonAbsorptionChange);
+		
+		// Calculate the forest area needed to plant required number of trees
+		double areaRequired = getForestAreaRequired(carbonAbsorptionChange);
+		
+		// If enough cash and arable land, proceed with the investment
+		if (investmentAmount <= this.country.availableToSpend){
+			if (areaRequired <= this.country.arableLandArea) {
+				this.country.availableToSpend -= investmentAmount;
+				this.country.carbonAbsorption += carbonAbsorptionChange;
+				this.country.arableLandArea -= areaRequired;
 			}
 			else {
-				throw new NotEnoughCashException();
+				throw new NotEnoughLandException();
 			}
 		}
-		catch (NotEnoughLandException e) {
-			throw e;
+		else {
+			throw new NotEnoughCashException();
 		}
-		catch (NotEnoughCashException e) {
-			throw e;
-		}
-		catch (Exception e) {
-			throw new Exception("investInCarbonAbsorption function error: " + e.getMessage());
-		}
-		
 	}
 	
 	/**

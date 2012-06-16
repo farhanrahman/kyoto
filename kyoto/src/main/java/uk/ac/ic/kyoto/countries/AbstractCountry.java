@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-
+import uk.ac.ic.kyoto.actions.AddRemoveFromMonitor;
+import uk.ac.ic.kyoto.actions.AddRemoveFromMonitor.addRemoveType;
 import uk.ac.ic.kyoto.actions.AddToCarbonTarget;
-import uk.ac.ic.kyoto.actions.AddToMonitor;
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
 import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
 import uk.ac.ic.kyoto.market.Economy;
@@ -25,6 +25,7 @@ import uk.ac.imperial.presage2.core.simulator.SimTime;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 /**
+ * Class from which all countries are derived
  * 
  * @author cs2309, Adam, Sam, Stuart, Chris
  */
@@ -33,44 +34,47 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	//================================================================================
     // Definitions of Parameters of a Country
     //================================================================================
+
+	// TODO Change visibility of fields?
 	
 	final protected String 		ISO;		//ISO 3166-1 alpha-3
 	
 	/*
 	 *  Simple boolean to check if the country is a member of Kyoto
-	 *  Defaults to true. Rogue states should set this to false in their constructor
+	 *  Defaults to true. Rogue states must set this to false in their constructor
 	 */
 	private boolean isKyotoMember=true; 
 	
-	// TODO Change visibility of fields
 	/*
 	 * These variables are related to land area for
 	 * dealing with carbon absorption prices
+	 * TODO: What are the units of these?
 	 */
-	final double 		landArea;
-
-	protected 		double 		arableLandArea;
+	final double landArea;
+	protected double arableLandArea;
 	
 	/*
 	 * These variables are related to carbon emissions and 
 	 * calculating 'effective' carbon output
 	 */
-	double 		carbonOutput;		// Tons of CO2 produced every year
-	double		carbonAbsorption;	// Tons of CO2 absorbed by forests every year
-	double 		carbonOffset; 		// Tons of CO2 that the country acquired (by trading or energy absorption)
-	double		emissionsTarget;	// Number of tons of carbon you SHOULD produce
+	double carbonOutput;		// Tons of CO2 produced every year
+	double carbonAbsorption;	// Tons of CO2 absorbed by forests every year
+	double carbonOffset; 		// Tons of CO2 that the country acquired (by trading or energy absorption)
+	double emissionsTarget;		// Number of tons of carbon you SHOULD produce
 	
 	/*
 	 * These variables are related to GDP and
 	 * available funds to spend on carbon trading and industry.
 	 */
-	double 		GDP;				// GDP of the country in millions of dollars. Changes every year
-	double 		GDPRate;			// The rate in which the GDP changes in a given year. Expressed in %
-	double  		energyOutput;		// How much Carbon we would use if the whole industry was carbon based. Measured in Tons of Carbon per year
-	double 		availableToSpend;	// Measure of cash available to the country in millions of dollars. Note, can NOT be derived from GDP. Initial value can be derived from there, but cash reserves need to be able to lower independently.
+	double GDP;				// GDP of the country in millions of dollars. Changes every year
+	double GDPRate;			// The rate in which the GDP changes in a given year. Expressed in %
+	double energyOutput;		// How much Carbon we would use if the whole industry was carbon based. Measured in Tons of Carbon per year
+	double availableToSpend;	// Measure of cash available to the country in millions of dollars. Note, can NOT be derived from GDP. Initial value can be derived from there, but cash reserves need to be able to lower independently.
 	
 	
-	protected 		Map<Integer, Double> carbonEmissionReports;
+	protected Map<Integer, Double> carbonEmissionReports;
+	
+	/* Environment Services */
 	
 	protected ParticipantCarbonReportingService reportingService;
 	protected CarbonTarget carbonTarget;
@@ -102,11 +106,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.ISO = ISO;
 	}
 	
-	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
-					double GDPRate, double energyOutput, double carbonOutput) {
+	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP, double GDPRate, double energyOutput,
+			double carbonOutput) {
 
 		//TODO Validate parameters
-		
 		super(id, name);
 		
 		this.landArea = landArea;
@@ -121,7 +124,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.carbonAbsorption = 0;
 		this.carbonEmissionReports = new HashMap<Integer, Double>();
 		this.energyOutput = energyOutput;
-		
 	}
 	
 	@Override
@@ -136,11 +138,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 					e2.printStackTrace();
 				}
 				try {
-					environment.act(new AddToMonitor(this), getID(), authkey);
+					if (getIsKyotoMember())
+						environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
 				} catch (ActionHandlingException e2) {
 					e2.printStackTrace();
 				}
-				// Initialize the Action Handlers DO THEY HAVE TO BE INSTANTIATED ALL THE TIME?
+				// Initialize the Action Handlers TODO: DO THEY HAVE TO BE INSTANTIATED ALL THE TIME?
 				try {
 					timeService = getEnvironmentService(ParticipantTimeService.class);
 				} catch (UnavailableServiceException e1) {
@@ -168,23 +171,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			ex.printStackTrace();
 		}
 	}
-	
-	//================================================================================
-    // Definitions of Abstract methods
-    //================================================================================
-	
-	@Override
-	abstract protected void processInput(Input input);
-	
-	abstract protected void YearlyFunction();
-	
-	abstract protected void SessionFunction();
-	
-	abstract protected void initialiseCountry();
-	
-	//================================================================================
-    // Public methods
-    //================================================================================
 	
 	@Override
 	final public void execute() {
@@ -235,8 +221,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 */
 	final void MonitorTax() {
 		// Give a tax to Monitor agent for monitoring every year
-		this.monitor.applyTaxation(GDP*GameConst.MONITOR_COST_PERCENTAGE); // Take % of GDP for monitoring
-		availableToSpend -= GDP*GameConst.MONITOR_COST_PERCENTAGE;
+		this.monitor.applyTaxation(GDP*GameConst.getMonitorCostPercentage()); // Take % of GDP for monitoring
+		availableToSpend -= GDP*GameConst.getMonitorCostPercentage();
 	}
 
 	/**
@@ -283,6 +269,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.addToReports(t, carbonOutput);
 		return new Double(carbonOutput);
 	}
+
+	@Override
+	abstract protected void processInput(Input input);
+	abstract protected void YearlyFunction();
+	abstract protected void SessionFunction();
+	abstract protected void initialiseCountry();
 	
 	//================================================================================
     // Private methods
@@ -301,14 +293,14 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		
 		switch(economy.getEconomyState()) {
 		case GROWTH:
-			marketStateFactor = GameConst.GROWTH_MARKET_STATE;
+			marketStateFactor = GameConst.getGrowthMarketState();
 		case STABLE:
-			marketStateFactor = GameConst.STABLE_MARKET_STATE;
+			marketStateFactor = GameConst.getStableMarketState();
 		case RECESSION:
-			marketStateFactor = GameConst.RECESSION_MARKET_STATE;
+			marketStateFactor = GameConst.getRecessionMarketState();
 		}
 		
-		GDPRate += marketStateFactor + (GameConst.GROWTH_SCALER*(energyOutput))/GDP;
+		GDPRate += marketStateFactor + (GameConst.getGrowthScaler()*(energyOutput))/GDP;
 		GDPRate /= 100; // Needs to be a % for rate formula
 		} catch (UnavailableServiceException e) {
 			System.out.println("Unable to reach economy service.");
@@ -329,7 +321,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * If we haven't spent something last year, it will be available this year too
 	 */
 	private final void updateAvailableToSpend() {
-		availableToSpend += GDP * GameConst.PERCENTAGE_OF_GDP;
+		availableToSpend += GDP * GameConst.getPercentageOfGdp();
 	}
 	
 	/**
@@ -346,61 +338,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	private final void resetCarbonOffset() {
 		carbonOffset = 0;
-	}
-	
-	//================================================================================
-    // Public getters
-    //================================================================================
-	
-	public String getISO() {
-		return ISO;
-	}
-		
-	public double getLandArea() {
-		return landArea;
-	}
-
-	public double getArableLandArea() {
-		return arableLandArea;
-	}
-
-	public double getGDP() {
-		return GDP;
-	}
-
-	public double getGDPRate() {
-		return GDPRate;
-	}
-
-	public double getEmissionsTarget() {
-		return emissionsTarget;
-	}
-
-	public double getCarbonOffset() {
-		return carbonOffset;
-	}
-
-	public double getEnergyOutput(){
-		return energyOutput;
-	}
-	public double getCarbonOutput(){
-		return carbonOutput;
-	}
-	
-	public double getAvailableToSpend() {
-		return availableToSpend;
-	}
-	
-	void setEmissionsTarget(double emissionsTarget) {
-		this.emissionsTarget = emissionsTarget;
-	}
-	
-	void setAvailableToSpend(double availableToSpend) {
-			this.availableToSpend = availableToSpend;
-	}
-	
-	public boolean getIsKyotoMember() {
-		return this.isKyotoMember;
 	}
 	
 	//================================================================================
@@ -495,7 +432,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				e.printStackTrace();
 			}
 		}
-	}	
+	}
+	
 	//================================================================================
     // Kyoto membership functions
     //================================================================================
@@ -507,11 +445,18 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	private int leaveTime=0, joinTime=0;
 	
 	protected final boolean leaveKyoto() {
+		try {
+			environment.act(new AddRemoveFromMonitor(this, addRemoveType.REMOVE), getID(), authkey);
+		} catch (ActionHandlingException e) {
+			System.out.println("Exception wilst removing from monitor: " + e);
+			e.printStackTrace();
+		}
+		
 		if (timeService.getCurrentTick() == 0) {
 			isKyotoMember = false;
 			return true;
 		}
-		else if (timeService.getCurrentTick() - joinTime >= timeService.getTicksInYear()*GameConst.MINIMUM_KYOTO_MEMBERSHIP_DURATION) {
+		else if (timeService.getCurrentTick() - joinTime >= timeService.getTicksInYear()*GameConst.getMinimumKyotoMembershipDuration()) {
 			isKyotoMember=false;
 			leaveTime=timeService.getCurrentTick();
 			return true;
@@ -520,11 +465,73 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	protected final boolean joinKyoto() {
-		if (timeService.getCurrentTick() - leaveTime >= timeService.getTicksInYear()*GameConst.MINIMUM_KYOTO_REJOIN_TIME) {
+		try {
+			environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
+		} catch (ActionHandlingException e) {
+			System.out.println("Exception wilst adding to monitor: " + e);
+			e.printStackTrace();
+		}
+		
+		if (timeService.getCurrentTick() - leaveTime >= timeService.getTicksInYear()*GameConst.getMinimumKyotoRejoinTime()) {
 			isKyotoMember=true;
 			joinTime = timeService.getCurrentTick();
 			return true;
 		}
 		return false;
+	}
+	
+	//================================================================================
+    // Public getters
+    //================================================================================
+	
+	public String getISO() {
+		return ISO;
+	}
+		
+	public double getLandArea() {
+		return landArea;
+	}
+
+	public double getArableLandArea() {
+		return arableLandArea;
+	}
+
+	public double getGDP() {
+		return GDP;
+	}
+
+	public double getGDPRate() {
+		return GDPRate;
+	}
+
+	public double getEmissionsTarget() {
+		return emissionsTarget;
+	}
+
+	public double getCarbonOffset() {
+		return carbonOffset;
+	}
+
+	public double getEnergyOutput(){
+		return energyOutput;
+	}
+	public double getCarbonOutput(){
+		return carbonOutput;
+	}
+	
+	public double getAvailableToSpend() {
+		return availableToSpend;
+	}
+	
+	void setEmissionsTarget(double emissionsTarget) {
+		this.emissionsTarget = emissionsTarget;
+	}
+	
+	void setAvailableToSpend(double availableToSpend) {
+			this.availableToSpend = availableToSpend;
+	}
+	
+	public boolean getIsKyotoMember() {
+		return this.isKyotoMember;
 	}
 }

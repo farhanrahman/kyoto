@@ -25,10 +25,10 @@ public class GlobalTimeService extends EnvironmentService {
 	public int tickCounter=0, yearCounter=0, sessionCounter=0;
 
 	//@Parameter(name="ticksInYear")
-	public int ticksInYear=GameConst.TICKS_IN_YEAR;
+	public int ticksInYear=GameConst.getTicksInYear();
 	
 	//@Parameter(name="yearsInSession")
-	public int yearsInSession=GameConst.YEARS_IN_SESSION;
+	public int yearsInSession=GameConst.getYearsInSession();
 	
 	EventBus eb;
 	

@@ -10,18 +10,18 @@ import uk.ac.imperial.presage2.core.Action;
 
 public class QueryEmissionsTarget implements Action {
 
-	public enum targetType {
+	public enum TargetPeriodType {
 		SESSION, YEAR;
 	}
 
-	private targetType TargetPeriod;
+	private TargetPeriodType TargetPeriod;
 	private double emmisionsTarget = 0;
 	
-	public QueryEmissionsTarget(targetType Period) {
+	public QueryEmissionsTarget(TargetPeriodType Period) {
 		this.TargetPeriod = Period;
 	}
 	
-	public targetType getTargetPeriod(){
+	public TargetPeriodType getTargetPeriod(){
 		return this.TargetPeriod;
 	}
 	

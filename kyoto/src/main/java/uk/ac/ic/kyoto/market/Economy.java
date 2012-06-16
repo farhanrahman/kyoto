@@ -32,9 +32,9 @@ public class Economy extends EnvironmentService
 	private State currentEconomyState;
 
 	// Values used for determining which State is defined by a given random number.
-	private final int growthNumberLimit = (int) (100 * GameConst.GROWTH_MARKET_CHANCE);
-	private final int stableNumberLimit = (int) (growthNumberLimit + 100 * GameConst.STABLE_MARKET_CHANCE);
-	private final int recessionNumberLimit = (int) (stableNumberLimit + 100 * GameConst.RECESSION_MARKET_CHANCE);
+	private final int growthNumberLimit = (int) (100 * GameConst.getGrowthMarketChance());
+	private final int stableNumberLimit = (int) (growthNumberLimit + 100 * GameConst.getStableMarketChance());
+	private final int recessionNumberLimit = (int) (stableNumberLimit + 100 * GameConst.getRecessionMarketChance());
 	
 	@Override
 	public void registerParticipant(EnvironmentRegistrationRequest req) {

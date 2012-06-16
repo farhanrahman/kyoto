@@ -1,7 +1,6 @@
 package uk.ac.ic.kyoto.actions;
 
 import java.util.UUID;
-
 import uk.ac.ic.kyoto.countries.CarbonTarget;
 import uk.ac.imperial.presage2.core.Action;
 import uk.ac.imperial.presage2.core.environment.ActionHandler;
@@ -10,7 +9,6 @@ import uk.ac.imperial.presage2.core.environment.EnvironmentServiceProvider;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.messaging.Input;
-
 import com.google.inject.Inject;
 
 /**
@@ -35,7 +33,8 @@ public class AddToCarbonTargetHandler implements ActionHandler {
 	@Override
 	public Input handle(Action action, UUID actor) throws ActionHandlingException {
 		AddToCarbonTarget obj = (AddToCarbonTarget) action;
-		ct.addMemberState(obj.countryObject);
+		if (actor == obj.countryObject.getID())
+			ct.addMemberState(obj.countryObject);
 		return null;
 	}
 

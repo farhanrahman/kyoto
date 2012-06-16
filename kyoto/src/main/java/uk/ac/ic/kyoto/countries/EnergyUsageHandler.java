@@ -56,7 +56,7 @@ public final class EnergyUsageHandler {
 		double cost;
 		try {
 			if (growth > 0)
-				cost = growth * GameConst.CARBON_INVESTMENT_PRICE;
+				cost = growth * GameConst.getCarbonInvestmentPrice();
 			else
 				throw new IllegalArgumentException("It is impossible to invest in negative carbon industry growth");
 		}
@@ -77,7 +77,7 @@ public final class EnergyUsageHandler {
 		double growth;
 		try {
 			if (cost > 0)
-				growth = cost / GameConst.CARBON_INVESTMENT_PRICE;
+				growth = cost / GameConst.getCarbonInvestmentPrice();
 			else
 				throw new IllegalArgumentException("It is impossible to invest negative sum in industry growth");
 		}

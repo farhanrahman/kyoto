@@ -1,16 +1,14 @@
 package uk.ac.ic.kyoto.annex1reduce;
 
 import java.util.UUID;
-
+import uk.ac.ic.kyoto.countries.AbstractCountry;
+import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
+import uk.ac.imperial.presage2.core.messaging.Input;
 import alice.tuprolog.MalformedGoalException;
 import alice.tuprolog.NoSolutionException;
 import alice.tuprolog.Prolog;
 import alice.tuprolog.SolveInfo;
 import alice.tuprolog.UnknownVarException;
-
-import uk.ac.ic.kyoto.countries.AbstractCountry;
-import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
-import uk.ac.imperial.presage2.core.messaging.Input;
 
 /**
  * Extends AbstractCountry, provides a skeleton for all EU member countries
@@ -22,20 +20,15 @@ public class AnnexOneReduce extends AbstractCountry {
 	final private Prolog engine;
 	private EU eu;
 	
-	public AnnexOneReduce(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
-			double GDPRate, double energyOutput, double carbonOutput) {
-
-		
-		super(id, name, ISO, landArea, arableLandArea, GDP,
-					GDPRate, energyOutput, carbonOutput);
-
+	public AnnexOneReduce(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP, double GDPRate, double energyOutput, 
+			double carbonOutput) {
+		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput);
 		engine = EUBehaviours.getEngine(name);
 	}
 
 	@Override
 	public void initialiseCountry(){
-		
-		// Add the country to the EU service
+		/* Add the country to the EU service */
 		try {
 			this.eu = this.getEnvironmentService(EU.class);
 			this.eu.addMemberState(this);
@@ -50,8 +43,7 @@ public class AnnexOneReduce extends AbstractCountry {
 	 */
 	@Override
 	protected void processInput(Input input) {
-		// TODO Auto-generated method stub
-		
+		// TODO Auto-generated method stub	
 	}
 	
 	@Override
