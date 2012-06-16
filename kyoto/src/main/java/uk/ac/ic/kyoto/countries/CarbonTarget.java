@@ -190,7 +190,7 @@ public class CarbonTarget extends EnvironmentService {
 	
 	private void updateSessionTargets(){
 		this.worldLastSessionTarget = this.worldCurrentSessionTarget;
-		this.worldCurrentSessionTarget = worldLastSessionTarget * GameConst.TARGET_REDUCTION ; 
+		this.worldCurrentSessionTarget = worldLastSessionTarget * GameConst.getTargetReduction(); 
 		
 		double worldOutput = 0;
 		double rogueCarbonOutput = 0;
@@ -251,7 +251,7 @@ public class CarbonTarget extends EnvironmentService {
 	 */
 	private void generateYearTarget(countryObject country)
 	{
-		double sessionProgress = (timeService.getCurrentYear() % GameConst.YEARS_IN_SESSION) / GameConst.YEARS_IN_SESSION;
+		double sessionProgress = (timeService.getCurrentYear() % GameConst.getYearsInSession()) / GameConst.getYearsInSession();
 		double diffTargets = country.lastSessionTarget - country.currentSessionTarget;
 		double newTarget = country.lastSessionTarget - (diffTargets * sessionProgress) - country.penalty;
 		country.currentYearTarget = newTarget;

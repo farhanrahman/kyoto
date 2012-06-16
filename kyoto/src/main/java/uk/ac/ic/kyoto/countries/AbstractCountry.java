@@ -235,8 +235,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 */
 	final void MonitorTax() {
 		// Give a tax to Monitor agent for monitoring every year
-		this.monitor.applyTaxation(GDP*GameConst.MONITOR_COST_PERCENTAGE); // Take % of GDP for monitoring
-		availableToSpend -= GDP*GameConst.MONITOR_COST_PERCENTAGE;
+		this.monitor.applyTaxation(GDP*GameConst.getMonitorCostPercentage()); // Take % of GDP for monitoring
+		availableToSpend -= GDP*GameConst.getMonitorCostPercentage();
 	}
 
 	/**
@@ -301,14 +301,14 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		
 		switch(economy.getEconomyState()) {
 		case GROWTH:
-			marketStateFactor = GameConst.GROWTH_MARKET_STATE;
+			marketStateFactor = GameConst.getGrowthMarketState();
 		case STABLE:
-			marketStateFactor = GameConst.STABLE_MARKET_STATE;
+			marketStateFactor = GameConst.getStableMarketState();
 		case RECESSION:
-			marketStateFactor = GameConst.RECESSION_MARKET_STATE;
+			marketStateFactor = GameConst.getRecessionMarketState();
 		}
 		
-		GDPRate += marketStateFactor + (GameConst.GROWTH_SCALER*(energyOutput))/GDP;
+		GDPRate += marketStateFactor + (GameConst.getGrowthScaler()*(energyOutput))/GDP;
 		GDPRate /= 100; // Needs to be a % for rate formula
 		} catch (UnavailableServiceException e) {
 			System.out.println("Unable to reach economy service.");
@@ -329,7 +329,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * If we haven't spent something last year, it will be available this year too
 	 */
 	private final void updateAvailableToSpend() {
-		availableToSpend += GDP * GameConst.PERCENTAGE_OF_GDP;
+		availableToSpend += GDP * GameConst.getPercentageOfGdp();
 	}
 	
 	/**
@@ -499,7 +499,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			isKyotoMember = false;
 			return true;
 		}
-		else if (timeService.getCurrentTick() - joinTime >= timeService.getTicksInYear()*GameConst.MINIMUM_KYOTO_MEMBERSHIP_DURATION) {
+		else if (timeService.getCurrentTick() - joinTime >= timeService.getTicksInYear()*GameConst.getMinimumKyotoMembershipDuration()) {
 			isKyotoMember=false;
 			leaveTime=timeService.getCurrentTick();
 			return true;
@@ -508,7 +508,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	protected final boolean joinKyoto() {
-		if (timeService.getCurrentTick() - leaveTime >= timeService.getTicksInYear()*GameConst.MINIMUM_KYOTO_REJOIN_TIME) {
+		if (timeService.getCurrentTick() - leaveTime >= timeService.getTicksInYear()*GameConst.getMinimumKyotoRejoinTime()) {
 			isKyotoMember=true;
 			joinTime = timeService.getCurrentTick();
 			return true;

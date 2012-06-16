@@ -24,6 +24,7 @@ import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.ic.kyoto.simulationagent.SimulationAgent;
 import uk.ac.ic.kyoto.trade.TradeProtocolTestAgent;
 import uk.ac.imperial.presage2.core.simulator.InjectedSimulation;
+import uk.ac.imperial.presage2.core.simulator.Parameter;
 import uk.ac.imperial.presage2.core.simulator.Scenario;
 import uk.ac.imperial.presage2.core.util.random.Random;
 import uk.ac.imperial.presage2.rules.RuleModule;
@@ -35,17 +36,42 @@ import com.google.inject.AbstractModule;
 
 public class Simulation extends InjectedSimulation {
 	
-//	@Parameter(name="annexOneReduceCount")
-//	public int annexOneReduceCount = 1;
-//	@Parameter(name="annexOneSustainCount")
-//	public int annexOneSustainCount = 1;
-//	@Parameter(name="annexTwoCount")
-//	public int annexTwoCount = 1;
-//	@Parameter(name="nonParticipantCount")
-//	public int nonParticipantCount = 1;
+//	@Parameter(name="GROWTH_MARKET_STATE")
+//	public double GROWTH_MARKET_STATE;
+//	@Parameter(name="STABLE_MARKET_STATE")
+//	public double STABLE_MARKET_STATE;
+//	@Parameter(name="RECESSION_MARKET_STATE")
+//	public double RECESSION_MARKET_STATE;
+//	@Parameter(name="GROWTH_MARKET_CHANCE")
+//	public double GROWTH_MARKET_CHANCE;
+//	@Parameter(name="STABLE_MARKET_CHANCE")
+//	public double STABLE_MARKET_CHANCE;
+//	@Parameter(name="RECESSION_MARKET_CHANCE")
+//	public double RECESSION_MARKET_CHANCE;
+//	@Parameter(name="MONITOR_COST_PERCENTAGE")
+//	public double MONITOR_COST_PERCENTAGE;
+//	@Parameter(name="SANCTION_RATE")
+//	public double SANCTION_RATE;
+//	@Parameter(name="MONITORING_PRICE")
+//	public double MONITORING_PRICE;
+//	@Parameter(name="YEARS_IN_SESSION")
+//	public int YEARS_IN_SESSION;
+//	@Parameter(name="TARGET_REDUCTION")
+//	public double TARGET_REDUCTION;
+//	@Parameter(name="MINIMUM_KYOTO_REJOIN_TIME")
+//	public int MINIMUM_KYOTO_REJOIN_TIME;
+//	@Parameter(name="MINIMUM_KYOTO_MEMBERSHIP_DURATION")
+//	public int MINIMUM_KYOTO_MEMBERSHIP_DURATION;
 	
 	@Override
 	protected Set<AbstractModule> getModules() {
+		
+//		new GameConst(GROWTH_MARKET_STATE, STABLE_MARKET_STATE, RECESSION_MARKET_STATE, 
+//				GROWTH_MARKET_CHANCE, STABLE_MARKET_CHANCE, RECESSION_MARKET_CHANCE,
+//				MONITOR_COST_PERCENTAGE, SANCTION_RATE, MONITORING_PRICE,
+//				YEARS_IN_SESSION, TARGET_REDUCTION, MINIMUM_KYOTO_REJOIN_TIME,
+//				MINIMUM_KYOTO_MEMBERSHIP_DURATION);
+		
 		Set<AbstractModule> modules = new HashSet<AbstractModule>();
 		
 		modules.add(new AbstractEnvironmentModule()

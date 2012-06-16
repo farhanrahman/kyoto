@@ -112,14 +112,14 @@ public class Monitor extends EnvironmentService {
 	// TODO add logging
 	private void monitorCountries () {
 		// Find how many countries can be monitored with the available cash
-		int noToMonitor = (int) Math.floor(cash / GameConst.MONITORING_PRICE);
+		int noToMonitor = (int) Math.floor(cash / GameConst.getMonitoringPrice());
 		
 		// Check if all the countries can be monitored
 		if (noToMonitor >= memberStates.size()) {
 			// monitor all the countries
 			for (AbstractCountry country: memberStates) {
 				double realCarbonOutput = country.getMonitored();
-				cash -= GameConst.MONITORING_PRICE;
+				cash -= GameConst.getMonitoringPrice();
 				double reportedCarbonOutput = carbonReportingService.getReport(country.getID(), SimTime.get());
 				if (realCarbonOutput > reportedCarbonOutput)
 					cheatSanction(country);
@@ -143,7 +143,7 @@ public class Monitor extends EnvironmentService {
 				while (monitoredCountries.contains(pickedCountry) );
 				
 				// Monitor the country
-				cash -= GameConst.MONITORING_PRICE;
+				cash -= GameConst.getMonitoringPrice();
 				double realCarbonOutput = pickedCountry.getMonitored();
 						
 				// Note that the country was monitored
@@ -179,7 +179,7 @@ public class Monitor extends EnvironmentService {
 		
 		// Deduct the cash from the country that has cheated
 		// newCash = oldCash - GDP * cash_penalty
-		sanctionee.setAvailableToSpend(Math.round((sanctionee.getAvailableToSpend()-sanctionee.getGDP()*(sinCount-1)* GameConst.SANCTION_RATE)));
+		sanctionee.setAvailableToSpend(Math.round((sanctionee.getAvailableToSpend()-sanctionee.getGDP()*(sinCount-1)* GameConst.getSanctionRate())));
 	}
 	
 	/**
@@ -192,7 +192,7 @@ public class Monitor extends EnvironmentService {
 		carbonTargetingService.addCountryPenalty(country.getID(), penalty);
 		
 		// Charge the country for not meeting the target
-		country.setAvailableToSpend( Math.round( (country.getAvailableToSpend() - carbonExcess * GameConst.SANCTION_RATE)) );
+		country.setAvailableToSpend( Math.round( (country.getAvailableToSpend() - carbonExcess * GameConst.getSanctionRate())) );
 		
 	}
 	
