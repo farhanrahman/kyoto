@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import javax.swing.Action;
+
 import uk.ac.ic.kyoto.countries.GameConst;
 
 /**
@@ -67,12 +69,24 @@ class CountrySimulator {
 
 			System.out.println("maintainSize " + i + " = " + stateList[i].maintainStates.size());
 
+			//Branch off all unculled maintain states by performing a sell action
+			Iterator<CountryState> mainIt = stateList[i].maintainStates.iterator();
+			while(mainIt.hasNext()) {
+				mainIt.next().sellCarbon();
+			}
+			
+			//Cull the sell states
+			stateList[i].sellStates = cullStates(stateList[i].sellStates);
+
+			System.out.println("sellSize " + i + " = " + stateList[i].sellStates.size());
+
+			
 			//So long as we aren't in the final year
 			if (i != (LOOK_AHEAD_YEARS - 1)) {
 				//Branch off all unculled reduce states by performing a reduce action
-				Iterator<CountryState> mainIt = stateList[i].maintainStates.iterator();
-				while(mainIt.hasNext()) {
-					mainIt.next().reduceCarbon();
+				Iterator<CountryState> sellIt = stateList[i].sellStates.iterator();
+				while(sellIt.hasNext()) {
+					sellIt.next().reduceCarbon();
 				}
 			}
 		}
@@ -115,6 +129,7 @@ class CountrySimulator {
 		boolean hasBeenReplaced = true;
 
 		while (hasBeenReplaced) {
+			System.out.println("cullloopstart");
 			hasBeenReplaced = false;
 
 			ArrayList<CountryState> bestList = new ArrayList<CountryState>(states.size());
@@ -146,7 +161,7 @@ class CountrySimulator {
 			}
 			states = bestList;
 		}	
-
+		System.out.println("culled");
 		return states;
 
 	}
@@ -198,7 +213,7 @@ class CountrySimulator {
 
 			this.previousState = null;
 
-			this.year = 0;
+			this.year = -1;
 
 			this.action = null;
 		}
@@ -259,11 +274,9 @@ class CountrySimulator {
 			}
 
 			if (isBetter) {
-//				System.out.println("culledbetter");
 				return Compare.BETTER;
 			}
 			if (isWorse) {
-//				System.out.println("culledworse");
 				return Compare.WORSE;
 			}
 			return Compare.UNKNOWN;
@@ -277,91 +290,75 @@ class CountrySimulator {
 		private CountryState(CountryState previousState,ReduceAction action) {
 			this.previousState = previousState;
 			this.action = action;
-
 			this.year = previousState.year + 1;
-
-			stateList[this.year-1].addReduce(this);
+			this.emissionsTarget = previousState.emissionsTarget;
+			this.GDPRate = previousState.GDPRate;
+			this.GDP = previousState.GDP;
+			stateList[this.year].addReduce(this);
 
 			double oldCarbonDifference = previousState.getCarbonDifference();
 
+			//Price of reaching our target by investment and buying credits
 			double[] investments = new double[2];
-
-			double investmentCost = country.getAbsorbReduceInvestment(action.investFrac * oldCarbonDifference, previousState, investments);
-
-			double marketCost = country.getMarketBuyPrice(action.buyCreditFrac * oldCarbonDifference, this.year);
-
-			double arableLandCost = country.getArableLandCost(investments[0],previousState.arableLandArea);
-
-			double absorptionIncrease = country.getCarbonAbsorptionChange(investments[0],previousState.arableLandArea);
-
-			double energyReduction = action.shutDownFrac * oldCarbonDifference;
-
-			this.carbonOutput = previousState.carbonOutput - oldCarbonDifference*(action.investFrac + action.shutDownFrac);
-			this.energyOutput = previousState.energyOutput - energyReduction;
-			this.carbonOffset = previousState.carbonOffset - oldCarbonDifference*action.buyCreditFrac;
-			this.carbonAbsorption = previousState.carbonAbsorption + absorptionIncrease;
-			this.emissionsTarget = previousState.emissionsTarget;
-
+			double carbonAbsorbedReduced = action.investFrac * oldCarbonDifference;
+			double investmentCost = country.getAbsorbReduceInvestment(carbonAbsorbedReduced, previousState, investments);
+			double carbonOffsetIncreased = oldCarbonDifference * action.buyCreditFrac;
+			double marketCost = country.getMarketBuyPrice(carbonOffsetIncreased, this.year);
 			this.availableToSpend = previousState.availableToSpend - investmentCost - marketCost;
-
-			this.GDPRate = previousState.GDPRate;
-			this.GDP = previousState.GDP;
-
+			
+			//Amount of arable land lost
+			double arableLandCost = country.getArableLandCost(investments[0],previousState.arableLandArea);
 			this.arableLandArea = previousState.arableLandArea - arableLandCost;
 
+			//Amount of carbon absorption we've increased by
+			double absorptionIncrease = country.getCarbonAbsorptionChange(investments[0],previousState.arableLandArea);
+			this.carbonAbsorption = previousState.carbonAbsorption + absorptionIncrease;
+
+			//Amount of energy and carbon we've lost by shutting down factories
+			double energyReduction = action.shutDownFrac * oldCarbonDifference;
+			this.energyOutput = previousState.energyOutput - energyReduction;
+
+			//Our carbon output decreased by the amount we invest in reduction plus the amount of factories we shut down
+			double carbonOutputReduced = country.getCarbonReduction(investments[1],previousState);
+			this.carbonOutput = previousState.carbonOutput - carbonOutputReduced - energyReduction;
+		
+			//Our carbon offset increased by the amount of carbon we bought in the market
+			this.carbonOffset = previousState.carbonOffset - carbonOffsetIncreased;
 		}
+		
+		/**
+		 * Constructor for a maintain state
+		 * @param previousState
+		 * @param action
+		 */
 		private CountryState(CountryState previousState,MaintainAction action) {
 			this.previousState = previousState;
 			this.action = action;
-
 			this.year = previousState.year;
-
-			stateList[this.year-1].addMaintain(this);
-
-			this.emissionsTarget = country.getNextEmissionTarget(previousState.emissionsTarget);
-
-			//Calculate the increase in energy production and carbon
+			this.emissionsTarget = previousState.emissionsTarget;
+			stateList[this.year].addMaintain(this);
+			
+			//energy Increase = carbon Increase when investing in factories
 			double energyCost = action.industryFrac * previousState.availableToSpend;
-
 			double energyIncrease = country.getCarbonEnergyIncrease(energyCost);
 
-			//Balance carbon increase with market purchases and investment
+			//Number of carbon credits gained by buying credits
+			double carbonCreditIncrease = action.buyCreditOffsetFrac * energyIncrease;
+			double marketBuyCost = country.getMarketBuyPrice(carbonCreditIncrease, this.year);
 
-			double carbonOffsetIncrease = action.buyCreditOffsetFrac * energyIncrease;
-
-			double marketBuyCost = country.getMarketBuyPrice(carbonOffsetIncrease, this.year);
-
-			double totalCarbonInvestOffset = action.investOffsetFrac * energyIncrease + action.investFrac * previousState.carbonOutput;
-
+			//Cost of investing in absorption and reduction
+			double CarbonInvestOffset = action.investOffsetFrac * energyIncrease;
 			double[] investments = new double[2];
-
-			double investmentCost = country.getAbsorbReduceInvestment(totalCarbonInvestOffset, previousState, investments);
-
+			double investmentCost = country.getAbsorbReduceInvestment(CarbonInvestOffset, previousState, investments);
 			double arableLandCost = country.getArableLandCost(investments[0],previousState.arableLandArea);
-
 			double absorptionIncrease = country.getCarbonAbsorptionChange(investments[0],previousState.arableLandArea);
-
-			//Phase 2 - shut down factories, then sell some of the difference.
-
-			double energyReduction = action.shutDownFrac * previousState.carbonOutput;
-			double carbonReduction = energyReduction;
-
-			double prevCarbonOutput = previousState.carbonOutput - previousState.carbonAbsorption - previousState.carbonOffset;
-
-			//carbonDifference next year, including next years change in sanctions
-			double carbonDifference = prevCarbonOutput * (action.shutDownFrac + action.investFrac) - prevCarbonOutput + this.emissionsTarget;
-
-			double carbonOffsetDecrease = action.sellFrac*carbonDifference;
-
-			double marketSellGain = country.getMarketSellPrice(carbonOffsetDecrease, this.year+1);
+			double carbonOutputReduced = country.getCarbonReduction(investments[1],previousState);
 
 
+			energyOutput = previousState.energyOutput + energyIncrease;
+			carbonOutput = previousState.carbonOutput + energyIncrease - carbonOutputReduced;
 
-			energyOutput = previousState.energyOutput + energyIncrease - energyReduction;
-
-			carbonOutput = previousState.carbonOutput - carbonReduction;
-
-			carbonOffset = previousState.carbonOffset + carbonOffsetIncrease - carbonOffsetDecrease;
+			carbonOffset = previousState.carbonOffset + carbonCreditIncrease;
 
 			arableLandArea = previousState.arableLandArea - arableLandCost;
 
@@ -373,7 +370,46 @@ class CountrySimulator {
 
 			GDP = previousState.GDP + previousState.GDP*GDPRate;
 
-			availableToSpend = previousState.availableToSpend - investmentCost - marketBuyCost + marketSellGain + (GDP * GameConst.PERCENTAGE_OF_GDP);
+			availableToSpend = previousState.availableToSpend - investmentCost - marketBuyCost + (GDP * GameConst.PERCENTAGE_OF_GDP);
+		}
+		
+		private CountryState(CountryState previousState,SellAction action) {
+			this.previousState = previousState;
+			this.action = action;
+			this.year = previousState.year;
+			this.emissionsTarget = country.getNextEmissionTarget(previousState.emissionsTarget);
+			this.GDPRate = previousState.GDPRate;
+			this.GDP = previousState.GDP;
+			stateList[this.year].addSell(this);
+			
+			//Our current total carbon output.
+			double carbonOutput = previousState.carbonOutput - previousState.carbonOffset - previousState.carbonAbsorption;
+			
+			//Shut down factories
+			double shutDownCarbon = carbonOutput*action.shutDownFrac;
+			
+			//Invest in being clean
+			double carbonAbsorbedReduced = carbonOutput*action.investFrac;
+			double[] investments = new double[2];
+			double investmentCost = country.getAbsorbReduceInvestment(carbonAbsorbedReduced, previousState, investments);
+			double absorptionIncrease = country.getCarbonAbsorptionChange(investments[0],previousState.arableLandArea);
+			double arableLandCost = country.getArableLandCost(investments[0],previousState.arableLandArea);
+			double carbonOutputReduced = country.getCarbonReduction(investments[1],previousState);
+
+			//Sell additional offset over next years target
+			double newCarbonOutput = carbonOutput - shutDownCarbon - carbonAbsorbedReduced;
+			double carbonBelowTarget = emissionsTarget - newCarbonOutput;
+			double totalCreditsEarned = carbonBelowTarget*action.sellFrac;
+
+			double marketSellGain = country.getMarketSellPrice(totalCreditsEarned, this.year);
+			
+			this.availableToSpend = previousState.availableToSpend - investmentCost + marketSellGain;
+			this.arableLandArea = previousState.arableLandArea - arableLandCost;
+			this.carbonAbsorption = previousState.carbonAbsorption + absorptionIncrease;
+			this.energyOutput = previousState.energyOutput - shutDownCarbon;
+			this.carbonOutput = previousState.carbonOutput - shutDownCarbon - carbonOutputReduced;
+			this.carbonOffset = previousState.carbonOffset + totalCreditsEarned;
+			
 		}
 
 		/**
@@ -404,77 +440,57 @@ class CountrySimulator {
 		 */
 		private void maintainCarbon() {
 
-			//Two phases:
-			//Phase one: optional
-			//Invest in carbon producing industries as a % of available cash
-			//Offset increase in carbon by investing in reduction/absorption OR by buying more offset from the market
-
-			//Phase 2 - further reduction and selling
-			//Invest in reduction/absorption AND/OR shut down factories - only shut down if we didn't open some
-			//Sell offset on market (as % of offset below next years target)
-			//Offset will go on sale next year.
-
-			int counter = 0;
-
+			//Invest some chunk of our GDP in industry, offset it by buying credits or absorbing
+			
 			float industryFrac;
 			float investOffsetFrac;
 			float buyCreditOffsetFrac;
+			
+			for (int i=0; i<=100; i=i+10) {
+				industryFrac = i;
+				
+				if (industryFrac!=0) {
+					for (int j=0; j<=100; j=j+10) {
+						investOffsetFrac = j;
+						for (int k=0; k<=100-investOffsetFrac; k=k+10) {
+							buyCreditOffsetFrac = k;
+							
+							new CountryState(this, new MaintainAction(industryFrac/100, investOffsetFrac/100, buyCreditOffsetFrac/100));
+						}
+					}
+				}
+				else {
+					new CountryState(this, new MaintainAction(0, 0, 0));
+				}
+			}
+		}
+		
+		/**
+		 * Branch off for all sell actions
+		 */
+		private void sellCarbon() {
+
 			float shutDownFrac;
 			float investFrac;
 			float sellFrac;
-
-			//Use some percentage of our available cash to make more factories
-			for (int i=0; i<=100; i=i+20) {
-				industryFrac = i;
-
-				//If we don't invest in industry we can shut down factories
-				if (industryFrac == 0) {
-					investOffsetFrac = 0;
-					buyCreditOffsetFrac = 0;
-
-					for (int j=0; j<=5; j=j+1) {
-						shutDownFrac = j;
-						for (int k=0; k<=5 - shutDownFrac; k = k+1) {
-							investFrac = k;
-							for (int l=0; l<=100; l=l+20) {
-								sellFrac = l;
-
-								counter++;
-								new CountryState(this, new MaintainAction(industryFrac/100, 
-										investOffsetFrac/100, buyCreditOffsetFrac/100, 
-										shutDownFrac/100, investFrac/100, sellFrac/100));
-							}
-						}
-					}
-				}
-				//If we do invest in industry
-				else {
-					shutDownFrac = 0;
-					for (int j = 0; j<=100; j=j+20) {
-						investOffsetFrac = j;
-						buyCreditOffsetFrac = 100 - investOffsetFrac;
-						for (int l = 0; l<=5; l=l+1) {
-							investFrac = l;
-							for (int m = 0; m<=100; m=m+20) {
-								sellFrac = m;
-
-								counter++;
-								new CountryState(this, new MaintainAction(industryFrac/100, 
-										investOffsetFrac/100, buyCreditOffsetFrac/100, 
-										shutDownFrac/100, investFrac/100, sellFrac/100));
-							}
-						}
+			
+			for (int i = 0; i<=10; i=i+1) {
+				shutDownFrac = i;
+				for (int j = 0; j<=10-shutDownFrac; j=j+1) {
+					investFrac = j;
+					for (int k = 0; k<=100; k=k+20) {
+						sellFrac = k;
+						new CountryState(this, new SellAction(shutDownFrac/100, investFrac/100, sellFrac/100));
 					}
 				}
 			}
-//			System.out.println("Counter = " + counter);
 		}
 
 		/**
 		 * @return a slight overestimate of the carbon we need to offset. Positive means we need to reduce to meet our target
 		 */
 		private double getCarbonDifference() {
-			return 1.02*(this.carbonOffset + this.carbonOutput - this.emissionsTarget);
+			return 1.02*(this.carbonOffset + this.carbonOutput + this.carbonAbsorption - this.emissionsTarget);
 		}
 
 	}
@@ -488,9 +504,14 @@ class CountrySimulator {
 	private class StateList {
 		private ArrayList<CountryState> reduceStates = new ArrayList<CountryState>();
 		private ArrayList<CountryState> maintainStates = new ArrayList<CountryState>();
+		private ArrayList<CountryState> sellStates = new ArrayList<CountryState>();
 
 		public void addReduce(CountryState countryState) {
 			reduceStates.add(countryState);
+		}
+		public void addSell(CountryState countryState) {
+			sellStates.add(countryState);
+			
 		}
 		public void addMaintain(CountryState countryState) {
 			maintainStates.add(countryState);			
@@ -514,25 +535,18 @@ class CountrySimulator {
 		final float buyCreditFrac;
 		final float investFrac;
 	}
-
+	
 	/**
 	 * A maintain action
 	 * @author Nik
 	 *
 	 */
 	private class MaintainAction implements Action {
-		public MaintainAction(float industryFrac, float investOffsetFrac, float buyCreditOffsetFrac,
-				float shutDownFrac, float investFrac, float sellFrac) {
+		public MaintainAction(float industryFrac, float investOffsetFrac, float buyCreditOffsetFrac) {
 			this.industryFrac = industryFrac;
 			this.investOffsetFrac = investOffsetFrac;
 			this.buyCreditOffsetFrac = buyCreditOffsetFrac;
-			this.shutDownFrac = shutDownFrac;
-			this.investFrac = investFrac;
-			this.sellFrac = sellFrac;
 		}
-
-		//Phase one actions
-
 		/**
 		 * Fraction of gdp spent on investing on factories.
 		 */
@@ -547,9 +561,16 @@ class CountrySimulator {
 		 * Fraction of carbon created by increasing industry to offset by buying credits etc.
 		 */
 		final float buyCreditOffsetFrac;
-
-		//Phase two actions
-
+	}
+	
+	private class SellAction implements Action {
+		
+		public SellAction(float shutDownFrac, float investFrac, float sellFrac) {
+			this.shutDownFrac = shutDownFrac;
+			this.investFrac = investFrac;
+			this.sellFrac = sellFrac;
+		}
+		
 		/**
 		 * Fraction of carbon to reduce by shutting down factories.
 		 * Impossible if you perform any actions in phase one
@@ -566,7 +587,6 @@ class CountrySimulator {
 		 * Calculated using next years carbon target.
 		 */
 		final float sellFrac;
-
 	}
 
 	/**

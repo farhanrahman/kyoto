@@ -78,7 +78,7 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 		}
 		
 		//Overestimate a bit
-		carbonReduction*=1.02;
+		carbonReduction*=1.01;
 		
 		double prevCost;
 		try {
@@ -188,6 +188,21 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 		
 		return change;
 	}
+	
+	public double getCarbonReduction(double reductionCost,CountrySimulator.CountryState state) {
+		
+		if (reductionCost == 0) {
+			return 0;
+		}
+		double reduction;
+		try {
+			reduction = carbonReductionHandler.getCarbonOutputChange(reductionCost, state.carbonOutput, state.energyOutput);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 0;
+		}
+		return reduction;
+	}
 
 	/**
 	 * 
@@ -243,4 +258,6 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 		// TODO Auto-generated method stub
 
 	}
+
+
 }
