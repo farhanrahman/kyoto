@@ -83,6 +83,11 @@ public class CarbonTarget extends EnvironmentService {
 	public void addMemberState(AbstractCountry state) {
 		countryObject memberState = new countryObject(state);
 		this.participantCountries.add(memberState);
+		
+		double Min = -1000.00;
+		double Max = 1000.00;
+		
+		add1990OutputData(state.getISO(), state.getCarbonOutput() + Min + (Math.random() * ((Max - Min) + 1)));
 	}
 	
 	/**

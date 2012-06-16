@@ -7,6 +7,7 @@ import java.util.UUID;
 import uk.ac.ic.kyoto.actions.AddRemoveFromMonitor;
 import uk.ac.ic.kyoto.actions.AddRemoveFromMonitor.addRemoveType;
 import uk.ac.ic.kyoto.actions.AddToCarbonTarget;
+import uk.ac.ic.kyoto.actions.ApplyMonitorTax;
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
 import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
 import uk.ac.ic.kyoto.market.Economy;
@@ -77,8 +78,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	/* Environment Services */
 	
 	protected ParticipantCarbonReportingService reportingService;
-	protected CarbonTarget carbonTarget;
-	protected Monitor monitor;
 	protected ParticipantTimeService timeService;
 	
 	protected TradeProtocol tradeProtocol; // Trading network interface thing'em
@@ -221,8 +220,13 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 */
 	final void MonitorTax() {
 		// Give a tax to Monitor agent for monitoring every year
-		this.monitor.applyTaxation(GDP*GameConst.getMonitorCostPercentage()); // Take % of GDP for monitoring
-		availableToSpend -= GDP*GameConst.getMonitorCostPercentage();
+		try {
+			environment.act(new ApplyMonitorTax(GDP*GameConst.getMonitorCostPercentage()), getID(), authkey);
+			availableToSpend -= GDP*GameConst.getMonitorCostPercentage();
+		} catch (ActionHandlingException e) {
+			logger.warn(e.getMessage(), e);
+			e.printStackTrace();
+		} // Take % of GDP for monitoring
 	}
 
 	/**
