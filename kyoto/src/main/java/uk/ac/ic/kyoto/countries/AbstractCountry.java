@@ -467,21 +467,33 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		}
 	}
 	
-	protected final void broadcastInvesteeOffer(int quantity, double unitCost, InvestmentType itype){
+	protected final void broadcastInvesteeOffer(int quantity, InvestmentType itype){
 		if(this.tradeProtocol != null){
-			Offer trade = new Offer(quantity, unitCost, TradeType.RECEIVE, itype);
-			this.network.sendMessage(
-						new MulticastMessage<OfferMessage>(
-								Performative.PROPOSE, 
-								Offer.TRADE_PROPOSAL, 
-								SimTime.get(), 
-								this.network.getAddress(),
-								this.tradeProtocol.getAgentsNotInConversation(),
-								new OfferMessage(
-										trade,
-										this.tradeProtocol.tradeToken.generate(),
-										OfferMessageType.BROADCAST_MESSAGE))
-					);
+			double unitCost;
+			try {
+				if (itype.equals(InvestmentType.ABSORB)) {
+					unitCost = this.carbonAbsorptionHandler.getInvestmentRequired(quantity)/quantity;
+				}
+				else {
+					unitCost = this.carbonReductionHandler.getInvestmentRequired(quantity)/quantity;
+				}
+				
+				Offer trade = new Offer(quantity, unitCost, TradeType.RECEIVE, itype);
+				this.network.sendMessage(
+							new MulticastMessage<OfferMessage>(
+									Performative.PROPOSE, 
+									Offer.TRADE_PROPOSAL, 
+									SimTime.get(), 
+									this.network.getAddress(),
+									this.tradeProtocol.getAgentsNotInConversation(),
+									new OfferMessage(
+											trade,
+											this.tradeProtocol.tradeToken.generate(),
+											OfferMessageType.BROADCAST_MESSAGE))
+						);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}	
 	//================================================================================
