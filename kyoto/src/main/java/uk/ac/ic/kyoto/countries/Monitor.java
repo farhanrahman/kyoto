@@ -46,13 +46,6 @@ public class Monitor extends EnvironmentService {
 	@Inject
 	public Monitor(EnvironmentSharedStateAccess sharedState, EnvironmentServiceProvider provider) {
 		super(sharedState);
-	
-		try {
-			this.timeService = provider.getEnvironmentService(GlobalTimeService.class);
-		} catch (UnavailableServiceException e) {
-			System.out.println("Unable to get environment service 'TimeService'.");
-			e.printStackTrace();
-		}
 		
 		this.provider = provider;
 	}
@@ -100,6 +93,13 @@ public class Monitor extends EnvironmentService {
 	@EventListener
 	private void initialize(EndOfTimeCycle E) {
 		if (SimTime.get().intValue() == 1) {
+			try {
+				this.timeService = provider.getEnvironmentService(GlobalTimeService.class);
+			} catch (UnavailableServiceException e) {
+				System.out.println("Unable to get environment service 'TimeService'.");
+				e.printStackTrace();
+			}
+			
 			// Register for the carbon reporting service
 			try {
 				this.carbonReportingService = provider.getEnvironmentService(CarbonReportingService.class);
