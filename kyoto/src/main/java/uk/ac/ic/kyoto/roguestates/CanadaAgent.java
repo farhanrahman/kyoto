@@ -36,7 +36,7 @@ public class CanadaAgent extends AbstractCountry {
 	
 	@Override
 	public void SessionFunction() {
-		if (carbonOutput - carbonOffset > emissionsTarget) {
+		if (getCarbonOutput() - getCarbonOffset() > getEmissionsTarget()) {
 			// leave Kyoto here
 		}
 	}
@@ -71,10 +71,10 @@ public class CanadaAgent extends AbstractCountry {
 //				e.printStackTrace();
 //			}
 //		}
-		if (availableToSpend > 0) {
+		if (getAvailableToSpend() > 0) {
 			try {
-				carbonReductionHandler.invest(availableToSpend*0.1);
-				System.out.println("Spending " + availableToSpend* 0.1 + " on carbon reduction. Current carbon output is " + carbonOutput + ".");
+				//carbonReductionHandler.invest(availableToSpend*0.1);
+				System.out.println("Spending " + getAvailableToSpend()* 0.1 + " on carbon reduction. Current carbon output is " + getCarbonOutput() + ".");
 			} catch (Exception e) {
 				logger.warn(e.getMessage(), e);
 				e.printStackTrace();
@@ -91,10 +91,10 @@ public class CanadaAgent extends AbstractCountry {
 //			}
 //		}
 //		System.out.println(energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(500));
-		System.out.println("I have this much money: " + availableToSpend + ".");
-		System.out.println("My GDPRate is : " + GDPRate);
-		System.out.println("My carbon output is : " + carbonOutput);
-		System.out.println("My energy output is : " + energyOutput);
+		System.out.println("I have this much money: " + getAvailableToSpend() + ".");
+		System.out.println("My GDPRate is : " + getGDPRate());
+		System.out.println("My carbon output is : " + getCarbonOutput());
+		System.out.println("My energy output is : " + getEnergyOutput());
 	}
 
 }

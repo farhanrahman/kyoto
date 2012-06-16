@@ -34,8 +34,8 @@
       <operations public="true" package="true" protected="true" private="true"/>    
     </display>  
   </class>  
-  <class id="5" corner="BOTTOM_RIGHT" language="java" name="uk.ac.ic.kyoto.trade.TradeProtocol" project="kyoto" 
-    file="/kyoto/src/main/java/uk/ac/ic/kyoto/trade/TradeProtocol.java" binary="false">    
+  <class id="5" corner="BOTTOM_RIGHT" language="java" name="uk.ac.ic.kyoto.countries.TradeProtocol" project="kyoto" 
+    file="/kyoto/src/main/java/uk/ac/ic/kyoto/countries/TradeProtocol.java" binary="false">    
     <position height="-1" width="-1" x="719" y="295"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true"/>      

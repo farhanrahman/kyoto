@@ -5,10 +5,10 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
+import uk.ac.ic.kyoto.countries.Offer;
+import uk.ac.ic.kyoto.countries.OfferMessage;
+import uk.ac.ic.kyoto.countries.TradeProtocol;
 import uk.ac.ic.kyoto.singletonfactory.SingletonProvider;
-import uk.ac.ic.kyoto.trade.Offer;
-import uk.ac.ic.kyoto.trade.OfferMessage;
-import uk.ac.ic.kyoto.trade.TradeProtocol;
 import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.ic.kyoto.tradehistory.TradeHistory;
 import uk.ac.imperial.presage2.core.messaging.Input;
@@ -61,7 +61,7 @@ public class EUTest2 extends AbstractCountry{
 	@Override
 	protected void initialiseCountry() {
 		try {
-			this.tradeProtocol = new TradeProtocol(getID(), authkey, environment, network) {
+			this.tradeProtocol = new TradeProtocol(getID(), authkey, environment, network, this) {
 				
 				@Override
 				protected boolean acceptExchange(NetworkAddress from, Offer trade) {

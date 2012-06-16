@@ -25,10 +25,10 @@ public class GlobalTimeService extends EnvironmentService {
 	public int tickCounter=0, yearCounter=0, sessionCounter=0;
 
 	//@Parameter(name="ticksInYear")
-	public int ticksInYear=GameConst.TICKS_IN_YEAR;
+	public int ticksInYear=GameConst.getTicksInYear();
 	
 	//@Parameter(name="yearsInSession")
-	public int yearsInSession=GameConst.YEARS_IN_SESSION;
+	public int yearsInSession=GameConst.getYearsInSession();
 	
 	EventBus eb;
 	
@@ -95,12 +95,34 @@ public class GlobalTimeService extends EnvironmentService {
 		}
 	}
 	
-	public int getYear() {
+	public int getCurrentYear() {
 		return yearCounter;
 	}
 	
-	public int getSession() {
+	public int getCurrentSession() {
 		return sessionCounter;
+	}
+	
+	
+	/**
+	 * 
+	 * @param year - the year you want the information for
+	 * @return - the tick number of the first turn in the year AFTER
+	 */
+	public int yearToSimTime(int year) {
+		return (ticksInYear * year);
+	}
+	
+	public int getCurrentTick() {		
+		return SimTime.get().intValue();
+	}
+	
+	public int getTicksInYear() {
+		return ticksInYear;
+	}
+	
+	public int getYearsInSession() {
+		return yearsInSession;
 	}
 
 }
