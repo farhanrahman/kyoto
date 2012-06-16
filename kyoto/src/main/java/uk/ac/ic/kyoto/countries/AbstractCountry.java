@@ -94,6 +94,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	/*Flag for single initialisation of AbstractCountry*/
 	private boolean initialised = false;
+
+	private double prevEnergyOutput; //Keeps track of the previous years EnergyOutput to calculate GDP
 	
 	//================================================================================
     // Constructors and Initializers
@@ -304,7 +306,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			marketStateFactor = GameConst.getRecessionMarketState();
 		}
 		
-		GDPRate += marketStateFactor + (GameConst.getGrowthScaler()*(energyOutput))/GDP;
+		GDPRate += marketStateFactor + GameConst.getGrowthScaler()*(energyOutput-prevEnergyOutput)/(2*GDP);
 		GDPRate /= 100; // Needs to be a % for rate formula
 		} catch (UnavailableServiceException e) {
 			System.out.println("Unable to reach economy service.");
