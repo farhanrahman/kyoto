@@ -1,6 +1,7 @@
 package uk.ac.ic.kyoto.countries;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
@@ -33,7 +34,7 @@ public class Monitor extends EnvironmentService {
 	private double cash = 0;
 	
 	// List of all the countries registered for the service
-	private ArrayList<AbstractCountry> memberStates = new ArrayList<AbstractCountry>();
+	private Map<UUID, AbstractCountry> memberStates = new HashMap<UUID, AbstractCountry>();
 
 	// Structure that counts the number of times the country cheated
 	private Map<AbstractCountry, Integer> sinBin;
@@ -66,7 +67,12 @@ public class Monitor extends EnvironmentService {
 	 * @param state 
 	 */
 	public void addMemberState(AbstractCountry state) {
-		memberStates.add(state);
+		if (!memberStates.containsKey(state.getID()))
+			memberStates.put(state.getID(), state);
+	}
+	
+	public void removeMemberState(AbstractCountry state) {
+		memberStates.remove(state.getID());
 	}
 	
 	@Inject
@@ -82,7 +88,7 @@ public class Monitor extends EnvironmentService {
 	}
 	
 	private void checkReports () {
-		for (AbstractCountry country : memberStates) {
+		for (AbstractCountry country : memberStates.values()) {
 			double reportedEmission = carbonReportingService.getReport(country.getID(), SimTime.get());
 			double emissionTarget = carbonTargetingService.queryYearTarget(country.getID(), (timeService.getCurrentYear() - 1));
 
@@ -129,7 +135,7 @@ public class Monitor extends EnvironmentService {
 		if (noToMonitor >= memberStates.size()) {
 			// monitor all the countries
 			
-			for (AbstractCountry country: memberStates) {
+			for (AbstractCountry country: memberStates.values()) {
 				double realCarbonOutput = country.getMonitored();
 				cash -= GameConst.MONITORING_PRICE;
 				double reportedCarbonOutput = carbonReportingService.getReport(country.getID(), SimTime.get());

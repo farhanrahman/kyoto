@@ -33,7 +33,8 @@ public class AddToCarbonTargetHandler implements ActionHandler {
 	@Override
 	public Input handle(Action action, UUID actor) throws ActionHandlingException {
 		AddToCarbonTarget obj = (AddToCarbonTarget) action;
-		ct.addMemberState(obj.countryObject);
+		if (actor == obj.countryObject.getID())
+			ct.addMemberState(obj.countryObject);
 		return null;
 	}
 

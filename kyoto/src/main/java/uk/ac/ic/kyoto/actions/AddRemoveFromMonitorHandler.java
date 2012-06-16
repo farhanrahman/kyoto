@@ -12,28 +12,38 @@ import uk.ac.imperial.presage2.core.messaging.Input;
 import com.google.inject.Inject;
 
 /**
- * Action object handler for adding country to CarbonTarget service
+ * Action object handler for adding country to Monitor service
  * 
- * @author Stuart Holland
+ * @author Stuart Holland, Jonathan Ely
  */
-public class AddToMonitorHandler implements ActionHandler {
+public class AddRemoveFromMonitorHandler implements ActionHandler {
 	
 	final protected Monitor monitor;
 	
 	@Inject
-	public AddToMonitorHandler(EnvironmentSharedStateAccess sharedState, EnvironmentServiceProvider environment) throws UnavailableServiceException {
+	public AddRemoveFromMonitorHandler(EnvironmentSharedStateAccess sharedState, EnvironmentServiceProvider environment) throws UnavailableServiceException {
 		this.monitor = environment.getEnvironmentService(Monitor.class);
 	}
 	
 	@Override
 	public boolean canHandle(Action action) {
-		return action instanceof AddToMonitor;
+		return action instanceof AddRemoveFromMonitor;
 	}
 
 	@Override
 	public Input handle(Action action, UUID actor) throws ActionHandlingException {
-		AddToMonitor obj = (AddToMonitor) action;
-		monitor.addMemberState(obj.country);
+		AddRemoveFromMonitor obj = (AddRemoveFromMonitor) action;
+		if (obj.country.getID() == actor) {
+			switch (obj.actionToImplement) {
+			case ADD :
+				this.monitor.addMemberState(obj.country);
+				break;
+			case REMOVE:
+				this.monitor.removeMemberState(obj.country);
+				break;
+			}
+
+		}
 		return null;
 	}
 
