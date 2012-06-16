@@ -57,9 +57,10 @@ public final class CarbonAbsorptionHandler {
 			double occupiedAreaMeasureAfter = calculateOccupiedAreaMeasure((arableLandArea - forestArea), country.landArea);
 			
 			// Get average price of single ton of additional carbon absorption
-			double averageUnitPrice = (GameConst.CARBON_ABSORPTION_PRICE_MIN + (
-										(GameConst.CARBON_ABSORPTION_PRICE_MAX - GameConst.CARBON_ABSORPTION_PRICE_MIN) *
-										(occupiedAreaMeasureBefore + occupiedAreaMeasureAfter)/2));
+			double averageUnitPrice = (GameConst.getCarbonAbsorptionPriceMin() +
+										( (GameConst.getCarbonAbsorptionPriceMax() - GameConst.getCarbonAbsorptionPriceMin()) *
+										  (occupiedAreaMeasureBefore + occupiedAreaMeasureAfter) /
+										  (2) ) );
 			
 			// Calculate the investment that is required
 			investmentRequired = (averageUnitPrice * carbonAbsorptionChange);
@@ -142,7 +143,7 @@ public final class CarbonAbsorptionHandler {
 		double forestArea;
 		
 		try {
-			forestArea = (carbonAbsorptionChange * GameConst.FOREST_CARBON_ABSORPTION);
+			forestArea = (carbonAbsorptionChange * GameConst.getForestCarbonAbsorption());
 		}
 		catch (Exception e) {
 			throw new Exception("getForestAreaRequired error: " + e.getMessage());
