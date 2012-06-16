@@ -30,7 +30,7 @@ public class SingletonModule extends AbstractModule {
 	protected void configure() {
 		bind(Token.class).to(TokenGenerator.class).in(Singleton.class);
 		bind(TradeHistory.class).to(TradeHistoryImplementation.class).in(Singleton.class);
-//		bind(MonitoredCountries.class).to(MonitoredCountriesImp.class).in(Singleton.class);
+		//bind(MonitoredCountries.class).to(MonitoredCountriesImp.class).in(Singleton.class);
 	}
 
 }
