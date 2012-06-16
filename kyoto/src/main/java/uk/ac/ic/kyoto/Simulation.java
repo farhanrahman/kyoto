@@ -116,7 +116,7 @@ public class Simulation extends InjectedSimulation {
 		    
 			UUID pid = Random.randomUUID();
 
-			carbonTarget.add1990OutputData(country.ISO, 1990Data)
+			
 			
 			switch(country.type) {
 				case x:  // NonAnnex
@@ -201,10 +201,14 @@ public class Simulation extends InjectedSimulation {
 //		AbstractParticipant p = new CanadaAgent(Random.randomUUID(),"CANADA","CAN",20000,10000,5000000,3,200000,28000,0,50000,30000);
 		//AbstractParticipant p1 = new TradeProtocolTestAgent(Random.randomUUID(), "Stuart", "CS1", 20000, 10000, 5000000, 3, 200000, 28000, 50000);
 		//AbstractParticipant p2 = new TradeProtocolTestAgent(Random.randomUUID(), "Farhan", "CS2", 20000, 10000, 5000000, 3, 200000, 28000, 50000);
+		//new TestAgent(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput)
 		AbstractParticipant p1 = new TestAgent(Random.randomUUID(), "Stuart", "LOL", 2000000, 1500000, 99999999999.00, 0.03, 70000, 50000);
 		AbstractParticipant p2 = new TestAgent(Random.randomUUID(), "Lolocaust", "LOL2", 500000, 200000, 100000, 0.07, 10000, 7000);
 		s.addParticipant(p1);
 		s.addParticipant(p2);
+		CarbonData1990.addCountry("LOL", 50000);
+		CarbonData1990.addCountry("LOL2", 50000);
+		
 		
 
 		//AbstractParticipant p3 = new TradeProtocolTestAgent(Random.randomUUID(), "TEST1", "TST");
