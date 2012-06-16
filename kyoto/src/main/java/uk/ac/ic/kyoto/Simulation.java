@@ -2,27 +2,18 @@ package uk.ac.ic.kyoto;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import uk.ac.ic.kyoto.actions.AddToCarbonTargetHandler;
 import uk.ac.ic.kyoto.actions.AddToMonitorHandler;
 import uk.ac.ic.kyoto.actions.QueryEmissionsTargetHandler;
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReportHandler;
-import uk.ac.ic.kyoto.annex1reduce.EUTest1;
-import uk.ac.ic.kyoto.annex1reduce.EUTest2;
 import uk.ac.ic.kyoto.countries.CarbonTarget;
-import uk.ac.ic.kyoto.countries.GameConst;
 import uk.ac.ic.kyoto.countries.Monitor;
 import uk.ac.ic.kyoto.countries.TestAgent;
 import uk.ac.ic.kyoto.market.Economy;
-import uk.ac.ic.kyoto.roguestates.CanadaAgent;
-import uk.ac.ic.kyoto.roguestates.TestAbsorptionHandlerAgent;
-import uk.ac.ic.kyoto.roguestates.TestReductionHandlerAgent;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
-import uk.ac.ic.kyoto.simulationagent.SimulationAgent;
-import uk.ac.ic.kyoto.trade.TradeProtocolTestAgent;
 import uk.ac.imperial.presage2.core.simulator.InjectedSimulation;
 import uk.ac.imperial.presage2.core.simulator.Scenario;
 import uk.ac.imperial.presage2.core.util.random.Random;
@@ -30,7 +21,6 @@ import uk.ac.imperial.presage2.rules.RuleModule;
 import uk.ac.imperial.presage2.util.environment.AbstractEnvironmentModule;
 import uk.ac.imperial.presage2.util.network.NetworkModule;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
-
 import com.google.inject.AbstractModule;
 
 public class Simulation extends InjectedSimulation {
