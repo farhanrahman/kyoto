@@ -5,8 +5,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import uk.ac.ic.kyoto.actions.AddRemoveFromMonitor.addRemoveType;
 import uk.ac.ic.kyoto.actions.AddToCarbonTarget;
-import uk.ac.ic.kyoto.actions.AddToMonitor;
+import uk.ac.ic.kyoto.actions.AddRemoveFromMonitor;
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
 import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
 import uk.ac.ic.kyoto.market.Economy;
@@ -136,7 +137,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 					e2.printStackTrace();
 				}
 				try {
-					environment.act(new AddToMonitor(this), getID(), authkey);
+					if (getIsKyotoMember())
+						environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
 				} catch (ActionHandlingException e2) {
 					e2.printStackTrace();
 				}
@@ -495,6 +497,13 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	private int leaveTime=0, joinTime=0;
 	
 	protected final boolean leaveKyoto() {
+		try {
+			environment.act(new AddRemoveFromMonitor(this, addRemoveType.REMOVE), getID(), authkey);
+		} catch (ActionHandlingException e) {
+			System.out.println("Exception wilst removing from monitor: " + e);
+			e.printStackTrace();
+		}
+		
 		if (timeService.getCurrentTick() == 0) {
 			isKyotoMember = false;
 			return true;
@@ -508,6 +517,13 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	protected final boolean joinKyoto() {
+		try {
+			environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
+		} catch (ActionHandlingException e) {
+			System.out.println("Exception wilst adding to monitor: " + e);
+			e.printStackTrace();
+		}
+		
 		if (timeService.getCurrentTick() - leaveTime >= timeService.getTicksInYear()*GameConst.MINIMUM_KYOTO_REJOIN_TIME) {
 			isKyotoMember=true;
 			joinTime = timeService.getCurrentTick();

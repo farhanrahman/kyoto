@@ -2,7 +2,6 @@ package uk.ac.ic.kyoto.actions;
 
 import java.util.UUID;
 
-import uk.ac.ic.kyoto.countries.CarbonTarget;
 import uk.ac.ic.kyoto.countries.Monitor;
 import uk.ac.imperial.presage2.core.Action;
 import uk.ac.imperial.presage2.core.environment.ActionHandler;
@@ -14,24 +13,34 @@ import uk.ac.imperial.presage2.core.messaging.Input;
 
 import com.google.inject.Inject;
 
-public class AddToMonitorHandler implements ActionHandler {
+public class AddRemoveFromMonitorHandler implements ActionHandler {
 	
 	final protected Monitor monitor;
 	
 	@Inject
-	public AddToMonitorHandler(EnvironmentSharedStateAccess sharedState, EnvironmentServiceProvider environment) throws UnavailableServiceException {
+	public AddRemoveFromMonitorHandler(EnvironmentSharedStateAccess sharedState, EnvironmentServiceProvider environment) throws UnavailableServiceException {
 		this.monitor = environment.getEnvironmentService(Monitor.class);
 	}
 	
 	@Override
 	public boolean canHandle(Action action) {
-		return action instanceof AddToMonitor;
+		return action instanceof AddRemoveFromMonitor;
 	}
 
 	@Override
 	public Input handle(Action action, UUID actor) throws ActionHandlingException {
-		AddToMonitor obj = (AddToMonitor) action;
-		monitor.addMemberState(obj.country);
+		AddRemoveFromMonitor obj = (AddRemoveFromMonitor) action;
+		if (obj.country.getID() == actor) {
+			switch (obj.actionToImplement) {
+			case ADD :
+				this.monitor.addMemberState(obj.country);
+				break;
+			case REMOVE:
+				this.monitor.removeMemberState(obj.country);
+				break;
+			}
+
+		}
 		return null;
 	}
 
