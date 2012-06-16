@@ -22,4 +22,6 @@ public interface TradeHistory {
 	public boolean tradeExists(UUID id);
 	
 	public void addToHistory(Time simTime, UUID tradeID, Offer trade);
+	
+	public void removeTradeHistoryWithID(UUID id);
 }
