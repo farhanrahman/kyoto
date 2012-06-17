@@ -3,7 +3,9 @@ package uk.ac.ic.kyoto.nonannexone;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
+import uk.ac.ic.kyoto.countries.Offer;
 import uk.ac.imperial.presage2.core.messaging.Input;
+import uk.ac.imperial.presage2.core.network.NetworkAddress;
 
 public class NonAnnexOne extends AbstractCountry {
 
@@ -42,6 +44,12 @@ public class NonAnnexOne extends AbstractCountry {
 	protected void behaviour() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	protected boolean acceptTrade(NetworkAddress from, Offer trade) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

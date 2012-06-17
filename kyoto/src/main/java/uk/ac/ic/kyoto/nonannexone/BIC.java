@@ -1,14 +1,16 @@
 package uk.ac.ic.kyoto.nonannexone;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
+import uk.ac.ic.kyoto.countries.Offer;
 import uk.ac.ic.kyoto.trade.InvestmentType;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
+import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 import java.util.UUID;
 
-/** author George
- * 
+/** @author George
+ *
  **/
 
 public class BIC extends AbstractCountry {
@@ -83,7 +85,12 @@ public class BIC extends AbstractCountry {
 	//.......................................................................................
 	//........................................................................................
 	
-	
+/***********************************************************************************************/
+	@Override
+	protected boolean acceptTrade(NetworkAddress from, Offer trade) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 	
 /************************Functions executed every year *******************************************/
 	
@@ -264,7 +271,6 @@ public class BIC extends AbstractCountry {
 		
 	private void clean_development_mechanism(double money_to_invest) throws Exception
 	{
-
 		CDM_absorption(money_to_invest);
 		CDM_reduction(money_to_invest);
 		
@@ -301,6 +307,12 @@ change_required = carbonAbsorptionHandler.getCarbonAbsorptionChange(acquire_cash
 
 broadcastInvesteeOffer(change_required,InvestmentType.ABSORB);
 
+/*accept counteroffer only
+ * if (currentAvailableArea() == "Safe" )
+ *  accept offer
+ *  else
+ *  reject offer
+ * */
 
 
 }
@@ -316,6 +328,9 @@ private void CDM_reduction(double acquire_cash) throws Exception
 
 
 broadcastInvesteeOffer(change_required,InvestmentType.REDUCE);	
+
+//no condition to reject the offer since country does not lose anything in doing so.
+
 }		
 		
 /*******************************************************************************************************/
@@ -329,6 +344,8 @@ broadcastInvesteeOffer(change_required,InvestmentType.REDUCE);
 				return "Danger";
 		
 		}
+
+
 		
 		
 }		
