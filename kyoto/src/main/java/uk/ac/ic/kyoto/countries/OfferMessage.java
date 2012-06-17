@@ -71,7 +71,7 @@ public class OfferMessage {
 	 * 
 	 * @return
 	 */
-	public Integer getOfferQuantity(){
+	public Double getOfferQuantity(){
 		return this.offer.getQuantity();
 	}
 
