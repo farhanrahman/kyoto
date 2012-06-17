@@ -123,9 +123,15 @@ public class BIC extends AbstractCountry {
 		//clean development mechanism only if country cares for environment
 		if (green_care)
 		{
-		financial_difference = invest_money - getAvailableToSpend();
-		clean_development_mechanism(financial_difference);
+			if (aim_success==false)
+			{
+			financial_difference = invest_money - getAvailableToSpend();
+			clean_development_mechanism(financial_difference);
+			}
+			else
+				clean_development_mechanism(invest_money);
 		}
+		
 		
 	}
 		
