@@ -5,17 +5,10 @@ import java.util.UUID;
 
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
 import uk.ac.ic.kyoto.trade.InvestmentType;
-import uk.ac.ic.kyoto.trade.TradeType;
-import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.ActionHandlingException;
 import uk.ac.imperial.presage2.core.messaging.Input;
-import uk.ac.imperial.presage2.core.messaging.Performative;
-import uk.ac.imperial.presage2.core.network.BroadcastMessage;
 import uk.ac.imperial.presage2.core.network.Message;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
-import uk.ac.imperial.presage2.core.simulator.SimTime;
-import uk.ac.imperial.presage2.util.fsm.FSMException;
-import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 public class TestAgent extends AbstractCountry {
 	
