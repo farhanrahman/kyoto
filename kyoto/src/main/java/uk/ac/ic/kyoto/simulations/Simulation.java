@@ -1,7 +1,10 @@
 package uk.ac.ic.kyoto.simulations;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+
+import org.apache.log4j.Logger;
 
 import uk.ac.ic.kyoto.CarbonData1990;
 import uk.ac.ic.kyoto.actions.AddToCarbonTargetHandler;
@@ -12,12 +15,17 @@ import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReportHandler;
 import uk.ac.ic.kyoto.countries.CarbonTarget;
 import uk.ac.ic.kyoto.countries.Monitor;
 import uk.ac.ic.kyoto.countries.TestAgent;
+import uk.ac.ic.kyoto.exceptions.NoCountryDataException;
 import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.ic.kyoto.trade.TradeProtocolTestAgent;
+import uk.ac.ic.kyoto.util.sim.jsonobjects.DataProvider;
+import uk.ac.ic.kyoto.util.sim.jsonobjects.JSONObjectContainer;
+import uk.ac.ic.kyoto.util.sim.jsonobjects.simulations.CountryData;
+import uk.ac.ic.kyoto.util.sim.jsonobjects.simulations.SimulationData;
 import uk.ac.imperial.presage2.core.simulator.InjectedSimulation;
 import uk.ac.imperial.presage2.core.simulator.Parameter;
 import uk.ac.imperial.presage2.core.simulator.Scenario;
@@ -103,6 +111,7 @@ public class Simulation extends InjectedSimulation {
 		
 		//Something new
 		
+		try{
 		
 		
 		
@@ -195,6 +204,19 @@ public class Simulation extends InjectedSimulation {
 		 * 
 		 * 
 		 */
+		Logger logger = Logger.getLogger(Simulation.class);
+		JSONObjectContainer<SimulationData> obj = new DataProvider().getSimulationData(this.simPersist.getID());
+		
+		if(obj.getObject().getCountries() == null || obj.getObject().getCountries().isEmpty()){
+			//throw new NoCountryDataException();
+		}
+			
+		if(obj.getObject().getCountries() != null && !obj.getObject().getCountries().isEmpty()){
+			Map<String,CountryData> countries = obj.getObject().getCountries();
+			for(String countryKey : countries.keySet()){
+				logger.info(countries.get(countryKey));
+			}
+		}
 		
 		//String endTime = this.getParameter("finishTime");
 		//AbstractParticipant p = new CanadaAgent(Random.randomUUID(),"CANADA","CAN",20000,10000,5000000,3,200000,28000,0,50000,30000);
@@ -239,5 +261,8 @@ public class Simulation extends InjectedSimulation {
 		//AbstractParticipant ABSVALUETEST = new TestAbsorptionHandlerAgent(Random.randomUUID(),"ABSVALUETEST","AT", 10000, 1000, 5000000, 3, 1000, 700);
 		
 		//s.addParticipant(ABSVALUETEST);
+		} catch(NoCountryDataException e){
+			
+		}
 	}
 }

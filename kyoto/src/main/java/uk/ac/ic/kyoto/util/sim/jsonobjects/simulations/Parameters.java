@@ -8,15 +8,15 @@ package uk.ac.ic.kyoto.util.sim.jsonobjects.simulations;
  *
  */
 public class Parameters {
-	private Integer finishTime;
+	private String finishTime;
 	private String testkey;
-	private Long worldemision;
-	public Integer getFinishTime(){return finishTime;}
-	public void setFinishTime(Integer finishTime){this.finishTime = finishTime;}
+	private String worldemision;
+	public String getFinishTime(){return finishTime;}
+	public void setFinishTime(String finishTime){this.finishTime = finishTime;}
 	public String getTestkey(){return testkey;}
 	public void setTestkey(String testkey){this.testkey = testkey;}
-	public Long getWorldemission(){return worldemision;}
-	public void setWorldemission(Long worldemision){this.worldemision = worldemision;}
+	public String getWorldemission(){return worldemision;}
+	public void setWorldemission(String worldemision){this.worldemision = worldemision;}
 	
 	public String toString(){
 		String s = "";
