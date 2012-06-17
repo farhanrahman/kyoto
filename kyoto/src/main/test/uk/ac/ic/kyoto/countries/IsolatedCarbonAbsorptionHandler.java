@@ -101,9 +101,9 @@ public final class IsolatedCarbonAbsorptionHandler {
 		double carbonAbsorptionChange;
 		
 		try {
-			double carbonDiff = country.carbonOutput - country.carbonAbsorption;
+			double carbonDiff = (country.carbonOutput - country.carbonAbsorption)/2;
 			
-			carbonAbsorptionChange = carbonDiff / 2;
+			carbonAbsorptionChange = carbonDiff;
 			
 			double tempInvestmentAmount = getInvestmentRequired(carbonAbsorptionChange, arableLandArea);
 

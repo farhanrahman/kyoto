@@ -457,11 +457,11 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 		return availableToSpend;
 	}
 	
-	void setEmissionsTarget(double emissionsTarget) {
+	public void setEmissionsTarget(double emissionsTarget) {
 		this.emissionsTarget = emissionsTarget;
 	}
 	
-	void setAvailableToSpend(double availableToSpend) {
+	public void setAvailableToSpend(double availableToSpend) {
 			this.availableToSpend = availableToSpend;
 	}
 	

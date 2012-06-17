@@ -3,6 +3,9 @@ package uk.ac.ic.kyoto.annex1reduce;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
+import uk.ac.ic.kyoto.countries.IsolatedAbstractCountry;
+import uk.ac.ic.kyoto.countries.NotEnoughCarbonOutputException;
+import uk.ac.ic.kyoto.countries.NotEnoughCashException;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.messaging.Input;
 
@@ -11,7 +14,7 @@ import uk.ac.imperial.presage2.core.messaging.Input;
  * @author Nik
  *
  */
-public class AnnexOneReduce extends AbstractCountry {
+public class AnnexOneReduce extends IsolatedAbstractCountry {
 
 	private EU eu;
 	final private CountrySimulator simulator;
@@ -43,6 +46,60 @@ public class AnnexOneReduce extends AbstractCountry {
 
 	@Override
 	protected void behaviour() {
+		
+		double reduction;
+		double currentMoney = getAvailableToSpend();
+		try {
+			reduction = carbonReductionHandler.getCarbonOutputChange(currentMoney);
+		} catch (Exception e) {
+			e.printStackTrace();
+			reduction = 0;
+		}
+		
+		double cost;
+		try {
+			cost = carbonReductionHandler.getInvestmentRequired(reduction);
+		} catch (Exception e1) {
+			e1.printStackTrace();
+			cost = 0;
+		}
+		
+		try {
+			carbonReductionHandler.investInCarbonReduction(reduction);
+		} catch (NotEnoughCarbonOutputException e) {
+			e.printStackTrace();
+		} catch (NotEnoughCashException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		double reduction2;
+		double currentMoney2 = getAvailableToSpend();
+		try {
+			reduction2 = carbonAbsorptionHandler.getCarbonAbsorptionChange(currentMoney2);
+		} catch (Exception e) {
+			e.printStackTrace();
+			reduction2 = 0;
+		}
+		
+		double cost2;
+		try {
+			cost2 = carbonAbsorptionHandler.getInvestmentRequired(reduction2);
+		} catch (Exception e1) {
+			e1.printStackTrace();
+			cost2 = 0;
+		}
+		
+		try {
+			carbonAbsorptionHandler.investInCarbonAbsorption(reduction2);
+		} catch (NotEnoughCarbonOutputException e) {
+			e.printStackTrace();
+		} catch (NotEnoughCashException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 		CountrySimulator.CountryState optimalState = 
 				simulator.simulate(getCarbonOutput(),getEnergyOutput(),
@@ -233,8 +290,8 @@ public class AnnexOneReduce extends AbstractCountry {
 	}
 	
 	public double getNextEmissionTarget(double emissionsTarget) {
-		// TODO Auto-generated method stub
-		return emissionsTarget * 0.95;
+		//TODO currently returns old emissions target times the 10th root of 0.95
+		return emissionsTarget * 0.99488;
 	}
 
 	@Override

@@ -11,15 +11,16 @@ public class AnnexOneReduceTest {
 	@BeforeClass
 	public static void initEUCountry() {
 		System.out.println("Initialising EUCountry");
-		test = new AnnexOneReduce(UUID.randomUUID(), "JunitTest", "JUT",1000000,500000,1000000,1000000,100000,70000);
-//		test.setAvailableToSpend(1000000000);
-//		test.setEmissionsTarget(68000);
-//		
+		test = new AnnexOneReduce(UUID.randomUUID(), "JunitTest", "JUT",1000000,500000,1000000,1000000,1000000,700000);
+		test.setAvailableToSpend(10000000);
+		test.setEmissionsTarget(680000);
+		
 		test.initialise();
 	}
 	
 	@Test
 	public void testbehaviour() {
+		
 		test.behaviour();
 
 		
