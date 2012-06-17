@@ -426,7 +426,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		}
 	}
 	
-	protected final void broadcastInvesteeOffer(int quantity, InvestmentType itype){
+	protected final void broadcastInvesteeOffer(double quantity, InvestmentType itype){
 		if(this.tradeProtocol != null){
 			double unitCost;
 			try {
