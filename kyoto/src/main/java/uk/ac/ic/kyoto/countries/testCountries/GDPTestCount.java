@@ -23,6 +23,7 @@ public class GDPTestCount extends AbstractCountry {
 		logger.debug("Current Cash: " + this.getAvailableToSpend());
 		logger.debug("Current GDP Rate: " + this.getGDPRate());
 		logger.debug("Current Energy Output: " + this.getEnergyOutput());
+		logger.debug("Current Previous Energy Output: " + this.getPrevEnergyOutput());
 		logger.debug("Current CO2 Output: " + this.getCarbonOutput());
 
 	}
