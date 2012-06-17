@@ -297,7 +297,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			marketStateFactor = GameConst.getRecessionMarketState();
 		}
 		
-		GDPRate += marketStateFactor + GameConst.getGrowthScaler()*(energyOutput-prevEnergyOutput)/(2*GDP);
+		double sum = ((((energyOutput-prevEnergyOutput)/prevEnergyOutput)*GameConst.getEnergyGrowthScaler() +marketStateFactor)+GDPRate)/2;
+		GDPRate = (GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler()));
 		GDPRate /= 100; // Needs to be a % for rate formula
 		} catch (UnavailableServiceException e) {
 			System.out.println("Unable to reach economy service.");
@@ -435,48 +436,53 @@ public abstract class AbstractCountry extends AbstractParticipant {
     // Kyoto membership functions
     //================================================================================
 	
-	//TODO: These should either throw exceptions, or be renamed to "try to leave/join" etc.
-	
 	public boolean isKyotoMember() {
 		return isKyotoMember;
 	}
 	
 	private int leaveTime=0, joinTime=0;
 	
-	protected final boolean leaveKyoto() {
-		try {
-			environment.act(new AddRemoveFromMonitor(this, addRemoveType.REMOVE), getID(), authkey);
-		} catch (ActionHandlingException e) {
-			System.out.println("Exception wilst removing from monitor: " + e);
-			e.printStackTrace();
-		}
-		
+	protected final void leaveKyoto() throws IllegalStateException {
 		if (timeService.getCurrentTick() == 0) {
 			isKyotoMember = false;
-			return true;
+			
+			try {
+				environment.act(new AddRemoveFromMonitor(this, addRemoveType.REMOVE), getID(), authkey);
+			} catch (ActionHandlingException e) {
+				System.out.println("Exception wilst removing from monitor: " + e);
+				e.printStackTrace();
+			}
+			return;
 		}
 		else if (timeService.getCurrentTick() - joinTime >= timeService.getTicksInYear()*GameConst.getMinimumKyotoMembershipDuration()) {
 			isKyotoMember=false;
 			leaveTime=timeService.getCurrentTick();
-			return true;
+			
+			try {
+				environment.act(new AddRemoveFromMonitor(this, addRemoveType.REMOVE), getID(), authkey);
+			} catch (ActionHandlingException e) {
+				System.out.println("Exception wilst removing from monitor: " + e);
+				e.printStackTrace();
+			}
+			return;
 		}
-		return false;
+		throw new IllegalStateException("Cannot leave Kyoto Protocol.");
 	}
 	
-	protected final boolean joinKyoto() {
-		try {
-			environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
-		} catch (ActionHandlingException e) {
-			System.out.println("Exception wilst adding to monitor: " + e);
-			e.printStackTrace();
-		}
-		
+	protected final void joinKyoto() throws IllegalStateException {
 		if (timeService.getCurrentTick() - leaveTime >= timeService.getTicksInYear()*GameConst.getMinimumKyotoRejoinTime()) {
 			isKyotoMember=true;
 			joinTime = timeService.getCurrentTick();
-			return true;
+			
+			try {
+				environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
+			} catch (ActionHandlingException e) {
+				System.out.println("Exception whilst adding to monitor: " + e);
+				e.printStackTrace();
+			}
+			return;
 		}
-		return false;
+		throw new IllegalStateException("Cannot join Kyoto Protocol.");
 	}
 	
 	//================================================================================
