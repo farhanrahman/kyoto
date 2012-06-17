@@ -3,9 +3,9 @@ package uk.ac.ic.kyoto.countries;
 public final class GameConst {
 	
 	// GDP Growth Values
-	private static double GROWTH_MARKET_STATE = 2;
+	private static double GROWTH_MARKET_STATE = 1;
 	private static double STABLE_MARKET_STATE = 0.5;
-	private static double RECESSION_MARKET_STATE = -2;
+	private static double RECESSION_MARKET_STATE = 0.1;
 	
 	private static double GROWTH_MARKET_CHANCE = 0.1;
 	private static double STABLE_MARKET_CHANCE = 0.8;
@@ -24,7 +24,7 @@ public final class GameConst {
 	 */
 	private static double GROWTH_SCALER = 0.25;
 	
-	private static double ENERGY_GROWTH_SCALER = 50;
+	private static double ENERGY_GROWTH_SCALER = 400;
 	
 	private static double MAX_GDP_GROWTH = 7;
 	/**
