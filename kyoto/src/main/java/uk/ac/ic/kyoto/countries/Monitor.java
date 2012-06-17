@@ -93,20 +93,20 @@ public class Monitor extends EnvironmentService {
 	
 	@SuppressWarnings("unused")
 	@EventListener
-	private void initialize(EndOfTimeCycle E) {
+	public void initialize(EndOfTimeCycle e) {
 		if (SimTime.get().intValue() == 1) {
 			try {
 				this.timeService = provider.getEnvironmentService(GlobalTimeService.class);
-			} catch (UnavailableServiceException e) {
+			} catch (UnavailableServiceException i) {
 				System.out.println("Unable to get environment service 'TimeService'.");
-				e.printStackTrace();
+				i.printStackTrace();
 			}
 			
 			// Register for the carbon reporting service
 			try {
 				this.carbonReportingService = provider.getEnvironmentService(CarbonReportingService.class);
-			} catch (UnavailableServiceException e) {
-				e.printStackTrace();
+			} catch (UnavailableServiceException i) {
+				i.printStackTrace();
 			}
 			if (this.carbonReportingService == null) {
 				System.err.println("PROBLEM");
@@ -115,8 +115,8 @@ public class Monitor extends EnvironmentService {
 			// Register for the carbon emissions targeting service
 			try {
 				this.carbonTargetingService = provider.getEnvironmentService(CarbonTarget.class);
-			} catch (UnavailableServiceException e) {
-				e.printStackTrace();
+			} catch (UnavailableServiceException i) {
+				i.printStackTrace();
 			}
 			if (this.carbonTargetingService == null) {
 				System.err.println("PROBLEM");

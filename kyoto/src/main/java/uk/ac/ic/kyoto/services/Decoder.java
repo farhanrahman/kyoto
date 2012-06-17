@@ -1,7 +1,7 @@
 /**
  * 
  */
-package uk.ac.ic.kyoto.simulations;
+package uk.ac.ic.kyoto.services;
 
 import java.util.HashMap;
 import java.util.Map;

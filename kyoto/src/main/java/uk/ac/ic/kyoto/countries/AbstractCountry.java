@@ -10,7 +10,7 @@ import uk.ac.ic.kyoto.actions.AddToCarbonTarget;
 import uk.ac.ic.kyoto.actions.ApplyMonitorTax;
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
 import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
-import uk.ac.ic.kyoto.market.Economy;
+import uk.ac.ic.kyoto.services.Economy;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.ic.kyoto.trade.InvestmentType;
@@ -127,6 +127,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.carbonAbsorption = 0;
 		this.carbonEmissionReports = new HashMap<Integer, Double>();
 		this.energyOutput = energyOutput;
+		this.prevEnergyOutput = energyOutput;
 	}
 	
 	@Override
@@ -206,6 +207,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 					} catch (ActionHandlingException e) {
 						e.printStackTrace();
 					}
+					logSimulationData(); // TO BE TESTED! Remove if necessary /Waffles
 					yearlyFunction();
 				}
 				if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
@@ -300,29 +302,34 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	private final void updateGDPRate() {
 		double marketStateFactor = 0;
 		double sum;
-		
 		Economy economy;
+		
 		try {
 			economy = getEnvironmentService(Economy.class);
-		
-		switch(economy.getEconomyState()) {
-		case GROWTH:
-			marketStateFactor = GameConst.getGrowthMarketState();
-		case STABLE:
-			marketStateFactor = GameConst.getStableMarketState();
-		case RECESSION:
-			marketStateFactor = GameConst.getRecessionMarketState();
-		}
-		if (energyOutput-prevEnergyOutput >= 0){	
-			sum = (((energyOutput-prevEnergyOutput)/prevEnergyOutput)*GameConst.getEnergyGrowthScaler() *marketStateFactor+GDPRate*100)/2;
-		}
-		else
-		{
-			sum = ((((energyOutput-prevEnergyOutput)/prevEnergyOutput)*GameConst.getEnergyGrowthScaler()));
-		}
-		GDPRate = (GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler()));
-		
-		GDPRate /= 100; // Needs to be a % for rate formula
+			
+			switch(economy.getEconomyState()) {
+			case GROWTH:
+				marketStateFactor = GameConst.getGrowthMarketState();
+			case STABLE:
+				marketStateFactor = GameConst.getStableMarketState();
+			case RECESSION:
+				marketStateFactor = GameConst.getRecessionMarketState();
+			}
+			
+			if (energyOutput-prevEnergyOutput >= 0){	
+				sum = (((energyOutput-prevEnergyOutput)/prevEnergyOutput)*GameConst.getEnergyGrowthScaler() *marketStateFactor+GDPRate*100)/2;
+			}
+			else{
+				sum = ((energyOutput-prevEnergyOutput)/prevEnergyOutput)*GameConst.getEnergyGrowthScaler();
+			}
+			
+			System.out.println(sum);
+			GDPRate = GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler());
+			
+			GDPRate /= 100; // Needs to be a % for rate formula
+			
+			prevEnergyOutput = energyOutput;
+				
 		} catch (UnavailableServiceException e) {
 			System.out.println("Unable to reach economy service.");
 			e.printStackTrace();
@@ -338,7 +345,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	/**
-	 * Calculate available to spend for the next year as an extra 1% of GDP
+	 * Calculate available to spend for the next year as an extra 0.5% of GDP
 	 * If we haven't spent something last year, it will be available this year too
 	 */
 	private final void updateAvailableToSpend() {
@@ -360,6 +367,36 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	private final void resetCarbonOffset() {
 		carbonOffset = 0;
+	}
+	
+	//================================================================================
+    // Log simulation data function
+    //================================================================================
+	/**
+	 * Stores all simulation data into MongoDB
+	 * @author waffles
+	 */
+	private final void logSimulationData() {
+		int time = SimTime.get().intValue();
+		
+//		// check if db is available
+//		if (this.persist != null) {
+//			this.persist.getState(time).setProperty("GDP", Double.toString(GDP));
+//			this.persist.getState(time).setProperty("GDPRate", Double.toString(GDPRate));
+//			this.persist.getState(time).setProperty("Available_to_spend", Double.toString(availableToSpend));
+//			this.persist.getState(time).setProperty("Emissions_target", Double.toString(emissionsTarget));
+//			this.persist.getState(time).setProperty("Carbon_offset", Double.toString(carbonOffset));
+//			this.persist.getState(time).setProperty("Carbon_output", Double.toString(carbonOutput));
+//			this.persist.getState(time).setProperty("Energy_output", Double.toString(energyOutput));
+//			this.persist.getState(time).setProperty("Is_kyoto?", Boolean.toString(isKyotoMember));
+				
+			/* TODO
+			 * is cheating?
+			 * carbon reduction - cost, quantity
+			 * carbon absorption - cost, quantity
+			 * energy usage - cost, quantity
+			 */
+//		}
 	}
 	
 	//================================================================================
@@ -397,6 +434,16 @@ public abstract class AbstractCountry extends AbstractParticipant {
 										this.tradeProtocol.tradeToken.generate(),
 										OfferMessageType.BROADCAST_MESSAGE))
 					);
+			
+//			int time = SimTime.get().intValue();
+//				
+//			// check if db is available
+//			if (this.persist != null) {
+//				this.persist.getState(time).setProperty("Trade_type", TradeType.SELL.toString());
+//				this.persist.getState(time).setProperty("From", getName());
+//				this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
+//				this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
+//			}
 		}
 	}
 
@@ -423,6 +470,16 @@ public abstract class AbstractCountry extends AbstractParticipant {
 										this.tradeProtocol.tradeToken.generate(), 
 										OfferMessageType.BROADCAST_MESSAGE))
 					);
+		
+//			int time = SimTime.get().intValue();
+//			
+//			// check if db is available
+//			if (this.persist != null) {
+//				this.persist.getState(time).setProperty("Trade_type", TradeType.BUY.toString());
+//				this.persist.getState(time).setProperty("From", getName());
+//				this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
+//				this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
+//			}
 		}
 	}
 	
@@ -450,6 +507,17 @@ public abstract class AbstractCountry extends AbstractParticipant {
 											this.tradeProtocol.tradeToken.generate(),
 											OfferMessageType.BROADCAST_MESSAGE))
 						);
+				
+//				int time = SimTime.get().intValue();
+//				
+//				// check if db is available
+//				if (this.persist != null) {
+//					this.persist.getState(time).setProperty("Trade_type", TradeType.RECEIVE.toString());
+//					this.persist.getState(time).setProperty("From", getName());
+//					this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
+//					this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
+//				}
+				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -544,6 +612,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	public double getEnergyOutput(){
 		return energyOutput;
 	}
+	
+	public double getPrevEnergyOut(){
+		return prevEnergyOutput;
+	}
+	
 	public double getCarbonOutput(){
 		return carbonOutput;
 	}

@@ -28,8 +28,8 @@ public final class EnergyUsageHandler {
 	public void reduceEnergyOutput (double amount)
 			throws NotEnoughCarbonOutputException, IllegalArgumentException, Exception {
 		try {
-			if (amount > 0) {
-				if (amount < country.carbonOutput) {
+			if (amount >= 0) {
+				if (amount <= country.carbonOutput) {
 					country.energyOutput -= amount;
 					country.carbonOutput -= amount;
 				}
@@ -55,7 +55,7 @@ public final class EnergyUsageHandler {
 			throws IllegalArgumentException, Exception {
 		double cost;
 		try {
-			if (growth > 0)
+			if (growth >= 0)
 				cost = growth * GameConst.getCarbonInvestmentPrice();
 			else
 				throw new IllegalArgumentException("It is impossible to invest in negative carbon industry growth");
@@ -76,7 +76,7 @@ public final class EnergyUsageHandler {
 			throws IllegalArgumentException, Exception {
 		double growth;
 		try {
-			if (cost > 0)
+			if (cost >= 0)
 				growth = cost / GameConst.getCarbonInvestmentPrice();
 			else
 				throw new IllegalArgumentException("It is impossible to invest negative sum in industry growth");

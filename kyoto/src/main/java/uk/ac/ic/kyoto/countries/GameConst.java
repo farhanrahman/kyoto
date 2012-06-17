@@ -30,7 +30,7 @@ public final class GameConst {
 	/**
 	 * Percentage of GDP available to spend on development
 	 */
-	private static double PERCENTAGE_OF_GDP = 0.1;
+	private static double PERCENTAGE_OF_GDP = 0.005;
 	
 	
 	/**
@@ -73,7 +73,7 @@ public final class GameConst {
 	/**
 	 * Percentage of GDP that is levied from availiableToSpend for monitoring
 	 */
-	private static double MONITOR_COST_PERCENTAGE = 0.005;
+	private static double MONITOR_COST_PERCENTAGE = 0.0005;
 	
 	/**
 	 * Percentage of GDP taken from country if they fail to meet their targets.  

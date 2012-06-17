@@ -1,4 +1,4 @@
-package uk.ac.ic.kyoto.market;
+package uk.ac.ic.kyoto.services;
 
 import java.util.Random;
 import org.apache.log4j.Logger;

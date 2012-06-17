@@ -5,17 +5,10 @@ import java.util.UUID;
 
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
 import uk.ac.ic.kyoto.trade.InvestmentType;
-import uk.ac.ic.kyoto.trade.TradeType;
-import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.ActionHandlingException;
 import uk.ac.imperial.presage2.core.messaging.Input;
-import uk.ac.imperial.presage2.core.messaging.Performative;
-import uk.ac.imperial.presage2.core.network.BroadcastMessage;
 import uk.ac.imperial.presage2.core.network.Message;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
-import uk.ac.imperial.presage2.core.simulator.SimTime;
-import uk.ac.imperial.presage2.util.fsm.FSMException;
-import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 public class TestAgent extends AbstractCountry {
 	
@@ -77,13 +70,15 @@ public class TestAgent extends AbstractCountry {
 		}
 		
 		int quantity=400, unitCost=20;
+		logger.info("I be broadcasting a buy offer, mon!");
 		broadcastBuyOffer(quantity, unitCost);
 		
 		quantity=400;
 		unitCost = 25;
+		logger.info("I done kinda broadcast sell offer, eh?");
 		broadcastSellOffer(quantity, unitCost);
 		
-		logger.info("PARTRIDGE IN A PEAR TREE");
+		//logger.info("PARTRIDGE IN A PEAR TREE");
 		
 		try {
 			logger.info("I am investing " + carbonAbsorptionHandler.getInvestmentRequired(1000) + " in carbon absorption.");
@@ -91,14 +86,11 @@ public class TestAgent extends AbstractCountry {
 			carbonAbsorptionHandler.investInCarbonAbsorption(1000);
 			logger.info("My carbon absorption change is " + (carbonAbsorption - bang));
 		} catch (NotEnoughCarbonOutputException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warn(e.getMessage(), e);
 		} catch (NotEnoughCashException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warn(e.getMessage(), e);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warn(e.getMessage(), e);
 		}
 		
 		try {
@@ -109,14 +101,11 @@ public class TestAgent extends AbstractCountry {
 			energyUsageHandler.investInCarbonIndustry(availableToSpend*0.01);
 			logger.info("My energy output has gone back up by " + energyOutput);
 		} catch (NotEnoughCashException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warn(e.getMessage(), e);
 		} catch (NotEnoughCarbonOutputException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warn(e.getMessage(), e);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warn(e.getMessage(), e);
 		}
 		
 		try {
@@ -125,17 +114,15 @@ public class TestAgent extends AbstractCountry {
 			carbonReductionHandler.investInCarbonReduction(5000);
 			logger.info("My carbon output change is " + (carbonOutput - bang));
 		} catch (NotEnoughCarbonOutputException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warn(e.getMessage(), e);
 		} catch (NotEnoughCashException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warn(e.getMessage(), e);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warn(e.getMessage(), e);
 		}
 		
 		if (getName() == "Lolocaust") {
+			logger.info("ME WANT INVEST!");
 			broadcastInvesteeOffer(400, InvestmentType.REDUCE);
 		}
 		
@@ -155,11 +142,12 @@ public class TestAgent extends AbstractCountry {
 
 	@Override
 	protected boolean acceptTrade(NetworkAddress from, Offer trade) {
-		if(trade.getUnitCost() == 0){
+		if (trade.getUnitCost() == 0) {
+			logger.info("Accepting trade!" + trade);
 			return true;
 		} else {
+			logger.info("Refusing trade :( " + trade);
 			return false;
 		}
-	};
-
+	}
 }

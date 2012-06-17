@@ -116,7 +116,7 @@ public class CarbonTarget extends EnvironmentService {
 	void retargetDueToCheaters(ArrayList<UUID> theCheaters) {
 		this.cheatersList = theCheaters;
 
-		if ((timeService.getCurrentYear() % GameConst.getYearsInSession()) == 0) {
+		if ((timeService.getCurrentYear() % GameConst.getYearsInSession() + (timeService.getCurrentTick() % timeService.getTicksInYear())) == 0) {
 			updateSessionTargets();
 			updateYearTargets();
 		}
