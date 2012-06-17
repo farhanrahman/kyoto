@@ -119,5 +119,11 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 		//logger.info("Myname: " + this.getName() + ", My energy output is : " + energyOutput);
 		logger.info("Myname: " + this.getName() + ", My carbonOffset is : " + this.getCarbonOffset());
 	}
+
+	@Override
+	protected boolean acceptTrade(NetworkAddress from, Offer trade) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 	
 }
