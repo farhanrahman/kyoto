@@ -21,6 +21,8 @@ public class CountryData{
 	private String availableToSpend;
 	private String emissionsTarget;
 	private String carbonOffset;
+	private String carbonOutput1990;
+	private String className;
 	private String energyOutput;
 	private String carbonOutput;
 	
@@ -40,6 +42,8 @@ public class CountryData{
 		s += " , \"availableToSpend\" : \"" + availableToSpend + "\"";
 		s += " , \"emissionsTarget\" : \"" + emissionsTarget + "\"";
 		s += " , \"carbonOffset\" : \"" + carbonOffset + "\"";
+		s += " , \"carbonOutput1990\" : \"" + carbonOutput1990 + "\"";
+		s += " , \"className\" : \"" + className + "\"";
 		s += " , \"energyOutput\" : \"" + energyOutput + "\"";
 		s += " , \"carbonOutput\" : \"" + carbonOutput + "\"" + "}";
 		return s;
@@ -78,5 +82,9 @@ public class CountryData{
 	public void setType(String type){this.Type = type;}
 	public String getLandArea(){return landArea;}
 	public void setLandArea(String landArea){this.landArea = landArea;}
+	public String getCarbonOutput1990(){return carbonOutput1990;}
+	public void setCarbonOutput1990(String carbonOutput1990){this.carbonOutput1990 = carbonOutput1990;}
+	public String getClassName(){return className;}
+	public void setClassName(String className){this.className = className;}
 	
 }
