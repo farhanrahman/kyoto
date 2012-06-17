@@ -116,7 +116,7 @@ public class Simulation extends InjectedSimulation {
 		// TODO Auto-generated method stub
 		
 		//Something new
-		
+		Logger logger = Logger.getLogger(Simulation.class);
 		try{
 		
 		
@@ -210,75 +210,79 @@ public class Simulation extends InjectedSimulation {
 		 * 
 		 * 
 		 */
-		Logger logger = Logger.getLogger(Simulation.class);
-		JSONObjectContainer<SimulationData> obj = new DataProvider().getSimulationData(this.simPersist.getID());
-		
-		if(obj.getObject().getCountries() == null || obj.getObject().getCountries().isEmpty()){
-			//TODO uncomment for final code
-			//throw new NoCountryDataException(); //Commented out for now.
-		}
+			JSONObjectContainer<SimulationData> obj = new DataProvider().getSimulationData(this.simPersist.getID());
 			
-		if(obj.getObject().getCountries() != null && !obj.getObject().getCountries().isEmpty()){
-			Map<String,CountryData> countries = obj.getObject().getCountries();
-			for(String countryKey : countries.keySet()){
-				logger.info(countries.get(countryKey));
-				String className = countries.get(countryKey).getClassName();
-				CountryData countryData = countries.get(countryKey);
-				AbstractCountry abstractCountry = null;
-				if(className.equals("NonAnnexOne")){
-					abstractCountry = new NonAnnexOne(
-									Random.randomUUID(), 
-									countryData.getName(),
-									countryData.getISO(), 
-									Double.parseDouble(countryData.getLandArea()), 
-									Double.parseDouble(countryData.getArableLandArea()), 
-									Double.parseDouble(countryData.getGDP()),
-									Double.parseDouble(countryData.getGDPRate()), 
-									Double.parseDouble(countryData.getEnergyOutput()), 
-									Double.parseDouble(countryData.getCarbonOutput()));
-				} else if(className.equals("AnnexOneReduce")){
-					abstractCountry = new AnnexOneReduce(
-									Random.randomUUID(), 
-									countryData.getName(),
-									countryData.getISO(), 
-									Double.parseDouble(countryData.getLandArea()), 
-									Double.parseDouble(countryData.getArableLandArea()), 
-									Double.parseDouble(countryData.getGDP()),
-									Double.parseDouble(countryData.getGDPRate()), 
-									Double.parseDouble(countryData.getEnergyOutput()), 
-									Double.parseDouble(countryData.getCarbonOutput()));
-				} else if(className.equals("CanadaAgent")){
-					abstractCountry = new CanadaAgent(
-									Random.randomUUID(), 
-									countryData.getName(),
-									countryData.getISO(), 
-									Double.parseDouble(countryData.getLandArea()), 
-									Double.parseDouble(countryData.getArableLandArea()), 
-									Double.parseDouble(countryData.getGDP()),
-									Double.parseDouble(countryData.getGDPRate()),
-									0.00,//Double.parseDouble(countryData.getEmissionsTarget()), //EmissionsTarget not specified yet
-									Double.parseDouble(countryData.getEnergyOutput()), 
-									Double.parseDouble(countryData.getCarbonOutput()));					
-				} else if(className.equals("AnnexOneSustain")){
-					abstractCountry = new AnnexOneSustain(
-									Random.randomUUID(), 
-									countryData.getName(),
-									countryData.getISO(), 
-									Double.parseDouble(countryData.getLandArea()), 
-									Double.parseDouble(countryData.getArableLandArea()), 
-									Double.parseDouble(countryData.getGDP()),
-									Double.parseDouble(countryData.getGDPRate()),
-									Long.parseLong(countryData.getEnergyOutput()), 
-									Long.parseLong(countryData.getCarbonOutput()));		
-				} else if(className.equals("USAgent")){
-					
-				}
-				
-				if(abstractCountry != null){
-					//TODO uncomment for final code
-					s.addParticipant(abstractCountry);
-				}
+			if(obj.getObject().getCountries() == null || obj.getObject().getCountries().isEmpty()){
+				//TODO uncomment for final code
+				throw new NoCountryDataException(); //Commented out for now.
 			}
+				
+			if(obj.getObject().getCountries() != null && !obj.getObject().getCountries().isEmpty()){
+				Map<String,CountryData> countries = obj.getObject().getCountries();
+				for(String countryKey : countries.keySet()){
+					logger.info(countries.get(countryKey));
+					String className = countries.get(countryKey).getClassName();
+					CountryData countryData = countries.get(countryKey);
+					AbstractCountry abstractCountry = null;
+					if(className.equals("NonAnnexOne")){
+						abstractCountry = new NonAnnexOne(
+										Random.randomUUID(), 
+										countryData.getName(),
+										countryData.getISO(), 
+										Double.parseDouble(countryData.getLandArea()), 
+										Double.parseDouble(countryData.getArableLandArea()), 
+										Double.parseDouble(countryData.getGDP()),
+										Double.parseDouble(countryData.getGDPRate()), 
+										Double.parseDouble(countryData.getEnergyOutput()), 
+										Double.parseDouble(countryData.getCarbonOutput()));
+					} else if(className.equals("AnnexOneReduce")){
+						abstractCountry = new AnnexOneReduce(
+										Random.randomUUID(), 
+										countryData.getName(),
+										countryData.getISO(), 
+										Double.parseDouble(countryData.getLandArea()), 
+										Double.parseDouble(countryData.getArableLandArea()), 
+										Double.parseDouble(countryData.getGDP()),
+										Double.parseDouble(countryData.getGDPRate()), 
+										Double.parseDouble(countryData.getEnergyOutput()), 
+										Double.parseDouble(countryData.getCarbonOutput()));
+					} else if(className.equals("CanadaAgent")){
+						abstractCountry = new CanadaAgent(
+										Random.randomUUID(), 
+										countryData.getName(),
+										countryData.getISO(), 
+										Double.parseDouble(countryData.getLandArea()), 
+										Double.parseDouble(countryData.getArableLandArea()), 
+										Double.parseDouble(countryData.getGDP()),
+										Double.parseDouble(countryData.getGDPRate()),
+										0.00,//Double.parseDouble(countryData.getEmissionsTarget()), //EmissionsTarget not specified yet
+										Double.parseDouble(countryData.getEnergyOutput()), 
+										Double.parseDouble(countryData.getCarbonOutput()));					
+					} else if(className.equals("AnnexOneSustain")){
+						abstractCountry = new AnnexOneSustain(
+										Random.randomUUID(), 
+										countryData.getName(),
+										countryData.getISO(), 
+										Double.parseDouble(countryData.getLandArea()), 
+										Double.parseDouble(countryData.getArableLandArea()), 
+										Double.parseDouble(countryData.getGDP()),
+										Double.parseDouble(countryData.getGDPRate()),
+										Long.parseLong(countryData.getEnergyOutput()), 
+										Long.parseLong(countryData.getCarbonOutput()));		
+					} else if(className.equals("USAgent")){
+						
+					}
+					
+					if(abstractCountry != null){
+						//TODO uncomment for final code
+						Decoder.addCountry(abstractCountry.getID(), abstractCountry.getName(), abstractCountry.getISO());
+						s.addParticipant(abstractCountry);
+					}
+				}
+			}		
+		
+		} catch(NoCountryDataException e){
+			logger.warn(e);
 		}
 		
 		//String endTime = this.getParameter("finishTime");
@@ -324,8 +328,6 @@ public class Simulation extends InjectedSimulation {
 		//AbstractParticipant ABSVALUETEST = new TestAbsorptionHandlerAgent(Random.randomUUID(),"ABSVALUETEST","AT", 10000, 1000, 5000000, 3, 1000, 700);
 		
 		//s.addParticipant(ABSVALUETEST);
-		} catch(NoCountryDataException e){
-			
-		}
+
 	}
 }
