@@ -11,28 +11,28 @@ import uk.ac.ic.kyoto.trade.TradeType;
  *
  */
 public class Offer{
-	final int quantity;
+	final double quantity;
 	final double unitCost;
 	final TradeType type;
 	final InvestmentType itype;
 
 	public static String TRADE_PROPOSAL = "Trade proposal";	
 
-	Offer(int quantity, double unitCost, TradeType type) {
+	Offer(double quantity, double unitCost, TradeType type) {
 		this.quantity = quantity;
 		this.unitCost = unitCost;
 		this.type = type;
 		this.itype = InvestmentType.INVALID;
 	}
 	
-	Offer(int quantity, double unitCost, TradeType type, InvestmentType itype) {
+	Offer(double quantity, double unitCost, TradeType type, InvestmentType itype) {
 		this.quantity = quantity;
 		this.unitCost = unitCost;
 		this.type = type;
 		this.itype = itype;
 	}
 
-	public int getQuantity() {
+	public double getQuantity() {
 		return quantity;
 	}
 
