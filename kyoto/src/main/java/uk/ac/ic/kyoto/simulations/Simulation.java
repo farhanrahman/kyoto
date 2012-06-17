@@ -3,6 +3,7 @@ package uk.ac.ic.kyoto.simulations;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.apache.log4j.Logger;
 
@@ -12,11 +13,16 @@ import uk.ac.ic.kyoto.actions.AddRemoveFromMonitorHandler;
 import uk.ac.ic.kyoto.actions.ApplyMonitorTaxHandler;
 import uk.ac.ic.kyoto.actions.QueryEmissionsTargetHandler;
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReportHandler;
+import uk.ac.ic.kyoto.annex1reduce.AnnexOneReduce;
+import uk.ac.ic.kyoto.annex1sustain.AnnexOneSustain;
+import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.CarbonTarget;
 import uk.ac.ic.kyoto.countries.Monitor;
 import uk.ac.ic.kyoto.countries.TestAgent;
 import uk.ac.ic.kyoto.exceptions.NoCountryDataException;
 import uk.ac.ic.kyoto.market.Economy;
+import uk.ac.ic.kyoto.nonannexone.NonAnnexOne;
+import uk.ac.ic.kyoto.roguestates.CanadaAgent;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
@@ -65,7 +71,7 @@ public class Simulation extends InjectedSimulation {
 //	public int MINIMUM_KYOTO_REJOIN_TIME;
 //	@Parameter(name="MINIMUM_KYOTO_MEMBERSHIP_DURATION")
 //	public int MINIMUM_KYOTO_MEMBERSHIP_DURATION;
-	
+		
 	@Override
 	protected Set<AbstractModule> getModules() {
 		
@@ -208,13 +214,70 @@ public class Simulation extends InjectedSimulation {
 		JSONObjectContainer<SimulationData> obj = new DataProvider().getSimulationData(this.simPersist.getID());
 		
 		if(obj.getObject().getCountries() == null || obj.getObject().getCountries().isEmpty()){
-			//throw new NoCountryDataException();
+			//TODO uncomment for final code
+			//throw new NoCountryDataException(); //Commented out for now.
 		}
 			
 		if(obj.getObject().getCountries() != null && !obj.getObject().getCountries().isEmpty()){
 			Map<String,CountryData> countries = obj.getObject().getCountries();
 			for(String countryKey : countries.keySet()){
 				logger.info(countries.get(countryKey));
+				String className = countries.get(countryKey).getClassName();
+				CountryData countryData = countries.get(countryKey);
+				AbstractCountry abstractCountry = null;
+				if(className.equals("NonAnnexOne")){
+					abstractCountry = new NonAnnexOne(
+									Random.randomUUID(), 
+									countryData.getName(),
+									countryData.getISO(), 
+									Double.parseDouble(countryData.getLandArea()), 
+									Double.parseDouble(countryData.getArableLandArea()), 
+									Double.parseDouble(countryData.getGDP()),
+									Double.parseDouble(countryData.getGDPRate()), 
+									Double.parseDouble(countryData.getEnergyOutput()), 
+									Double.parseDouble(countryData.getCarbonOutput()));
+				} else if(className.equals("AnnexOneReduce")){
+					abstractCountry = new AnnexOneReduce(
+									Random.randomUUID(), 
+									countryData.getName(),
+									countryData.getISO(), 
+									Double.parseDouble(countryData.getLandArea()), 
+									Double.parseDouble(countryData.getArableLandArea()), 
+									Double.parseDouble(countryData.getGDP()),
+									Double.parseDouble(countryData.getGDPRate()), 
+									Double.parseDouble(countryData.getEnergyOutput()), 
+									Double.parseDouble(countryData.getCarbonOutput()));
+				} else if(className.equals("CanadaAgent")){
+					abstractCountry = new CanadaAgent(
+									Random.randomUUID(), 
+									countryData.getName(),
+									countryData.getISO(), 
+									Double.parseDouble(countryData.getLandArea()), 
+									Double.parseDouble(countryData.getArableLandArea()), 
+									Double.parseDouble(countryData.getGDP()),
+									Double.parseDouble(countryData.getGDPRate()),
+									0.00,//Double.parseDouble(countryData.getEmissionsTarget()), //EmissionsTarget not specified yet
+									Double.parseDouble(countryData.getEnergyOutput()), 
+									Double.parseDouble(countryData.getCarbonOutput()));					
+				} else if(className.equals("AnnexOneSustain")){
+					abstractCountry = new AnnexOneSustain(
+									Random.randomUUID(), 
+									countryData.getName(),
+									countryData.getISO(), 
+									Double.parseDouble(countryData.getLandArea()), 
+									Double.parseDouble(countryData.getArableLandArea()), 
+									Double.parseDouble(countryData.getGDP()),
+									Double.parseDouble(countryData.getGDPRate()),
+									Long.parseLong(countryData.getEnergyOutput()), 
+									Long.parseLong(countryData.getCarbonOutput()));		
+				} else if(className.equals("USAgent")){
+					
+				}
+				
+				if(abstractCountry != null){
+					//TODO uncomment for final code
+					s.addParticipant(abstractCountry);
+				}
 			}
 		}
 		
