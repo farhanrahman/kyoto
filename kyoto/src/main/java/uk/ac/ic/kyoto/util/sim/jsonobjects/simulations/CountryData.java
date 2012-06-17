@@ -11,18 +11,20 @@ public class CountryData{
 	private String name;	
 	private String ISO;
 	private String agentName;
-	private Long Ratified;
-	private Long totalArea;
-	private Long landArea;
-	private Long waterArea;
-	private Long arableLandArea;
-	private Long GDP;
-	private Long GDPRate;
-	private Long availableToSpend;
-	private Long emissionsTarget;
-	private Long carbonOffset;
-	private Long energyOutput;
-	private Long carbonOutput;
+	private String Ratified;
+	private String totalArea;
+	private String landArea;
+	private String waterArea;
+	private String arableLandArea;
+	private String GDP;
+	private String GDPRate;
+	private String availableToSpend;
+	private String emissionsTarget;
+	private String carbonOffset;
+	private String carbonOutput1990;
+	private String className;
+	private String energyOutput;
+	private String carbonOutput;
 	
 	public String toString(){
 		String s = "";
@@ -40,6 +42,8 @@ public class CountryData{
 		s += " , \"availableToSpend\" : \"" + availableToSpend + "\"";
 		s += " , \"emissionsTarget\" : \"" + emissionsTarget + "\"";
 		s += " , \"carbonOffset\" : \"" + carbonOffset + "\"";
+		s += " , \"carbonOutput1990\" : \"" + carbonOutput1990 + "\"";
+		s += " , \"className\" : \"" + className + "\"";
 		s += " , \"energyOutput\" : \"" + energyOutput + "\"";
 		s += " , \"carbonOutput\" : \"" + carbonOutput + "\"" + "}";
 		return s;
@@ -52,31 +56,35 @@ public class CountryData{
 	public void setISO(String iSO){ISO = iSO;}
 	public String getAgentName(){return agentName;}
 	public void setAgentName(String agentName){this.agentName = agentName;}
-	public Long getRatified(){return Ratified;}
-	public void setRatified(Long ratified){Ratified = ratified;}
-	public Long getTotalArea(){return totalArea;}
-	public void setTotalArea(Long totalArea){this.totalArea = totalArea;}
-	public Long getWaterArea(){return waterArea;}
-	public void setWaterArea(Long waterArea){this.waterArea = waterArea;}
-	public Long getArableLandArea(){return arableLandArea;}
-	public void setArableLandArea(Long arableLandArea){this.arableLandArea = arableLandArea;}
-	public Long getGDP(){return GDP;}
-	public void setGDP(Long gDP){GDP = gDP;}
-	public Long getGDPRate(){return GDPRate;}
-	public void setGDPRate(Long gDPRate){GDPRate = gDPRate;}
-	public Long getAvailableToSpend(){return availableToSpend;}
-	public void setAvailableToSpend(Long availableToSpend){this.availableToSpend = availableToSpend;}
-	public Long getEmissionsTarget(){return emissionsTarget;}
-	public void setEmissionsTarget(Long emissionsTarget){this.emissionsTarget = emissionsTarget;}
-	public Long getCarbonOffset(){return carbonOffset;}
-	public void setCarbonOffset(Long carbonOffset){this.carbonOffset = carbonOffset;}
-	public Long getEnergyOutput(){return energyOutput;}
-	public void setEnergyOutput(Long energyOutput){this.energyOutput = energyOutput;}
-	public Long getCarbonOutput(){return carbonOutput;}
-	public void setCarbonOutput(Long carbonOutput){this.carbonOutput = carbonOutput;}
+	public String getRatified(){return Ratified;}
+	public void setRatified(String ratified){Ratified = ratified;}
+	public String getTotalArea(){return totalArea;}
+	public void setTotalArea(String totalArea){this.totalArea = totalArea;}
+	public String getWaterArea(){return waterArea;}
+	public void setWaterArea(String waterArea){this.waterArea = waterArea;}
+	public String getArableLandArea(){return arableLandArea;}
+	public void setArableLandArea(String arableLandArea){this.arableLandArea = arableLandArea;}
+	public String getGDP(){return GDP;}
+	public void setGDP(String gDP){GDP = gDP;}
+	public String getGDPRate(){return GDPRate;}
+	public void setGDPRate(String gDPRate){GDPRate = gDPRate;}
+	public String getAvailableToSpend(){return availableToSpend;}
+	public void setAvailableToSpend(String availableToSpend){this.availableToSpend = availableToSpend;}
+	public String getEmissionsTarget(){return emissionsTarget;}
+	public void setEmissionsTarget(String emissionsTarget){this.emissionsTarget = emissionsTarget;}
+	public String getCarbonOffset(){return carbonOffset;}
+	public void setCarbonOffset(String carbonOffset){this.carbonOffset = carbonOffset;}
+	public String getEnergyOutput(){return energyOutput;}
+	public void setEnergyOutput(String energyOutput){this.energyOutput = energyOutput;}
+	public String getCarbonOutput(){return carbonOutput;}
+	public void setCarbonOutput(String carbonOutput){this.carbonOutput = carbonOutput;}
 	public String getType(){return Type;}
 	public void setType(String type){this.Type = type;}
-	public Long getLandArea(){return landArea;}
-	public void setLandArea(Long landArea){this.landArea = landArea;}
+	public String getLandArea(){return landArea;}
+	public void setLandArea(String landArea){this.landArea = landArea;}
+	public String getCarbonOutput1990(){return carbonOutput1990;}
+	public void setCarbonOutput1990(String carbonOutput1990){this.carbonOutput1990 = carbonOutput1990;}
+	public String getClassName(){return className;}
+	public void setClassName(String className){this.className = className;}
 	
 }

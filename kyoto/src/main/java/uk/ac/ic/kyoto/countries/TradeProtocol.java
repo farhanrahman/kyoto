@@ -9,6 +9,8 @@ import org.apache.log4j.Logger;
 import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
 import uk.ac.ic.kyoto.singletonfactory.SingletonProvider;
 import uk.ac.ic.kyoto.tokengen.Token;
+import uk.ac.ic.kyoto.trade.InvestmentType;
+import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.ic.kyoto.tradehistory.TradeHistory;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.EnvironmentConnector;
@@ -24,6 +26,7 @@ import uk.ac.imperial.presage2.util.fsm.AndCondition;
 import uk.ac.imperial.presage2.util.fsm.EventTypeCondition;
 import uk.ac.imperial.presage2.util.fsm.FSM;
 import uk.ac.imperial.presage2.util.fsm.FSMException;
+import uk.ac.imperial.presage2.util.fsm.OrCondition;
 import uk.ac.imperial.presage2.util.fsm.StateType;
 import uk.ac.imperial.presage2.util.fsm.Transition;
 import uk.ac.imperial.presage2.util.protocols.ConversationCondition;
@@ -54,8 +57,12 @@ public abstract class TradeProtocol extends FSMProtocol {
 	private AbstractCountry participant;
 
 	public enum ResponderReplies{
-		ACCEPT,REJECT,WAIT
+		ACCEPT,REJECT
 	};
+	
+	public enum InitiatorReplies{
+		REVERT_NOW, TRADE_SUCCESSFUL,TRADE_UNSUCCESSFUL
+	}
 
 	enum States {
 		START, //Common start state
@@ -63,7 +70,12 @@ public abstract class TradeProtocol extends FSMProtocol {
 		/*Initiator States*/
 		TRADE_PROPOSED,
 		TIMED_OUT, //Timed out state for initiator
-		TRADE_DONE //Common end state for both responder and initiator		
+		TRADE_DONE,
+		
+		/*Responder states*/
+		WAIT_FOR_CONFIRMATION,
+		REVERT,
+		RESPONDER_TIMEDOUT
 	};
 
 	enum Transitions {
@@ -74,7 +86,10 @@ public abstract class TradeProtocol extends FSMProtocol {
 		TRADE_REJECTED,
 
 		/*Responder transitions*/
-		RESPOND_TO_TRADE
+		RESPOND_TO_TRADE,
+		REVERTING,
+		CONFIRMATION,
+		RESPONDER_TIME_OUT
 	}
 
 	public TradeProtocol(final UUID id, final UUID authkey, 
@@ -93,30 +108,19 @@ public abstract class TradeProtocol extends FSMProtocol {
 
 		this.tradeHistory = SingletonProvider.getTradeHistory();
 
-		if(this.tradeToken == null){
-			logger.warn("Huge problem");
-		}
-
-		if(this.tradeHistory == null){
-			logger.warn("Huge problem");
-		}
-
 		try {
 			this.description
 			.addState(States.START, StateType.START)
 			.addState(States.TRADE_PROPOSED)
+			.addState(States.WAIT_FOR_CONFIRMATION)
+			.addState(States.REVERT, StateType.END)
+			.addState(States.RESPONDER_TIMEDOUT, StateType.END)
 			.addState(States.TRADE_DONE, StateType.END)
 			.addState(States.TIMED_OUT, StateType.END);
 
 
-			/* Initiator FSM */
+			/*==========================Initiator FSM==========================*/
 			this.description
-			/*
-			 * Transition: START -> TRADE_PROPOSED.
-			 * Send a trade proposal to all other agents
-			 * Responds to the Multicast message sent by
-			 * and agent.
-			 */
 			.addTransition(Transitions.PROPOSE_TRADE,
 					new EventTypeCondition(TradeSpawnEvent.class), 
 					States.START,
@@ -153,10 +157,42 @@ public abstract class TradeProtocol extends FSMProtocol {
 							public void processMessage(Message<?> message,
 									FSMConversation conv, Transition transition) {
 								OfferMessage offerMessage = ((OfferMessage) message.getData());
-								Offer trade = new Offer(offerMessage.getOfferQuantity(), offerMessage.getOfferUnitCost(), offerMessage.getOfferType());
-								handleTradeCompletion(trade.reverse());
-								logger.info("Trade was accepted");
-
+								Offer trade = new Offer(offerMessage.getOfferQuantity(), offerMessage.getOfferUnitCost(), offerMessage.getOfferType(), offerMessage.getOfferInvestmentType());
+								if(handleTradeCompletion(trade.reverse())){
+									/*Everything worked out well. Its okay to end this FSM*/
+									logger.info("Trade was accepted");
+									conv.setEntity(offerMessage);
+									NetworkAddress from = conv.getNetwork()
+											.getAddress();
+									NetworkAddress to = message.getFrom();
+									Time t = SimTime.get();
+									conv.getNetwork().sendMessage(
+											new UnicastMessage<OfferMessage>(
+													Performative.CONFIRM,
+													InitiatorReplies.TRADE_SUCCESSFUL.name(), t,
+													from, to, offerMessage));
+								}else{
+									/*handleTradeCompletion for initiator did not work. Revert back
+									 * both initiator and responder.*/
+									logger.warn("Revert changes now");
+									//TODO
+									/*
+									 * 1) Send message back to responder that initiator did not handle trade completion with success
+									 * 2) Remove history from trade history that was recorded
+									 * 3) Revert change for myself (initiator)
+									 * 4) Message sent will revert change for responder*/
+									NetworkAddress from = conv.getNetwork()
+											.getAddress();
+									NetworkAddress to = message.getFrom();
+									Time t = SimTime.get();
+									conv.setEntity(offerMessage);
+									revertInitiator(trade.reverse());
+									conv.getNetwork().sendMessage(
+											new UnicastMessage<OfferMessage>(
+													Performative.FAILURE,
+													InitiatorReplies.REVERT_NOW.name(), t,
+													from, to, offerMessage));
+								}
 							}
 			})
 			.addTransition(Transitions.TRADE_REJECTED,
@@ -165,16 +201,27 @@ public abstract class TradeProtocol extends FSMProtocol {
 								   new ConversationCondition()), 
 						   States.TRADE_PROPOSED,
 						   States.TRADE_DONE, 
-						   new Action(){
+						   new MessageAction(){
 
 							@Override
-							public void execute(Object event, Object entity,
-									Transition transition) {
-								logger.info("Trade was rejected");
+							public void processMessage(Message<?> message,
+									FSMConversation conv, Transition transition) {
+								OfferMessage offerMessage = ((OfferMessage) message.getData());
+								NetworkAddress from = conv.getNetwork()
+										.getAddress();
+								NetworkAddress to = message.getFrom();
+								Time t = SimTime.get();
+								conv.setEntity(offerMessage);
+								conv.getNetwork().sendMessage(
+										new UnicastMessage<Object>(
+												Performative.INFORM,
+												InitiatorReplies.TRADE_UNSUCCESSFUL.name(), t,
+												from, to, offerMessage));
+								
 							}
 			})			
 			.addTransition(Transitions.TIMEOUT,
-					new TimeoutCondition(4),
+					new TimeoutCondition(3),
 					States.TRADE_PROPOSED,
 					States.TIMED_OUT, 
 					new Action(){
@@ -183,24 +230,19 @@ public abstract class TradeProtocol extends FSMProtocol {
 						public void execute(Object event, Object entity,
 								Transition transition) {
 								logger.warn("Initiator timed out");
+								
 						}
 
 			});
 
 
 
-			/*Responder FSM*/
-
-					/*
-					 * Transitions: START -> TRADE_DONE
-					 * Message received by agent who sent the multicast message
-					 */
+			/*==========================Responder FSM==========================*/
 			this.description
-			/* Non-initiator FSM */
 			.addTransition(Transitions.RESPOND_TO_TRADE, 
 					new MessageTypeCondition(Transitions.PROPOSE_TRADE.name()),
 					States.START,
-					States.TRADE_DONE,
+					States.WAIT_FOR_CONFIRMATION,
 					new InitialiseConversationAction() {
 
 				@Override
@@ -208,7 +250,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 						FSMConversation conv, Transition transition) {
 					if (message.getData() instanceof OfferMessage) {
 						OfferMessage offerMessage = ((OfferMessage) message.getData());
-						Offer trade = new Offer(offerMessage.getOfferQuantity(), offerMessage.getOfferUnitCost(), offerMessage.getOfferType());
+						Offer trade = new Offer(offerMessage.getOfferQuantity(), offerMessage.getOfferUnitCost(), offerMessage.getOfferType(), offerMessage.getOfferInvestmentType());
 						conv.setEntity(offerMessage);
 						NetworkAddress from = conv.getNetwork()
 								.getAddress();
@@ -216,19 +258,34 @@ public abstract class TradeProtocol extends FSMProtocol {
 						Time t = SimTime.get();
 						if (acceptExchange(to, trade)) {
 							// send accept message
-							logger.debug("Accepting exchange proposal: "
-									+ trade);
 							if(!TradeProtocol.this.tradeHistory.tradeExists(offerMessage.getTradeID())){
+								if(handleTradeCompletion(trade)){
+									conv.getNetwork().sendMessage(
+											new UnicastMessage<OfferMessage>(
+													Performative.ACCEPT_PROPOSAL,
+													ResponderReplies.ACCEPT.name(), t,
+													from, to, offerMessage));
 								TradeProtocol.this.tradeHistory.addToHistory(
-										SimTime.get(), offerMessage.getTradeID(), trade);
-								handleTradeCompletion(trade);
-								conv.getNetwork().sendMessage(
-										new UnicastMessage<OfferMessage>(
-												Performative.ACCEPT_PROPOSAL,
-												ResponderReplies.ACCEPT.name(), t,
-												from, to, offerMessage));								
+										SimTime.get(), offerMessage.getTradeID(), trade); /*Add to trade history*/									
+								logger.debug("Accepting exchange proposal: "
+										+ trade);
+								}else{
+									/* 1) Revert changes for responder*/
+									revertResponder(trade);
+									conv.setEntity(offerMessage);
+									conv.getNetwork().sendMessage(
+											new UnicastMessage<Object>(
+													Performative.REJECT_PROPOSAL,
+													ResponderReplies.REJECT.name(), t,
+													from, to, offerMessage));
+								}							
 							}else{
 								logger.warn("Trade already happened");
+								conv.getNetwork().sendMessage(
+										new UnicastMessage<Object>(
+												Performative.REJECT_PROPOSAL,
+												ResponderReplies.REJECT.name(), t,
+												from, to, offerMessage));
 							}
 						} else {
 							// send reject message
@@ -238,12 +295,62 @@ public abstract class TradeProtocol extends FSMProtocol {
 									new UnicastMessage<Object>(
 											Performative.REJECT_PROPOSAL,
 											ResponderReplies.REJECT.name(), t,
-											from, to, null));
+											from, to, offerMessage));
 						}
 					} else {
 						logger.warn("Message type not equal to OfferMessage");
 					}
 				}
+			})
+			.addTransition(Transitions.REVERTING,
+						   new AndCondition(
+								   new MessageTypeCondition(InitiatorReplies.REVERT_NOW.name()), 
+								   new ConversationCondition()), 
+						   States.WAIT_FOR_CONFIRMATION,
+						   States.REVERT, 
+						   new MessageAction(){
+
+							@Override
+							public void processMessage(Message<?> message,
+									FSMConversation conv, Transition transition) {
+								//TODO
+								/*Revert changes*/
+								OfferMessage offerMessage = ((OfferMessage) message.getData());
+								Offer trade = new Offer(offerMessage.getOfferQuantity(), offerMessage.getOfferUnitCost(), offerMessage.getOfferType(), offerMessage.getOfferInvestmentType());
+								revertResponderFromInitiatorFailure(trade);
+								TradeProtocol.this.tradeHistory.removeTradeHistoryWithID(offerMessage.getTradeID());
+							}
+			})
+			.addTransition(Transitions.CONFIRMATION,
+						   new AndCondition(
+								   new OrCondition(
+										new MessageTypeCondition(InitiatorReplies.TRADE_UNSUCCESSFUL.name()),
+										new MessageTypeCondition(InitiatorReplies.TRADE_SUCCESSFUL.name())
+										), 
+								   new ConversationCondition()), 
+						   States.WAIT_FOR_CONFIRMATION,
+						   States.TRADE_DONE, 
+						   new MessageAction(){
+
+							@Override
+							public void processMessage(Message<?> message,
+									FSMConversation conv, Transition transition) {
+								logger.info("got confirmation");
+							}
+			})
+			.addTransition(Transitions.RESPONDER_TIME_OUT,
+					new TimeoutCondition(3),
+					States.WAIT_FOR_CONFIRMATION,
+					States.RESPONDER_TIMEDOUT, 
+					new Action(){
+
+						@Override
+						public void execute(Object event, Object entity,
+								Transition transition) {
+								logger.warn("Responder timed out");
+								
+						}
+
 			});
 
 		} catch (FSMException e) {
@@ -285,9 +392,9 @@ public abstract class TradeProtocol extends FSMProtocol {
 
 		final OfferMessage offerMessage;
 
-		public TradeSpawnEvent(NetworkAddress with, int quantity, int unitCost, TradeType type, OfferMessage offerMessage) {
+		public TradeSpawnEvent(NetworkAddress with, int quantity, double unitCost, TradeType type, InvestmentType itype, OfferMessage offerMessage) {
 			super(with);
-			this.offerMessage = new OfferMessage(new Offer(quantity, unitCost, type), offerMessage.getTradeID(), OfferMessageType.TRADE_PROTOCOL);
+			this.offerMessage = new OfferMessage(new Offer(quantity, unitCost, type, itype), offerMessage.getTradeID(), OfferMessageType.TRADE_PROTOCOL);
 		}
 
 	}
@@ -305,64 +412,212 @@ public abstract class TradeProtocol extends FSMProtocol {
 		return all;
 	}
 
-	public void offer(NetworkAddress to, int quantity, int unitPrice, TradeType type, OfferMessage offerMessage)
+	public void offer(NetworkAddress to, int quantity, double unitPrice, OfferMessage offerMessage)
 			throws FSMException {
-		this.spawnAsInititor(new TradeSpawnEvent(to, quantity, unitPrice, type, offerMessage));
+			this.spawnAsInititor(
+					new TradeSpawnEvent(
+							to, 
+							quantity, unitPrice, 
+							offerMessage.getOfferType(), offerMessage.getOfferInvestmentType(), 
+							offerMessage));
 	}
 
 	protected abstract boolean acceptExchange(NetworkAddress from,
 			Offer trade);
 
-	public void handleTradeCompletion(Offer trade){
+	/**
+	 * Handle trade completion. Return false if something fucks up
+	 * If things fuck up then force revert the changes for both
+	 * initiator and responder. This is the case when countries are
+	 * stupid enough to fuck things up!!
+	 * @param trade
+	 * @return
+	 */
+	private boolean handleTradeCompletion(Offer trade){
 		try{
 			switch(trade.getType()){
-			case BUY:	participant.receiveOffset(trade.getQuantity());
+			case BUY:	if(this.participant.getAvailableToSpend() < trade.getTotalCost()){
+							throw new NotEnoughCashException();
+						}
+						participant.receiveOffset(trade.getQuantity());
 						participant.payMoney(trade.getTotalCost());
-						logger.info("My name: " + this.participant.getName()+ ", I am buying: " + trade.getQuantity() + " and paying: " + trade.getTotalCost());
+						logger.info("My name: " 
+								+ this.participant.getName()
+								+ ", I am buying: " 
+								+ trade.getQuantity() 
+								+ " and paying: " 
+								+ trade.getTotalCost());
 						break;
 
 			case SELL:	participant.sellOffset(trade.getQuantity());
 						participant.receiveMoney(trade.getTotalCost());
-						logger.info("My name: " + this.participant.getName()+ ", I am selling: " + trade.getQuantity() + " and receiving: " + trade.getTotalCost());
+						logger.info("My name: " 
+								+ this.participant.getName()
+								+ ", I am selling: " 
+								+ trade.getQuantity() 
+								+ " and receiving: " 
+								+ trade.getTotalCost());
 						break;
 
-			case INVEST:	participant.receiveOffset(trade.getQuantity());
+			case INVEST:	
+						if(this.participant.getAvailableToSpend() < trade.getTotalCost()){
+							throw new NotEnoughCashException();
+						}
+							participant.receiveOffset(trade.getQuantity());
 							participant.payMoney(trade.getTotalCost());
-							logger.info("My name: " + this.participant.getName()+ ", I am receiving: " + trade.getQuantity() + " for my investment in absorption of: " + trade.getTotalCost());
+							logger.info("My name: " 
+									+ this.participant.getName()
+									+ ", I am receiving: " 
+									+ trade.getQuantity() 
+									+ " for my investment of: " 
+									+ trade.getTotalCost());
 							break;
 
-			case RECEIVE:	if (trade.getInvestmentType()==InvestmentType.ABSORB) {
+			case RECEIVE:	participant.receiveMoney(trade.getTotalCost());
+
+							if (trade.itype.equals(InvestmentType.ABSORB)) {
 								try {
 									participant.carbonAbsorptionHandler.investInCarbonAbsorption(trade.getQuantity());
 								} catch (NotEnoughCarbonOutputException e) {
-									e.printStackTrace();
-								} catch (NotEnoughCashException e) {
-									e.printStackTrace();
+									logger.warn(e);
+									return false; /*Trade must fail*/
+								} catch (NotEnoughLandException e) {
+									logger.warn(e);
+									return false; /*Trade must fail*/
 								} catch (Exception e) {
-									e.printStackTrace();
+									logger.warn(e);
+									return false; /*Trade must fail*/
 								}
+
+								logger.info("My name: " 
+										+ this.participant.getName()
+										+ ", I am generating: " 
+										+ trade.getQuantity() +
+										" for an investment in absorption of: " 
+										+ trade.getTotalCost() 
+										+ ". My new absorption is " 
+										+ participant.carbonAbsorption);
 							}
 
-							if (trade.getInvestmentType()==InvestmentType.REDUCE) {
+							else if (trade.itype.equals(InvestmentType.REDUCE)) {
 								try {
 									participant.carbonReductionHandler.investInCarbonReduction(trade.getQuantity());
 								} catch (NotEnoughCarbonOutputException e) {
-									e.printStackTrace();
+									logger.warn(e);
+									return false; /*Trade must fail*/
 								} catch (NotEnoughCashException e) {
-									e.printStackTrace();
+									logger.warn(e);
+									return false; /*Trade must fail*/
 								} catch (Exception e) {
-									e.printStackTrace();
+									logger.warn(e);
+									return false; /*Trade must fail*/
 								}
-							}
 
-							participant.sellOffset(trade.getQuantity());
-							participant.receiveMoney(trade.getTotalCost());
-							logger.info("My name: " + this.participant.getName()+ ", I am generating: " + trade.getQuantity() + " for an investment of: " + trade.getTotalCost());
+								logger.info("My name: " 
+										+ this.participant.getName()
+										+ ", I am generating: " 
+										+ trade.getQuantity() +
+										" for an investment in reduction of: " 
+										+ trade.getTotalCost() 
+										+ ". My new output is " 
+										+ participant.carbonOutput);
+							}
 							break;
 			}
-		}catch(NullPointerException e){
+		}catch(NotEnoughCashException e){
+			/*Trade MUST FAIL*/
 			logger.warn(e);
+			return false;
 		}
+		
+		return true; /*Trade Passes*/
+	}
+	
+	/**
+	 * Revert responder if Responder fails to handle completion
+	 * @param trade
+	 */
+	private void revertResponder(Offer trade){
+		if(trade.getType().equals(TradeType.RECEIVE)){
+			participant.payMoney(trade.getTotalCost());
+		}
+		
+		/*handle none of the other TradeTypes because they
+		 * are handled in the handleTradeCompletion at this stage at least.*/
+	}
+	
+	/**
+	 * Revert responder if initiator responds that it fucked up!
+	 * @param trade
+	 */
+	private void revertResponderFromInitiatorFailure(Offer trade){
+		switch(trade.getType()){
+		case BUY:
+			/*If the responder trade type was BUY then
+			 * 1) sellOffset gained
+			 * 2) receive money that was payed*/
+				participant.sellOffset(trade.getQuantity());
+				participant.receiveMoney(trade.getTotalCost());
+				break;
+
+		case SELL:
+			/*If the responder trade type was SELL then
+			 * 1) receive the offset given away
+			 * 2) give the money back that was owned*/
+				participant.receiveOffset(trade.getQuantity());
+				participant.payMoney(trade.getTotalCost());
+				break;
+		case INVEST:
+			/*If the responder trade type was INVEST then
+			 * 1) sell offset that was bought
+			 * 2) receive money that was given away*/
+				participant.sellOffset(trade.getQuantity());
+				participant.receiveMoney(trade.getTotalCost());
+				break;
+		case RECEIVE:
+			/*If the responder trade type was RECEIVE then
+			 * 1) pay the money back
+			 * 2) Revert absorbtion if InvestmentType was ABSORB
+			 * 3) Revert reduction if InvestmentType was REDUCE*/
+				participant.payMoney(trade.getTotalCost());
+				if (trade.itype.equals(InvestmentType.ABSORB)){
+					try {
+						double investmentAmount = participant.carbonAbsorptionHandler.getInvestmentRequired(trade.getQuantity());
+						double areaRequired = participant.carbonAbsorptionHandler.getForestAreaRequired(trade.getQuantity());
+						this.participant.availableToSpend += investmentAmount;
+						this.participant.carbonAbsorption -= trade.getQuantity();
+						this.participant.arableLandArea += areaRequired;
+					} catch (Exception e) {
+						/*NOT SUPPOSED TO REACH HERE*/
+						logger.warn(e);
+					}
+				}else if (trade.itype.equals(InvestmentType.REDUCE)){
+					double investmentAmount;
+					try {
+						investmentAmount = participant.carbonReductionHandler.getInvestmentRequired(trade.getQuantity());
+						this.participant.availableToSpend += investmentAmount;
+						this.participant.carbonOutput += trade.getQuantity();
+					} catch (Exception e) {
+						/*NOT SUPPOSED TO REACH HERE*/
+						logger.warn(e);
+					}
+				}
+		}
+		
+	}
+	
+	/**
+	 * Revert initiator when initiator fucked up!
+	 * @param trade
+	 */
+	private void revertInitiator(Offer trade){
+		if(trade.getType().equals(TradeType.RECEIVE)){
+			/*Pay the money back that the initiator just took*/
+			participant.payMoney(trade.getTotalCost());
+		}
+		
+		/*handle none of the other TradeTypes because they
+		 * are handled in the handleTradeCompletion at this stage at least.*/
 	}
 
 	public UUID getId() {

@@ -20,6 +20,7 @@ public class USAgent extends AbstractCountry {
 			double GDPRate, double energyOutput, double carbonOutput){
 		super(id, name, ISO, landArea, arableLandArea, GDP,
 				GDPRate, energyOutput, carbonOutput);
+		leaveKyoto();
 		SetInitialPoliticalParty();
 		SetInitialIntensityRatio();
 	}
@@ -30,7 +31,7 @@ public class USAgent extends AbstractCountry {
 	 * @see uk.ac.ic.kyoto.countries.AbstractCountry#YearlyFunction()
 	 * Called by execute() every year.
 	 */
-	public void YearlyFunction() {
+	public void yearlyFunction() {
 		/*
 		 * Function is executed at the end of every year. 
 		 */
@@ -56,7 +57,7 @@ public class USAgent extends AbstractCountry {
 	 * Notes:
 	 * Carbon offsets are wiped at the beginning of each session. 
 	 */ 
-	public void SessionFunction() {
+	public void sessionFunction() {
 		if (carbonOutput <= emissionsTarget) {
 			// Consider joining Kyoto here
 		}

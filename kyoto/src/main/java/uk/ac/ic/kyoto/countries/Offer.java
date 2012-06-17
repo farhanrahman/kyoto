@@ -3,26 +3,29 @@
  */
 package uk.ac.ic.kyoto.countries;
 
+import uk.ac.ic.kyoto.trade.InvestmentType;
+import uk.ac.ic.kyoto.trade.TradeType;
+
 /**
  * @author cmd08 and farhanrahman
  *
  */
 public class Offer{
 	final int quantity;
-	final int unitCost;
+	final double unitCost;
 	final TradeType type;
 	final InvestmentType itype;
 
 	public static String TRADE_PROPOSAL = "Trade proposal";	
 
-	public Offer(int quantity, int unitCost, TradeType type) {
+	Offer(int quantity, double unitCost, TradeType type) {
 		this.quantity = quantity;
 		this.unitCost = unitCost;
 		this.type = type;
 		this.itype = InvestmentType.INVALID;
 	}
 	
-	public Offer(int quantity, int unitCost, TradeType type, InvestmentType itype) {
+	Offer(int quantity, double unitCost, TradeType type, InvestmentType itype) {
 		this.quantity = quantity;
 		this.unitCost = unitCost;
 		this.type = type;
@@ -33,11 +36,11 @@ public class Offer{
 		return quantity;
 	}
 
-	public int getUnitCost() {
+	public double getUnitCost() {
 		return unitCost;
 	}
 
-	public int getTotalCost() {
+	public double getTotalCost() {
 		return unitCost * quantity;
 	}
 
@@ -59,15 +62,18 @@ public class Offer{
 			return true;
 		} else if (	this.quantity == t.getQuantity() && 
 					this.unitCost == t.getUnitCost() && 
-					this.type == t.getType()) {
+					this.type == t.getType() &&
+					this.itype == t.getInvestmentType()) {
 			return true;
 		} else if (	this.quantity == -t.getQuantity() &&
 					this.unitCost == t.getUnitCost() && 
-					this.type == t.reverse().getType()){
+					this.type == t.reverse().getType() &&
+					this.itype == t.getInvestmentType()){
 			return true;
 		} else if ( this.quantity == t.getQuantity() &&
 					this.unitCost == -t.getUnitCost() &&
-					this.type == t.reverse().getType()){
+					this.type == t.reverse().getType() &&
+					this.itype == t.getInvestmentType()){
 			return true;
 		} else {
 			return false;

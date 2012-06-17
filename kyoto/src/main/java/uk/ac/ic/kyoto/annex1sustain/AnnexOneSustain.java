@@ -112,7 +112,7 @@ public class AnnexOneSustain extends AbstractCountry {
 	 * - Updates the internal variables.
 	 */
 	@Override
-	public void YearlyFunction() {
+	public void yearlyFunction() {
 		calculateLastYearFactor();
 		calculateNewSellingTarget();
 		logger.info("Internal Yearly Data of Post-Communist Country " + this.getName() + " was updated");
@@ -122,7 +122,7 @@ public class AnnexOneSustain extends AbstractCountry {
 	 * Function called at the end of each session.
 	 */
 	@Override
-	public void SessionFunction() {
+	public void sessionFunction() {
 		// TODO implement
 	}
 	
@@ -278,11 +278,11 @@ public class AnnexOneSustain extends AbstractCountry {
 		double potentialProfit;
 		
 		try {
-			investmentCost = carbonAbsorptionHandler.getCost(absorptionInvestmentTarget);
+			investmentCost = carbonAbsorptionHandler.getInvestmentRequired(absorptionInvestmentTarget);
 			potentialProfit = absorptionInvestmentTarget * internalPrice;
 			
 			if (potentialProfit > investmentCost) {
-				carbonAbsorptionHandler.invest(investmentCost);
+				carbonAbsorptionHandler.investInCarbonAbsorption(investmentCost);
 				increaseAbsorptionInvestmentTarget();
 				logger.info("Post-Communist Country " + this.getName() + " invested " + String.valueOf(investmentCost) + " in carbon absorption");
 			}
@@ -313,11 +313,11 @@ public class AnnexOneSustain extends AbstractCountry {
 		double potentialProfit;
 		
 		try {
-			investmentCost = carbonReductionHandler.getCost(reductionInvestmentTarget);
+			investmentCost = carbonReductionHandler.getInvestmentRequired(reductionInvestmentTarget);
 			potentialProfit = reductionInvestmentTarget * internalPrice;
 			
 			if (potentialProfit > investmentCost) {
-				carbonReductionHandler.invest(investmentCost);
+				carbonReductionHandler.investInCarbonReduction(investmentCost);
 				increaseReductionInvestmentTarget();
 				logger.info("Post-Communist Country " + this.getName() + " invested " + String.valueOf(investmentCost) + " in carbon reduction");
 			}
@@ -379,8 +379,8 @@ public class AnnexOneSustain extends AbstractCountry {
 								calculateMarketFactor();
 			
 			// Adjust the new target if out of possible range
-			if (newSellingTarget > carbonOffset) {
-				newSellingTarget = Math.round(carbonOffset);
+			if (newSellingTarget > getCarbonOffset()) {
+				newSellingTarget = Math.round(getCarbonOffset());
 			}
 		}
 		catch (Exception e) {
@@ -399,11 +399,11 @@ public class AnnexOneSustain extends AbstractCountry {
 		double availableCreditsFactor;
 		
 		try {
-			availableCreditsFactor = carbonOffset * Constants.SELL_AMOUNT_COEFFICIENT;
+			availableCreditsFactor = getCarbonOffset() * Constants.SELL_AMOUNT_COEFFICIENT;
 		}
 		catch (Exception e) {
 			logger.warn("Problem with calculating availableCreditsFactor: " + e);
-			availableCreditsFactor = carbonOffset;
+			availableCreditsFactor = getCarbonOffset();
 		}
 		
 		return availableCreditsFactor;

@@ -3,12 +3,6 @@ package uk.ac.ic.kyoto.annex1reduce;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Map;
-
-
-import uk.ac.ic.kyoto.actions.QueryEmissionsTarget;
-import uk.ac.ic.kyoto.actions.QueryEmissionsTargetHandler;
-import uk.ac.ic.kyoto.countries.AbstractCountry;
-import uk.ac.ic.kyoto.countries.GameConst;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfYearCycle;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
@@ -35,7 +29,7 @@ public class EU extends EnvironmentService {
 	@EventListener
 	public void monitorCountries (EndOfYearCycle e) {
 		for (AnnexOneReduce a : euMemberStates) {
-			double realCarbonOutput = a.getMonitored();
+			double realCarbonOutput = a.getCarbonOutput();
 			Serializable state = sharedState.get(CarbonReportingService.name, a.getID());
 			@SuppressWarnings("unchecked")
 			Map<Integer, Double> reports = (Map<Integer, Double>)state;
@@ -46,7 +40,7 @@ public class EU extends EnvironmentService {
 	}
 	
 	private void sanction(AnnexOneReduce sanctionee) {
-		/// TODO Sanctions
+		//TODO Sanctions
 	}
 	
 	/**
@@ -56,6 +50,4 @@ public class EU extends EnvironmentService {
 	public void addMemberState(AnnexOneReduce state) {
 		euMemberStates.add(state);
 	}
-
-	
 }

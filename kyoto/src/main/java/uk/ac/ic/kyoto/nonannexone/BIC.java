@@ -1,6 +1,7 @@
 package uk.ac.ic.kyoto.nonannexone;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
+import uk.ac.ic.kyoto.trade.InvestmentType;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
@@ -18,8 +19,7 @@ public class BIC extends AbstractCountry {
 	protected double energy_aim ; // the energy output aim of a country each year.
 	protected boolean green_care = true ; // does the country care about the environment?
 	protected boolean green_lands = false; // variable to check if country met environment target or not. 
-	protected String economic_state; // financial state of the country.
-	
+	int times_aim_met = 0; //the consecutive times the energy aim is met.
 	//............................................................................................ 
 	
 	public BIC(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
@@ -40,12 +40,11 @@ public class BIC extends AbstractCountry {
 	@EventListener
 	public void TickFunction(EndOfTimeCycle e){
 		//TODO implement functions that are done every tick
-		clean_development_mechanism(); //awaiting protocol!
-		
+				
 	}
 /*****************************************************************************************/
 	@Override
-	public void YearlyFunction() {
+	public void yearlyFunction() {
 		// TODO implement
 		//functions that are implemented every year
 				try {
@@ -62,7 +61,7 @@ public class BIC extends AbstractCountry {
 /*****************************************************************************************/
 	
 	@Override
-	public void SessionFunction() {
+	public void sessionFunction() {
 		// TODO implement 
 		// carbonAbsorption to carbonOffset
 	}
@@ -78,7 +77,7 @@ public class BIC extends AbstractCountry {
 	
 	protected void initialiseCountry() {
 		// TODO Auto-generated method stub
-		energy_aim = getEnergyOutput() + 30000 ; //initialise an aim (to be decided)
+		energy_aim = getEnergyOutput() + CountryConstants.INITIAL_ENERGY_THRESHOLD ; //initialise an aim (to be decided)
 		environment_friendly_target = 0; //initialise a target (to be decided)
 		}
 	//.......................................................................................
@@ -92,25 +91,35 @@ public class BIC extends AbstractCountry {
 	
 	private void economy() throws IllegalArgumentException, Exception
 	{
-		double difference;
-		boolean aim_success = false; 
-		
-		difference = energy_aim - getEnergyOutput(); //difference in energy aim and current energy output.
+		double energy_difference;
+		double financial_difference;
+		boolean aim_success = false;
 		double invest_money;
-		invest_money = energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(difference) ;
-				if (invest_money < getAvailableToSpend())
+		
+		energy_difference = energy_aim - getEnergyOutput(); //difference in energy aim and current energy output.
+		invest_money = energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(energy_difference) ;
+		
+		if (invest_money <= getAvailableToSpend())
 				{
 					buildIndustry(invest_money); //!!!!!!!
-					aim_success = true;
+					aim_success = true; // energy target met
+					times_aim_met +=1; //how many consecutive times the target was met.
 					logger.info("Country met its yearly energy output goal");
 				}
 		else{
+			times_aim_met = 0; //reset the counter.
 			logger.info("Country has insufficient funds to meet its energy output goal");
-			generate_income(); //out of money
 			}
-		update_energy_aim(energy_aim , aim_success); //update the energy aim for the next year.	
+		update_energy_aim(energy_aim , aim_success,times_aim_met); //update the energy aim for the next year.	
 		
+		//clean development mechanism only if country cares for environment
+		if (green_care)
+		{
+		financial_difference = invest_money - getAvailableToSpend();
+		clean_development_mechanism(financial_difference);
 		}
+		
+	}
 		
 	
 		/*function that uses EnergyUsageHandler to create factories and increase energy output
@@ -206,15 +215,58 @@ public class BIC extends AbstractCountry {
 	//Function that updates the energy goal each year.
 /*****************************************************************************************************/
 		
-		private void update_energy_aim(double previous_aim,boolean success){
-			if (success){ // country met goal, change goal
-				energy_aim = previous_aim + previous_aim * CountryConstants.ENERGY_AIM_GROWTH; //change aim every year
+		private void update_energy_aim(double previous_aim,boolean success,int counter)
+		{
+			if (success)
+			{ // country met goal, change goal
+				
+					switch (counter)
+					{
+					case 0:
+					{
+						energy_aim = previous_aim + previous_aim * CountryConstants.NORMAL_ENERGY_AIM_GROWTH; //change aim every year	
+						logger.info("Country in NORMAL state, normal energy growth");
+						break;
+					}
+					case 1:
+					{
+						energy_aim = previous_aim + previous_aim * CountryConstants.GROW_ENERGY_AIM_GROWTH; //change aim every year	
+						logger.info("Country in GROW state, grow energy growth");	
+						break;
+					}
+					case 2:
+					{
+						energy_aim = previous_aim + previous_aim * CountryConstants.BIG_ENERGY_AIM_GROWTH; //change aim every year	
+						logger.info("Country in BIG state, big energy growth");	
+						break;
+					}
+					case 3:
+					{
+						energy_aim = previous_aim + previous_aim * CountryConstants.HUGE_ENERGY_AIM_GROWTH; //change aim every year	
+						logger.info("Country in HUGE state, huge energy growth");	
+						break;
+					}
+					default:
+					{
+						energy_aim = previous_aim + previous_aim * CountryConstants.FREE_ENERGY_AIM_GROWTH; //change aim every year	
+						logger.info("Country in FREE state, energy growth");	
+						break;
+					}	
+					
+					}
 			}
+				
+			
 		}
-/*******************************************************************************************************/
+/**
+ * @throws Exception *****************************************************************************************************/
+	//uses the Clean Development Mechanism in order to sell carbon credits
 		
-	private void generate_income()
+	private void clean_development_mechanism(double money_to_invest) throws Exception
 	{
+
+		CDM_absorption(money_to_invest);
+		CDM_reduction(money_to_invest);
 		
 	}
 /*******************************************************************************************************/
@@ -235,16 +287,40 @@ public class BIC extends AbstractCountry {
 		
 	}
 	
+		
+/**
+ * @throws Exception *****************************************************************************************************/
+
+private void CDM_absorption(double acquire_cash) throws Exception
+{
+
+double change_required; // change in carbon absorption in order to acquire the amount of money specified.
+
+change_required = carbonAbsorptionHandler.getCarbonAbsorptionChange(acquire_cash);
+
+
+broadcastInvesteeOffer(change_required,InvestmentType.ABSORB);
+
+
+
+}
+		
+		
+/**
+ * @throws Exception *****************************************************************************************************/
+private void CDM_reduction(double acquire_cash) throws Exception
+{
+	double change_required; // change in carbon absorption in order to acquire the amount of money specified.
+
+	change_required = carbonReductionHandler.getCarbonOutputChange(acquire_cash, getCarbonOutput(), getEnergyOutput());
+
+
+broadcastInvesteeOffer(change_required,InvestmentType.REDUCE);	
+}		
+		
 /*******************************************************************************************************/
-	  //.......................................trading.CSM...............................................
-		//basically search for potential investors in our lands through clean development mechanism (acquire cash!)
-		private void clean_development_mechanism()
-		{
-			//to be implemented
-		}
-	
-/*******************************************************************************************************/
-		//Check available area  in order to choose decision accordingly for accepting to sell credits or plant trees for own sake.
+
+//Check available area  in order to choose decision accordingly for accepting to sell credits or plant trees for own sake.
 		private String currentAvailableArea(){
 			
 			if (getArableLandArea() > getLandArea()/(CountryConstants.AREA_LIMIT))

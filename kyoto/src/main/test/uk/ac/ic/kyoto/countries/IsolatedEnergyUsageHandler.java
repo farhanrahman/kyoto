@@ -47,7 +47,7 @@ public final class IsolatedEnergyUsageHandler {
 	/**
 	 * Calculates the cost of investing in carbon industry
 	 * @param growth
-	 * The expected increase in carbon output
+	 * The increase in carbon output
 	 * @return
 	 * The cost for the country
 	 */
@@ -56,7 +56,7 @@ public final class IsolatedEnergyUsageHandler {
 		double cost;
 		try {
 			if (growth > 0)
-				cost = growth * GameConst.CARBON_INVESTMENT_PRICE;
+				cost = growth * GameConst.getCarbonInvestmentPrice();
 			else
 				throw new IllegalArgumentException("It is impossible to invest in negative carbon industry growth");
 		}
@@ -77,7 +77,7 @@ public final class IsolatedEnergyUsageHandler {
 		double growth;
 		try {
 			if (cost > 0)
-				growth = cost / GameConst.CARBON_INVESTMENT_PRICE;
+				growth = cost / GameConst.getCarbonInvestmentPrice();
 			else
 				throw new IllegalArgumentException("It is impossible to invest negative sum in industry growth");
 		}

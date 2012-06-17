@@ -1,7 +1,6 @@
 package uk.ac.ic.kyoto.actions;
 
 import java.util.UUID;
-
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.imperial.presage2.core.Action;
 import uk.ac.imperial.presage2.core.environment.ActionHandler;
@@ -11,9 +10,10 @@ import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
 import uk.ac.imperial.presage2.core.environment.ServiceDependencies;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.messaging.Input;
-
 import com.google.inject.Inject;
+
 /**
+ * ActionHandler for CarbonEmissionReport Service
  * 
  * @author farhanrahman
  */
@@ -43,7 +43,7 @@ public class SubmitCarbonEmissionReportHandler implements ActionHandler{
 			}
 			return null;
 		}
-		throw new ActionHandlingException("Action not recognized (From SubmitCarbonEmissionReportHandler");
+		throw new ActionHandlingException("Action not recognized (From SubmitCarbonEmissionReportHandler)");
 	}
 
 }

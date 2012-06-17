@@ -31,43 +31,43 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 	protected void processInput(Input in) {
 		if (this.tradeProtocol.canHandle(in)) {
 			this.tradeProtocol.handle(in);
-		}
+		}else{
 
-		if(in instanceof Message){
-			try{
-				@SuppressWarnings("unchecked")
-				Message<OfferMessage> m = (Message<OfferMessage>) in;
-				OfferMessage o = m.getData();
-				if(!this.tradeProtocol
-						.getActiveConversationMembers()
-							.contains(m.getFrom())){
-					try {
-						this.tradeProtocol.offer(
-								m.getFrom(), 
-								o.getOfferQuantity(), 
-								o.getOfferUnitCost(), 
-								o.getOfferType(),
-								o);
-					} catch (FSMException e) {
-						e.printStackTrace();
+			if(in instanceof Message){
+				try{
+					@SuppressWarnings("unchecked")
+					Message<OfferMessage> m = (Message<OfferMessage>) in;
+					OfferMessage o = m.getData();
+					if(!this.tradeProtocol
+							.getActiveConversationMembers()
+								.contains(m.getFrom())){
+						try {
+							this.tradeProtocol.offer(
+									m.getFrom(), 
+									o.getOfferQuantity(), 
+									o.getOfferUnitCost(), 
+									o);
+						} catch (FSMException e) {
+							e.printStackTrace();
+						}
 					}
+				}catch(ClassCastException e){
+					logger.warn("Class cast exception");
+					logger.warn(e);
 				}
-			}catch(ClassCastException e){
-				logger.warn("Class cast exception");
-				logger.warn(e);
 			}
-		}			
+		}
 	}
 	
 
 	@Override
-	public void YearlyFunction() {
+	public void yearlyFunction() {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void SessionFunction() {
+	public void sessionFunction() {
 		// TODO Auto-generated method stub
 		
 	}
@@ -99,24 +99,20 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 		if(this.getName().equals("Stuart")){
 			//if(counter == 0){
 				int quantity = 10;
-				int unitCost = 2;
-				this.broadcastBuyOffer(quantity, unitCost);
+				//double unitCost = 2;
+				//this.broadcastBuyOffer(quantity, unitCost);
 			//	counter++;
-			/*
-			 * 	int quantity =10;
-			 * 
-			 *	double unitCost = this.carbonAbsorptionHandler.getInvestmentRequired(quantity);
-			 * 	//or
-			 * 	double unitCost = this.carbonReductionHandler.getInvestmentRequired(quantity);
-			 * 
-			 * 	this.broadcastInvesteeAOffer(quantity, unitCost);
-			 * 	this.broadcastInvesteeROffer(quantity, unitCost);
-			*/
+			
+			  	InvestmentType i = InvestmentType.ABSORB;
+			  	//InvestmentType i = InvestmentType.REDUCE;
+		  
+			  	this.broadcastInvesteeOffer(quantity, i);
+			
 			//}
 		}
 		
-		this.tradeProtocol.incrementTime();
 		
+		//this.tradeProtocol.incrementTime();
 		logger.info("Myname: " + this.getName() + ", I have this much money: " + this.getAvailableToSpend() + ".");
 		//logger.info("Myname: " + this.getName() + ", My GDPRate is : " + GDPRate);
 		//logger.info("Myname: " + this.getName() + ", My carbon output is : " + carbonOutput);

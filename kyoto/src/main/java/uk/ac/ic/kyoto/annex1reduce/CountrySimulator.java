@@ -296,12 +296,12 @@ class CountrySimulator {
 			carbonAbsorption = previousState.carbonAbsorption + absorptionIncrease;
 
 			//TODO ensure the formula is correct
-			double tempGDPRate = previousState.GDPRate + GameConst.GROWTH_SCALER*(energyOutput)/previousState.GDP;
+			double tempGDPRate = previousState.GDPRate + GameConst.getGrowthScaler()*(energyOutput)/previousState.GDP;
 			GDPRate = tempGDPRate/100;
 
 			GDP = previousState.GDP + previousState.GDP*GDPRate;
 
-			availableToSpend = previousState.availableToSpend - investmentCost - marketBuyCost + (GDP * GameConst.PERCENTAGE_OF_GDP);
+			availableToSpend = previousState.availableToSpend - investmentCost - marketBuyCost + (GDP * GameConst.getPercentageOfGdp());
 			
 			carbonDiff = carbonOutput - carbonAbsorption;
 		}
