@@ -22,7 +22,9 @@ import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.messaging.Performative;
 import uk.ac.imperial.presage2.core.network.MulticastMessage;
+import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
+import uk.ac.imperial.presage2.util.fsm.FSMException;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 /**
@@ -171,6 +173,19 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		} catch(AlreadyInitialisedException ex){
 			ex.printStackTrace();
 		}
+		
+		try {
+			this.tradeProtocol = new TradeProtocol(getID(), this.authkey, environment, network, null) {
+				
+				@Override
+				protected boolean acceptExchange(NetworkAddress from, Offer trade) {
+					return acceptTrade(from, trade);
+				}
+			};
+		} catch (FSMException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
@@ -272,6 +287,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	abstract protected void yearlyFunction();
 	abstract protected void sessionFunction();
 	abstract protected void initialiseCountry();
+	abstract protected boolean acceptTrade(NetworkAddress from, Offer trade);
 	
 	//================================================================================
     // Private methods

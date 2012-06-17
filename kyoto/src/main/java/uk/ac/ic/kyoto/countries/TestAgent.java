@@ -4,6 +4,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
+import uk.ac.ic.kyoto.trade.InvestmentType;
 import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.ActionHandlingException;
@@ -28,25 +29,6 @@ public class TestAgent extends AbstractCountry {
 	
 	@Override
 	public void initialiseCountry(){
-		
-		try {
-			this.tradeProtocol = new TradeProtocol(getID(), this.authkey, environment, network, null) {
-				
-				@Override
-				protected boolean acceptExchange(NetworkAddress from, Offer trade) {
-					// TODO decide if we should accept the trade
-					// for example...
-					if(trade.getUnitCost() == 0){
-						return true;
-					} else {
-						return false;
-					}
-				}
-			};
-		} catch (FSMException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	@Override
@@ -153,6 +135,10 @@ public class TestAgent extends AbstractCountry {
 			e.printStackTrace();
 		}
 		
+		if (getName() == "Lolocaust") {
+			broadcastInvesteeOffer(400, InvestmentType.REDUCE);
+		}
+		
 	}
 
 	@Override
@@ -165,6 +151,15 @@ public class TestAgent extends AbstractCountry {
 	public void sessionFunction() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	protected boolean acceptTrade(NetworkAddress from, Offer trade) {
+		if(trade.getUnitCost() == 0){
+			return true;
+		} else {
+			return false;
+		}
 	};
 
 }
