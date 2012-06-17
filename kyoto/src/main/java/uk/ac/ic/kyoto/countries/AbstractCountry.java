@@ -97,7 +97,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	/*Flag for single initialisation of AbstractCountry*/
 	private boolean initialised = false;
 
-	private double prevEnergyOutput; //Keeps track of the previous years EnergyOutput to calculate GDP
+	private double prevEnergyOutput = energyOutput; //Keeps track of the previous years EnergyOutput to calculate GDP
 	
 	//================================================================================
     // Constructors and Initializers
@@ -300,29 +300,33 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	private final void updateGDPRate() {
 		double marketStateFactor = 0;
 		double sum;
-		
 		Economy economy;
+		
 		try {
 			economy = getEnvironmentService(Economy.class);
-		
-		switch(economy.getEconomyState()) {
-		case GROWTH:
-			marketStateFactor = GameConst.getGrowthMarketState();
-		case STABLE:
-			marketStateFactor = GameConst.getStableMarketState();
-		case RECESSION:
-			marketStateFactor = GameConst.getRecessionMarketState();
-		}
-		if (energyOutput-prevEnergyOutput >= 0){	
-			sum = (((energyOutput-prevEnergyOutput)/prevEnergyOutput)*GameConst.getEnergyGrowthScaler() *marketStateFactor+GDPRate*100)/2;
-		}
-		else
-		{
-			sum = ((((energyOutput-prevEnergyOutput)/prevEnergyOutput)*GameConst.getEnergyGrowthScaler()));
-		}
-		GDPRate = (GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler()));
-		
-		GDPRate /= 100; // Needs to be a % for rate formula
+			
+			switch(economy.getEconomyState()) {
+			case GROWTH:
+				marketStateFactor = GameConst.getGrowthMarketState();
+			case STABLE:
+				marketStateFactor = GameConst.getStableMarketState();
+			case RECESSION:
+				marketStateFactor = GameConst.getRecessionMarketState();
+			}
+			
+			if (energyOutput-prevEnergyOutput >= 0){	
+				sum = (((energyOutput-prevEnergyOutput)/prevEnergyOutput)*GameConst.getEnergyGrowthScaler() *marketStateFactor+GDPRate*100)/2;
+			}
+			else{
+				sum = ((energyOutput-prevEnergyOutput)/prevEnergyOutput)*GameConst.getEnergyGrowthScaler();
+			}
+			
+			GDPRate = (GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler()));
+			
+			GDPRate /= 100; // Needs to be a % for rate formula
+			
+			prevEnergyOutput = energyOutput;
+				
 		} catch (UnavailableServiceException e) {
 			System.out.println("Unable to reach economy service.");
 			e.printStackTrace();
@@ -338,7 +342,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	/**
-	 * Calculate available to spend for the next year as an extra 1% of GDP
+	 * Calculate available to spend for the next year as an extra 0.5% of GDP
 	 * If we haven't spent something last year, it will be available this year too
 	 */
 	private final void updateAvailableToSpend() {

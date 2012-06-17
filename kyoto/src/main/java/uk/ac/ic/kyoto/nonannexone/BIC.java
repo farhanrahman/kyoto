@@ -1,14 +1,16 @@
 package uk.ac.ic.kyoto.nonannexone;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
+import uk.ac.ic.kyoto.countries.Offer;
 import uk.ac.ic.kyoto.trade.InvestmentType;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
+import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 import java.util.UUID;
 
-/** author George
- * 
+/** @author George
+ *
  **/
 
 public class BIC extends AbstractCountry {
@@ -20,6 +22,7 @@ public class BIC extends AbstractCountry {
 	protected boolean green_care = true ; // does the country care about the environment?
 	protected boolean green_lands = false; // variable to check if country met environment target or not. 
 	int times_aim_met = 0; //the consecutive times the energy aim is met.
+	boolean aim_success = false; // variable that controls whether the energy aim was met or not
 	//............................................................................................ 
 	
 	public BIC(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
@@ -83,7 +86,12 @@ public class BIC extends AbstractCountry {
 	//.......................................................................................
 	//........................................................................................
 	
-	
+/***********************************************************************************************/
+	@Override
+	protected boolean acceptTrade(NetworkAddress from, Offer trade) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 	
 /************************Functions executed every year *******************************************/
 	
@@ -93,7 +101,6 @@ public class BIC extends AbstractCountry {
 	{
 		double energy_difference;
 		double financial_difference;
-		boolean aim_success = false;
 		double invest_money;
 		
 		energy_difference = energy_aim - getEnergyOutput(); //difference in energy aim and current energy output.
@@ -108,6 +115,7 @@ public class BIC extends AbstractCountry {
 				}
 		else{
 			times_aim_met = 0; //reset the counter.
+			aim_success = false; //energy target not met
 			logger.info("Country has insufficient funds to meet its energy output goal");
 			}
 		update_energy_aim(energy_aim , aim_success,times_aim_met); //update the energy aim for the next year.	
@@ -168,17 +176,21 @@ public class BIC extends AbstractCountry {
 				logger.warn("Invest in carbon industry not successful");
 			}
 			
-			try{ //also since country exceeds its own carbon target, invests in carbon absorption in order to get carbon offset.
+			try{ //also since country exceeds its own carbon target, invests in carbon absorption or carbon reduction in order to get carbon offset.
 				carbon_difference = environment_friendly_target - (getCarbonOutput() + energyUsageHandler.calculateCarbonIndustryGrowth(money_invest));
 				if ((carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend() ) && (currentAvailableArea() == "Safe"))
 					{
 					carbonAbsorptionHandler.investInCarbonAbsorption(carbonAbsorptionHandler.getInvestmentRequired(carbon_difference));
-					logger.info("Country invests in carbon absorption to reduce carbon output");
+					logger.info("Country invests in carbon absorption to increase carbon absorption and thus reach environment target carbon output");
 					}
 				else if ((carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend() ) && (currentAvailableArea() == "Danger"))
 					{
-					logger.info("Country reach limit of available pre-set land, does not meet its environment friendly target");
-					green_care = false;
+					logger.info("Country reach limit of available pre-set land, not possible to invest in carbon absorption, try invest in carbon reduction");
+					if (carbonReductionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend())
+						{
+						carbonReductionHandler.investInCarbonReduction(carbon_difference);
+						logger.info("Country has enough cash to invest in carbon reduction, invests!");
+						}
 					}
 				else 
 					{
@@ -264,7 +276,6 @@ public class BIC extends AbstractCountry {
 		
 	private void clean_development_mechanism(double money_to_invest) throws Exception
 	{
-
 		CDM_absorption(money_to_invest);
 		CDM_reduction(money_to_invest);
 		
@@ -301,6 +312,12 @@ change_required = carbonAbsorptionHandler.getCarbonAbsorptionChange(acquire_cash
 
 broadcastInvesteeOffer(change_required,InvestmentType.ABSORB);
 
+/*accept counteroffer only
+ * if (currentAvailableArea() == "Safe" )
+ *  accept offer
+ *  else
+ *  reject offer
+ * */
 
 
 }
@@ -316,6 +333,9 @@ private void CDM_reduction(double acquire_cash) throws Exception
 
 
 broadcastInvesteeOffer(change_required,InvestmentType.REDUCE);	
+
+//no condition to reject the offer since country does not lose anything in doing so.
+
 }		
 		
 /*******************************************************************************************************/
@@ -329,6 +349,8 @@ broadcastInvesteeOffer(change_required,InvestmentType.REDUCE);
 				return "Danger";
 		
 		}
+
+
 		
 		
 }		

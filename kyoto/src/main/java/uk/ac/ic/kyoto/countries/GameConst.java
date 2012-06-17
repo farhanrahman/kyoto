@@ -30,7 +30,7 @@ public final class GameConst {
 	/**
 	 * Percentage of GDP available to spend on development
 	 */
-	private static double PERCENTAGE_OF_GDP = 0.1;
+	private static double PERCENTAGE_OF_GDP = 0.005;
 	
 	
 	/**
