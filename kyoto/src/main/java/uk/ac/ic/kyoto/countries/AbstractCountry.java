@@ -97,7 +97,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	/*Flag for single initialisation of AbstractCountry*/
 	private boolean initialised = false;
 
-	private double prevEnergyOutput = energyOutput; //Keeps track of the previous years EnergyOutput to calculate GDP
+	private double prevEnergyOutput; //Keeps track of the previous years EnergyOutput to calculate GDP
 	
 	//================================================================================
     // Constructors and Initializers
@@ -127,6 +127,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.carbonAbsorption = 0;
 		this.carbonEmissionReports = new HashMap<Integer, Double>();
 		this.energyOutput = energyOutput;
+		this.prevEnergyOutput = energyOutput;
 	}
 	
 	@Override
@@ -321,7 +322,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				sum = ((energyOutput-prevEnergyOutput)/prevEnergyOutput)*GameConst.getEnergyGrowthScaler();
 			}
 			
-			GDPRate = (GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler()));
+			System.out.println(sum);
+			GDPRate = GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler());
 			
 			GDPRate /= 100; // Needs to be a % for rate formula
 			
@@ -347,7 +349,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 */
 	private final void updateAvailableToSpend() {
 		availableToSpend += GDP * GameConst.getPercentageOfGdp();
-		System.out.println(availableToSpend);
 	}
 	
 	/**
@@ -549,6 +550,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	public double getEnergyOutput(){
 		return energyOutput;
 	}
+	
+	public double getPrevEnergyOut(){
+		return prevEnergyOutput;
+	}
+	
 	public double getCarbonOutput(){
 		return carbonOutput;
 	}
