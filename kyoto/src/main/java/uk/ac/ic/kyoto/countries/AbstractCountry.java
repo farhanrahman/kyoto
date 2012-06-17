@@ -10,7 +10,7 @@ import uk.ac.ic.kyoto.actions.AddToCarbonTarget;
 import uk.ac.ic.kyoto.actions.ApplyMonitorTax;
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
 import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
-import uk.ac.ic.kyoto.market.Economy;
+import uk.ac.ic.kyoto.services.Economy;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.ic.kyoto.trade.InvestmentType;
@@ -347,6 +347,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 */
 	private final void updateAvailableToSpend() {
 		availableToSpend += GDP * GameConst.getPercentageOfGdp();
+		System.out.println(availableToSpend);
 	}
 	
 	/**
