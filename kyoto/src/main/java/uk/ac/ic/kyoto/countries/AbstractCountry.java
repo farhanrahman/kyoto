@@ -104,6 +104,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 
 	private double prevEnergyOutput; //Keeps track of the previous years EnergyOutput to calculate GDP
 	
+	private DataStore dataStore = new DataStore();
+	
 	//================================================================================
     // Constructors and Initializers
     //================================================================================
@@ -212,7 +214,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 					} catch (ActionHandlingException e) {
 						e.printStackTrace();
 					}
-					logSimulationData(); // TO BE TESTED! Remove if necessary /Waffles
 					yearlyFunction();
 				}
 				if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
@@ -223,6 +224,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 //			}else{
 //				throw new UnauthorisedExecuteException(SimTime.get().intValue(), this.getID(), this.getName());
 //			}
+				logSimulationData();
 				behaviour();
 //		} catch(UnauthorisedExecuteException e){
 //			e.printStackTrace();
@@ -385,8 +387,13 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * @author waffles
 	 */
 	private final void logSimulationData() {
-		int time = SimTime.get().intValue();
-		
+		this.dataStore.addGdp(this.getGDP());
+		this.dataStore.addGdpRate(this.getGDPRate());
+		this.dataStore.addAvailableToSpend(this.getAvailableToSpend());
+		this.dataStore.addEmissionsTarget(this.getEmissionsTarget());
+		this.dataStore.addCarbonOffset(this.getCarbonOffset());
+		this.dataStore.addCarbonOutput(this.getCarbonOutput());
+		this.dataStore.addIsKyotoMember(this.isKyotoMember());
 //		// check if db is available
 //		if (this.persist != null) {
 //			this.persist.getState(time).setProperty("GDP", Double.toString(GDP));
@@ -405,6 +412,22 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			 * energy usage - cost, quantity
 			 */
 //		}
+	}
+	
+	private final void dumpSimulationData(){
+		
+		this.persist.setProperty(DataStore.gdpKey, this.dataStore.getGdpHistory().toString());
+		this.persist.setProperty(DataStore.gdpRateKey, this.dataStore.getGdpRateHistory().toString());
+		this.persist.setProperty(DataStore.availableToSpendKey, this.dataStore.getAvailableToSpendHistory().toString());
+		this.persist.setProperty(DataStore.emissionTargetKey, this.dataStore.getEmissionsTargetHistory().toString());
+		this.persist.setProperty(DataStore.carbonOffsetKey, this.dataStore.getCarbonOffsetHistory().toString());
+		this.persist.setProperty(DataStore.carbonOutputKey, this.dataStore.getCarbonOutputHistory().toString());
+		this.persist.setProperty(DataStore.isKyotoMemberKey, this.dataStore.getIsKyotoMemberHistory().toString());
+	}
+	
+	@Override
+	public void onSimulationComplete(){
+		this.dumpSimulationData();
 	}
 	
 	//================================================================================
