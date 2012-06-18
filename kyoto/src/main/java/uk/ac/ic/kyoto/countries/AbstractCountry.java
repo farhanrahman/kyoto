@@ -133,6 +133,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.carbonEmissionReports = new HashMap<Integer, Double>();
 		this.energyOutput = energyOutput;
 		this.prevEnergyOutput = energyOutput;
+		this.kyotoMemberLevel = KyotoMember.ANNEXONE;
 	}
 	
 	@Override
