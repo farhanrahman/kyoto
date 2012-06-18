@@ -10,7 +10,6 @@ import uk.ac.ic.kyoto.CarbonData1990;
 import uk.ac.ic.kyoto.countries.AbstractCountry.KyotoMember;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
-import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfSessionCycle;
 import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfYearCycle;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentServiceProvider;
@@ -54,7 +53,6 @@ public class CarbonTarget extends EnvironmentService {
 	
 	private double worldLastSessionTarget = 0;
 	private double worldCurrentSessionTarget = 0;
-	private int sessionCounter = 0;
 	
 	@SuppressWarnings(value = {"unused"})
 	private EventBus eb;
@@ -199,21 +197,47 @@ public class CarbonTarget extends EnvironmentService {
 	}
 	
 	@EventListener
-	public void onEndOfSession(EndOfSessionCycle e) {
-		if (timeService.getCurrentSession() != 0) {
-			this.worldLastSessionTarget = this.worldCurrentSessionTarget;
-			this.worldCurrentSessionTarget = worldLastSessionTarget * GameConst.getTargetReduction(); 
-			updateSessionTargets();
-			this.sessionCounter++;
-		}
-	}
-	
-	@EventListener
 	public void onEndOfYear(EndOfYearCycle e) {
 		if (timeService.getCurrentYear() != 0) {
 			updateYearTargets();
 		}
 	}
+	
+	public void updateYearTargets()
+	{
+		if (((timeService.getCurrentYear() % timeService.getYearsInSession()) == 0) && timeService.getCurrentYear() != 0)
+		{
+			this.worldLastSessionTarget = this.worldCurrentSessionTarget;
+			this.worldCurrentSessionTarget = worldLastSessionTarget * GameConst.getTargetReduction(); 
+			updateSessionTargets();
+		}
+		
+		try {
+			this.exclusiveAccess.acquire();
+		} catch (InterruptedException e) {
+			System.out.println("Interrupted Exception : " + e);
+			e.printStackTrace();
+		}
+		
+		for (countryObject country : participantCountries) {
+			if (country.obj.isKyotoMember() == KyotoMember.ANNEXONE)
+				generateYearTarget(country);
+		}
+		
+		this.exclusiveAccess.release();
+	}
+	
+	/*
+	 * Generates end of year target (non binding) based on last reported emissions and session target.
+	 */
+	private void generateYearTarget(countryObject country)
+	{
+		double sessionProgress = (double) ( timeService.getCurrentYear() % GameConst.getYearsInSession()) / GameConst.getYearsInSession();
+		double diffTargets = country.lastSessionTarget - country.currentSessionTarget;
+		double newTarget = country.lastSessionTarget - (diffTargets * sessionProgress) - country.penalty;
+		country.yearTargets.put(timeService.getCurrentYear(), newTarget);
+		country.obj.emissionsTarget = newTarget;
+	}	
 	
 	private void updateSessionTargets(){
 		this.worldLastSessionTarget = this.worldCurrentSessionTarget;
@@ -242,25 +266,6 @@ public class CarbonTarget extends EnvironmentService {
 		}
 	}
 	
-	public void updateYearTargets()
-	{
-		try {
-			this.exclusiveAccess.acquire();
-		} catch (InterruptedException e) {
-			System.out.println("Interrupted Exception : " + e);
-			e.printStackTrace();
-		}
-		
-		while (this.sessionCounter != timeService.getCurrentSession()) {}
-		
-		for (countryObject country : participantCountries) {
-			if (country.obj.isKyotoMember() == KyotoMember.ANNEXONE)
-				generateYearTarget(country);
-		}
-		
-		this.exclusiveAccess.release();
-	}
-	
 	/*
 	 * Generates end of session target (binding) from 1990 data
 	 */
@@ -270,16 +275,4 @@ public class CarbonTarget extends EnvironmentService {
 		country.lastSessionTarget = country.currentSessionTarget;
 		country.currentSessionTarget = country.proportion * kyotoTarget;
 	}
-	
-	/*
-	 * Generates end of year target (non binding) based on last reported emissions and session target.
-	 */
-	private void generateYearTarget(countryObject country)
-	{
-		double sessionProgress = (double) ( timeService.getCurrentYear() % GameConst.getYearsInSession()) / GameConst.getYearsInSession();
-		double diffTargets = country.lastSessionTarget - country.currentSessionTarget;
-		double newTarget = country.lastSessionTarget - (diffTargets * sessionProgress) - country.penalty;
-		country.yearTargets.put(timeService.getCurrentYear(), newTarget);
-		country.obj.emissionsTarget = newTarget;
-	}	
 }
