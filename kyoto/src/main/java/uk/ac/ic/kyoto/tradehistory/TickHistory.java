@@ -21,12 +21,12 @@ public class TickHistory{
 	private double tradeHigh;
 	private double tradeLow;
 	private int tradeNo;
-	private int tradeSum;
+	private double tradeSum;
 	
-	private int investmentHigh;
-	private int investmentLow;
+	private double investmentHigh;
+	private double investmentLow;
 	private int investmentNo;
-	private int investmentSum;
+	private double investmentSum;
 
 	/**
 	 * Constructs a TickHistory with ID of currentTick
@@ -44,13 +44,13 @@ public class TickHistory{
 	private void init(){
 		messages = new ArrayList<Offer>();
 		
-		tradeHigh = Integer.MIN_VALUE;
-		tradeLow = Integer.MAX_VALUE;
+		tradeHigh = Double.MIN_VALUE;
+		tradeLow = Double.MAX_VALUE;
 		tradeNo = 0;
 		tradeSum = 0;
 		
-		investmentHigh = Integer.MIN_VALUE;
-		investmentLow = Integer.MAX_VALUE;
+		investmentHigh = Double.MIN_VALUE;
+		investmentLow = Double.MAX_VALUE;
 		investmentNo = 0;
 		investmentSum = 0;
 	}
@@ -105,7 +105,7 @@ public class TickHistory{
 		return tickId;
 	}
 
-	public float getTradeAverage() {
+	public double getTradeAverage() {
 		return tradeSum/tradeNo;
 	}
 
@@ -156,7 +156,12 @@ public class TickHistory{
 		
 		result = 57 * result + this.messages.hashCode();
 		
-		return (int) result;
+		return (int) Math.round(result);
+	}
+	
+	@Override
+	public String toString() {
+		return "TickHistory with tickId " + tickId + " storing " + messages.size() + " messages.";
 	}
 	
 }
