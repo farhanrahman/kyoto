@@ -32,13 +32,13 @@ public class CheatingAgent extends AbstractCountry {
 
 	@Override
 	protected void yearlyFunction() {
-		// TODO Auto-generated method stub
+		logger.info("NEW YEAR'S!");
 
 	}
 
 	@Override
 	protected void sessionFunction() {
-		// TODO Auto-generated method stub
+		logger.info("NEW SESSION!");
 
 	}
 
