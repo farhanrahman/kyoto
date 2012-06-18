@@ -7,6 +7,7 @@ import java.util.UUID;
 import java.util.concurrent.Semaphore;
 
 import uk.ac.ic.kyoto.CarbonData1990;
+import uk.ac.ic.kyoto.countries.AbstractCountry.KyotoMember;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfSessionCycle;
@@ -81,7 +82,8 @@ public class CarbonTarget extends EnvironmentService {
 	 */
 	public void addMemberState(AbstractCountry state) {
 		countryObject memberState = new countryObject(state);
-		this.participantCountries.add(memberState);
+		if (!participantCountries.contains(memberState))
+			participantCountries.add(memberState);
 	}
 	
 	public double querySessionTarget(UUID countryID) {
@@ -224,7 +226,7 @@ public class CarbonTarget extends EnvironmentService {
 		for (countryObject country : participantCountries) {
 			double output = getReportedCarbonOutput(country.obj.getID(), lastYear);
 			worldOutput += output;
-			if(!country.obj.getIsKyotoMember()){
+			if(country.obj.isKyotoMember() != KyotoMember.ANNEXONE){
 				rogueCarbonOutput += output ;
 			}
 		}
@@ -232,7 +234,7 @@ public class CarbonTarget extends EnvironmentService {
 		double kyotoTarget = this.worldCurrentSessionTarget - rogueCarbonOutput;
 		
 		for (countryObject country : participantCountries) {
-			if (country.obj.getIsKyotoMember()){
+			if (country.obj.isKyotoMember() == KyotoMember.ANNEXONE){
 				double output = getReportedCarbonOutput(country.obj.getID(), lastYear);
 				country.proportion = output / (worldOutput - rogueCarbonOutput);
 				generateSessionTarget(country, kyotoTarget);
@@ -252,7 +254,8 @@ public class CarbonTarget extends EnvironmentService {
 		while (this.sessionCounter != timeService.getCurrentSession()) {}
 		
 		for (countryObject country : participantCountries) {
-			generateYearTarget(country);
+			if (country.obj.isKyotoMember() == KyotoMember.ANNEXONE)
+				generateYearTarget(country);
 		}
 		
 		this.exclusiveAccess.release();

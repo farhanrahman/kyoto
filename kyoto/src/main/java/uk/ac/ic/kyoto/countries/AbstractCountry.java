@@ -133,6 +133,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.carbonEmissionReports = new HashMap<Integer, Double>();
 		this.energyOutput = energyOutput;
 		this.prevEnergyOutput = energyOutput;
+		this.kyotoMemberLevel = KyotoMember.ANNEXONE;
 	}
 	
 	@Override
@@ -644,5 +645,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	public KyotoMember isKyotoMember() {
 		return kyotoMemberLevel;
+	}
+	
+	public void setKyotoMemberLevel(KyotoMember level) {
+		if (SimTime.get().intValue() == 0) {
+			kyotoMemberLevel = level;
+		}
 	}
 }
