@@ -9,6 +9,6 @@ public static final double HUGE_ENERGY_AIM_GROWTH = 0.75;
 public static final double FREE_ENERGY_AIM_GROWTH = 1;
 public static final double TARGET_AIM_GROWTH = 0.1;
 public static final double AREA_LIMIT = 0.0675;	
-public static final double INITIAL_ENERGY_THRESHOLD = 30000;
+public static final double INITIAL_ENERGY_THRESHOLD = 300;
 public static final double LAND_AREA_UNIT_DIVIDE = 10;
 }

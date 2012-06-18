@@ -96,6 +96,7 @@ public class BIC extends AbstractCountry {
 /******************************************************************************************/
 	
 	protected void behaviour() {
+		
 		try {
 			economy();
 		} catch (IllegalArgumentException e) {
@@ -112,7 +113,7 @@ public class BIC extends AbstractCountry {
 	protected void initialiseCountry() {
 		// TODO Auto-generated method stub
 		energy_aim = getEnergyOutput() + CountryConstants.INITIAL_ENERGY_THRESHOLD ; //initialise an aim (to be decided)
-		environment_friendly_target = 0; //initialise a target (to be decided)
+		environment_friendly_target = 50000; //initialise a target (to be decided)
 		setKyotoMemberLevel(KyotoMember.NONANNEXONE);
 		
 	}
@@ -143,11 +144,12 @@ public class BIC extends AbstractCountry {
 		double energy_difference;
 		double financial_difference;
 		double invest_money;
+		double money_available;
 		
 		energy_difference = energy_aim - getEnergyOutput(); //difference in energy aim and current energy output.
 		invest_money = energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(energy_difference) ;
-		
-		if (invest_money <= getAvailableToSpend())
+		money_available=getAvailableToSpend();
+		if (invest_money <= money_available)
 				{
 					buildIndustry(invest_money); //!!!!!!!
 					aim_success = true; // energy target met
