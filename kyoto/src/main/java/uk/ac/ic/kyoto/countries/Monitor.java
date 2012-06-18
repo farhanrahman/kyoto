@@ -222,8 +222,8 @@ public class Monitor extends EnvironmentService {
 		double penalty = carbonExcess * 1.3;
 		carbonTargetingService.addCountryPenalty(country.getID(), penalty);
 		
-		// Charge the country for not meeting the target
-		country.setAvailableToSpend(Math.round((country.getAvailableToSpend() - carbonExcess * GameConst.getSanctionRate())));
+		// Charge the country for not meeting the target - financial penalties aren't applied by kyoto
+		//country.setAvailableToSpend(Math.round((country.getAvailableToSpend() - carbonExcess * GameConst.getSanctionRate())));
 		
 	}
 	
