@@ -93,8 +93,8 @@ public class TradeTest extends InjectedSimulation {
 		
 		s.addParticipant(p1);
 		s.addParticipant(p2);
-		CarbonData1990.addCountry("LOL", 50000);
-		CarbonData1990.addCountry("LOL2", 9000);
+		CarbonData1990.addCountry("CS1", 50000);
+		CarbonData1990.addCountry("CS2", 9000);
 		
 		System.out.println(this.simPersist.getID());
 		

@@ -81,6 +81,7 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 
 	@Override
 	protected void behaviour() {
+		super.execute();
 		if(this.getName().equals("Stuart")){
 			//if(counter == 0){
 				int quantity = 10;

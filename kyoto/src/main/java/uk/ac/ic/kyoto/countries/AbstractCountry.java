@@ -10,6 +10,7 @@ import uk.ac.ic.kyoto.actions.AddToCarbonTarget;
 import uk.ac.ic.kyoto.actions.ApplyMonitorTax;
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
 import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
+import uk.ac.ic.kyoto.exceptions.UnauthorisedExecuteException;
 import uk.ac.ic.kyoto.services.Economy;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
@@ -96,15 +97,14 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	protected CarbonAbsorptionHandler 	carbonAbsorptionHandler;
 	protected EnergyUsageHandler		energyUsageHandler;
 	
-	/*Simulation tick counter to stop sub classes from calling execute more than once*/
-	private Integer simTick = 0;
-	
 	/*Flag for single initialisation of AbstractCountry*/
 	private boolean initialised = false;
 
 	private double prevEnergyOutput; //Keeps track of the previous years EnergyOutput to calculate GDP
 	
 	private DataStore dataStore = new DataStore();
+	
+	private boolean executeLock = false; /*Lock for stopping multiple execution of the execute block*/
 	
 	//================================================================================
     // Constructors and Initializers
@@ -198,9 +198,18 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	@Override
 	final public void execute() {
-//		try{
-//			if(simTick == SimTime.get().intValue()){
+		try{
 				super.execute();
+				if(!this.isExecuteLocked()){
+					this.acquireExecuteLock(); //acquire the lock
+				}else{
+					throw new UnauthorisedExecuteException(
+							SimTime.get().intValue(),
+							this.getID(),
+							this.getName());
+				}
+				
+				
 				if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {	
 					updateGDPRate();
 					updateGDP();
@@ -222,11 +231,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 					resetCarbonOffset();
 					sessionFunction();
 				}
-				simTick++;
-//			}else{
-//				throw new UnauthorisedExecuteException(SimTime.get().intValue(), this.getID(), this.getName());
-//			}
-				
+	
 			//leave a 10-tick grace period to allow current trades to complete before performing end of year routine
 			if (timeService.getCurrentTick() % timeService.getTicksInYear() < timeService.getTicksInYear() - 10 ) {
 				behaviour();
@@ -243,9 +248,34 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			
 			logSimulationData();
 			
-//		} catch(UnauthorisedExecuteException e){
-//			e.printStackTrace();
-//		}
+			this.releaseExecuteLock();
+			
+		} catch(UnauthorisedExecuteException e){
+			logger.warn(e);
+		}
+	}
+	
+	/**
+	 * function to set executeLock to true.
+	 */
+	private synchronized void acquireExecuteLock(){
+		this.executeLock = true;
+	}
+	
+	/**
+	 * void function to set executeLock to false
+	 */
+	private synchronized void releaseExecuteLock(){
+		this.executeLock = false;
+	}
+	
+	/**
+	 * function returns whether the executeLock is
+	 * true or false
+	 * @return the state of the executeLock
+	 */
+	private synchronized boolean isExecuteLocked(){
+		return this.executeLock;
 	}
 	
 	protected void reportCarbonOutput() throws ActionHandlingException {
