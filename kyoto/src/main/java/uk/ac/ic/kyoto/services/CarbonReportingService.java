@@ -91,6 +91,34 @@ public class CarbonReportingService extends EnvironmentService {
 		}
 	}
 	
+	
+	/**
+	 * This function should be used if a service
+	 * wants to get a report from the past. The
+	 * reason for this is that Time cannot be decremented
+	 * which becomes an issue when querrying for report.
+	 * @param id
+	 * @param simTime
+	 * @return The report of a participant
+	 */
+	public Double getReport(UUID id, Integer simTime) {
+		try{
+			@SuppressWarnings("unchecked")
+			Map<Integer,Double> reportForParticipant = 
+								(Map<Integer,Double>)this.sharedState.get(
+											CarbonReportingService.name, 
+											id);
+			if(reportForParticipant == null){
+				return null;
+			}else{
+				return reportForParticipant.get(simTime);
+			}
+		}catch(ClassCastException e){
+			logger.warn(e);
+			return null;
+		}
+	}
+	
 	/**
 	 * Returns null if report does
 	 * not exist for participant at all
