@@ -272,15 +272,16 @@ public class BugTestingSimulation extends InjectedSimulation {
 //			logger.warn(e);
 //		}
 		
-		AbstractParticipant p1 = new TestAgent(Random.randomUUID(), "Stuart", "LOL", 2000000, 1500000, 99999999999.00, 0.03, 70000, 50000);
-		AbstractParticipant p2 = new TestAgent(Random.randomUUID(), "Lolocaust", "LOL2", 500000, 200000, 100000, 0.07, 10000, 7000);
+		//AbstractParticipant p1 = new TestAgent(Random.randomUUID(), "Stuart", "LOL", 2000000, 1500000, 99999999999.00, 0.03, 70000, 50000);
+		//AbstractParticipant p2 = new TestAgent(Random.randomUUID(), "Lolocaust", "LOL2", 500000, 200000, 100000, 0.07, 10000, 7000);
 		AbstractParticipant p3 = new CheatingAgent(Random.randomUUID(), "Kekeke", "KEK", 10000, 2000, 500000, 0.01, 70000, 60000);
 		
-		s.addParticipant(p1);
-		s.addParticipant(p2);
+		//s.addParticipant(p1);
+		//s.addParticipant(p2);
 		s.addParticipant(p3);
-		CarbonData1990.addCountry("LOL", 50000);
-		CarbonData1990.addCountry("LOL2", 9000);
+		
+		//CarbonData1990.addCountry("LOL", 50000);
+		//CarbonData1990.addCountry("LOL2", 9000);
 		CarbonData1990.addCountry("KEK", 60000);
 
 	}
