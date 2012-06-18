@@ -356,11 +356,13 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * @author ct
 	 */
 	private final void updateCarbonOffsetYearly() {
-		if (carbonOffset > 0) {
-			if ((emissionsTarget - carbonOutput + carbonAbsorption)  > carbonOffset)
-				carbonOffset = 0;
-			else
-				carbonOffset += (emissionsTarget - carbonOutput + carbonAbsorption);
+		if (emissionsTarget <= carbonOffset +carbonAbsorption +carbonOutput ){
+			if (carbonOffset > 0) {
+				if ((emissionsTarget - carbonOutput + carbonAbsorption)  > carbonOffset)
+					carbonOffset = 0;
+				else
+					carbonOffset += (emissionsTarget - carbonOutput + carbonAbsorption);
+			}
 		}
 	}
 	
