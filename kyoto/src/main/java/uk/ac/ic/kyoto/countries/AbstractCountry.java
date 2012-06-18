@@ -427,9 +427,87 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.carbonOffset += amount;
 	}
 	
-	protected final void broadcastSellOffer(int quantity, double unitCost){
-		if(this.tradeProtocol != null){
-			Offer trade = new Offer(quantity, unitCost, TradeType.SELL);
+	protected final OfferMessage broadcastSellOffer(int quantity, double unitCost){
+		Offer trade = new Offer(quantity, unitCost, TradeType.SELL);
+		OfferMessage returnObject = new OfferMessage(
+				trade,
+				this.tradeProtocol.tradeToken.generate(),
+				OfferMessageType.BROADCAST_MESSAGE);
+		this.network.sendMessage(
+					new MulticastMessage<OfferMessage>(
+							Performative.PROPOSE, 
+							Offer.TRADE_PROPOSAL, 
+							SimTime.get(), 
+							this.network.getAddress(),
+							this.tradeProtocol.getAgentsNotInConversation(),
+							returnObject)
+				);
+		return returnObject;
+		
+//			int time = SimTime.get().intValue();
+//				
+//			// check if db is available
+//			if (this.persist != null) {
+//				this.persist.getState(time).setProperty("Trade_type", TradeType.SELL.toString());
+//				this.persist.getState(time).setProperty("From", getName());
+//				this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
+//				this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
+//			}
+	}
+
+	protected final OfferMessage broadcastBuyOffer(int quantity, double unitCost){
+		Offer trade = new Offer(quantity, unitCost, TradeType.BUY);
+		
+		/*DEBUG*/
+//			System.out.println();
+//			System.out.println(this.tradeProtocol.getActiveConversationMembers().toString());
+//			System.out.println(this.network.getConnectedNodes());
+//			System.out.println();
+		/*DEBUG*/
+		
+		OfferMessage returnObject = new OfferMessage(
+				trade, 
+				this.tradeProtocol.tradeToken.generate(), 
+				OfferMessageType.BROADCAST_MESSAGE);
+		
+		this.network.sendMessage(
+					new MulticastMessage<OfferMessage>(
+							Performative.PROPOSE, 
+							Offer.TRADE_PROPOSAL, 
+							SimTime.get(), 
+							this.network.getAddress(),
+							this.tradeProtocol.getAgentsNotInConversation(),
+							returnObject)
+				);
+		return returnObject;
+	
+//			int time = SimTime.get().intValue();
+//			
+//			// check if db is available
+//			if (this.persist != null) {
+//				this.persist.getState(time).setProperty("Trade_type", TradeType.BUY.toString());
+//				this.persist.getState(time).setProperty("From", getName());
+//				this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
+//				this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
+//			}
+	}
+	
+	protected final OfferMessage broadcastInvesteeOffer(double quantity, InvestmentType itype){
+		double unitCost;
+		try {
+			if (itype.equals(InvestmentType.ABSORB)) {
+				unitCost = this.carbonAbsorptionHandler.getInvestmentRequired(quantity)/quantity;
+			}
+			else {
+				unitCost = this.carbonReductionHandler.getInvestmentRequired(quantity)/quantity;
+			}
+			
+			Offer trade = new Offer(quantity, unitCost, TradeType.RECEIVE, itype);
+			
+			OfferMessage returnObject = new OfferMessage(
+					trade,
+					this.tradeProtocol.tradeToken.generate(),
+					OfferMessageType.BROADCAST_MESSAGE);
 			this.network.sendMessage(
 						new MulticastMessage<OfferMessage>(
 								Performative.PROPOSE, 
@@ -443,79 +521,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 										OfferMessageType.BROADCAST_MESSAGE))
 					);
 			
-//			int time = SimTime.get().intValue();
-//				
-//			// check if db is available
-//			if (this.persist != null) {
-//				this.persist.getState(time).setProperty("Trade_type", TradeType.SELL.toString());
-//				this.persist.getState(time).setProperty("From", getName());
-//				this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
-//				this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
-//			}
-		}
-	}
-
-	protected final void broadcastBuyOffer(int quantity, double unitCost){
-		if(this.tradeProtocol != null){
-			Offer trade = new Offer(quantity, unitCost, TradeType.BUY);
-			
-			/*DEBUG*/
-//			System.out.println();
-//			System.out.println(this.tradeProtocol.getActiveConversationMembers().toString());
-//			System.out.println(this.network.getConnectedNodes());
-//			System.out.println();
-			/*DEBUG*/
-			
-			this.network.sendMessage(
-						new MulticastMessage<OfferMessage>(
-								Performative.PROPOSE, 
-								Offer.TRADE_PROPOSAL, 
-								SimTime.get(), 
-								this.network.getAddress(),
-								this.tradeProtocol.getAgentsNotInConversation(),
-								new OfferMessage(
-										trade, 
-										this.tradeProtocol.tradeToken.generate(), 
-										OfferMessageType.BROADCAST_MESSAGE))
-					);
-		
-//			int time = SimTime.get().intValue();
-//			
-//			// check if db is available
-//			if (this.persist != null) {
-//				this.persist.getState(time).setProperty("Trade_type", TradeType.BUY.toString());
-//				this.persist.getState(time).setProperty("From", getName());
-//				this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
-//				this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
-//			}
-		}
-	}
-	
-	protected final void broadcastInvesteeOffer(double quantity, InvestmentType itype){
-		if(this.tradeProtocol != null){
-			double unitCost;
-			try {
-				if (itype.equals(InvestmentType.ABSORB)) {
-					unitCost = this.carbonAbsorptionHandler.getInvestmentRequired(quantity)/quantity;
-				}
-				else {
-					unitCost = this.carbonReductionHandler.getInvestmentRequired(quantity)/quantity;
-				}
-				
-				Offer trade = new Offer(quantity, unitCost, TradeType.RECEIVE, itype);
-				this.network.sendMessage(
-							new MulticastMessage<OfferMessage>(
-									Performative.PROPOSE, 
-									Offer.TRADE_PROPOSAL, 
-									SimTime.get(), 
-									this.network.getAddress(),
-									this.tradeProtocol.getAgentsNotInConversation(),
-									new OfferMessage(
-											trade,
-											this.tradeProtocol.tradeToken.generate(),
-											OfferMessageType.BROADCAST_MESSAGE))
-						);
-				
 //				int time = SimTime.get().intValue();
 //				
 //				// check if db is available
@@ -525,11 +530,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
 //					this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
 //					this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
 //				}
-				
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			return returnObject;
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
+		return null;
 	}
 	
 	//================================================================================
