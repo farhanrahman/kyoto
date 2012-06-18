@@ -67,7 +67,7 @@ public class TestAgent extends AbstractCountry {
 	@Override
 	public void behaviour() {
 		
-		logger.info("I have this much money: " + availableToSpend);
+		//logger.info("I have this much money: " + availableToSpend);
 		
 		try {
 			environment.act(new SubmitCarbonEmissionReport(carbonOutput), getID(), authkey);
@@ -76,55 +76,55 @@ public class TestAgent extends AbstractCountry {
 		}
 		
 		int quantity=400, unitCost=20;
-		logger.info("I be broadcasting a buy offer, mon!");
+		//logger.info("I be broadcasting a buy offer, mon!");
 		broadcastBuyOffer(quantity, unitCost);
 		
 		quantity=400;
 		unitCost = 25;
-		logger.info("I done kinda broadcast sell offer, eh?");
+		//logger.info("I done kinda broadcast sell offer, eh?");
 		broadcastSellOffer(quantity, unitCost);
 		
 		//logger.info("PARTRIDGE IN A PEAR TREE");
 		
 		try {
-			logger.info("I am investing " + carbonAbsorptionHandler.getInvestmentRequired(1000) + " in carbon absorption.");
+			//logger.info("I am investing " + carbonAbsorptionHandler.getInvestmentRequired(1000) + " in carbon absorption.");
 			double bang = carbonAbsorption;
 			carbonAbsorptionHandler.investInCarbonAbsorption(1000);
-			logger.info("My carbon absorption change is " + (carbonAbsorption - bang));
+			//logger.info("My carbon absorption change is " + (carbonAbsorption - bang));
 		} catch (NotEnoughCarbonOutputException e) {
-			logger.warn(e.getMessage(), e);
+			//logger.warn(e.getMessage(), e);
 		} catch (NotEnoughCashException e) {
-			logger.warn(e.getMessage(), e);
+			//logger.warn(e.getMessage(), e);
 		} catch (Exception e) {
-			logger.warn(e.getMessage(), e);
+			//logger.warn(e.getMessage(), e);
 		}
 		
 		try {
-			logger.info("I am reducing my energy output by " + energyOutput*0.01);
+			//logger.info("I am reducing my energy output by " + energyOutput*0.01);
 			energyUsageHandler.reduceEnergyOutput(energyOutput*0.01);
-			logger.info("My energy output is " + energyOutput);
-			logger.info("I am investing " + availableToSpend*0.01 + " in carbon industry.");
+			//logger.info("My energy output is " + energyOutput);
+			//logger.info("I am investing " + availableToSpend*0.01 + " in carbon industry.");
 			energyUsageHandler.investInCarbonIndustry(availableToSpend*0.01);
-			logger.info("My energy output has gone back up by " + energyOutput);
+			//logger.info("My energy output has gone back up by " + energyOutput);
 		} catch (NotEnoughCashException e) {
-			logger.warn(e.getMessage(), e);
+			//logger.warn(e.getMessage(), e);
 		} catch (NotEnoughCarbonOutputException e) {
-			logger.warn(e.getMessage(), e);
+			//logger.warn(e.getMessage(), e);
 		} catch (Exception e) {
-			logger.warn(e.getMessage(), e);
+			//logger.warn(e.getMessage(), e);
 		}
 		
 		try {
-			logger.info("I am investing " + carbonReductionHandler.getInvestmentRequired(5000) + " in carbon reduction.");
+			//logger.info("I am investing " + carbonReductionHandler.getInvestmentRequired(5000) + " in carbon reduction.");
 			double bang = carbonOutput;
 			carbonReductionHandler.investInCarbonReduction(5000);
-			logger.info("My carbon output change is " + (carbonOutput - bang));
+			//logger.info("My carbon output change is " + (carbonOutput - bang));
 		} catch (NotEnoughCarbonOutputException e) {
-			logger.warn(e.getMessage(), e);
+			//logger.warn(e.getMessage(), e);
 		} catch (NotEnoughCashException e) {
-			logger.warn(e.getMessage(), e);
+			//logger.warn(e.getMessage(), e);
 		} catch (Exception e) {
-			logger.warn(e.getMessage(), e);
+			//logger.warn(e.getMessage(), e);
 		}
 		
 		if (getName() == "Lolocaust") {

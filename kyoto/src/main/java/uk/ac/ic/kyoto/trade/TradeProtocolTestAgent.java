@@ -74,21 +74,6 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 
 	@Override
 	protected void initialiseCountry() {
-		try {
-			tradeProtocol = new TradeProtocol(getID(), authkey, environment, network, this) {
-				@Override
-				protected boolean acceptExchange(NetworkAddress from,
-						Offer trade) {
-					return true;
-					/*if (carbonOutput - emissionsTarget + carbonOffset < 0) {
-						return true;
-					}
-					return true;*/
-				}
-			};
-		} catch (FSMException e) {
-			e.printStackTrace();
-		}
 		
 	}
 	
@@ -123,7 +108,7 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 	@Override
 	protected boolean acceptTrade(NetworkAddress from, Offer trade) {
 		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 	
 }

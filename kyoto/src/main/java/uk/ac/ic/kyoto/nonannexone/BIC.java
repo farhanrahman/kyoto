@@ -2,11 +2,15 @@ package uk.ac.ic.kyoto.nonannexone;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.Offer;
+import uk.ac.ic.kyoto.countries.OfferMessage;
 import uk.ac.ic.kyoto.trade.InvestmentType;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
+import uk.ac.imperial.presage2.core.network.Message;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
+import uk.ac.imperial.presage2.util.fsm.FSMException;
+
 import java.util.UUID;
 
 /** @author George
@@ -28,7 +32,7 @@ public class BIC extends AbstractCountry {
 	public BIC(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
 			double GDPRate, double energyOutput, double carbonOutput){
 		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput);
-
+		
 	}
 	
 	//Inherited functions......................................................................
@@ -36,8 +40,35 @@ public class BIC extends AbstractCountry {
 /*****************************************************************************************/
 	@Override
 	protected void processInput(Input in) {
-		// TODO Auto-generated method stub
+		if (this.tradeProtocol.canHandle(in)) {
+			this.tradeProtocol.handle(in);
+		}
+		else {
 
+			if(in instanceof Message){
+				try{
+					@SuppressWarnings("unchecked")
+					Message<OfferMessage> m = (Message<OfferMessage>) in;
+					OfferMessage o = m.getData();
+					if(!this.tradeProtocol
+							.getActiveConversationMembers()
+								.contains(m.getFrom())){
+						try {
+							this.tradeProtocol.offer(
+									m.getFrom(), 
+									o.getOfferQuantity(), 
+									o.getOfferUnitCost(), 
+									o);
+						} catch (FSMException e) {
+							e.printStackTrace();
+						}
+					}
+				}catch(ClassCastException e){
+					logger.warn("Class cast exception");
+					logger.warn(e);
+				}
+			}
+		}		
 	}
 /*****************************************************************************************/
 	@EventListener
@@ -82,15 +113,24 @@ public class BIC extends AbstractCountry {
 		// TODO Auto-generated method stub
 		energy_aim = getEnergyOutput() + CountryConstants.INITIAL_ENERGY_THRESHOLD ; //initialise an aim (to be decided)
 		environment_friendly_target = 0; //initialise a target (to be decided)
-		}
+	//	setKyotoMemberLevel(KyotoMember.NONANNEXONE);
+	}
 	//.......................................................................................
 	//........................................................................................
 	
 /***********************************************************************************************/
 	@Override
 	protected boolean acceptTrade(NetworkAddress from, Offer trade) {
-		// TODO Auto-generated method stub
-		return false;
+		
+		if (trade.getInvestmentType() == InvestmentType.ABSORB)
+		{
+			if (currentAvailableArea()=="Safe")
+				return true;
+			else
+				return false;
+		}
+		else
+			return true;
 	}
 	
 /************************Functions executed every year *******************************************/
@@ -318,14 +358,6 @@ change_required = carbonAbsorptionHandler.getCarbonAbsorptionChange(acquire_cash
 
 broadcastInvesteeOffer(change_required,InvestmentType.ABSORB);
 
-/*accept counteroffer only
- * if (currentAvailableArea() == "Safe" )
- *  accept offer
- *  else
- *  reject offer
- * */
-
-
 }
 		
 		
@@ -340,7 +372,6 @@ private void CDM_reduction(double acquire_cash) throws Exception
 
 broadcastInvesteeOffer(change_required,InvestmentType.REDUCE);	
 
-//no condition to reject the offer since country does not lose anything in doing so.
 
 }		
 		

@@ -397,7 +397,8 @@ public abstract class TradeProtocol extends FSMProtocol {
 
 		public TradeSpawnEvent(NetworkAddress with, double quantity, double unitCost, TradeType type, InvestmentType itype, OfferMessage offerMessage) {
 			super(with);
-			this.offerMessage = new OfferMessage(new Offer(quantity, unitCost, type, itype), offerMessage.getTradeID(), OfferMessageType.TRADE_PROTOCOL);
+			this.offerMessage = new OfferMessage(new Offer(quantity, unitCost, type, itype), offerMessage.getTradeID(), OfferMessageType.TRADE_PROTOCOL, offerMessage.getBroadCaster());
+			this.offerMessage.setInitiator(TradeProtocol.this.getId());/*Set the initiator id*/
 		}
 
 	}
