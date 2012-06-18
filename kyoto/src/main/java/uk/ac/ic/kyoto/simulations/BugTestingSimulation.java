@@ -13,12 +13,13 @@ import uk.ac.ic.kyoto.actions.QueryEmissionsTargetHandler;
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReportHandler;
 import uk.ac.ic.kyoto.countries.CarbonTarget;
 import uk.ac.ic.kyoto.countries.Monitor;
-import uk.ac.ic.kyoto.countries.TestAgent;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.Economy;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
+import uk.ac.ic.kyoto.testagents.CheatingAgent;
+import uk.ac.ic.kyoto.testagents.TestAgent;
 import uk.ac.imperial.presage2.core.simulator.InjectedSimulation;
 import uk.ac.imperial.presage2.core.simulator.Scenario;
 import uk.ac.imperial.presage2.core.util.random.Random;
@@ -271,49 +272,16 @@ public class BugTestingSimulation extends InjectedSimulation {
 //			logger.warn(e);
 //		}
 		
-		//String endTime = this.getParameter("finishTime");
-		//AbstractParticipant p = new CanadaAgent(Random.randomUUID(),"CANADA","CAN",20000,10000,5000000,3,200000,28000,0,50000,30000);
-		//AbstractParticipant p1 = new EUTest1(Random.randomUUID(), "Chris Test1", "CS1", 20000, 10000, 5000000, 3, 200000, 28000, 50000);
-		//AbstractParticipant p2 = new EUTest2(Random.randomUUID(), "Chris Test2", "CS2", 20000, 10000, 5000000, 3, 200000, 28000, 50000);
-		//s.addParticipant(p1);
-		//s.addParticipant(p2);
-//		AbstractParticipant p = new CanadaAgent(Random.randomUUID(),"CANADA","CAN",20000,10000,5000000,3,200000,28000,0,50000,30000);
-		//AbstractParticipant p1 = new TradeProtocolTestAgent(Random.randomUUID(), "Stuart", "CS1", 20000, 10000, 5000000, 3, 200000, 28000, 50000);
-		//AbstractParticipant p2 = new TradeProtocolTestAgent(Random.randomUUID(), "Farhan", "CS2", 20000, 10000, 5000000, 3, 200000, 28000, 50000);
-		//new TestAgent(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput)
 		AbstractParticipant p1 = new TestAgent(Random.randomUUID(), "Stuart", "LOL", 2000000, 1500000, 99999999999.00, 0.03, 70000, 50000);
 		AbstractParticipant p2 = new TestAgent(Random.randomUUID(), "Lolocaust", "LOL2", 500000, 200000, 100000, 0.07, 10000, 7000);
+		AbstractParticipant p3 = new CheatingAgent(Random.randomUUID(), "Kekeke", "KEK", 10000, 2000, 500000, 0.01, 70000, 60000);
 		
 		s.addParticipant(p1);
 		s.addParticipant(p2);
+		s.addParticipant(p3);
 		CarbonData1990.addCountry("LOL", 50000);
 		CarbonData1990.addCountry("LOL2", 9000);
-		
-		
-		//AbstractParticipant p3 = new TradeProtocolTestAgent(Random.randomUUID(), "TEST1", "TST");
-		//AbstractParticipant p4 = new TradeProtocolTestAgent(Random.randomUUID(), "TEST2", "TST");
-		//SimulationAgent a = new SimulationAgent(Random.randomUUID(), "SimAgent", Integer.parseInt(endTime));
-		//AbstractParticipant overalTester = new TestAbsorptionHandlerAgent(Random.randomUUID(),"ABSORPTION","ABS",20000, 10000 ,5000000,3,28000,50000,30000);
-		//AbstractParticipant landTester = new TestAbsorptionHandlerAgent(Random.randomUUID(),"LAND","LAN",20000, 0 ,5000000,3,28000,50000,30000);
-		//s.addParticipant(p3);
-		//s.addParticipant(p4);
-		//s.addParticipant(a);
-		//s.addParticipant(overalTester);
-		//s.addParticipant(landTester);		
-		
-		//AbstractParticipant POOR_ABS = new TestAbsorptionHandlerAgent(Random.randomUUID(),"POOR_ABS","PA", 1000000, 500000, 5000000, 3, 50000, 30000);
-		  // Should run out of money in a few ticks with current constants
-		//AbstractParticipant SMALL_ABS = new TestAbsorptionHandlerAgent(Random.randomUUID(),"SMALL_ABS","SA", 1000000, 100, 5000000, 3, 50000, 30000);
-		  // Should run out of land in a few ticks with current constants
-		//AbstractParticipant POOR_RED = new TestReductionHandlerAgent(Random.randomUUID(),"POOR_RED","PR", 1000000, 500000, 5000000, 3, 50000, 30000);
-		 // Should run out of money in a few ticks with current constants
-		//AbstractParticipant CLEAN_RED = new TestReductionHandlerAgent(Random.randomUUID(),"CLEAN_RED","CR", 1000000, 500000, 5000000, 3, 50000, 300);
-		 // Should run out of carbon output in a few ticks with current constants
-		
-		//AbstractParticipant REDVALUETEST = new TestReductionHandlerAgent(Random.randomUUID(),"REDVALUETEST","RT", 1000000, 500000, 5000000, 3, 1000, 700);
-		//AbstractParticipant ABSVALUETEST = new TestAbsorptionHandlerAgent(Random.randomUUID(),"ABSVALUETEST","AT", 10000, 1000, 5000000, 3, 1000, 700);
-		
-		//s.addParticipant(ABSVALUETEST);
+		CarbonData1990.addCountry("KEK", 60000);
 
 	}
 }

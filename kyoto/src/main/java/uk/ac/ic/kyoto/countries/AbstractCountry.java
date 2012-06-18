@@ -67,6 +67,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 */
 	double carbonOutput;		// Tons of CO2 produced every year
 	double carbonAbsorption;	// Tons of CO2 absorbed by forests every year
+
 	double carbonOffset; 		// Tons of CO2 that the country acquired (by trading or energy absorption)
 	double emissionsTarget;		// Number of tons of carbon you SHOULD produce
 	
@@ -644,6 +645,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	public KyotoMember isKyotoMember() {
 		return kyotoMemberLevel;
+	}
+	
+	public double getCarbonAbsorption() {
+		return carbonAbsorption;
 	}
 	
 	public void setKyotoMemberLevel(KyotoMember level) {
