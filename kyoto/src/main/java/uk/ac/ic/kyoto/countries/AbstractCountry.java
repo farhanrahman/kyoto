@@ -646,4 +646,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	public KyotoMember isKyotoMember() {
 		return kyotoMemberLevel;
 	}
+	
+	public void setKyotoMemberLevel(KyotoMember level) {
+		if (SimTime.get().intValue() == 0) {
+			kyotoMemberLevel = level;
+		}
+	}
 }
