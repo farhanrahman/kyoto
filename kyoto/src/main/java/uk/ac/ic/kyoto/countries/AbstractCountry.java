@@ -242,6 +242,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			}
 			
 			logSimulationData();
+			this.dumpSimulationData();
 			
 //		} catch(UnauthorisedExecuteException e){
 //			e.printStackTrace();
@@ -432,6 +433,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	@Override
 	public void onSimulationComplete(){
+		super.onSimulationComplete();
 		this.dumpSimulationData();
 	}
 	
@@ -471,16 +473,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 							this.tradeProtocol.getAgentsNotInConversation(),
 							returnObject)
 				);
-		
-			int time = SimTime.get().intValue();
-				
-			// check if db is available
-//			if (this.persist != null) {
-//				this.persist.getState(time).setProperty("Trade_type", TradeType.SELL.toString());
-//				this.persist.getState(time).setProperty("From", getName());
-//				this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
-//				this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
-//			}
 			return returnObject;
 	}
 
@@ -509,16 +501,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 							this.tradeProtocol.getAgentsNotInConversation(),
 							returnObject)
 				);
-	
-			int time = SimTime.get().intValue();
-			
-			// check if db is available
-//			if (this.persist != null) {
-//				this.persist.getState(time).setProperty("Trade_type", TradeType.BUY.toString());
-//				this.persist.getState(time).setProperty("From", getName());
-//				this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
-//				this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
-//			}
 			return returnObject;
 	}
 	
@@ -548,16 +530,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 								this.tradeProtocol.getAgentsNotInConversation(),
 								returnObject)
 					);
-			
-				int time = SimTime.get().intValue();
-				
-				// check if db is available
-//				if (this.persist != null) {
-//					this.persist.getState(time).setProperty("Trade_type", TradeType.RECEIVE.toString());
-//					this.persist.getState(time).setProperty("From", getName());
-//					this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
-//					this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
-//				}
 			return returnObject;
 		} catch (Exception e) {
 			e.printStackTrace();
