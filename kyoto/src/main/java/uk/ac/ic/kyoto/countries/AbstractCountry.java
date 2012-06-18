@@ -331,13 +331,19 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		try {
 			economy = getEnvironmentService(Economy.class);
 			
-			switch(economy.getEconomyState()) {
+			switch (economy.getEconomyState()) {
 			case GROWTH:
 				marketStateFactor = GameConst.getGrowthMarketState();
+				break;
 			case STABLE:
 				marketStateFactor = GameConst.getStableMarketState();
+				break;
 			case RECESSION:
 				marketStateFactor = GameConst.getRecessionMarketState();
+				break;
+			default:
+				marketStateFactor = GameConst.getStableMarketState();
+				break;
 			}
 			
 			if (energyOutput-prevEnergyOutput >= 0){	
