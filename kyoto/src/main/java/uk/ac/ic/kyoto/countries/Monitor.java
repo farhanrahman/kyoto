@@ -5,9 +5,12 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
+
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfYearCycle;
+import uk.ac.ic.kyoto.services.GlobalTimeService.TimeToMonitor;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentServiceProvider;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
@@ -26,6 +29,8 @@ import com.google.inject.Inject;
  */
 @ServiceDependencies({CarbonReportingService.class})
 public class Monitor extends EnvironmentService {
+	
+	/*static Semaphore offsetAccess = new Semaphore(1);*/
 	
 	/* The amount that the Monitor can spend on monitoring in a current year */
 	private double cash = 0;
@@ -72,17 +77,15 @@ public class Monitor extends EnvironmentService {
 	}
 	
 	@EventListener
-	public void yearlyFunction(EndOfYearCycle e) {
-		if (timeService.getCurrentYear() != 0) {
-			checkReports();
-			monitorCountries();
-		}
+	public void yearlyFunction(TimeToMonitor e) {
+		checkReports();
+		monitorCountries();
 	}
 	
 	private void checkReports () {
 		for (AbstractCountry country : memberStates.values()) {
-			double reportedEmission = carbonReportingService.getReport(country.getID(), SimTime.get());
-			double emissionTarget = carbonTargetingService.queryYearTarget(country.getID(), (timeService.getCurrentYear() - 1));
+			double reportedEmission = carbonReportingService.getReport(country.getID(), SimTime.get().intValue()-1);
+			double emissionTarget = carbonTargetingService.queryYearTarget(country.getID(), (timeService.getCurrentYear()));
 
 			if (Math.round(reportedEmission) > Math.round(emissionTarget)) {
 				targetSanction(country, emissionTarget - reportedEmission);
@@ -125,7 +128,7 @@ public class Monitor extends EnvironmentService {
 	}
 	
 	// TODO add logging
-	private void monitorCountries () {
+	private void monitorCountries () {	
 		ArrayList<UUID> cheaters = new ArrayList<UUID>();
 
 		// Find how many countries can be monitored with the available cash

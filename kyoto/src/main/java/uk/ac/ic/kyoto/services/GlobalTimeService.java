@@ -53,6 +53,10 @@ public class GlobalTimeService extends EnvironmentService {
 	@EventListener
 	public void updateTickCounter (EndOfTimeCycle e) {
 		tickCounter++;
+		if (SimTime.get().intValue() - yearCounter * ticksInYear == ticksInYear-2) {
+			TimeToMonitor m = new TimeToMonitor(tickCounter);
+			eb.publish(m);
+		}
 		if (SimTime.get().intValue() - yearCounter * ticksInYear == ticksInYear-1) {
 			EndOfYearCycle y = new EndOfYearCycle(yearCounter);
 			eb.publish(y);
@@ -92,6 +96,14 @@ public class GlobalTimeService extends EnvironmentService {
 		
 		EndOfSessionCycle(int endedSession) {
 			this.endedSession = endedSession;
+		}
+	}
+	
+	public class TimeToMonitor implements Event {
+		final int monitorTick;
+		
+		TimeToMonitor(int tickCounter) {
+			this.monitorTick = tickCounter;
 		}
 	}
 	
