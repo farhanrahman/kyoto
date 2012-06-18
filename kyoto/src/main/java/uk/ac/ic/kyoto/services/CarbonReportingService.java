@@ -91,6 +91,24 @@ public class CarbonReportingService extends EnvironmentService {
 		}
 	}
 	
+	public Double getReport(UUID id, Integer simTime) {
+		try{
+			@SuppressWarnings("unchecked")
+			Map<Integer,Double> reportForParticipant = 
+								(Map<Integer,Double>)this.sharedState.get(
+											CarbonReportingService.name, 
+											id);
+			if(reportForParticipant == null){
+				return null;
+			}else{
+				return reportForParticipant.get(simTime);
+			}
+		}catch(ClassCastException e){
+			logger.warn(e);
+			return null;
+		}
+	}
+	
 	/**
 	 * Returns null if report does
 	 * not exist for participant at all

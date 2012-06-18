@@ -199,20 +199,18 @@ public abstract class AbstractCountry extends AbstractParticipant {
 //		try{
 //			if(simTick == SimTime.get().intValue()){
 				super.execute();
-				if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {		
+				if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {	
 					updateGDPRate();
 					updateGDP();
 					updateAvailableToSpend();
 					if (kyotoMemberLevel == KyotoMember.ANNEXONE) {
 						MonitorTax();
 					}
-					updateCarbonOffsetYearly();
-					try {
-						reportCarbonOutput();
-					} catch (ActionHandlingException e) {
-						e.printStackTrace();
-					}
+					
 					logSimulationData(); // TO BE TESTED! Remove if necessary /Waffles
+
+					updateCarbonOffsetYearly();
+					
 					yearlyFunction();
 				}
 				if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
@@ -223,7 +221,20 @@ public abstract class AbstractCountry extends AbstractParticipant {
 //			}else{
 //				throw new UnauthorisedExecuteException(SimTime.get().intValue(), this.getID(), this.getName());
 //			}
-			behaviour();
+				
+			//leave a 10-tick grace period to allow current trades to complete before performing end of year routine
+			if (timeService.getCurrentTick() % timeService.getTicksInYear() < timeService.getTicksInYear() - 10 ) {
+				behaviour();
+			}
+			
+			//assume by this point all trades are complete and it's safe to report
+			else if (timeService.getCurrentTick() % timeService.getTicksInYear() == timeService.getTicksInYear() - 3 ){
+				try {
+					reportCarbonOutput();
+				} catch (ActionHandlingException e) {
+					e.printStackTrace();
+				}
+			}
 //		} catch(UnauthorisedExecuteException e){
 //			e.printStackTrace();
 //		}
