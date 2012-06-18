@@ -201,19 +201,21 @@ public abstract class AbstractCountry extends AbstractParticipant {
 //		try{
 //			if(simTick == SimTime.get().intValue()){
 				super.execute();
-				if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {		
+				if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {	
 					updateGDPRate();
 					updateGDP();
 					updateAvailableToSpend();
 					if (kyotoMemberLevel == KyotoMember.ANNEXONE) {
 						MonitorTax();
 					}
+
 					updateCarbonOffsetYearly();
 					try {
 						reportCarbonOutput();
 					} catch (ActionHandlingException e) {
 						e.printStackTrace();
 					}
+					
 					yearlyFunction();
 				}
 				if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
@@ -224,8 +226,23 @@ public abstract class AbstractCountry extends AbstractParticipant {
 //			}else{
 //				throw new UnauthorisedExecuteException(SimTime.get().intValue(), this.getID(), this.getName());
 //			}
-				logSimulationData();
+				
+			//leave a 10-tick grace period to allow current trades to complete before performing end of year routine
+			if (timeService.getCurrentTick() % timeService.getTicksInYear() < timeService.getTicksInYear() - 10 ) {
 				behaviour();
+			}
+			
+			//assume by this point all trades are complete and it's safe to report
+			else if (timeService.getCurrentTick() % timeService.getTicksInYear() == timeService.getTicksInYear() - 3 ){
+				try {
+					reportCarbonOutput();
+				} catch (ActionHandlingException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			logSimulationData();
+			
 //		} catch(UnauthorisedExecuteException e){
 //			e.printStackTrace();
 //		}
@@ -393,25 +410,13 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.dataStore.addEmissionsTarget(this.getEmissionsTarget());
 		this.dataStore.addCarbonOffset(this.getCarbonOffset());
 		this.dataStore.addCarbonOutput(this.getCarbonOutput());
-		this.dataStore.addIsKyotoMember(this.isKyotoMember());
-//		// check if db is available
-//		if (this.persist != null) {
-//			this.persist.getState(time).setProperty("GDP", Double.toString(GDP));
-//			this.persist.getState(time).setProperty("GDPRate", Double.toString(GDPRate));
-//			this.persist.getState(time).setProperty("Available_to_spend", Double.toString(availableToSpend));
-//			this.persist.getState(time).setProperty("Emissions_target", Double.toString(emissionsTarget));
-//			this.persist.getState(time).setProperty("Carbon_offset", Double.toString(carbonOffset));
-//			this.persist.getState(time).setProperty("Carbon_output", Double.toString(carbonOutput));
-//			this.persist.getState(time).setProperty("Energy_output", Double.toString(energyOutput));
-//			this.persist.getState(time).setProperty("Is_kyoto?", Boolean.toString(isKyotoMember));
-				
+		this.dataStore.addIsKyotoMember(this.isKyotoMember());	
 			/* TODO
 			 * is cheating?
 			 * carbon reduction - cost, quantity
 			 * carbon absorption - cost, quantity
 			 * energy usage - cost, quantity
 			 */
-//		}
 	}
 	
 	private final void dumpSimulationData(){
