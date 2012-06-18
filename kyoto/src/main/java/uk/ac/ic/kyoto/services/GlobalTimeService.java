@@ -53,7 +53,7 @@ public class GlobalTimeService extends EnvironmentService {
 	@EventListener
 	public void updateTickCounter (EndOfTimeCycle e) {
 		tickCounter++;
-		if (SimTime.get().intValue() - yearCounter * ticksInYear == ticksInYear) {
+		if (SimTime.get().intValue() - yearCounter * ticksInYear == ticksInYear-1) {
 			EndOfYearCycle y = new EndOfYearCycle(yearCounter);
 			eb.publish(y);
 		}
@@ -63,7 +63,7 @@ public class GlobalTimeService extends EnvironmentService {
 	public void updateYearCounter (EndOfYearCycle e) {
 		yearCounter++;
 		sharedState.changeGlobal("YearCount", yearCounter);
-		if (yearCounter - sessionCounter * yearsInSession == yearsInSession) {
+		if (yearCounter - sessionCounter * yearsInSession == yearsInSession-1) {
 			EndOfSessionCycle s = new EndOfSessionCycle(sessionCounter);
 			eb.publish(s);
 		}

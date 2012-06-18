@@ -443,27 +443,27 @@ public abstract class AbstractCountry extends AbstractParticipant {
 							this.tradeProtocol.getAgentsNotInConversation(),
 							returnObject)
 				);
-		return returnObject;
 		
-//			int time = SimTime.get().intValue();
-//				
-//			// check if db is available
-//			if (this.persist != null) {
-//				this.persist.getState(time).setProperty("Trade_type", TradeType.SELL.toString());
-//				this.persist.getState(time).setProperty("From", getName());
-//				this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
-//				this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
-//			}
+			int time = SimTime.get().intValue();
+				
+			// check if db is available
+			if (this.persist != null) {
+				this.persist.getState(time).setProperty("Trade_type", TradeType.SELL.toString());
+				this.persist.getState(time).setProperty("From", getName());
+				this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
+				this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
+			}
+			return returnObject;
 	}
 
 	protected final OfferMessage broadcastBuyOffer(int quantity, double unitCost){
 		Offer trade = new Offer(quantity, unitCost, TradeType.BUY);
 		
 		/*DEBUG*/
-//			System.out.println();
-//			System.out.println(this.tradeProtocol.getActiveConversationMembers().toString());
-//			System.out.println(this.network.getConnectedNodes());
-//			System.out.println();
+			System.out.println();
+			System.out.println(this.tradeProtocol.getActiveConversationMembers().toString());
+			System.out.println(this.network.getConnectedNodes());
+			System.out.println();
 		/*DEBUG*/
 		
 		OfferMessage returnObject = new OfferMessage(
@@ -480,17 +480,17 @@ public abstract class AbstractCountry extends AbstractParticipant {
 							this.tradeProtocol.getAgentsNotInConversation(),
 							returnObject)
 				);
-		return returnObject;
 	
-//			int time = SimTime.get().intValue();
-//			
-//			// check if db is available
-//			if (this.persist != null) {
-//				this.persist.getState(time).setProperty("Trade_type", TradeType.BUY.toString());
-//				this.persist.getState(time).setProperty("From", getName());
-//				this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
-//				this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
-//			}
+			int time = SimTime.get().intValue();
+			
+			// check if db is available
+			if (this.persist != null) {
+				this.persist.getState(time).setProperty("Trade_type", TradeType.BUY.toString());
+				this.persist.getState(time).setProperty("From", getName());
+				this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
+				this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
+			}
+			return returnObject;
 	}
 	
 	protected final OfferMessage broadcastInvesteeOffer(double quantity, InvestmentType itype){
@@ -522,15 +522,15 @@ public abstract class AbstractCountry extends AbstractParticipant {
 										OfferMessageType.BROADCAST_MESSAGE))
 					);
 			
-//				int time = SimTime.get().intValue();
-//				
-//				// check if db is available
-//				if (this.persist != null) {
-//					this.persist.getState(time).setProperty("Trade_type", TradeType.RECEIVE.toString());
-//					this.persist.getState(time).setProperty("From", getName());
-//					this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
-//					this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
-//				}
+				int time = SimTime.get().intValue();
+				
+				// check if db is available
+				if (this.persist != null) {
+					this.persist.getState(time).setProperty("Trade_type", TradeType.RECEIVE.toString());
+					this.persist.getState(time).setProperty("From", getName());
+					this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
+					this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
+				}
 			return returnObject;
 		} catch (Exception e) {
 			e.printStackTrace();
