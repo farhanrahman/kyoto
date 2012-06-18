@@ -207,6 +207,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 					} catch (ActionHandlingException e) {
 						e.printStackTrace();
 					}
+					logSimulationData(); // TO BE TESTED! Remove if necessary /Waffles
 					yearlyFunction();
 				}
 				if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
@@ -368,6 +369,36 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	//================================================================================
+    // Log simulation data function
+    //================================================================================
+	/**
+	 * Stores all simulation data into MongoDB
+	 * @author waffles
+	 */
+	private final void logSimulationData() {
+		int time = SimTime.get().intValue();
+		
+//		// check if db is available
+//		if (this.persist != null) {
+//			this.persist.getState(time).setProperty("GDP", Double.toString(GDP));
+//			this.persist.getState(time).setProperty("GDPRate", Double.toString(GDPRate));
+//			this.persist.getState(time).setProperty("Available_to_spend", Double.toString(availableToSpend));
+//			this.persist.getState(time).setProperty("Emissions_target", Double.toString(emissionsTarget));
+//			this.persist.getState(time).setProperty("Carbon_offset", Double.toString(carbonOffset));
+//			this.persist.getState(time).setProperty("Carbon_output", Double.toString(carbonOutput));
+//			this.persist.getState(time).setProperty("Energy_output", Double.toString(energyOutput));
+//			this.persist.getState(time).setProperty("Is_kyoto?", Boolean.toString(isKyotoMember));
+				
+			/* TODO
+			 * is cheating?
+			 * carbon reduction - cost, quantity
+			 * carbon absorption - cost, quantity
+			 * energy usage - cost, quantity
+			 */
+//		}
+	}
+	
+	//================================================================================
     // Trade protocol methods
     //================================================================================
 	
@@ -402,6 +433,16 @@ public abstract class AbstractCountry extends AbstractParticipant {
 										this.tradeProtocol.tradeToken.generate(),
 										OfferMessageType.BROADCAST_MESSAGE))
 					);
+			
+//			int time = SimTime.get().intValue();
+//				
+//			// check if db is available
+//			if (this.persist != null) {
+//				this.persist.getState(time).setProperty("Trade_type", TradeType.SELL.toString());
+//				this.persist.getState(time).setProperty("From", getName());
+//				this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
+//				this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
+//			}
 		}
 	}
 
@@ -428,6 +469,16 @@ public abstract class AbstractCountry extends AbstractParticipant {
 										this.tradeProtocol.tradeToken.generate(), 
 										OfferMessageType.BROADCAST_MESSAGE))
 					);
+		
+//			int time = SimTime.get().intValue();
+//			
+//			// check if db is available
+//			if (this.persist != null) {
+//				this.persist.getState(time).setProperty("Trade_type", TradeType.BUY.toString());
+//				this.persist.getState(time).setProperty("From", getName());
+//				this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
+//				this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
+//			}
 		}
 	}
 	
@@ -455,6 +506,17 @@ public abstract class AbstractCountry extends AbstractParticipant {
 											this.tradeProtocol.tradeToken.generate(),
 											OfferMessageType.BROADCAST_MESSAGE))
 						);
+				
+//				int time = SimTime.get().intValue();
+//				
+//				// check if db is available
+//				if (this.persist != null) {
+//					this.persist.getState(time).setProperty("Trade_type", TradeType.RECEIVE.toString());
+//					this.persist.getState(time).setProperty("From", getName());
+//					this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
+//					this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
+//				}
+				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
