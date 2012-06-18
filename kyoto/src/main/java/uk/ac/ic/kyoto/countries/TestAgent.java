@@ -4,6 +4,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
+import uk.ac.ic.kyoto.exceptions.NotEnoughCarbonOutputException;
+import uk.ac.ic.kyoto.exceptions.NotEnoughCashException;
 import uk.ac.ic.kyoto.trade.InvestmentType;
 import uk.ac.imperial.presage2.core.environment.ActionHandlingException;
 import uk.ac.imperial.presage2.core.messaging.Input;

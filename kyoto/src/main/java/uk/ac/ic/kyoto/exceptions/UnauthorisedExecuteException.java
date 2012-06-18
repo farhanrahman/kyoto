@@ -1,7 +1,7 @@
 /**
  * 
  */
-package uk.ac.ic.kyoto.countries;
+package uk.ac.ic.kyoto.exceptions;
 
 import java.util.UUID;
 

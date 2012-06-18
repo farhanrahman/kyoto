@@ -322,8 +322,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			else{
 				sum = ((energyOutput-prevEnergyOutput)/prevEnergyOutput)*GameConst.getEnergyGrowthScaler();
 			}
-			
-			System.out.println(sum);
+
 			GDPRate = GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler());
 			
 			GDPRate /= 100; // Needs to be a % for rate formula

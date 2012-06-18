@@ -25,6 +25,7 @@ public class GDPTestCount extends AbstractCountry {
 		logger.debug("Current Energy Output: " + this.getEnergyOutput());
 		logger.debug("Current Previous Energy Output: " + this.getPrevEnergyOut());
 		logger.debug("Current CO2 Output: " + this.getCarbonOutput());
+		logger.debug("Emissions Target: " + this.getEmissionsTarget());
 
 	}
 

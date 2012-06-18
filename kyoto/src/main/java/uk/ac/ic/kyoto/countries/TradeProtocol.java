@@ -7,6 +7,9 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 
 import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
+import uk.ac.ic.kyoto.exceptions.NotEnoughCarbonOutputException;
+import uk.ac.ic.kyoto.exceptions.NotEnoughCashException;
+import uk.ac.ic.kyoto.exceptions.NotEnoughLandException;
 import uk.ac.ic.kyoto.singletonfactory.SingletonProvider;
 import uk.ac.ic.kyoto.tokengen.Token;
 import uk.ac.ic.kyoto.trade.InvestmentType;
