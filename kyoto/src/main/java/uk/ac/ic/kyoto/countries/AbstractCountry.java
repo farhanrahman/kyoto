@@ -172,6 +172,14 @@ public abstract class AbstractCountry extends AbstractParticipant {
 					System.out.println("Unable to reach emission reporting service.");
 					e.printStackTrace();
 				}
+				
+				this.tradeProtocol = new TradeProtocol(getID(), this.authkey, environment, network, this) {
+					
+					@Override
+					protected boolean acceptExchange(NetworkAddress from, Offer trade) {
+						return acceptTrade(from, trade);
+					}
+				};	
 				this.initialised = true;
 				initialiseCountry();
 			}else{
@@ -179,20 +187,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			}
 		} catch(AlreadyInitialisedException ex){
 			ex.printStackTrace();
-		}
-		
-		try {
-			this.tradeProtocol = new TradeProtocol(getID(), this.authkey, environment, network, null) {
-				
-				@Override
-				protected boolean acceptExchange(NetworkAddress from, Offer trade) {
-					return acceptTrade(from, trade);
-				}
-			};
 		} catch (FSMException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 	}
 	
 	@Override
