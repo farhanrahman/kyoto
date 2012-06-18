@@ -432,7 +432,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		OfferMessage returnObject = new OfferMessage(
 				trade,
 				this.tradeProtocol.tradeToken.generate(),
-				OfferMessageType.BROADCAST_MESSAGE);
+				OfferMessageType.BROADCAST_MESSAGE,
+				this.getID());
 		this.network.sendMessage(
 					new MulticastMessage<OfferMessage>(
 							Performative.PROPOSE, 
@@ -442,33 +443,34 @@ public abstract class AbstractCountry extends AbstractParticipant {
 							this.tradeProtocol.getAgentsNotInConversation(),
 							returnObject)
 				);
-		return returnObject;
 		
-//			int time = SimTime.get().intValue();
-//				
-//			// check if db is available
-//			if (this.persist != null) {
-//				this.persist.getState(time).setProperty("Trade_type", TradeType.SELL.toString());
-//				this.persist.getState(time).setProperty("From", getName());
-//				this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
-//				this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
-//			}
+			int time = SimTime.get().intValue();
+				
+			// check if db is available
+			if (this.persist != null) {
+				this.persist.getState(time).setProperty("Trade_type", TradeType.SELL.toString());
+				this.persist.getState(time).setProperty("From", getName());
+				this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
+				this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
+			}
+			return returnObject;
 	}
 
 	protected final OfferMessage broadcastBuyOffer(int quantity, double unitCost){
 		Offer trade = new Offer(quantity, unitCost, TradeType.BUY);
 		
 		/*DEBUG*/
-//			System.out.println();
-//			System.out.println(this.tradeProtocol.getActiveConversationMembers().toString());
-//			System.out.println(this.network.getConnectedNodes());
-//			System.out.println();
+			System.out.println();
+			System.out.println(this.tradeProtocol.getActiveConversationMembers().toString());
+			System.out.println(this.network.getConnectedNodes());
+			System.out.println();
 		/*DEBUG*/
 		
 		OfferMessage returnObject = new OfferMessage(
 				trade, 
 				this.tradeProtocol.tradeToken.generate(), 
-				OfferMessageType.BROADCAST_MESSAGE);
+				OfferMessageType.BROADCAST_MESSAGE,
+				this.getID());
 		
 		this.network.sendMessage(
 					new MulticastMessage<OfferMessage>(
@@ -479,17 +481,17 @@ public abstract class AbstractCountry extends AbstractParticipant {
 							this.tradeProtocol.getAgentsNotInConversation(),
 							returnObject)
 				);
-		return returnObject;
 	
-//			int time = SimTime.get().intValue();
-//			
-//			// check if db is available
-//			if (this.persist != null) {
-//				this.persist.getState(time).setProperty("Trade_type", TradeType.BUY.toString());
-//				this.persist.getState(time).setProperty("From", getName());
-//				this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
-//				this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
-//			}
+			int time = SimTime.get().intValue();
+			
+			// check if db is available
+			if (this.persist != null) {
+				this.persist.getState(time).setProperty("Trade_type", TradeType.BUY.toString());
+				this.persist.getState(time).setProperty("From", getName());
+				this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
+				this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
+			}
+			return returnObject;
 	}
 	
 	protected final OfferMessage broadcastInvesteeOffer(double quantity, InvestmentType itype){
@@ -507,7 +509,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			OfferMessage returnObject = new OfferMessage(
 					trade,
 					this.tradeProtocol.tradeToken.generate(),
-					OfferMessageType.BROADCAST_MESSAGE);
+					OfferMessageType.BROADCAST_MESSAGE,
+					this.getID());
 			this.network.sendMessage(
 						new MulticastMessage<OfferMessage>(
 								Performative.PROPOSE, 
@@ -515,21 +518,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 								SimTime.get(), 
 								this.network.getAddress(),
 								this.tradeProtocol.getAgentsNotInConversation(),
-								new OfferMessage(
-										trade,
-										this.tradeProtocol.tradeToken.generate(),
-										OfferMessageType.BROADCAST_MESSAGE))
+								returnObject)
 					);
 			
-//				int time = SimTime.get().intValue();
-//				
-//				// check if db is available
-//				if (this.persist != null) {
-//					this.persist.getState(time).setProperty("Trade_type", TradeType.RECEIVE.toString());
-//					this.persist.getState(time).setProperty("From", getName());
-//					this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
-//					this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
-//				}
 			return returnObject;
 		} catch (Exception e) {
 			e.printStackTrace();
