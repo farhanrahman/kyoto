@@ -43,10 +43,15 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	final protected String 		ISO;		//ISO 3166-1 alpha-3
 	
 	/*
-	 *  Simple boolean to check if the country is a member of Kyoto
-	 *  Defaults to true. Rogue states must set this to false in their constructor
+	 *  KyotoMember level variable shows whether country is annex one,
+	 *  non-annex one, or rogue states
 	 */
-	private boolean isKyotoMember=true; 
+	enum KyotoMember {
+		ROGUE,
+		ANNEXONE,
+		NONANNEXONE
+	}
+	private KyotoMember kyotoMemberLevel; 
 	
 	/*
 	 * These variables are related to land area for
@@ -142,7 +147,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 					e2.printStackTrace();
 				}
 				try {
-					if (getIsKyotoMember())
+					if (isKyotoMember() == KyotoMember.ANNEXONE)
 						environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
 				} catch (ActionHandlingException e2) {
 					e2.printStackTrace();
@@ -198,7 +203,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 					updateGDPRate();
 					updateGDP();
 					updateAvailableToSpend();
-					if (isKyotoMember) {
+					if (kyotoMemberLevel == KyotoMember.ANNEXONE) {
 						MonitorTax();
 					}
 					updateCarbonOffsetYearly();
@@ -356,12 +361,14 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * @author ct
 	 */
 	private final void updateCarbonOffsetYearly() {
-		if (emissionsTarget <= carbonOffset +carbonAbsorption +carbonOutput ){
-			if (carbonOffset > 0) {
-				if ((emissionsTarget - carbonOutput + carbonAbsorption)  > carbonOffset)
-					carbonOffset = 0;
-				else
-					carbonOffset += (emissionsTarget - carbonOutput + carbonAbsorption);
+		if (kyotoMemberLevel == KyotoMember.ANNEXONE) {
+			if (emissionsTarget <= carbonOffset +carbonAbsorption +carbonOutput ){
+				if (carbonOffset > 0) {
+					if ((emissionsTarget - carbonOutput + carbonAbsorption)  > carbonOffset)
+						carbonOffset = 0;
+					else
+						carbonOffset += (emissionsTarget - carbonOutput + carbonAbsorption);
+				}
 			}
 		}
 	}
@@ -529,15 +536,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
     // Kyoto membership functions
     //================================================================================
 	
-	public boolean isKyotoMember() {
-		return isKyotoMember;
-	}
-	
 	private int leaveTime=0, joinTime=0;
 	
 	protected final void leaveKyoto() throws IllegalStateException {
 		if (timeService.getCurrentTick() == 0) {
-			isKyotoMember = false;
+			kyotoMemberLevel = KyotoMember.ROGUE;
 			
 			try {
 				environment.act(new AddRemoveFromMonitor(this, addRemoveType.REMOVE), getID(), authkey);
@@ -548,7 +551,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			return;
 		}
 		else if (timeService.getCurrentTick() - joinTime >= timeService.getTicksInYear()*GameConst.getMinimumKyotoMembershipDuration()) {
-			isKyotoMember=false;
+			kyotoMemberLevel = KyotoMember.ROGUE;
 			leaveTime=timeService.getCurrentTick();
 			
 			try {
@@ -564,7 +567,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	protected final void joinKyoto() throws IllegalStateException {
 		if (timeService.getCurrentTick() - leaveTime >= timeService.getTicksInYear()*GameConst.getMinimumKyotoRejoinTime()) {
-			isKyotoMember=true;
+			kyotoMemberLevel = KyotoMember.ANNEXONE;
 			joinTime = timeService.getCurrentTick();
 			
 			try {
@@ -634,7 +637,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			this.availableToSpend = availableToSpend;
 	}
 	
-	public boolean getIsKyotoMember() {
-		return this.isKyotoMember;
+	public KyotoMember isKyotoMember() {
+		return kyotoMemberLevel;
 	}
 }
