@@ -123,7 +123,7 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 	@Override
 	protected boolean acceptTrade(NetworkAddress from, Offer trade) {
 		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 	
 }
