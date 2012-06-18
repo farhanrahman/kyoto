@@ -11,9 +11,7 @@ public final class GameConst {
 	private static double STABLE_MARKET_CHANCE = 0.8;
 	private static double RECESSION_MARKET_CHANCE = 0.1;
 	
-	@Deprecated
-	private static int ECONOMIC_OUTPUT_REDUCTION = 1; // Deprecated constant
-	
+
 	/**
 	 * The cost of investment in one extra ton of carbon per year
 	 */
@@ -55,25 +53,10 @@ public final class GameConst {
 	 */
 	private static double FOREST_CARBON_ABSORPTION = 1;
 	
-	///**
-	// * Coefficient to calculate the cost of carbon absorption
-	// */
-	//private static float CARBON_ABSORPTION_COEFF = 1;
-	
-	///**
-	// * Size of a block of arable land
-	// */
-	//private static float FOREST_BLOCK_SIZE = 100;
-	
-	///**
-	// * Amount of carbon (in tons) that you offset with a single unit of forest PER YEAR
-	// */
-	//private static long FOREST_CARBON_ABSORPTION = 10;
-	
 	/**
 	 * Percentage of GDP that is levied from availiableToSpend for monitoring
 	 */
-	private static double MONITOR_COST_PERCENTAGE = 0.0005;
+	private static double MONITOR_COST_PERCENTAGE = 0.00025;   // 2.5% of absolute cash given out
 	
 	/**
 	 * Percentage of GDP taken from country if they fail to meet their targets.  
@@ -84,7 +67,7 @@ public final class GameConst {
 	/**
 	 * Price for each monitor
 	 */
-	private static double MONITORING_PRICE = 5000;
+	private static double MONITORING_PRICE = 847;
 	
 	/**
 	 * Number of ticks in a year
@@ -152,10 +135,6 @@ public final class GameConst {
 
 	public static double getRecessionMarketChance() {
 		return RECESSION_MARKET_CHANCE;
-	}
-
-	public static int getEconomicOutputReduction() {
-		return ECONOMIC_OUTPUT_REDUCTION;
 	}
 
 	public static double getCarbonInvestmentPrice() {
