@@ -1,5 +1,8 @@
 package uk.ac.ic.kyoto.countries;
 
+import uk.ac.ic.kyoto.exceptions.NotEnoughCarbonOutputException;
+import uk.ac.ic.kyoto.exceptions.NotEnoughCashException;
+
 /**
  * 
  * @author Adam

@@ -1,5 +1,8 @@
 package uk.ac.ic.kyoto.countries;
 
+import uk.ac.ic.kyoto.exceptions.NotEnoughCashException;
+import uk.ac.ic.kyoto.exceptions.NotEnoughLandException;
+
 /**
  * 
  * @author Piotr, Nikunj
