@@ -273,7 +273,7 @@ public class CarbonTarget extends EnvironmentService {
 	 */
 	private void generateYearTarget(countryObject country)
 	{
-		double sessionProgress = (timeService.getCurrentYear() % GameConst.getYearsInSession()) / GameConst.getYearsInSession();
+		double sessionProgress = (double) ( timeService.getCurrentYear() % GameConst.getYearsInSession()) / GameConst.getYearsInSession();
 		double diffTargets = country.lastSessionTarget - country.currentSessionTarget;
 		double newTarget = country.lastSessionTarget - (diffTargets * sessionProgress) - country.penalty;
 		country.yearTargets.put(timeService.getCurrentYear(), newTarget);
