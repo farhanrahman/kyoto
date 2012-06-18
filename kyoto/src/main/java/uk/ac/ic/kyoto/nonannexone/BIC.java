@@ -93,7 +93,7 @@ public class BIC extends AbstractCountry {
 		// carbonAbsorption to carbonOffset
 	}
 
-/*****************************************************************************************/
+/******************************************************************************************/
 	
 	protected void behaviour() {
 		try {
@@ -114,6 +114,7 @@ public class BIC extends AbstractCountry {
 		energy_aim = getEnergyOutput() + CountryConstants.INITIAL_ENERGY_THRESHOLD ; //initialise an aim (to be decided)
 		environment_friendly_target = 0; //initialise a target (to be decided)
 		setKyotoMemberLevel(KyotoMember.NONANNEXONE);
+		
 	}
 	//.......................................................................................
 	//........................................................................................
@@ -380,7 +381,7 @@ broadcastInvesteeOffer(change_required,InvestmentType.REDUCE);
 //Check available area  in order to choose decision accordingly for accepting to sell credits or plant trees for own sake.
 		private String currentAvailableArea(){
 			
-			if (getArableLandArea() > getLandArea()/(CountryConstants.AREA_LIMIT))
+			if (getArableLandArea() > getLandArea()*(CountryConstants.AREA_LIMIT))
 				return "Safe";
 			else 
 				return "Danger";
