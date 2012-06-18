@@ -32,27 +32,32 @@ public class TestAgent extends AbstractCountry {
 	 * Iterates over the input queue: i.e. all messages multicast or unicast to THIS agent
 	 */
 	protected void processInput(Input in) {
-		// TODO Auto-generated method stub
-		if (in instanceof Message){
-			@SuppressWarnings("unchecked")
-			Message<OfferMessage> m = (Message<OfferMessage>) in;
-			if(m.getType().equalsIgnoreCase("Trade")){
-				OfferMessage o = (OfferMessage) m.getData();
-				//Update our knowledgebase
-				//trades.add(t);
-				
-				if(!this.tradeProtocol
-						.getActiveConversationMembers()
-							.contains(m.getFrom())){
-					try {
-						this.tradeProtocol.offer(
-								m.getFrom(), 
-								o.getOfferQuantity(), 
-								o.getOfferUnitCost(), 
-								o);
-					} catch (FSMException e) {
-						e.printStackTrace();
+		if (this.tradeProtocol.canHandle(in)) {
+			this.tradeProtocol.handle(in);
+		}
+		else {
+
+			if(in instanceof Message){
+				try{
+					@SuppressWarnings("unchecked")
+					Message<OfferMessage> m = (Message<OfferMessage>) in;
+					OfferMessage o = m.getData();
+					if(!this.tradeProtocol
+							.getActiveConversationMembers()
+								.contains(m.getFrom())){
+						try {
+							this.tradeProtocol.offer(
+									m.getFrom(), 
+									o.getOfferQuantity(), 
+									o.getOfferUnitCost(), 
+									o);
+						} catch (FSMException e) {
+							e.printStackTrace();
+						}
 					}
+				}catch(ClassCastException e){
+					logger.warn("Class cast exception");
+					logger.warn(e);
 				}
 			}
 		}

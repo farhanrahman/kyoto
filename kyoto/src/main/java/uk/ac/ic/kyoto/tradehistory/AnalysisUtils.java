@@ -1,9 +1,15 @@
 package uk.ac.ic.kyoto.tradehistory;
 
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.UUID;
+
+import uk.ac.ic.kyoto.countries.GameConst;
+import uk.ac.ic.kyoto.countries.Offer;
 
 /**
  * 
@@ -32,8 +38,8 @@ public class AnalysisUtils {
 
 		SortedMap<Integer, TickHistory> history = new TreeMap<Integer, TickHistory>();
 		
-		long low = Long.MAX_VALUE;
-		long high = Long.MIN_VALUE;
+		double low = Double.MAX_VALUE;
+		double high = Double.MIN_VALUE;
 		
 		// Putting all sessions into a single SortedMap
 		for (SessionHistory s : sessions) {
@@ -194,19 +200,19 @@ public class AnalysisUtils {
 	@Deprecated
 	public final static double stardardDeviation(SessionHistory[] sessions, TradeActionType type){
 		SortedMap<Integer, TickHistory> history = new TreeMap<Integer, TickHistory>();
-		SortedMap<Integer, Float> m = new TreeMap<Integer, Float>();
+		SortedMap<Integer, Double> m = new TreeMap<Integer, Double>();
 		
-		float sumOfVars = 0;
+		double sumOfVars = 0;
 		int numberOfVars = 0;
 		
-		float variance;
+		double variance;
 		
 		// Pull all session histories into a single history
 		for (SessionHistory s : sessions) {
 			history.putAll(s.getSession());
 		}
 		
-		float average = average(sessions, type);
+		double average = average(sessions, type);
 		
 		for (Entry<Integer, TickHistory> e : history.entrySet()) {
 			if (type == TradeActionType.TRADE) {
@@ -216,7 +222,7 @@ public class AnalysisUtils {
 			}
 		}
 		
-		for (Entry<Integer, Float> e : m.entrySet()) {
+		for (Entry<Integer, Double> e : m.entrySet()) {
 			sumOfVars += (e.getValue() * e.getValue());
 			numberOfVars++;
 		}
@@ -235,10 +241,10 @@ public class AnalysisUtils {
 		public final TradeActionType type;
 		public final int startTick;
 		public final int endTick;
-		public final long low;
-		public final long high;
+		public final double low;
+		public final double high;
 		
-		public Range(TradeActionType type, int startTick, int endTick, long low, long high) {
+		public Range(TradeActionType type, int startTick, int endTick, double low, double high) {
 			checkTickPreconditions(startTick, endTick);
 			
 			this.type = type;
@@ -288,6 +294,31 @@ public class AnalysisUtils {
 		if(endTick > startTick){
 			throw new InvalidParameterException("startTick must be > endTick");
 		}
+	}
+	
+	public static ArrayList<SessionHistory> toSessionHistoryArray(Map<Integer, Map<UUID, Offer>> tradeHistory) throws Exception{
+		
+		if(tradeHistory.isEmpty()){
+				throw new Exception("Jizz all up my ass");
+		}
+		
+		ArrayList<SessionHistory> s = new ArrayList<SessionHistory>();
+		
+		for (Entry<Integer, Map<UUID, Offer>> e : tradeHistory.entrySet()) {
+			
+			int year = e.getKey()/(GameConst.getYearsInSession() * GameConst.getTicksInYear());
+			
+			for (Entry<UUID, Offer> offer : e.getValue().entrySet()) {
+				try {
+					s.get(year).add(offer.getValue(), e.getKey());
+				} catch (Exception e1) {
+					s.add(new SessionHistory(year));
+					s.get(year).add(offer.getValue(), e.getKey());
+				}
+			}
+		}
+		
+		return s;
 	}
 
 }

@@ -91,6 +91,16 @@ public class CarbonReportingService extends EnvironmentService {
 		}
 	}
 	
+	
+	/**
+	 * This function should be used if a service
+	 * wants to get a report from the past. The
+	 * reason for this is that Time cannot be decremented
+	 * which becomes an issue when querying for report.
+	 * @param id
+	 * @param simTime
+	 * @return The report of a participant
+	 */
 	public Double getReport(UUID id, Integer simTime) {
 		try{
 			@SuppressWarnings("unchecked")
