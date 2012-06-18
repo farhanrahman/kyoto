@@ -283,6 +283,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 */
 	private final void updateGDPRate() {
 		double marketStateFactor = 0;
+		double sum;
 		
 		Economy economy;
 		try {
@@ -296,9 +297,15 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		case RECESSION:
 			marketStateFactor = GameConst.getRecessionMarketState();
 		}
-		
-		double sum = ((((energyOutput-prevEnergyOutput)/prevEnergyOutput)*GameConst.getEnergyGrowthScaler() +marketStateFactor)+GDPRate)/2;
+		if (energyOutput-prevEnergyOutput >= 0){	
+			sum = (((energyOutput-prevEnergyOutput)/prevEnergyOutput)*GameConst.getEnergyGrowthScaler() *marketStateFactor+GDPRate*100)/2;
+		}
+		else
+		{
+			sum = ((((energyOutput-prevEnergyOutput)/prevEnergyOutput)*GameConst.getEnergyGrowthScaler()));
+		}
 		GDPRate = (GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler()));
+		
 		GDPRate /= 100; // Needs to be a % for rate formula
 		} catch (UnavailableServiceException e) {
 			System.out.println("Unable to reach economy service.");
@@ -324,6 +331,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	/**
 	 * Adjusts the amount of CarbonOffset depending on the last years usage
+	 * @author ct
 	 */
 	private final void updateCarbonOffsetYearly() {
 		if (carbonOffset > 0) {

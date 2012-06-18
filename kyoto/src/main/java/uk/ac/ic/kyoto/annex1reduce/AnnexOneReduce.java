@@ -12,7 +12,6 @@ import uk.ac.imperial.presage2.core.messaging.Input;
  *
  */
 public class AnnexOneReduce extends IsolatedAbstractCountry {
-
 	private EU eu;
 	final private CountrySimulator simulator;
 	public AnnexOneReduce(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP, double GDPRate, double energyOutput, 
@@ -43,7 +42,6 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 
 	@Override
 	protected void behaviour() {
-		
 //		double reduction;
 //		double currentMoney = getAvailableToSpend();
 //		try {
@@ -99,10 +97,9 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 //		}
 
 		CountrySimulator.CountryState optimalState = 
-				simulator.simulate(getCarbonOutput(),getEnergyOutput(),
+				simulator.simulate(getCarbonOutput(),getEnergyOutput(),getPrevEnergyOutput(),
 				getCarbonOffset(),getCarbonAbsorption(), getEmissionsTarget(), getAvailableToSpend(),
 				getGDP(),getGDPRate(),getArableLandArea());
-
 	}
 
 	/**

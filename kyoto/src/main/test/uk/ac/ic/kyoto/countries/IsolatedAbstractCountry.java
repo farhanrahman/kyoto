@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import uk.ac.ic.kyoto.actions.AddRemoveFromMonitor;
+import uk.ac.ic.kyoto.actions.AddRemoveFromMonitor.addRemoveType;
+import uk.ac.ic.kyoto.actions.AddToCarbonTarget;
 import uk.ac.ic.kyoto.actions.ApplyMonitorTax;
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
 import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
@@ -128,12 +131,10 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 	final public void initialise(){
 		try{
 			if(this.initialised == false){
-				
 				// Initialize the Action Handlers
 				carbonAbsorptionHandler = new IsolatedCarbonAbsorptionHandler(this);
 				carbonReductionHandler = new IsolatedCarbonReductionHandler(this);
 				energyUsageHandler = new IsolatedEnergyUsageHandler(this);
-				
 				this.initialised = true;
 			}else{
 				throw new AlreadyInitialisedException();
@@ -253,6 +254,7 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 	 */
 	private final void updateGDPRate() {
 		double marketStateFactor = 0;
+		double sum;
 		
 		Economy economy;
 		try {
@@ -266,9 +268,15 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 		case RECESSION:
 			marketStateFactor = GameConst.getRecessionMarketState();
 		}
-		
-		double sum = ((((energyOutput-prevEnergyOutput)/prevEnergyOutput)*GameConst.getEnergyGrowthScaler() +marketStateFactor)+GDPRate)/2;
+		if (energyOutput-prevEnergyOutput >= 0){	
+			sum = (((energyOutput-prevEnergyOutput)/prevEnergyOutput)*GameConst.getEnergyGrowthScaler() *marketStateFactor+GDPRate*100)/2;
+		}
+		else
+		{
+			sum = ((((energyOutput-prevEnergyOutput)/prevEnergyOutput)*GameConst.getEnergyGrowthScaler()));
+		}
 		GDPRate = (GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler()));
+		
 		GDPRate /= 100; // Needs to be a % for rate formula
 		} catch (UnavailableServiceException e) {
 			System.out.println("Unable to reach economy service.");
@@ -294,6 +302,7 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 	
 	/**
 	 * Adjusts the amount of CarbonOffset depending on the last years usage
+	 * @author ct
 	 */
 	private final void updateCarbonOffsetYearly() {
 		if (carbonOffset > 0) {
@@ -410,6 +419,8 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 		return isKyotoMember;
 	}
 	
+	private int leaveTime=0, joinTime=0;
+	
 	//================================================================================
     // Public getters
     //================================================================================
@@ -445,6 +456,10 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 	public double getEnergyOutput(){
 		return energyOutput;
 	}
+	public double getPrevEnergyOutput() {
+		return prevEnergyOutput;
+	}
+
 	public double getCarbonOutput(){
 		return carbonOutput;
 	}

@@ -105,9 +105,9 @@ public final class CarbonReductionHandler{
 		double carbonOutputChange;
 
 		try {
-			double carbonDiff = carbonOutput;
+			double carbonDiff = carbonOutput / 2;
 			
-			carbonOutputChange = carbonDiff / 2;
+			carbonOutputChange = carbonDiff;
 			
 			double tempInvestmentAmount = getInvestmentRequired(carbonOutputChange, carbonOutput, energyOutput);
 			
