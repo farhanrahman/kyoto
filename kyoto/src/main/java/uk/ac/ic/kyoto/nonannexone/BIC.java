@@ -81,14 +81,7 @@ public class BIC extends AbstractCountry {
 	public void yearlyFunction() {
 		// TODO implement
 		//functions that are implemented every year
-				try {
-					economy();
-				} catch (IllegalArgumentException e) {
-				e.printStackTrace();
-				} catch (Exception e) {
-				e.printStackTrace();
-				} 
-				//calculate carbon output every year
+				
 				yearly_emissions();
 										
 	}
@@ -100,10 +93,17 @@ public class BIC extends AbstractCountry {
 		// carbonAbsorption to carbonOffset
 	}
 
-/*****************************************************************************************/
+/******************************************************************************************/
 	
 	protected void behaviour() {
-		// TODO Auto-generated method stub
+		try {
+			economy();
+		} catch (IllegalArgumentException e) {
+		e.printStackTrace();
+		} catch (Exception e) {
+		e.printStackTrace();
+		} 
+		//calculate carbon output every year
 		
 	}
 
@@ -113,7 +113,8 @@ public class BIC extends AbstractCountry {
 		// TODO Auto-generated method stub
 		energy_aim = getEnergyOutput() + CountryConstants.INITIAL_ENERGY_THRESHOLD ; //initialise an aim (to be decided)
 		environment_friendly_target = 0; //initialise a target (to be decided)
-	//	setKyotoMemberLevel(KyotoMember.NONANNEXONE);
+		setKyotoMemberLevel(KyotoMember.NONANNEXONE);
+		
 	}
 	//.......................................................................................
 	//........................................................................................
@@ -380,7 +381,7 @@ broadcastInvesteeOffer(change_required,InvestmentType.REDUCE);
 //Check available area  in order to choose decision accordingly for accepting to sell credits or plant trees for own sake.
 		private String currentAvailableArea(){
 			
-			if (getArableLandArea() > getLandArea()/(CountryConstants.AREA_LIMIT))
+			if (getArableLandArea() > getLandArea()*(CountryConstants.AREA_LIMIT))
 				return "Safe";
 			else 
 				return "Danger";
