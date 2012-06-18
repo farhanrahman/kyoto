@@ -11,6 +11,7 @@ import uk.ac.imperial.presage2.core.environment.ActionHandlingException;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.network.Message;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
+import uk.ac.imperial.presage2.util.fsm.FSMException;
 
 public class TestAgent extends AbstractCountry {
 	
@@ -34,13 +35,25 @@ public class TestAgent extends AbstractCountry {
 		// TODO Auto-generated method stub
 		if (in instanceof Message){
 			@SuppressWarnings("unchecked")
-			Message<Offer> m = (Message<Offer>) in;
+			Message<OfferMessage> m = (Message<OfferMessage>) in;
 			if(m.getType().equalsIgnoreCase("Trade")){
-				//Offer t = (Offer) m.getData();
+				OfferMessage o = (OfferMessage) m.getData();
 				//Update our knowledgebase
 				//trades.add(t);
 				
-				
+				if(!this.tradeProtocol
+						.getActiveConversationMembers()
+							.contains(m.getFrom())){
+					try {
+						this.tradeProtocol.offer(
+								m.getFrom(), 
+								o.getOfferQuantity(), 
+								o.getOfferUnitCost(), 
+								o);
+					} catch (FSMException e) {
+						e.printStackTrace();
+					}
+				}
 			}
 		}
 
@@ -53,15 +66,6 @@ public class TestAgent extends AbstractCountry {
 	
 	@Override
 	public void behaviour() {
-//		this.network.sendMessage(
-//				new BroadcastMessage<Object>(
-//						Performative.PROPOSE, 
-//						"TRADE", 
-//						SimTime.get(), 
-//						network.getAddress(), 
-//						new OfferMessage(new Offer(0, 0, TradeType.SELL), authkey)
-//				)
-//			);
 		
 		logger.info("I have this much money: " + availableToSpend);
 		
