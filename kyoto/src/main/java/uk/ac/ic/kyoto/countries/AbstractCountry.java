@@ -242,7 +242,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			}
 			
 			logSimulationData();
-			this.dumpSimulationData();
 			
 //		} catch(UnauthorisedExecuteException e){
 //			e.printStackTrace();
@@ -439,7 +438,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	@Override
 	public void onSimulationComplete(){
-		super.onSimulationComplete();
 		this.dumpSimulationData();
 	}
 	
