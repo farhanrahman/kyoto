@@ -36,7 +36,7 @@ public class Decoder {
 	 * @param name
 	 * @param ISO
 	 */
-	static synchronized void addCountry(UUID id, String name, String ISO){
+	public static synchronized void addCountry(UUID id, String name, String ISO){
 		/*Add to maps decoding id-name : name-id*/
 		Decoder.id2name.put(id, name);
 		Decoder.name2id.put(name, id);
