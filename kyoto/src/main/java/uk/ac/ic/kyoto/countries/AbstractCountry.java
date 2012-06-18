@@ -46,7 +46,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 *  KyotoMember level variable shows whether country is annex one,
 	 *  non-annex one, or rogue states
 	 */
-	enum KyotoMember {
+	public enum KyotoMember {
 		ROGUE,
 		ANNEXONE,
 		NONANNEXONE
@@ -223,7 +223,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 //			}else{
 //				throw new UnauthorisedExecuteException(SimTime.get().intValue(), this.getID(), this.getName());
 //			}
-			behaviour();
+				behaviour();
 //		} catch(UnauthorisedExecuteException e){
 //			e.printStackTrace();
 //		}
@@ -447,12 +447,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			int time = SimTime.get().intValue();
 				
 			// check if db is available
-			if (this.persist != null) {
-				this.persist.getState(time).setProperty("Trade_type", TradeType.SELL.toString());
-				this.persist.getState(time).setProperty("From", getName());
-				this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
-				this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
-			}
+//			if (this.persist != null) {
+//				this.persist.getState(time).setProperty("Trade_type", TradeType.SELL.toString());
+//				this.persist.getState(time).setProperty("From", getName());
+//				this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
+//				this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
+//			}
 			return returnObject;
 	}
 
@@ -485,12 +485,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			int time = SimTime.get().intValue();
 			
 			// check if db is available
-			if (this.persist != null) {
-				this.persist.getState(time).setProperty("Trade_type", TradeType.BUY.toString());
-				this.persist.getState(time).setProperty("From", getName());
-				this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
-				this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
-			}
+//			if (this.persist != null) {
+//				this.persist.getState(time).setProperty("Trade_type", TradeType.BUY.toString());
+//				this.persist.getState(time).setProperty("From", getName());
+//				this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
+//				this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
+//			}
 			return returnObject;
 	}
 	
@@ -521,6 +521,15 @@ public abstract class AbstractCountry extends AbstractParticipant {
 								returnObject)
 					);
 			
+				int time = SimTime.get().intValue();
+				
+				// check if db is available
+//				if (this.persist != null) {
+//					this.persist.getState(time).setProperty("Trade_type", TradeType.RECEIVE.toString());
+//					this.persist.getState(time).setProperty("From", getName());
+//					this.persist.getState(time).setProperty("Quantity", Double.toString(quantity));
+//					this.persist.getState(time).setProperty("Unit_cost", Double.toString(unitCost));
+//				}
 			return returnObject;
 		} catch (Exception e) {
 			e.printStackTrace();
