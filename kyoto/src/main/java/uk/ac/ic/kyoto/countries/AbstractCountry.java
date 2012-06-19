@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
+import com.google.common.collect.ImmutableMap;
+
 import uk.ac.ic.kyoto.actions.AddRemoveFromMonitor;
 import uk.ac.ic.kyoto.actions.AddRemoveFromMonitor.addRemoveType;
 import uk.ac.ic.kyoto.actions.AddToCarbonTarget;
@@ -145,7 +148,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			
 			// Check if the initialised function has already been called.
 			if (this.initialised) {
-				throw new AlreadyInitialisedException();
+				throw new IllegalAccessException("Participant " + this.ISO + " already initialised");
 			} else {
 				this.initialised = true;
 			}
@@ -201,7 +204,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		} catch (ActionHandlingException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
-		} catch (AlreadyInitialisedException e) {
+		} catch (IllegalAccessException e) {
 			e.printStackTrace();
 		}
 		
@@ -321,7 +324,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	public Map<Integer,Double> getCarbonEmissionReports(){
-		return this.carbonEmissionReports;
+		return ImmutableMap.copyOf(this.carbonEmissionReports);
 	}
 	
 	/**
@@ -479,13 +482,13 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	private final void dumpCurrentTickData(){
-		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.gdpKey, this.dataStore.getGdpHistory().get(SimTime.get().intValue()).toString());
-		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.gdpRateKey, this.dataStore.getGdpRateHistory().get(SimTime.get().intValue()).toString());
-		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.availableToSpendKey, this.dataStore.getAvailableToSpendHistory().get(SimTime.get().intValue()).toString());
-		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.emissionTargetKey, this.dataStore.getEmissionsTargetHistory().get(SimTime.get().intValue()).toString());
-		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.carbonOffsetKey, this.dataStore.getCarbonOffsetHistory().get(SimTime.get().intValue()).toString());
-		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.carbonOutputKey, this.dataStore.getCarbonOutputHistory().get(SimTime.get().intValue()).toString());
-		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.isKyotoMemberKey, this.dataStore.getIsKyotoMemberHistory().get(SimTime.get().intValue()).toString());
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.gdpKey, Double.toString(this.getGDP()));
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.gdpRateKey, Double.toString(this.getGDPRate()));
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.availableToSpendKey, Double.toString(this.getAvailableToSpend()));
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.emissionTargetKey, Double.toString(this.getEmissionsTarget()));
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.carbonOffsetKey, Double.toString(this.getCarbonOffset()));
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.carbonOutputKey, Double.toString(this.getCarbonOutput()));
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.isKyotoMemberKey, this.isKyotoMember().name());
 	}
 	
 	@Override
@@ -566,8 +569,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		
 		if (itype.equals(InvestmentType.ABSORB)) {
 			unitCost = this.carbonAbsorptionHandler.getInvestmentRequired(quantity)/quantity;
-		}
-		else {
+		}else {
 			unitCost = this.carbonReductionHandler.getInvestmentRequired(quantity)/quantity;
 		}
 		
@@ -692,7 +694,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	void setAvailableToSpend(double availableToSpend) {
-			this.availableToSpend = availableToSpend;
+		this.availableToSpend = availableToSpend;
 	}
 	
 	public KyotoMember isKyotoMember() {
@@ -703,9 +705,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return carbonAbsorption;
 	}
 	
-	public void setKyotoMemberLevel(KyotoMember level) {
+	public void setKyotoMemberLevel(KyotoMember level) throws IllegalStateException{
 		if (SimTime.get().intValue() == 0) {
 			kyotoMemberLevel = level;
+		}else{
+			throw new IllegalStateException("Attempted to set kyotoMemberLevel in tick " + SimTime.get().intValue());
 		}
 	}
 }

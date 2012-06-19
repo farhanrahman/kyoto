@@ -22,7 +22,7 @@ public class GlobalTimeService extends EnvironmentService {
 	
 	public static String name = "GlobalTime";
 	
-	public int tickCounter=0, yearCounter=0, sessionCounter=0;
+	private volatile int tickCounter=0, yearCounter=0, sessionCounter=0;
 
 	//@Parameter(name="ticksInYear")
 	public int ticksInYear=GameConst.getTicksInYear();
