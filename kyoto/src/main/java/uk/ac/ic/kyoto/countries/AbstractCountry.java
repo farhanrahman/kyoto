@@ -482,13 +482,13 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	private final void dumpCurrentTickData(){
-		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.gdpKey, this.dataStore.getGdpHistory().get(SimTime.get().intValue()).toString());
-		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.gdpRateKey, this.dataStore.getGdpRateHistory().get(SimTime.get().intValue()).toString());
-		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.availableToSpendKey, this.dataStore.getAvailableToSpendHistory().get(SimTime.get().intValue()).toString());
-		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.emissionTargetKey, this.dataStore.getEmissionsTargetHistory().get(SimTime.get().intValue()).toString());
-		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.carbonOffsetKey, this.dataStore.getCarbonOffsetHistory().get(SimTime.get().intValue()).toString());
-		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.carbonOutputKey, this.dataStore.getCarbonOutputHistory().get(SimTime.get().intValue()).toString());
-		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.isKyotoMemberKey, this.dataStore.getIsKyotoMemberHistory().get(SimTime.get().intValue()).toString());
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.gdpKey, Double.toString(this.getGDP()));
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.gdpRateKey, Double.toString(this.getGDPRate()));
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.availableToSpendKey, Double.toString(this.getAvailableToSpend()));
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.emissionTargetKey, Double.toString(this.getEmissionsTarget()));
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.carbonOffsetKey, Double.toString(this.getCarbonOffset()));
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.carbonOutputKey, Double.toString(this.getCarbonOutput()));
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.isKyotoMemberKey, this.isKyotoMember().name());
 	}
 	
 	@Override
