@@ -258,6 +258,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			}
 			
 			logSimulationData();
+			dumpCurrentTickData();
 			
 			this.releaseExecuteLock();
 			
@@ -475,6 +476,16 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.persist.setProperty(DataStore.carbonOffsetKey, this.dataStore.getCarbonOffsetHistory().toString());
 		this.persist.setProperty(DataStore.carbonOutputKey, this.dataStore.getCarbonOutputHistory().toString());
 		this.persist.setProperty(DataStore.isKyotoMemberKey, this.dataStore.getIsKyotoMemberHistory().toString());
+	}
+	
+	private final void dumpCurrentTickData(){
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.gdpKey, this.dataStore.getGdpHistory().get(SimTime.get().intValue()).toString());
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.gdpRateKey, this.dataStore.getGdpRateHistory().get(SimTime.get().intValue()).toString());
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.availableToSpendKey, this.dataStore.getAvailableToSpendHistory().get(SimTime.get().intValue()).toString());
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.emissionTargetKey, this.dataStore.getEmissionsTargetHistory().get(SimTime.get().intValue()).toString());
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.carbonOffsetKey, this.dataStore.getCarbonOffsetHistory().get(SimTime.get().intValue()).toString());
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.carbonOutputKey, this.dataStore.getCarbonOutputHistory().get(SimTime.get().intValue()).toString());
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.isKyotoMemberKey, this.dataStore.getIsKyotoMemberHistory().get(SimTime.get().intValue()).toString());
 	}
 	
 	@Override
