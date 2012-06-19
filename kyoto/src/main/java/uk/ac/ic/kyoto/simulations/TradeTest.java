@@ -18,7 +18,6 @@ import uk.ac.ic.kyoto.annex1sustain.AnnexOneSustain;
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.CarbonTarget;
 import uk.ac.ic.kyoto.countries.Monitor;
-import uk.ac.ic.kyoto.countries.TestAgent;
 import uk.ac.ic.kyoto.exceptions.NoCountryDataException;
 import uk.ac.ic.kyoto.nonannexone.NonAnnexOne;
 import uk.ac.ic.kyoto.roguestates.CanadaAgent;
