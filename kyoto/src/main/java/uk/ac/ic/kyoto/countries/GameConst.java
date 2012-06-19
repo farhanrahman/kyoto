@@ -72,7 +72,7 @@ public final class GameConst {
 	/**
 	 * Target penalty coefficient
 	 */
-	private static double PENALTY_COEF = 1.3;
+	private static double PENALTY_COEF = 0.3;
 	
 	/**
 	 * Number of ticks in a year
