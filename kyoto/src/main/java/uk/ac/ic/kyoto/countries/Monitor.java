@@ -200,6 +200,8 @@ public class Monitor extends EnvironmentService {
 		
 		int sinCount;
 		
+		System.out.println("SANCTIONING: " + sanctionee.getName());
+		
 		// Update the list of countries that have cheated
 		if (sinBin.containsKey(sanctionee)) {
 			sinCount = sinBin.get(sanctionee) + 1;
