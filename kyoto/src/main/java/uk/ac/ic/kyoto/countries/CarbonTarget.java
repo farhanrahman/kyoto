@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 
 import uk.ac.ic.kyoto.CarbonData1990;
@@ -38,7 +39,7 @@ public class CarbonTarget extends EnvironmentService {
 		public double lastSessionTarget = 0;
 		public double currentSessionTarget = 0;
 		
-		public Map<Integer, Double> yearTargets = new HashMap<Integer, Double>();
+		public Map<Integer, Double> yearTargets = new ConcurrentHashMap<Integer, Double>();
 		
 		public double proportion = 0;
 		public double penalty = 0;
@@ -108,7 +109,7 @@ public class CarbonTarget extends EnvironmentService {
 		
 		countryObject target= findCountryObject(countryID);
 		target.penalty = penaltyValue;
-		generateYearTarget(target);
+		/*generateYearTarget(target);*/
 		
 		this.exclusiveAccess.release();
 	}
@@ -196,18 +197,20 @@ public class CarbonTarget extends EnvironmentService {
 		}
 	}
 	
-	@EventListener
-	public void onEndOfYear(EndOfYearCycle e) {
-		if (timeService.getCurrentYear() != 0) {
-			if ((timeService.getCurrentYear() % timeService.getYearsInSession()) == 0)
-			{
-				this.worldLastSessionTarget = this.worldCurrentSessionTarget;
-				this.worldCurrentSessionTarget = worldLastSessionTarget * GameConst.getTargetReduction(); 
-				updateSessionTargets();
-			}
+	/*@EventListener*/
+	public void onEndOfYear(/*EndOfYearCycle e*/) {
+		//if (timeService.getCurrentYear() != 0) {
+		if (((timeService.getCurrentYear() % (timeService.getYearsInSession())) == (timeService.getYearsInSession() - 1))
+				&& ((timeService.getCurrentTick()<5) || (timeService.getCurrentYear()!=0)))
+		{
+			this.worldLastSessionTarget = this.worldCurrentSessionTarget;
+			this.worldCurrentSessionTarget = worldLastSessionTarget * GameConst.getTargetReduction(); 
+			System.out.println("is this wrong?");
+			updateSessionTargets();
+		}
 			
 			updateYearTargets();
-		}
+		//}
 	}
 	
 	public void updateYearTargets()
@@ -232,10 +235,19 @@ public class CarbonTarget extends EnvironmentService {
 	 */
 	private void generateYearTarget(countryObject country)
 	{
+		int year = timeService.getCurrentYear();
+		if (timeService.getCurrentTick() > 5) {
+			year++;
+		}
+		
 		double sessionProgress = (double) ( timeService.getCurrentYear() % GameConst.getYearsInSession()) / GameConst.getYearsInSession();
 		double diffTargets = country.lastSessionTarget - country.currentSessionTarget;
 		double newTarget = country.lastSessionTarget - (diffTargets * sessionProgress) - country.penalty;
-		country.yearTargets.put(timeService.getCurrentYear(), newTarget);
+		
+		System.out.println("About to update target for year " + (year));
+		country.yearTargets.put(year, newTarget);
+		System.out.println("Just updated target for year " + (year));
+		System.out.println("Target = " + country.yearTargets.get(year));
 		country.obj.emissionsTarget = newTarget;
 	}	
 	
@@ -245,7 +257,11 @@ public class CarbonTarget extends EnvironmentService {
 		double worldOutput = 0;
 		double rogueCarbonOutput = 0;
 		
-		int lastYear = timeService.getCurrentYear() - 1;
+		int lastYear = timeService.getCurrentYear() -1;
+		int session = timeService.getCurrentSession();
+		if (timeService.getCurrentTick()>5) {
+			session++;
+		}
 		
 		for (countryObject country : participantCountries) {
 			double output = getReportedCarbonOutput(country.obj.getID(), lastYear);
@@ -261,7 +277,10 @@ public class CarbonTarget extends EnvironmentService {
 			if (country.obj.isKyotoMember() == KyotoMember.ANNEXONE){
 				double output = getReportedCarbonOutput(country.obj.getID(), lastYear);
 				country.proportion = output / (worldOutput - rogueCarbonOutput);
+				System.out.println("About to update target for session " + session);
 				generateSessionTarget(country, kyotoTarget);
+				System.out.println("Just updated target for session " + session);
+				System.out.println("Target = " + country.currentSessionTarget);
 			}
 		}
 	}

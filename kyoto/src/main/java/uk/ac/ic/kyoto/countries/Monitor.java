@@ -84,7 +84,11 @@ public class Monitor extends EnvironmentService {
 	
 	private void checkReports () {
 		for (AbstractCountry country : memberStates.values()) {
+			
+			carbonTargetingService.onEndOfYear();
+			
 			double reportedEmission = carbonReportingService.getReport(country.getID(), SimTime.get().intValue()-1);
+			System.out.println("About to query year target for year " + timeService.getCurrentYear());
 			double emissionTarget = carbonTargetingService.queryYearTarget(country.getID(), (timeService.getCurrentYear()));
 
 			if (Math.round(reportedEmission) > Math.round(emissionTarget)) {

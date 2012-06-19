@@ -211,7 +211,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				}
 				
 				
-				if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {	
+				if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
+					System.out.println(this.ISO + " first day of new year on tick " + timeService.getCurrentTick());
+					
 					updateGDPRate();
 					updateGDP();
 					updateAvailableToSpend();
@@ -220,6 +222,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 					}
 
 					updateCarbonOffsetYearly();
+					
 					try {
 						reportCarbonOutput();
 					} catch (ActionHandlingException e) {
@@ -228,10 +231,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
 					
 					yearlyFunction();
 				}
-				if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
-					resetCarbonOffset();
-					sessionFunction();
-				}
+				
+			if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
+				resetCarbonOffset();
+				sessionFunction();
+			}
 	
 			//leave a 10-tick grace period to allow current trades to complete before performing end of year routine
 			if (timeService.getCurrentTick() % timeService.getTicksInYear() < timeService.getTicksInYear() - 10 ) {
@@ -241,6 +245,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			//assume by this point all trades are complete and it's safe to report
 			else if (timeService.getCurrentTick() % timeService.getTicksInYear() == timeService.getTicksInYear() - 3 ){
 				try {
+					System.out.println(this.ISO + "reporting on tick " + timeService.getCurrentTick());
 					reportCarbonOutput();
 				} catch (ActionHandlingException e) {
 					e.printStackTrace();
@@ -280,7 +285,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	protected void reportCarbonOutput() throws ActionHandlingException {
-		logger.info("Reporting bullshit");
 		environment.act(new SubmitCarbonEmissionReport(carbonOutput), getID(), authkey);
 	}
 	
