@@ -596,7 +596,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				System.out.println("Exception wilst removing from monitor: " + e);
 				e.printStackTrace();
 			}
-			return;
 		}
 		else if (timeService.getCurrentTick() - joinTime >= timeService.getTicksInYear()*GameConst.getMinimumKyotoMembershipDuration()) {
 			kyotoMemberLevel = KyotoMember.ROGUE;
@@ -608,9 +607,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				System.out.println("Exception wilst removing from monitor: " + e);
 				e.printStackTrace();
 			}
-			return;
+		} else {
+			throw new IllegalStateException("Cannot leave Kyoto Protocol.");
 		}
-		throw new IllegalStateException("Cannot leave Kyoto Protocol.");
 	}
 	
 	protected final void joinKyoto() throws IllegalStateException {
@@ -624,9 +623,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				System.out.println("Exception whilst adding to monitor: " + e);
 				e.printStackTrace();
 			}
-			return;
+		} else {
+			throw new IllegalStateException("Cannot join Kyoto Protocol.");
 		}
-		throw new IllegalStateException("Cannot join Kyoto Protocol.");
 	}
 	
 	//================================================================================
