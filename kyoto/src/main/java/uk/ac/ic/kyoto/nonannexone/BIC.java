@@ -29,6 +29,7 @@ public class BIC extends AbstractCountry {
 	boolean aim_success = false; // variable that controls whether the energy aim was met or not
 	int ticks_in_a_year; //how many ticks are in a year
 	int current_tick; //tick currently operating
+	int current_year; //year currently operating
 	//............................................................................................ 
 	
 	public BIC(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
@@ -98,8 +99,7 @@ public class BIC extends AbstractCountry {
 /******************************************************************************************/
 	
 	protected void behaviour() {
-		
-		
+			
 		try {
 			economy();
 		} catch (IllegalArgumentException e) {
@@ -204,6 +204,9 @@ public class BIC extends AbstractCountry {
 	private void energy_increase_with_care(double money_invest) throws IllegalArgumentException, Exception
 	{
 		double carbon_difference; 
+		double available_area;
+		available_area = getArableLandArea();
+		
 		
 		if (getCarbonOutput() + energyUsageHandler.calculateCarbonIndustryGrowth(money_invest) < environment_friendly_target)
 		{ //invest but also check if we meet our environment friendly target.
@@ -231,12 +234,13 @@ public class BIC extends AbstractCountry {
 			
 			try{ //also since country exceeds its own carbon target, invests in carbon absorption or carbon reduction in order to get carbon offset.
 				carbon_difference = environment_friendly_target - (getCarbonOutput() + energyUsageHandler.calculateCarbonIndustryGrowth(money_invest));
-				if ((carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend() ) && (currentAvailableArea() == "Safe"))
+				if (carbonAbsorptionHandler.getForestAreaRequired(carbon_difference) < available_area)
+				if (carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend() )
 					{
 					carbonAbsorptionHandler.investInCarbonAbsorption(carbonAbsorptionHandler.getInvestmentRequired(carbon_difference));
 					logger.info("Country invests in carbon absorption to increase carbon absorption and thus reach environment target carbon output");
 					}
-				else if ((carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend() ) && (currentAvailableArea() == "Danger"))
+				else if ((carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend() ) && (carbonAbsorptionHandler.getForestAreaRequired(carbon_difference) >= available_area))
 					{
 					logger.info("Country reach limit of available pre-set land, not possible to invest in carbon absorption, try invest in carbon reduction");
 					if (carbonReductionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend())
@@ -282,11 +286,8 @@ public class BIC extends AbstractCountry {
 		
 		private void update_energy_aim(double previous_aim,boolean success,int counter)
 		{
-			ticks_in_a_year = timeService.getTicksInYear();
-			current_tick = timeService.getCurrentTick();
-			System.out.println("Time report:");
-			System.out.println("Current tick: " + current_tick + "  Ticks in a year: " + ticks_in_a_year + ".");
-			
+				current_tick = timeService.getCurrentTick();
+				
 			if (success)
 			{ // country met goal, change goal
 				if (current_tick < 345) //steady increase every tick
@@ -294,17 +295,16 @@ public class BIC extends AbstractCountry {
 					energy_aim = previous_aim + CountryConstants.STEADY_TICK_ENERGY_INCREASE;
 					
 				}
-				if (current_tick ==345)
+				if (current_tick == 345)
 				{
-				ticks_in_a_year = timeService.getTicksInYear();
-				current_tick = timeService.getCurrentTick();
-				System.out.println("Time report:");
-				System.out.println("Current tick: " + current_tick + "  Ticks in a year: " + ticks_in_a_year + ".");
+				
 				times_aim_met = 0; //reset counter
+				
 				}
-				else
+				if (current_tick > 345)
 				{
-					
+					if (current_tick == 365)
+						current_tick=0;
 					switch (counter)
 					{
 					case 0:
@@ -368,7 +368,7 @@ public class BIC extends AbstractCountry {
 	{
 		if (succeed) //country met environment target goal, change goal.
 			
-		environment_friendly_target = previous_target - previous_target * CountryConstants.TARGET_AIM_GROWTH;
+		environment_friendly_target = previous_target - CountryConstants.DECREASING_CARBON_TARGET;
 		
 	}
 	
@@ -415,8 +415,8 @@ broadcastInvesteeOffer(change_required,InvestmentType.REDUCE);
 		
 		}
 
+/*******************************************************************************************************/
 
-		
 		
 }		
 		
