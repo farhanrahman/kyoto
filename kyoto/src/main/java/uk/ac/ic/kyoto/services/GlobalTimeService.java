@@ -67,7 +67,7 @@ public class GlobalTimeService extends EnvironmentService {
 	public void updateYearCounter (EndOfYearCycle e) {
 		yearCounter++;
 		sharedState.changeGlobal("YearCount", yearCounter);
-		if (yearCounter - sessionCounter * yearsInSession == yearsInSession-1) {
+		if (yearCounter - sessionCounter * yearsInSession == yearsInSession) {
 			EndOfSessionCycle s = new EndOfSessionCycle(sessionCounter);
 			eb.publish(s);
 		}
