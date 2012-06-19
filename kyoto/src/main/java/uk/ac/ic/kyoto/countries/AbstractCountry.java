@@ -210,7 +210,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 							this.getName());
 				}
 				
-				
 				if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
 					System.out.println(this.ISO + " first day of new year on tick " + timeService.getCurrentTick());
 					
