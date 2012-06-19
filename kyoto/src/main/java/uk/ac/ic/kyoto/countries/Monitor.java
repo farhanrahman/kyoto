@@ -88,7 +88,7 @@ public class Monitor extends EnvironmentService {
 			double emissionTarget = carbonTargetingService.queryYearTarget(country.getID(), (timeService.getCurrentYear()));
 
 			if (Math.round(reportedEmission) > Math.round(emissionTarget)) {
-				targetSanction(country, emissionTarget - reportedEmission);
+				targetSanction(country,  reportedEmission - emissionTarget);
 			}
 		}
 	}

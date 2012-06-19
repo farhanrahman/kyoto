@@ -107,7 +107,7 @@ public class CarbonTarget extends EnvironmentService {
 		}
 		
 		countryObject target= findCountryObject(countryID);
-		target.penalty += penaltyValue;
+		target.penalty = penaltyValue;
 		generateYearTarget(target);
 		
 		this.exclusiveAccess.release();
@@ -199,19 +199,19 @@ public class CarbonTarget extends EnvironmentService {
 	@EventListener
 	public void onEndOfYear(EndOfYearCycle e) {
 		if (timeService.getCurrentYear() != 0) {
+			if ((timeService.getCurrentYear() % timeService.getYearsInSession()) == 0)
+			{
+				this.worldLastSessionTarget = this.worldCurrentSessionTarget;
+				this.worldCurrentSessionTarget = worldLastSessionTarget * GameConst.getTargetReduction(); 
+				updateSessionTargets();
+			}
+			
 			updateYearTargets();
 		}
 	}
 	
 	public void updateYearTargets()
 	{
-		if (((timeService.getCurrentYear() % timeService.getYearsInSession()) == 0) && timeService.getCurrentYear() != 0)
-		{
-			this.worldLastSessionTarget = this.worldCurrentSessionTarget;
-			this.worldCurrentSessionTarget = worldLastSessionTarget * GameConst.getTargetReduction(); 
-			updateSessionTargets();
-		}
-		
 		try {
 			this.exclusiveAccess.acquire();
 		} catch (InterruptedException e) {
@@ -271,7 +271,6 @@ public class CarbonTarget extends EnvironmentService {
 	 */
 	private void generateSessionTarget(countryObject country, double kyotoTarget)
 	{	
-		country.penalty = 0;
 		country.lastSessionTarget = country.currentSessionTarget;
 		country.currentSessionTarget = country.proportion * kyotoTarget;
 	}
