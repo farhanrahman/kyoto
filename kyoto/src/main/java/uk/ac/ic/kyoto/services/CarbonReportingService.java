@@ -12,6 +12,7 @@ import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
 import uk.ac.imperial.presage2.core.environment.StateTransformer;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 
 /**
@@ -74,21 +75,7 @@ public class CarbonReportingService extends EnvironmentService {
 	 * @return
 	 */
 	public Double getReport(UUID id, Time simTime) {
-		try{
-			@SuppressWarnings("unchecked")
-			Map<Integer,Double> reportForParticipant = 
-								(Map<Integer,Double>)this.sharedState.get(
-											CarbonReportingService.name, 
-											id);
-			if(reportForParticipant == null){
-				return null;
-			}else{
-				return reportForParticipant.get(simTime.intValue());
-			}
-		}catch(ClassCastException e){
-			logger.warn(e);
-			return null;
-		}
+		return this.getReport(id, simTime.intValue());
 	}
 	
 	
@@ -109,13 +96,13 @@ public class CarbonReportingService extends EnvironmentService {
 											CarbonReportingService.name, 
 											id);
 			if(reportForParticipant == null){
-				return null;
+				throw new NullPointerException("No report for participant " + id);
 			}else{
 				return reportForParticipant.get(simTime);
 			}
 		}catch(ClassCastException e){
 			logger.warn(e);
-			return null;
+			throw new RuntimeException(e);
 		}
 	}
 	
@@ -133,13 +120,13 @@ public class CarbonReportingService extends EnvironmentService {
 											CarbonReportingService.name, 
 											id);
 			if(reportForParticipant == null){
-				return null;
+				throw new NullPointerException("No report for participant " + id);
 			}else{
-				return reportForParticipant;
+				return ImmutableMap.copyOf(reportForParticipant);
 			}
 		}catch(ClassCastException e){
 			logger.warn(e);
-			return null;
+			throw new RuntimeException(e);
 		}
 	}	
 }
