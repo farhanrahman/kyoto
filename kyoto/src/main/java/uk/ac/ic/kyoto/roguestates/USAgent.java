@@ -6,10 +6,31 @@ import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.util.random.Random;
 import uk.ac.ic.kyoto.countries.AbstractCountry;
-
+/*
+ * ToDo
+ * 
+ * General
+ * 
+ * CDM investments - party that implements that increases its likelihood of re-election. 
+ * 	-> some sort of condition on this? i.e. only if the previous year was a good year economically,
+ *	   the justification being 	
+ *
+ * Amount of money to be spent on investments/CDM each year. 
+ * Need to set overall goal state. Goal changes the year on year range of accepted values for reduction. 
+ * -> Maximise Reduction
+ * -> Maximise Wealth
+ * 
+ * Specific
+ * 
+ * - Calculate what target would be under Kyoto.
+ * 	-> Used then for testing
+ */
 public class USAgent extends AbstractCountry {
 
-	private int yearMod4 = 0;
+	private static final int CampaignTargetIncrease = 5; // democrats campaign to further the reduction target
+															// by a random number up 0 to this. 	
+	private double			AverageGDPRate; // to be stored in an array or DB for furhter analysis. 
+
 	private boolean democratElected; 			// chosen at random on class instantiation
 	private double AbsolutionReductionTarget; 	// Units in metric tonnes C02
 												// Can be positive or negative
@@ -31,22 +52,24 @@ public class USAgent extends AbstractCountry {
 	 * @see uk.ac.ic.kyoto.countries.AbstractCountry#YearlyFunction()
 	 * Called by execute() every year.
 	 */
+<<<<<<< HEAD
 	public void yearlyFunction() {
 		/*
 		 * Function is executed at the end of every year. 
 		 */
 		
 		// Election results are affected by the previous years GDPEate
+=======
+	public void YearlyFunction() {
+		// GDPRate function calculates what the GDPRate was for the previous year.
+		CalculateAverageGDP(); // takes the previously saved AverageGDPRate, adds the just calculated
+		// value and divides by the elapsed number of years.
+		// Election results are affected by the previous years GDPRate
+>>>>>>> group4
 		if(IsElectionYear()) {
 			HoldElection(); // will set democratElected to either true or false
 		}
 		SetEmissionsTarget();
-		if (democratElected) {
-			AbsolutionReductionTarget = carbonOutput*0.95;
-		}
-		else {
-			AbsolutionReductionTarget = carbonOutput;
-		}
 	}
 	
 	@Override
@@ -57,7 +80,23 @@ public class USAgent extends AbstractCountry {
 	 * Notes:
 	 * Carbon offsets are wiped at the beginning of each session. 
 	 */ 
+<<<<<<< HEAD
 	public void sessionFunction() {
+=======
+	public void SessionFunction() {
+/*
+ * Emissions must decrease in absolute terms, rather than just the intensity. 
+ */
+		if(JoiningCriteriaMet()) {
+			KyotoMember.NONANNEXONE;
+		}
+			
+		
+	}
+	
+	boolean JoiningCriteriaMet() {
+		// Calculate what target would be under Kyoto
+>>>>>>> group4
 		if (carbonOutput <= emissionsTarget) {
 			// Consider joining Kyoto here
 		}
@@ -113,19 +152,47 @@ public class USAgent extends AbstractCountry {
 	 */
 	private void HoldElection() {		
 		// Local variables
-		double DemocratCampaignTarget;
-		
+		double  DemocratCampaignTarget;
+		boolean CampaignTargetIsHigh;
 		// Choose democrat next election period target intensity ratio reduction. Remember that
 		// this target will be translated into an absolute metric value, thus higher values result
 		// in a greater reduction. 		
-		DemocratCampaignTarget = this.IntensityReductionTarget + Random.randomInt(5);
+		DemocratCampaignTarget = this.IntensityReductionTarget + Random.randomInt(CampaignTargetIncrease);
 		
-		
-		
+		if(DemocratCampaignTarget > (CampaignTargetIncrease / 2)) {
+			CampaignTargetIsHigh = true;
+		}
+		else {
+			CampaignTargetIsHigh = false;
+		}
+		// How to define what is a 'good' / 'bad' GDPRate for the previous year?
+		// Long term average?
+		// GDPRate += 
 	}
 	
-	private double CalculateTargetRatio(){
+	private void CalculateAverageGDP() {
+	// Previous cumulative GDP changes divided by new total years elapsed. 
+		try {
+			ParticipantTimeService timeService = getEnvironmentService(ParticipantTimeService.class);			
+		} 
+		catch (UnavailableServiceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
+		int YearsElapsed = timeService.getCurrentYear(); // returns years elapsed from year 0
+		
+		if(YearsElapsed==0) {
+			AverageGDPRate = GDPRate; // GDPRates are seeded from historical data. 
+		}
+		else {
+			AverageGDPRate = (AverageGDPRate + GDPRate) / YearsElapsed;
+		}
+	}
+	
+	
+	
+	private double CalculateTargetRatio(){		
 		return 0;
 	}
 	/*

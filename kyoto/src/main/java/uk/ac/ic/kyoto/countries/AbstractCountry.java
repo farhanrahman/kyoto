@@ -566,8 +566,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		
 		if (itype.equals(InvestmentType.ABSORB)) {
 			unitCost = this.carbonAbsorptionHandler.getInvestmentRequired(quantity)/quantity;
-		}
-		else {
+		}else {
 			unitCost = this.carbonReductionHandler.getInvestmentRequired(quantity)/quantity;
 		}
 		
@@ -692,7 +691,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	void setAvailableToSpend(double availableToSpend) {
-			this.availableToSpend = availableToSpend;
+		this.availableToSpend = availableToSpend;
 	}
 	
 	public KyotoMember isKyotoMember() {
@@ -703,9 +702,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return carbonAbsorption;
 	}
 	
-	public void setKyotoMemberLevel(KyotoMember level) {
+	public void setKyotoMemberLevel(KyotoMember level) throws IllegalStateException{
 		if (SimTime.get().intValue() == 0) {
 			kyotoMemberLevel = level;
+		}else{
+			throw new IllegalStateException("Attempted to set kyotoMemberLevel in tick " + SimTime.get().intValue());
 		}
 	}
 }
