@@ -12,6 +12,7 @@ import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
 import uk.ac.imperial.presage2.core.environment.StateTransformer;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 
 /**
@@ -74,6 +75,20 @@ public class CarbonReportingService extends EnvironmentService {
 	 * @return
 	 */
 	public Double getReport(UUID id, Time simTime) {
+		return this.getReport(id, simTime.intValue());
+	}
+	
+	
+	/**
+	 * This function should be used if a service
+	 * wants to get a report from the past. The
+	 * reason for this is that Time cannot be decremented
+	 * which becomes an issue when querying for report.
+	 * @param id
+	 * @param simTime
+	 * @return The report of a participant
+	 */
+	public Double getReport(UUID id, Integer simTime) {
 		try{
 			@SuppressWarnings("unchecked")
 			Map<Integer,Double> reportForParticipant = 
@@ -81,13 +96,13 @@ public class CarbonReportingService extends EnvironmentService {
 											CarbonReportingService.name, 
 											id);
 			if(reportForParticipant == null){
-				return null;
+				throw new NullPointerException("No report for participant " + id);
 			}else{
-				return reportForParticipant.get(simTime.intValue());
+				return reportForParticipant.get(simTime);
 			}
 		}catch(ClassCastException e){
 			logger.warn(e);
-			return null;
+			throw new RuntimeException(e);
 		}
 	}
 	
@@ -105,13 +120,13 @@ public class CarbonReportingService extends EnvironmentService {
 											CarbonReportingService.name, 
 											id);
 			if(reportForParticipant == null){
-				return null;
+				throw new NullPointerException("No report for participant " + id);
 			}else{
-				return reportForParticipant;
+				return ImmutableMap.copyOf(reportForParticipant);
 			}
 		}catch(ClassCastException e){
 			logger.warn(e);
-			return null;
+			throw new RuntimeException(e);
 		}
 	}	
 }

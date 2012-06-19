@@ -5,11 +5,11 @@ import java.util.UUID;
 import java.util.List;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
-import uk.ac.ic.kyoto.countries.NotEnoughCarbonOutputException;
-import uk.ac.ic.kyoto.countries.NotEnoughCashException;
-import uk.ac.ic.kyoto.countries.NotEnoughLandException;
-import uk.ac.ic.kyoto.market.Economy;
-import uk.ac.ic.kyoto.market.FossilPrices;
+import uk.ac.ic.kyoto.exceptions.NotEnoughCarbonOutputException;
+import uk.ac.ic.kyoto.exceptions.NotEnoughCashException;
+import uk.ac.ic.kyoto.exceptions.NotEnoughLandException;
+import uk.ac.ic.kyoto.services.Economy;
+import uk.ac.ic.kyoto.services.FossilPrices;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.event.EventListener;

@@ -4,8 +4,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
-import uk.ac.ic.kyoto.countries.NotEnoughCashException;
-import uk.ac.ic.kyoto.countries.NotEnoughLandException;
+import uk.ac.ic.kyoto.exceptions.NotEnoughCashException;
+import uk.ac.ic.kyoto.exceptions.NotEnoughLandException;
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
 import uk.ac.imperial.presage2.core.messaging.Input;
 

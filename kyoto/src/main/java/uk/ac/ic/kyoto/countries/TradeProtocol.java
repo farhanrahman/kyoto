@@ -7,6 +7,9 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 
 import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
+import uk.ac.ic.kyoto.exceptions.NotEnoughCarbonOutputException;
+import uk.ac.ic.kyoto.exceptions.NotEnoughCashException;
+import uk.ac.ic.kyoto.exceptions.NotEnoughLandException;
 import uk.ac.ic.kyoto.singletonfactory.SingletonProvider;
 import uk.ac.ic.kyoto.tokengen.Token;
 import uk.ac.ic.kyoto.trade.InvestmentType;
@@ -392,9 +395,10 @@ public abstract class TradeProtocol extends FSMProtocol {
 
 		final OfferMessage offerMessage;
 
-		public TradeSpawnEvent(NetworkAddress with, int quantity, double unitCost, TradeType type, InvestmentType itype, OfferMessage offerMessage) {
+		public TradeSpawnEvent(NetworkAddress with, double quantity, double unitCost, TradeType type, InvestmentType itype, OfferMessage offerMessage) {
 			super(with);
-			this.offerMessage = new OfferMessage(new Offer(quantity, unitCost, type, itype), offerMessage.getTradeID(), OfferMessageType.TRADE_PROTOCOL);
+			this.offerMessage = new OfferMessage(new Offer(quantity, unitCost, type, itype), offerMessage.getTradeID(), OfferMessageType.TRADE_PROTOCOL, offerMessage.getBroadCaster());
+			this.offerMessage.setInitiator(TradeProtocol.this.getId());/*Set the initiator id*/
 		}
 
 	}
@@ -412,14 +416,22 @@ public abstract class TradeProtocol extends FSMProtocol {
 		return all;
 	}
 
-	public void offer(NetworkAddress to, int quantity, double unitPrice, OfferMessage offerMessage)
+	public boolean offer(NetworkAddress to, double quantity, double unitPrice, OfferMessage offerMessage)
 			throws FSMException {
+		if(offerMessage.getOfferMessageType().equals(OfferMessageType.BROADCAST_MESSAGE)){
+			/*Start an offer if the message type is BROADCAST_MESSAGE i.e. not part of the 
+			 * message passing in the TradeProtocol states*/
 			this.spawnAsInititor(
 					new TradeSpawnEvent(
 							to, 
 							quantity, unitPrice, 
 							offerMessage.getOfferType(), offerMessage.getOfferInvestmentType(), 
 							offerMessage));
+			return true;
+		}else{
+			/*Else let the participant know that the offer didn't go*/
+			return false;
+		}
 	}
 
 	protected abstract boolean acceptExchange(NetworkAddress from,
@@ -478,7 +490,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 							if (trade.itype.equals(InvestmentType.ABSORB)) {
 								try {
 									participant.carbonAbsorptionHandler.investInCarbonAbsorption(trade.getQuantity());
-								} catch (NotEnoughCarbonOutputException e) {
+								} catch (NotEnoughCashException e) {
 									logger.warn(e);
 									return false; /*Trade must fail*/
 								} catch (NotEnoughLandException e) {

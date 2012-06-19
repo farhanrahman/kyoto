@@ -4,13 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
 import uk.ac.ic.kyoto.actions.AddRemoveFromMonitor;
 import uk.ac.ic.kyoto.actions.AddRemoveFromMonitor.addRemoveType;
 import uk.ac.ic.kyoto.actions.AddToCarbonTarget;
 import uk.ac.ic.kyoto.actions.ApplyMonitorTax;
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
 import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
-import uk.ac.ic.kyoto.market.Economy;
+import uk.ac.ic.kyoto.services.Economy;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.ic.kyoto.trade.InvestmentType;
@@ -22,8 +23,12 @@ import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.messaging.Performative;
 import uk.ac.imperial.presage2.core.network.MulticastMessage;
+import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
+import uk.ac.imperial.presage2.util.fsm.FSMException;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
+
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Class from which all countries are derived
@@ -41,10 +46,15 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	final protected String 		ISO;		//ISO 3166-1 alpha-3
 	
 	/*
-	 *  Simple boolean to check if the country is a member of Kyoto
-	 *  Defaults to true. Rogue states must set this to false in their constructor
+	 *  KyotoMember level variable shows whether country is annex one,
+	 *  non-annex one, or rogue states
 	 */
-	private boolean isKyotoMember=true; 
+	public enum KyotoMember {
+		ROGUE,
+		ANNEXONE,
+		NONANNEXONE
+	}
+	private KyotoMember kyotoMemberLevel; 
 	
 	/*
 	 * These variables are related to land area for
@@ -60,6 +70,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 */
 	double carbonOutput;		// Tons of CO2 produced every year
 	double carbonAbsorption;	// Tons of CO2 absorbed by forests every year
+
 	double carbonOffset; 		// Tons of CO2 that the country acquired (by trading or energy absorption)
 	double emissionsTarget;		// Number of tons of carbon you SHOULD produce
 	
@@ -89,13 +100,14 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	protected CarbonAbsorptionHandler 	carbonAbsorptionHandler;
 	protected EnergyUsageHandler		energyUsageHandler;
 	
-	/*Simulation tick counter to stop sub classes from calling execute more than once*/
-	private Integer simTick = 0;
-	
 	/*Flag for single initialisation of AbstractCountry*/
 	private boolean initialised = false;
 
 	private double prevEnergyOutput; //Keeps track of the previous years EnergyOutput to calculate GDP
+	
+	private DataStore dataStore = new DataStore();
+	
+	private boolean executeLock = false; /*Lock for stopping multiple execution of the execute block*/
 	
 	//================================================================================
     // Constructors and Initializers
@@ -125,86 +137,162 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.carbonAbsorption = 0;
 		this.carbonEmissionReports = new HashMap<Integer, Double>();
 		this.energyOutput = energyOutput;
+		this.prevEnergyOutput = energyOutput;
+		this.kyotoMemberLevel = KyotoMember.ANNEXONE;
 	}
 	
 	@Override
 	final public void initialise(){
 		try{
-			if(this.initialised == false){
-				super.initialise();
-				
-				try {
-					environment.act(new AddToCarbonTarget(this), getID(), authkey);
-				} catch (ActionHandlingException e2) {
-					e2.printStackTrace();
-				}
-				try {
-					if (getIsKyotoMember())
-						environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
-				} catch (ActionHandlingException e2) {
-					e2.printStackTrace();
-				}
-				// Initialize the Action Handlers TODO: DO THEY HAVE TO BE INSTANTIATED ALL THE TIME?
-				try {
-					timeService = getEnvironmentService(ParticipantTimeService.class);
-				} catch (UnavailableServiceException e1) {
-					System.out.println("TimeService doesn't work");
-					e1.printStackTrace();
-				}
-				// Initialize the Action Handlers
-				carbonAbsorptionHandler = new CarbonAbsorptionHandler(this);
-				carbonReductionHandler = new CarbonReductionHandler(this);
-				energyUsageHandler = new EnergyUsageHandler(this);
-				
-				// Connect to the Reporting Service
-				try {
-					this.reportingService = this.getEnvironmentService(ParticipantCarbonReportingService.class);
-				} catch (UnavailableServiceException e) {
-					System.out.println("Unable to reach emission reporting service.");
-					e.printStackTrace();
-				}
+			
+			// Check if the initialised function has already been called.
+			if (this.initialised) {
+				throw new IllegalAccessException("Participant " + this.ISO + " already initialised");
+			} else {
 				this.initialised = true;
-				initialiseCountry();
-			}else{
-				throw new AlreadyInitialisedException();
 			}
-		} catch(AlreadyInitialisedException ex){
-			ex.printStackTrace();
+			
+			super.initialise();
+				
+			environment.act(new AddToCarbonTarget(this), getID(), authkey);
+			
+			if (isKyotoMember() == KyotoMember.ANNEXONE){
+				environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
+			}				
+
+			//TODO: Initialize the Action Handlers (DO THEY HAVE TO BE INSTANTIATED ALL THE TIME?)
+			
+			try {
+				timeService = getEnvironmentService(ParticipantTimeService.class);
+			} catch (UnavailableServiceException e) {
+				System.out.println("Unable to reach time service service.");
+				throw e;
+			}
+			
+			// Initialize the Action Handlers
+			carbonAbsorptionHandler = new CarbonAbsorptionHandler(this);
+			carbonReductionHandler = new CarbonReductionHandler(this);
+			energyUsageHandler = new EnergyUsageHandler(this);
+			
+			// Connect to the Reporting Service
+			try {
+				this.reportingService = this.getEnvironmentService(ParticipantCarbonReportingService.class);
+			} catch (UnavailableServiceException e) {
+				System.out.println("Unable to reach emission reporting service.");
+				throw e;
+			}
+			
+
+			this.tradeProtocol = new TradeProtocol(getID(), this.authkey, environment, network, this) {
+				
+				@Override
+				protected boolean acceptExchange(NetworkAddress from, Offer trade) {
+					return acceptTrade(from, trade);
+				}
+				
+			};
+			
+			initialiseCountry();
+			
+		} catch (FSMException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		} catch (UnavailableServiceException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		} catch (ActionHandlingException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
 		}
+		
 	}
 	
 	@Override
 	final public void execute() {
-//		try{
-//			if(simTick == SimTime.get().intValue()){
+		try{
 				super.execute();
-				if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {		
+				if(!this.isExecuteLocked()){
+					this.acquireExecuteLock(); //acquire the lock
+				}else{
+					throw new IllegalAccessException("Execute function called more than once in one tick. Simulation time: " 
+							+ SimTime.get().intValue()
+							+ ", Participant ID: "
+							+ this.getID()
+							+ ", name: "
+							+ this.getName());
+				}
+				
+				
+				if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {	
 					updateGDPRate();
 					updateGDP();
 					updateAvailableToSpend();
-					if (isKyotoMember) {
+					if (kyotoMemberLevel == KyotoMember.ANNEXONE) {
 						MonitorTax();
 					}
+
 					updateCarbonOffsetYearly();
 					try {
 						reportCarbonOutput();
 					} catch (ActionHandlingException e) {
 						e.printStackTrace();
 					}
+					
 					yearlyFunction();
 				}
 				if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
 					resetCarbonOffset();
 					sessionFunction();
 				}
-				simTick++;
-//			}else{
-//				throw new UnauthorisedExecuteException(SimTime.get().intValue(), this.getID(), this.getName());
-//			}
-			behaviour();
-//		} catch(UnauthorisedExecuteException e){
-//			e.printStackTrace();
-//		}
+	
+			//leave a 10-tick grace period to allow current trades to complete before performing end of year routine
+			if (timeService.getCurrentTick() % timeService.getTicksInYear() < timeService.getTicksInYear() - 10 ) {
+				behaviour();
+			}
+			
+			//assume by this point all trades are complete and it's safe to report
+			else if (timeService.getCurrentTick() % timeService.getTicksInYear() == timeService.getTicksInYear() - 3 ){
+				try {
+					reportCarbonOutput();
+				} catch (ActionHandlingException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			logSimulationData();
+			dumpCurrentTickData();
+			
+			this.releaseExecuteLock();
+			
+		} catch(IllegalAccessException e){
+			logger.warn(e);
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * function to set executeLock to true.
+	 */
+	private synchronized void acquireExecuteLock(){
+		this.executeLock = true;
+	}
+	
+	/**
+	 * void function to set executeLock to false
+	 */
+	private synchronized void releaseExecuteLock(){
+		this.executeLock = false;
+	}
+	
+	/**
+	 * function returns whether the executeLock is
+	 * true or false
+	 * @return the state of the executeLock
+	 */
+	private synchronized boolean isExecuteLocked(){
+		return this.executeLock;
 	}
 	
 	protected void reportCarbonOutput() throws ActionHandlingException {
@@ -238,7 +326,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	public Map<Integer,Double> getCarbonEmissionReports(){
-		return this.carbonEmissionReports;
+		return ImmutableMap.copyOf(this.carbonEmissionReports);
 	}
 	
 	/**
@@ -272,6 +360,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	abstract protected void yearlyFunction();
 	abstract protected void sessionFunction();
 	abstract protected void initialiseCountry();
+	abstract protected boolean acceptTrade(NetworkAddress from, Offer trade);
 	
 	//================================================================================
     // Private methods
@@ -284,29 +373,39 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	private final void updateGDPRate() {
 		double marketStateFactor = 0;
 		double sum;
-		
 		Economy economy;
+		
 		try {
 			economy = getEnvironmentService(Economy.class);
-		
-		switch(economy.getEconomyState()) {
-		case GROWTH:
-			marketStateFactor = GameConst.getGrowthMarketState();
-		case STABLE:
-			marketStateFactor = GameConst.getStableMarketState();
-		case RECESSION:
-			marketStateFactor = GameConst.getRecessionMarketState();
-		}
-		if (energyOutput-prevEnergyOutput >= 0){	
-			sum = (((energyOutput-prevEnergyOutput)/prevEnergyOutput)*GameConst.getEnergyGrowthScaler() *marketStateFactor+GDPRate*100)/2;
-		}
-		else
-		{
-			sum = ((((energyOutput-prevEnergyOutput)/prevEnergyOutput)*GameConst.getEnergyGrowthScaler()));
-		}
-		GDPRate = (GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler()));
-		
-		GDPRate /= 100; // Needs to be a % for rate formula
+			
+			switch (economy.getEconomyState()) {
+			case GROWTH:
+				marketStateFactor = GameConst.getGrowthMarketState();
+				break;
+			case STABLE:
+				marketStateFactor = GameConst.getStableMarketState();
+				break;
+			case RECESSION:
+				marketStateFactor = GameConst.getRecessionMarketState();
+				break;
+			default:
+				marketStateFactor = GameConst.getStableMarketState();
+				break;
+			}
+			
+			if (energyOutput-prevEnergyOutput >= 0){	
+				sum = (((energyOutput-prevEnergyOutput)/prevEnergyOutput)*GameConst.getEnergyGrowthScaler() *marketStateFactor+GDPRate*100)/2;
+			}
+			else{
+				sum = ((energyOutput-prevEnergyOutput)/prevEnergyOutput)*GameConst.getEnergyGrowthScaler();
+			}
+
+			GDPRate = GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler());
+			
+			GDPRate /= 100; // Needs to be a % for rate formula
+			
+			prevEnergyOutput = energyOutput;
+				
 		} catch (UnavailableServiceException e) {
 			System.out.println("Unable to reach economy service.");
 			e.printStackTrace();
@@ -322,7 +421,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	/**
-	 * Calculate available to spend for the next year as an extra 1% of GDP
+	 * Calculate available to spend for the next year as an extra 0.5% of GDP
 	 * If we haven't spent something last year, it will be available this year too
 	 */
 	private final void updateAvailableToSpend() {
@@ -334,16 +433,69 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * @author ct
 	 */
 	private final void updateCarbonOffsetYearly() {
-		if (carbonOffset > 0) {
-			if ((emissionsTarget - carbonOutput + carbonAbsorption)  > carbonOffset)
-				carbonOffset = 0;
-			else
-				carbonOffset += (emissionsTarget - carbonOutput + carbonAbsorption);
+		if (kyotoMemberLevel == KyotoMember.ANNEXONE) {
+			if (emissionsTarget <= carbonOffset +carbonAbsorption +carbonOutput ){
+				if (carbonOffset > 0) {
+					if ((emissionsTarget - carbonOutput + carbonAbsorption)  > carbonOffset)
+						carbonOffset = 0;
+					else
+						carbonOffset += (emissionsTarget - carbonOutput + carbonAbsorption);
+				}
+			}
 		}
 	}
 	
 	private final void resetCarbonOffset() {
 		carbonOffset = 0;
+	}
+	
+	//================================================================================
+    // Log simulation data function
+    //================================================================================
+	/**
+	 * Stores all simulation data into MongoDB
+	 * @author waffles
+	 */
+	private final void logSimulationData() {
+		this.dataStore.addGdp(this.getGDP());
+		this.dataStore.addGdpRate(this.getGDPRate());
+		this.dataStore.addAvailableToSpend(this.getAvailableToSpend());
+		this.dataStore.addEmissionsTarget(this.getEmissionsTarget());
+		this.dataStore.addCarbonOffset(this.getCarbonOffset());
+		this.dataStore.addCarbonOutput(this.getCarbonOutput());
+		this.dataStore.addIsKyotoMember(this.isKyotoMember());	
+			/* TODO
+			 * is cheating?
+			 * carbon reduction - cost, quantity
+			 * carbon absorption - cost, quantity
+			 * energy usage - cost, quantity
+			 */
+	}
+	
+	private final void dumpSimulationData(){
+		
+		this.persist.setProperty(DataStore.gdpKey, this.dataStore.getGdpHistory().toString());
+		this.persist.setProperty(DataStore.gdpRateKey, this.dataStore.getGdpRateHistory().toString());
+		this.persist.setProperty(DataStore.availableToSpendKey, this.dataStore.getAvailableToSpendHistory().toString());
+		this.persist.setProperty(DataStore.emissionTargetKey, this.dataStore.getEmissionsTargetHistory().toString());
+		this.persist.setProperty(DataStore.carbonOffsetKey, this.dataStore.getCarbonOffsetHistory().toString());
+		this.persist.setProperty(DataStore.carbonOutputKey, this.dataStore.getCarbonOutputHistory().toString());
+		this.persist.setProperty(DataStore.isKyotoMemberKey, this.dataStore.getIsKyotoMemberHistory().toString());
+	}
+	
+	private final void dumpCurrentTickData(){
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.gdpKey, Double.toString(this.getGDP()));
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.gdpRateKey, Double.toString(this.getGDPRate()));
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.availableToSpendKey, Double.toString(this.getAvailableToSpend()));
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.emissionTargetKey, Double.toString(this.getEmissionsTarget()));
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.carbonOffsetKey, Double.toString(this.getCarbonOffset()));
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.carbonOutputKey, Double.toString(this.getCarbonOutput()));
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.isKyotoMemberKey, this.isKyotoMember().name());
+	}
+	
+	@Override
+	public void onSimulationComplete(){
+		this.dumpSimulationData();
 	}
 	
 	//================================================================================
@@ -366,93 +518,92 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.carbonOffset += amount;
 	}
 	
-	protected final void broadcastSellOffer(int quantity, double unitCost){
-		if(this.tradeProtocol != null){
-			Offer trade = new Offer(quantity, unitCost, TradeType.SELL);
-			this.network.sendMessage(
-						new MulticastMessage<OfferMessage>(
-								Performative.PROPOSE, 
-								Offer.TRADE_PROPOSAL, 
-								SimTime.get(), 
-								this.network.getAddress(),
-								this.tradeProtocol.getAgentsNotInConversation(),
-								new OfferMessage(
-										trade,
-										this.tradeProtocol.tradeToken.generate(),
-										OfferMessageType.BROADCAST_MESSAGE))
-					);
-		}
+	protected final OfferMessage broadcastSellOffer(int quantity, double unitCost){
+		Offer trade = new Offer(quantity, unitCost, TradeType.SELL);
+		OfferMessage returnObject = new OfferMessage(
+				trade,
+				this.tradeProtocol.tradeToken.generate(),
+				OfferMessageType.BROADCAST_MESSAGE,
+				this.getID());
+		this.network.sendMessage(
+					new MulticastMessage<OfferMessage>(
+							Performative.PROPOSE, 
+							Offer.TRADE_PROPOSAL, 
+							SimTime.get(), 
+							this.network.getAddress(),
+							this.tradeProtocol.getAgentsNotInConversation(),
+							returnObject)
+				);
+			return returnObject;
 	}
 
-	protected final void broadcastBuyOffer(int quantity, double unitCost){
-		if(this.tradeProtocol != null){
-			Offer trade = new Offer(quantity, unitCost, TradeType.BUY);
-			
-			/*DEBUG*/
-//			System.out.println();
-//			System.out.println(this.tradeProtocol.getActiveConversationMembers().toString());
-//			System.out.println(this.network.getConnectedNodes());
-//			System.out.println();
-			/*DEBUG*/
-			
-			this.network.sendMessage(
-						new MulticastMessage<OfferMessage>(
-								Performative.PROPOSE, 
-								Offer.TRADE_PROPOSAL, 
-								SimTime.get(), 
-								this.network.getAddress(),
-								this.tradeProtocol.getAgentsNotInConversation(),
-								new OfferMessage(
-										trade, 
-										this.tradeProtocol.tradeToken.generate(), 
-										OfferMessageType.BROADCAST_MESSAGE))
-					);
-		}
+	protected final OfferMessage broadcastBuyOffer(int quantity, double unitCost){
+		Offer trade = new Offer(quantity, unitCost, TradeType.BUY);
+		
+		/*DEBUG*/
+			System.out.println();
+			System.out.println(this.tradeProtocol.getActiveConversationMembers().toString());
+			System.out.println(this.network.getConnectedNodes());
+			System.out.println();
+		/*DEBUG*/
+		
+		OfferMessage returnObject = new OfferMessage(
+				trade, 
+				this.tradeProtocol.tradeToken.generate(), 
+				OfferMessageType.BROADCAST_MESSAGE,
+				this.getID());
+		
+		this.network.sendMessage(
+					new MulticastMessage<OfferMessage>(
+							Performative.PROPOSE, 
+							Offer.TRADE_PROPOSAL, 
+							SimTime.get(), 
+							this.network.getAddress(),
+							this.tradeProtocol.getAgentsNotInConversation(),
+							returnObject)
+				);
+		
+		return returnObject;
 	}
 	
-	protected final void broadcastInvesteeOffer(int quantity, InvestmentType itype){
-		if(this.tradeProtocol != null){
-			double unitCost;
-			try {
-				if (itype.equals(InvestmentType.ABSORB)) {
-					unitCost = this.carbonAbsorptionHandler.getInvestmentRequired(quantity)/quantity;
-				}
-				else {
-					unitCost = this.carbonReductionHandler.getInvestmentRequired(quantity)/quantity;
-				}
-				
-				Offer trade = new Offer(quantity, unitCost, TradeType.RECEIVE, itype);
-				this.network.sendMessage(
-							new MulticastMessage<OfferMessage>(
-									Performative.PROPOSE, 
-									Offer.TRADE_PROPOSAL, 
-									SimTime.get(), 
-									this.network.getAddress(),
-									this.tradeProtocol.getAgentsNotInConversation(),
-									new OfferMessage(
-											trade,
-											this.tradeProtocol.tradeToken.generate(),
-											OfferMessageType.BROADCAST_MESSAGE))
-						);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+	protected final OfferMessage broadcastInvesteeOffer(double quantity, InvestmentType itype){
+		double unitCost;
+		
+		if (itype.equals(InvestmentType.ABSORB)) {
+			unitCost = this.carbonAbsorptionHandler.getInvestmentRequired(quantity)/quantity;
+		}else {
+			unitCost = this.carbonReductionHandler.getInvestmentRequired(quantity)/quantity;
 		}
+		
+		Offer trade = new Offer(quantity, unitCost, TradeType.RECEIVE, itype);
+		
+		OfferMessage returnObject = new OfferMessage(
+				trade,
+				this.tradeProtocol.tradeToken.generate(),
+				OfferMessageType.BROADCAST_MESSAGE,
+				this.getID());
+		this.network.sendMessage(
+					new MulticastMessage<OfferMessage>(
+							Performative.PROPOSE, 
+							Offer.TRADE_PROPOSAL, 
+							SimTime.get(), 
+							this.network.getAddress(),
+							this.tradeProtocol.getAgentsNotInConversation(),
+							returnObject)
+				);
+			
+			return returnObject;
 	}
 	
 	//================================================================================
     // Kyoto membership functions
     //================================================================================
 	
-	public boolean isKyotoMember() {
-		return isKyotoMember;
-	}
-	
 	private int leaveTime=0, joinTime=0;
 	
 	protected final void leaveKyoto() throws IllegalStateException {
 		if (timeService.getCurrentTick() == 0) {
-			isKyotoMember = false;
+			kyotoMemberLevel = KyotoMember.ROGUE;
 			
 			try {
 				environment.act(new AddRemoveFromMonitor(this, addRemoveType.REMOVE), getID(), authkey);
@@ -460,10 +611,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				System.out.println("Exception wilst removing from monitor: " + e);
 				e.printStackTrace();
 			}
-			return;
 		}
 		else if (timeService.getCurrentTick() - joinTime >= timeService.getTicksInYear()*GameConst.getMinimumKyotoMembershipDuration()) {
-			isKyotoMember=false;
+			kyotoMemberLevel = KyotoMember.ROGUE;
 			leaveTime=timeService.getCurrentTick();
 			
 			try {
@@ -472,14 +622,14 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				System.out.println("Exception wilst removing from monitor: " + e);
 				e.printStackTrace();
 			}
-			return;
+		} else {
+			throw new IllegalStateException("Cannot leave Kyoto Protocol.");
 		}
-		throw new IllegalStateException("Cannot leave Kyoto Protocol.");
 	}
 	
 	protected final void joinKyoto() throws IllegalStateException {
 		if (timeService.getCurrentTick() - leaveTime >= timeService.getTicksInYear()*GameConst.getMinimumKyotoRejoinTime()) {
-			isKyotoMember=true;
+			kyotoMemberLevel = KyotoMember.ANNEXONE;
 			joinTime = timeService.getCurrentTick();
 			
 			try {
@@ -488,9 +638,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				System.out.println("Exception whilst adding to monitor: " + e);
 				e.printStackTrace();
 			}
-			return;
+		} else {
+			throw new IllegalStateException("Cannot join Kyoto Protocol.");
 		}
-		throw new IllegalStateException("Cannot join Kyoto Protocol.");
 	}
 	
 	//================================================================================
@@ -528,6 +678,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	public double getEnergyOutput(){
 		return energyOutput;
 	}
+	
+	public double getPrevEnergyOut(){
+		return prevEnergyOutput;
+	}
+	
 	public double getCarbonOutput(){
 		return carbonOutput;
 	}
@@ -545,10 +700,22 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	void setAvailableToSpend(double availableToSpend) {
-			this.availableToSpend = availableToSpend;
+		this.availableToSpend = availableToSpend;
 	}
 	
-	public boolean getIsKyotoMember() {
-		return this.isKyotoMember;
+	public KyotoMember isKyotoMember() {
+		return kyotoMemberLevel;
+	}
+	
+	public double getCarbonAbsorption() {
+		return carbonAbsorption;
+	}
+	
+	public void setKyotoMemberLevel(KyotoMember level) throws IllegalStateException{
+		if (SimTime.get().intValue() == 0) {
+			kyotoMemberLevel = level;
+		}else{
+			throw new IllegalStateException("Attempted to set kyotoMemberLevel in tick " + SimTime.get().intValue());
+		}
 	}
 }

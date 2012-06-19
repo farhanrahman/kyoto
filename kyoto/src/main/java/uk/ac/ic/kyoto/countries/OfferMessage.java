@@ -19,6 +19,9 @@ import uk.ac.ic.kyoto.trade.TradeType;
 public class OfferMessage {
 	private final Offer offer;
 	private final UUID tradeID;
+	
+	private final UUID broadCaster;
+	private UUID initiator;
 
 	enum OfferMessageType{
 		TRADE_PROTOCOL,
@@ -26,17 +29,7 @@ public class OfferMessage {
 	};
 
 	private final OfferMessageType offerMessageType;
-	/**
-	 * Constructor when OfferMessage is sent
-	 * as a MultiCast message. No conversation
-	 * has been started so tradeID is null
-	 * @param offer
-	 */
-	public OfferMessage(Offer offer, OfferMessageType offerMessageType){
-		this.offer = offer;
-		this.tradeID = null;
-		this.offerMessageType = offerMessageType;
-	}
+	
 
 	/**
 	 * Constructor when OfferMessage is instantiated
@@ -45,10 +38,12 @@ public class OfferMessage {
 	 * @param offer
 	 * @param id
 	 */
-	public OfferMessage(Offer offer, UUID id, OfferMessageType offerMessageType){
+	public OfferMessage(Offer offer, UUID id, OfferMessageType offerMessageType, UUID broadCaster){
 		this.offer = offer;
 		this.tradeID = id;
 		this.offerMessageType = offerMessageType;
+		this.broadCaster = broadCaster;
+		this.initiator = null;
 	}
 	
 	/**
@@ -71,7 +66,7 @@ public class OfferMessage {
 	 * 
 	 * @return
 	 */
-	public Integer getOfferQuantity(){
+	public Double getOfferQuantity(){
 		return this.offer.getQuantity();
 	}
 
@@ -97,6 +92,24 @@ public class OfferMessage {
 	 */
 	public OfferMessageType getOfferMessageType() {
 		return offerMessageType;
+	}
+
+	public UUID getBroadCaster() {
+		return broadCaster;
+	}
+
+	/**
+	 * @return the initiator
+	 */
+	public UUID getInitiator() {
+		return initiator;
+	}
+
+	/**
+	 * @param initiator the initiator to set
+	 */
+	void setInitiator(UUID initiator) {
+		this.initiator = initiator;
 	}
 
 }

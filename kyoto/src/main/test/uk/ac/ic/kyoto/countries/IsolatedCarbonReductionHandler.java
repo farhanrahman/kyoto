@@ -1,5 +1,8 @@
 package uk.ac.ic.kyoto.countries;
 
+import uk.ac.ic.kyoto.exceptions.NotEnoughCarbonOutputException;
+import uk.ac.ic.kyoto.exceptions.NotEnoughCashException;
+
 /**
  * 
  * @author Piotr, Nikunj
@@ -27,7 +30,7 @@ public final class IsolatedCarbonReductionHandler{
 	 * @return
 	 * Cost of reducing carbon by the specified amount.
 	 */
-	public final double getInvestmentRequired(double carbonOutputChange) throws Exception {
+	public final double getInvestmentRequired(double carbonOutputChange) {
 		return getInvestmentRequired(carbonOutputChange, country.carbonOutput, country.energyOutput);
 	}
 	
@@ -47,10 +50,9 @@ public final class IsolatedCarbonReductionHandler{
 	 * @return
 	 * Cost of reducing carbon by the specified amount.
 	 */
-	public final double getInvestmentRequired(double carbonOutputChange, double carbonOutput, double energyOutput) throws Exception {
+	public final double getInvestmentRequired(double carbonOutputChange, double carbonOutput, double energyOutput) {
 		double investmentRequired;
 		
-		try {			
 			// Calculate the clean industry measure after and before investment
 			double cleanIndustryBefore = calculateCleanIndustryMeasure(carbonOutput, energyOutput);
 			double cleanIndustryAfter = calculateCleanIndustryMeasure((carbonOutput - carbonOutputChange), energyOutput);
@@ -63,10 +65,6 @@ public final class IsolatedCarbonReductionHandler{
 			
 			// Calculate the investment that is required
 			investmentRequired = (averageUnitPrice * carbonOutputChange);
-		}
-		catch (Exception e) {
-			throw new Exception("getInvestmentRequired function error: " + e.getMessage());
-		}
 		
 		return investmentRequired;
 	}
@@ -80,7 +78,7 @@ public final class IsolatedCarbonReductionHandler{
 	 * @return
 	 * Change in carbon output from specified cost.
 	 */
-	public final double getCarbonOutputChange(double investmentAmount) throws Exception {
+	public final double getCarbonOutputChange(double investmentAmount) {
 		return getCarbonOutputChange(investmentAmount, country.carbonOutput, country.energyOutput);
 	}
 	
@@ -101,32 +99,27 @@ public final class IsolatedCarbonReductionHandler{
 	 * @return
 	 * Change in carbon output achieved with specified investment.
 	 */
-	public final double getCarbonOutputChange(double investmentAmount, double carbonOutput, double energyOutput) throws Exception {
+	public final double getCarbonOutputChange(double investmentAmount, double carbonOutput, double energyOutput) {
 		double carbonOutputChange;
 
-		try {
-			double carbonDiff = carbonOutput / 2;
+		double carbonDiff = carbonOutput / 2;
+		
+		carbonOutputChange = carbonDiff;
+		
+		double tempInvestmentAmount = getInvestmentRequired(carbonOutputChange, carbonOutput, energyOutput);
+		
+		for (int i = 0; i < 30; i++) {
+			carbonDiff /= 2;
 			
-			carbonOutputChange = carbonDiff;
-			
-			double tempInvestmentAmount = getInvestmentRequired(carbonOutputChange, carbonOutput, energyOutput);
-			
-			for (int i = 0; i < 20; i++) {
-				carbonDiff /= 2;
-				
-				// If value is higher, lower our estimate, else increase it
-				if (tempInvestmentAmount < investmentAmount) {
-					carbonOutputChange += carbonDiff;
-					tempInvestmentAmount = getInvestmentRequired(carbonOutputChange,carbonOutput,energyOutput);
-				}
-				else if (tempInvestmentAmount > investmentAmount) {
-					carbonOutputChange -= carbonDiff;
-					tempInvestmentAmount = getInvestmentRequired(carbonOutputChange,carbonOutput,energyOutput);
-				}
+			// If value is higher, lower our estimate, else increase it
+			if (tempInvestmentAmount < investmentAmount) {
+				carbonOutputChange += carbonDiff;
+				tempInvestmentAmount = getInvestmentRequired(carbonOutputChange,carbonOutput,energyOutput);
 			}
-		}
-		catch (Exception e) {
-			throw new Exception("getCarbonOutputChange function error: " + e.getMessage());
+			else if (tempInvestmentAmount > investmentAmount) {
+				carbonOutputChange -= carbonDiff;
+				tempInvestmentAmount = getInvestmentRequired(carbonOutputChange,carbonOutput,energyOutput);
+			}
 		}
 		
 		return carbonOutputChange;
@@ -140,7 +133,7 @@ public final class IsolatedCarbonReductionHandler{
 	 * @param carbonOutputChange
 	 * Decrease in carbon output.
 	 */
-	public final void investInCarbonReduction(double carbonOutputChange) throws Exception, NotEnoughCarbonOutputException, NotEnoughCashException {
+	public final void investInCarbonReduction(double carbonOutputChange) throws NotEnoughCarbonOutputException, NotEnoughCashException {
 		double investmentAmount;
 		
 		try {
@@ -167,9 +160,6 @@ public final class IsolatedCarbonReductionHandler{
 		catch (NotEnoughCashException e) {
 			throw e;
 		}
-		catch (Exception e) {
-			throw new Exception("investInCarbonReduction function error: " + e.getMessage());
-		}
 	}
 	
 	/**
@@ -184,14 +174,14 @@ public final class IsolatedCarbonReductionHandler{
 	 * @return
 	 * Measure of clean industry of the country.
 	 */
-	private double calculateCleanIndustryMeasure(double carbonOutput, double energyOutput) throws Exception {
+	private double calculateCleanIndustryMeasure(double carbonOutput, double energyOutput){
 		double cleanIndustry;
 		
 		if (carbonOutput <= energyOutput) {
 			cleanIndustry = (1 - (carbonOutput / energyOutput));
 		}
 		else {
-			throw new Exception("calculateCleanIndustryMeasure function error: carbonOutput is greater than energyOutput");
+			throw new RuntimeException("calculateCleanIndustryMeasure function error: carbonOutput is greater than energyOutput");
 		}
 		
 		return cleanIndustry;

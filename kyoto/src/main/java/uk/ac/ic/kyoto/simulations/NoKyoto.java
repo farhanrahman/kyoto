@@ -11,8 +11,8 @@ import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReportHandler;
 import uk.ac.ic.kyoto.countries.CarbonTarget;
 import uk.ac.ic.kyoto.countries.Monitor;
 import uk.ac.ic.kyoto.countries.testCountries.DoNothing;
-import uk.ac.ic.kyoto.market.Economy;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
+import uk.ac.ic.kyoto.services.Economy;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
@@ -77,9 +77,9 @@ public class NoKyoto extends InjectedSimulation {
 		final double carbonOutput = 70000;
 		final double GDPRate = 0.03;
 		
-		for(; countries >= 0; countries--){
-			String name = "Country"+countries;
-			String ISO = "DN"+countries;
+		for(int i = 0; i < countries; i++){
+			String name = "Country"+i;
+			String ISO = "DN"+i;
 			AbstractParticipant p = new DoNothing(Random.randomUUID(), name, ISO, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput);
 			s.addParticipant(p);
 			CarbonData1990.addCountry(ISO, energyOutput);

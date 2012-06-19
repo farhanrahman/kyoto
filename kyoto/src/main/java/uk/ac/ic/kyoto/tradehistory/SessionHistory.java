@@ -2,6 +2,7 @@ package uk.ac.ic.kyoto.tradehistory;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import uk.ac.ic.kyoto.countries.Offer;
@@ -88,6 +89,11 @@ public class SessionHistory {
 		result = 4 * result + this.session.hashCode();
 		
 		return result;
+	}
+	
+	@Override
+	public String toString() {
+		return "SessionHistory with sessionId " + sessionId + " storing " + session.size() + " ticks";
 	}
 	
 }

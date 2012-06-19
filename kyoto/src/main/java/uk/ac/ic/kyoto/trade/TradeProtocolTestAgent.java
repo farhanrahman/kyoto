@@ -74,21 +74,6 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 
 	@Override
 	protected void initialiseCountry() {
-		try {
-			tradeProtocol = new TradeProtocol(getID(), authkey, environment, network, this) {
-				@Override
-				protected boolean acceptExchange(NetworkAddress from,
-						Offer trade) {
-					return true;
-					/*if (carbonOutput - emissionsTarget + carbonOffset < 0) {
-						return true;
-					}
-					return true;*/
-				}
-			};
-		} catch (FSMException e) {
-			e.printStackTrace();
-		}
 		
 	}
 	
@@ -96,6 +81,7 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 
 	@Override
 	protected void behaviour() {
+		super.execute();
 		if(this.getName().equals("Stuart")){
 			//if(counter == 0){
 				int quantity = 10;
@@ -118,6 +104,12 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 		//logger.info("Myname: " + this.getName() + ", My carbon output is : " + carbonOutput);
 		//logger.info("Myname: " + this.getName() + ", My energy output is : " + energyOutput);
 		logger.info("Myname: " + this.getName() + ", My carbonOffset is : " + this.getCarbonOffset());
+	}
+
+	@Override
+	protected boolean acceptTrade(NetworkAddress from, Offer trade) {
+		// TODO Auto-generated method stub
+		return true;
 	}
 	
 }

@@ -5,9 +5,12 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
+
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfYearCycle;
+import uk.ac.ic.kyoto.services.GlobalTimeService.TimeToMonitor;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentServiceProvider;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
@@ -26,6 +29,8 @@ import com.google.inject.Inject;
  */
 @ServiceDependencies({CarbonReportingService.class})
 public class Monitor extends EnvironmentService {
+	
+	/*static Semaphore offsetAccess = new Semaphore(1);*/
 	
 	/* The amount that the Monitor can spend on monitoring in a current year */
 	private double cash = 0;
@@ -72,20 +77,18 @@ public class Monitor extends EnvironmentService {
 	}
 	
 	@EventListener
-	public void yearlyFunction(EndOfYearCycle e) {
-		if (timeService.getCurrentYear() != 0) {
-			checkReports();
-			monitorCountries();
-		}
+	public void yearlyFunction(TimeToMonitor e) {
+		checkReports();
+		monitorCountries();
 	}
 	
 	private void checkReports () {
 		for (AbstractCountry country : memberStates.values()) {
-			double reportedEmission = carbonReportingService.getReport(country.getID(), SimTime.get());
-			double emissionTarget = carbonTargetingService.queryYearTarget(country.getID(), (timeService.getCurrentYear() - 1));
+			double reportedEmission = carbonReportingService.getReport(country.getID(), SimTime.get().intValue()-1);
+			double emissionTarget = carbonTargetingService.queryYearTarget(country.getID(), (timeService.getCurrentYear()));
 
 			if (Math.round(reportedEmission) > Math.round(emissionTarget)) {
-				targetSanction(country, emissionTarget - reportedEmission);
+				targetSanction(country,  reportedEmission - emissionTarget);
 			}
 		}
 	}
@@ -93,20 +96,20 @@ public class Monitor extends EnvironmentService {
 	
 	@SuppressWarnings("unused")
 	@EventListener
-	private void initialize(EndOfTimeCycle E) {
+	public void initialize(EndOfTimeCycle e) {
 		if (SimTime.get().intValue() == 1) {
 			try {
 				this.timeService = provider.getEnvironmentService(GlobalTimeService.class);
-			} catch (UnavailableServiceException e) {
+			} catch (UnavailableServiceException i) {
 				System.out.println("Unable to get environment service 'TimeService'.");
-				e.printStackTrace();
+				i.printStackTrace();
 			}
 			
 			// Register for the carbon reporting service
 			try {
 				this.carbonReportingService = provider.getEnvironmentService(CarbonReportingService.class);
-			} catch (UnavailableServiceException e) {
-				e.printStackTrace();
+			} catch (UnavailableServiceException i) {
+				i.printStackTrace();
 			}
 			if (this.carbonReportingService == null) {
 				System.err.println("PROBLEM");
@@ -115,8 +118,8 @@ public class Monitor extends EnvironmentService {
 			// Register for the carbon emissions targeting service
 			try {
 				this.carbonTargetingService = provider.getEnvironmentService(CarbonTarget.class);
-			} catch (UnavailableServiceException e) {
-				e.printStackTrace();
+			} catch (UnavailableServiceException i) {
+				i.printStackTrace();
 			}
 			if (this.carbonTargetingService == null) {
 				System.err.println("PROBLEM");
@@ -125,7 +128,7 @@ public class Monitor extends EnvironmentService {
 	}
 	
 	// TODO add logging
-	private void monitorCountries () {
+	private void monitorCountries () {	
 		ArrayList<UUID> cheaters = new ArrayList<UUID>();
 
 		// Find how many countries can be monitored with the available cash
@@ -197,6 +200,8 @@ public class Monitor extends EnvironmentService {
 		
 		int sinCount;
 		
+		System.out.println("SANCTIONING: " + sanctionee.getName());
+		
 		// Update the list of countries that have cheated
 		if (sinBin.containsKey(sanctionee)) {
 			sinCount = sinBin.get(sanctionee) + 1;
@@ -217,11 +222,11 @@ public class Monitor extends EnvironmentService {
 	 * The country to be sanctioned
 	 */
 	public void targetSanction(AbstractCountry country, double carbonExcess) {
-		double penalty = carbonExcess * 1.3;
+		double penalty = carbonExcess * GameConst.getPenaltyCoef();
 		carbonTargetingService.addCountryPenalty(country.getID(), penalty);
 		
-		// Charge the country for not meeting the target
-		country.setAvailableToSpend(Math.round((country.getAvailableToSpend() - carbonExcess * GameConst.getSanctionRate())));
+		// Charge the country for not meeting the target - financial penalties aren't applied by kyoto
+		//country.setAvailableToSpend(Math.round((country.getAvailableToSpend() - carbonExcess * GameConst.getSanctionRate())));
 		
 	}
 	
