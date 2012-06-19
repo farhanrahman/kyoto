@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 
 import uk.ac.ic.kyoto.CarbonData1990;
@@ -38,7 +39,7 @@ public class CarbonTarget extends EnvironmentService {
 		public double lastSessionTarget = 0;
 		public double currentSessionTarget = 0;
 		
-		public Map<Integer, Double> yearTargets = new HashMap<Integer, Double>();
+		public Map<Integer, Double> yearTargets = new ConcurrentHashMap<Integer, Double>();
 		
 		public double proportion = 0;
 		public double penalty = 0;

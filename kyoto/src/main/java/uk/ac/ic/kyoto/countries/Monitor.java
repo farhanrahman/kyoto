@@ -7,6 +7,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 
+import org.apache.log4j.Logger;
+
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfYearCycle;
@@ -40,7 +42,7 @@ public class Monitor extends EnvironmentService {
 
 	/* Structure that counts the number of times the country cheated */
 	private Map<AbstractCountry, Integer> sinBin;
-
+	
 	EventBus eb;
 	
 	private EnvironmentServiceProvider provider;
@@ -84,11 +86,18 @@ public class Monitor extends EnvironmentService {
 	
 	private void checkReports () {
 		for (AbstractCountry country : memberStates.values()) {
-			double reportedEmission = carbonReportingService.getReport(country.getID(), SimTime.get().intValue()-1);
-			double emissionTarget = carbonTargetingService.queryYearTarget(country.getID(), (timeService.getCurrentYear()));
-
-			if (Math.round(reportedEmission) > Math.round(emissionTarget)) {
-				targetSanction(country,  reportedEmission - emissionTarget);
+			if(country instanceof AbstractCountry){
+				double reportedEmission = carbonReportingService.getReport(country.getID(), SimTime.get().intValue()-1);
+				System.out.println("Current Year: " + timeService.getCurrentYear());
+				System.out.println("This Country ID: " + country.getID());
+				System.out.println("carbotTargetingService: " + carbonTargetingService.toString());
+				double emissionTarget = carbonTargetingService.queryYearTarget(country.getID(), (timeService.getCurrentYear()));
+	
+				if (Math.round(reportedEmission) > Math.round(emissionTarget)) {
+					targetSanction(country,  reportedEmission - emissionTarget);
+				}
+			} else {
+				throw new RuntimeException("this country is not an instance of AbstractCountry");
 			}
 		}
 	}
@@ -133,14 +142,13 @@ public class Monitor extends EnvironmentService {
 
 		// Find how many countries can be monitored with the available cash
 		int noToMonitor = (int) Math.floor(cash / GameConst.getMonitoringPrice());
-		// Check if all the countries can be monitored
+		// Check if all the countries can be monitored 
 		if (noToMonitor >= memberStates.size()) {
 			// monitor all the countries
 			
 			for (AbstractCountry country: memberStates.values()) {
 				double realCarbonOutput = country.getCarbonOutput();
 				cash -= GameConst.getMonitoringPrice();
-				System.out.println("FUUUUUUCK!!!!!" + SimTime.get().intValue());
 				double reportedCarbonOutput = carbonReportingService.getReport(country.getID(), SimTime.get().intValue() - 1);
 				if (Math.round(realCarbonOutput) != Math.round(reportedCarbonOutput)) {
 					cheaters.add(country.getID());
