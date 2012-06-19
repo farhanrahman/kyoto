@@ -101,7 +101,7 @@ public final class EnergyUsageHandler {
 		double growth;
 		try {
 			growth = calculateCarbonIndustryGrowth(investment);
-			if (investment < country.availableToSpend) {
+			if (investment <= country.availableToSpend) {
 				country.carbonOutput += growth;
 				country.energyOutput += growth;
 				country.availableToSpend -= investment;
