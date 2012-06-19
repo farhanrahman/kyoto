@@ -24,6 +24,7 @@ public class GDPTestCount extends AbstractCountry {
 		double GDP = getGDP();
 		try {
 			System.out.println("Investment of 100000: " + energyUsageHandler.calculateCarbonIndustryGrowth(100000));
+			energyUsageHandler.investInCarbonIndustry(100000);
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -34,12 +35,15 @@ public class GDPTestCount extends AbstractCountry {
 		double sum = (((getEnergyOutput()-getPrevEnergyOut())/getPrevEnergyOut())*GameConst.getEnergyGrowthScaler() +getGDPRate()*100)/2;
 		GDPRate = GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler());
 		
+		GDPRate /= 100;
+		double prevGDP = GDP;
 		GDP += GDP*GDPRate;
-		double cash = GDP*GameConst.getPercentageOfGdp();
+		double cash = GDP*GameConst.getPercentageOfGdp()-prevGDP*GameConst.getPercentageOfGdp();
 		
+		logger.debug("Previous GDP: " + getGDP());
 		logger.debug("Current GDP: " + GDP);
 		logger.debug("Current Return Cash: " + cash);
-		logger.debug("Current GDP Rate: " + GDPRate);
+		logger.debug("Current GDP Rate: " + GDPRate*100);
 		
 		
 		logger.debug("Current Energy Output: " + this.getEnergyOutput());
