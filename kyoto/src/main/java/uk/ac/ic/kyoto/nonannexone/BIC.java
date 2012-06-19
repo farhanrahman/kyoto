@@ -29,6 +29,7 @@ public class BIC extends AbstractCountry {
 	boolean aim_success = false; // variable that controls whether the energy aim was met or not
 	int ticks_in_a_year; //how many ticks are in a year
 	int current_tick; //tick currently operating
+	int current_year; //year currently operating
 	//............................................................................................ 
 	
 	public BIC(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
@@ -98,8 +99,7 @@ public class BIC extends AbstractCountry {
 /******************************************************************************************/
 	
 	protected void behaviour() {
-		
-		
+			
 		try {
 			economy();
 		} catch (IllegalArgumentException e) {
@@ -286,11 +286,8 @@ public class BIC extends AbstractCountry {
 		
 		private void update_energy_aim(double previous_aim,boolean success,int counter)
 		{
-			ticks_in_a_year = timeService.getTicksInYear();
-			current_tick = timeService.getCurrentTick();
-			System.out.println("Time report:");
-			System.out.println("Current tick: " + current_tick + "  Ticks in a year: " + ticks_in_a_year + ".");
-			
+				current_tick = timeService.getCurrentTick();
+				
 			if (success)
 			{ // country met goal, change goal
 				if (current_tick < 345) //steady increase every tick
@@ -300,15 +297,14 @@ public class BIC extends AbstractCountry {
 				}
 				if (current_tick == 345)
 				{
-				ticks_in_a_year = timeService.getTicksInYear();
-				current_tick = timeService.getCurrentTick();
-				System.out.println("Time report:");
-				System.out.println("Current tick: " + current_tick + "  Ticks in a year: " + ticks_in_a_year + ".");
+				
 				times_aim_met = 0; //reset counter
+				
 				}
 				if (current_tick > 345)
 				{
-					
+					if (current_tick == 365)
+						current_tick=0;
 					switch (counter)
 					{
 					case 0:
@@ -419,8 +415,8 @@ broadcastInvesteeOffer(change_required,InvestmentType.REDUCE);
 		
 		}
 
+/*******************************************************************************************************/
 
-		
 		
 }		
 		
