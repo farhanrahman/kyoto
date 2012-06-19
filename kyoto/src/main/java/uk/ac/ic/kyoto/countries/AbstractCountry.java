@@ -280,6 +280,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	protected void reportCarbonOutput() throws ActionHandlingException {
+		logger.info("Reporting bullshit");
 		environment.act(new SubmitCarbonEmissionReport(carbonOutput), getID(), authkey);
 	}
 	

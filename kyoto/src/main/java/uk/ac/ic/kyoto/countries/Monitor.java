@@ -140,7 +140,8 @@ public class Monitor extends EnvironmentService {
 			for (AbstractCountry country: memberStates.values()) {
 				double realCarbonOutput = country.getCarbonOutput();
 				cash -= GameConst.getMonitoringPrice();
-				double reportedCarbonOutput = carbonReportingService.getReport(country.getID(), SimTime.get());
+				System.out.println("FUUUUUUCK!!!!!" + SimTime.get().intValue());
+				double reportedCarbonOutput = carbonReportingService.getReport(country.getID(), SimTime.get().intValue() - 1);
 				if (Math.round(realCarbonOutput) != Math.round(reportedCarbonOutput)) {
 					cheaters.add(country.getID());
 					cheatSanction(country);
