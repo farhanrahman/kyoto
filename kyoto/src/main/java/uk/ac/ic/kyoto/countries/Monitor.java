@@ -222,7 +222,7 @@ public class Monitor extends EnvironmentService {
 	 * The country to be sanctioned
 	 */
 	public void targetSanction(AbstractCountry country, double carbonExcess) {
-		double penalty = carbonExcess * 1.3;
+		double penalty = carbonExcess * GameConst.getPenaltyCoef();
 		carbonTargetingService.addCountryPenalty(country.getID(), penalty);
 		
 		// Charge the country for not meeting the target - financial penalties aren't applied by kyoto
