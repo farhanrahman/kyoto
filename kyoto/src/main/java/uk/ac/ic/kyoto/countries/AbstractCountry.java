@@ -143,6 +143,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	final public void initialise(){
 		try{
 			
+			// Check if the initialised function has already been called.
 			if (this.initialised) {
 				throw new AlreadyInitialisedException();
 			} else {
@@ -545,40 +546,38 @@ public abstract class AbstractCountry extends AbstractParticipant {
 							this.tradeProtocol.getAgentsNotInConversation(),
 							returnObject)
 				);
-			return returnObject;
+		
+		return returnObject;
 	}
 	
 	protected final OfferMessage broadcastInvesteeOffer(double quantity, InvestmentType itype){
 		double unitCost;
-		try {
-			if (itype.equals(InvestmentType.ABSORB)) {
-				unitCost = this.carbonAbsorptionHandler.getInvestmentRequired(quantity)/quantity;
-			}
-			else {
-				unitCost = this.carbonReductionHandler.getInvestmentRequired(quantity)/quantity;
-			}
-			
-			Offer trade = new Offer(quantity, unitCost, TradeType.RECEIVE, itype);
-			
-			OfferMessage returnObject = new OfferMessage(
-					trade,
-					this.tradeProtocol.tradeToken.generate(),
-					OfferMessageType.BROADCAST_MESSAGE,
-					this.getID());
-			this.network.sendMessage(
-						new MulticastMessage<OfferMessage>(
-								Performative.PROPOSE, 
-								Offer.TRADE_PROPOSAL, 
-								SimTime.get(), 
-								this.network.getAddress(),
-								this.tradeProtocol.getAgentsNotInConversation(),
-								returnObject)
-					);
-			return returnObject;
-		} catch (Exception e) {
-			e.printStackTrace();
+		
+		if (itype.equals(InvestmentType.ABSORB)) {
+			unitCost = this.carbonAbsorptionHandler.getInvestmentRequired(quantity)/quantity;
 		}
-		return null;
+		else {
+			unitCost = this.carbonReductionHandler.getInvestmentRequired(quantity)/quantity;
+		}
+		
+		Offer trade = new Offer(quantity, unitCost, TradeType.RECEIVE, itype);
+		
+		OfferMessage returnObject = new OfferMessage(
+				trade,
+				this.tradeProtocol.tradeToken.generate(),
+				OfferMessageType.BROADCAST_MESSAGE,
+				this.getID());
+		this.network.sendMessage(
+					new MulticastMessage<OfferMessage>(
+							Performative.PROPOSE, 
+							Offer.TRADE_PROPOSAL, 
+							SimTime.get(), 
+							this.network.getAddress(),
+							this.tradeProtocol.getAgentsNotInConversation(),
+							returnObject)
+				);
+			
+			return returnObject;
 	}
 	
 	//================================================================================
