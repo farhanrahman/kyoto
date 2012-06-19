@@ -9,6 +9,8 @@ import java.util.TreeMap;
 import uk.ac.ic.kyoto.countries.AbstractCountry.KyotoMember;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
 
+import com.google.common.collect.ImmutableMap;
+
 /**
  * @author farhanrahman
  *
@@ -106,7 +108,7 @@ public class DataStore {
 	 * @return map of gdp history
 	 */
 	public Map<Integer, String> getGdpHistory() {
-		return gdpHistory;
+		return ImmutableMap.copyOf(gdpHistory);
 	}
 
 	/**
@@ -114,7 +116,7 @@ public class DataStore {
 	 * @return map of gdp rate history
 	 */
 	public Map<Integer, String> getGdpRateHistory() {
-		return gdpRateHistory;
+		return ImmutableMap.copyOf(gdpRateHistory);
 	}
 
 	/**
@@ -122,7 +124,7 @@ public class DataStore {
 	 * @return map of available to spend history
 	 */
 	public Map<Integer, String> getAvailableToSpendHistory() {
-		return availableToSpendHistory;
+		return ImmutableMap.copyOf(availableToSpendHistory);
 	}
 
 	/**
@@ -130,7 +132,7 @@ public class DataStore {
 	 * @return a map of emissions target history
 	 */
 	public Map<Integer, String> getEmissionsTargetHistory() {
-		return emissionsTargetHistory;
+		return ImmutableMap.copyOf(emissionsTargetHistory);
 	}
 
 	/**
@@ -138,7 +140,7 @@ public class DataStore {
 	 * @return a map of carbon offset history
 	 */
 	public Map<Integer, String> getCarbonOffsetHistory() {
-		return carbonOffsetHistory;
+		return ImmutableMap.copyOf(carbonOffsetHistory);
 	}
 
 	/**
@@ -146,7 +148,7 @@ public class DataStore {
 	 * @return a map of carbon output history
 	 */
 	public Map<Integer, String> getCarbonOutputHistory() {
-		return carbonOutputHistory;
+		return ImmutableMap.copyOf(carbonOutputHistory);
 	}
 
 	/**
@@ -154,7 +156,7 @@ public class DataStore {
 	 * @return a map of energy output history
 	 */
 	public Map<Integer, String> getEnergyOutputHistory() {
-		return energyOutputHistory;
+		return ImmutableMap.copyOf(energyOutputHistory);
 	}
 
 	/**
@@ -162,7 +164,7 @@ public class DataStore {
 	 * @return returns a map of kyoto member state history
 	 */
 	public Map<Integer, String> getIsKyotoMemberHistory() {
-		return isKyotoMemberHistory;
+		return ImmutableMap.copyOf(isKyotoMemberHistory);
 	}
 
 }
