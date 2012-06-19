@@ -69,7 +69,7 @@ public class AverageCountry extends InjectedSimulation {
 	public AverageCountry(Set<AbstractModule> modules) {
 		super(modules);
 	}
-	
+
 	@Override
 	protected void addToScenario(Scenario s) {
 		
