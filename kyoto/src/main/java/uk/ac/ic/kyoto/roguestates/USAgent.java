@@ -6,7 +6,25 @@ import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.util.random.Random;
 import uk.ac.ic.kyoto.countries.AbstractCountry;
-
+/*
+ * ToDo
+ * 
+ * General
+ * 
+ * CDM investments - party that implements that increases its likelihood of re-election. 
+ * 	-> some sort of condition on this? i.e. only if the previous year was a good year economically,
+ *	   the justification being 	
+ *
+ * Amount of money to be spent on investments/CDM each year. 
+ * Need to set overall goal state. Goal changes the year on year range of accepted values for reduction. 
+ * -> Maximise Reduction
+ * -> Maximise Wealth
+ * 
+ * Specific
+ * 
+ * - Calculate what target would be under Kyoto.
+ * 	-> Used then for testing
+ */
 public class USAgent extends AbstractCountry {
 
 	private static final int CampaignTargetIncrease = 5; // democrats campaign to further the reduction target
@@ -53,6 +71,18 @@ public class USAgent extends AbstractCountry {
 	 * Carbon offsets are wiped at the beginning of each session. 
 	 */ 
 	public void SessionFunction() {
+/*
+ * Emissions must decrease in absolute terms, rather than just the intensity. 
+ */
+		if(JoiningCriteriaMet()) {
+			KyotoMember.NONANNEXONE;
+		}
+			
+		
+	}
+	
+	boolean JoiningCriteriaMet() {
+		// Calculate what target would be under Kyoto
 		if (carbonOutput <= emissionsTarget) {
 			// Consider joining Kyoto here
 		}
@@ -148,8 +178,7 @@ public class USAgent extends AbstractCountry {
 	
 	
 	
-	private double CalculateTargetRatio(){
-		
+	private double CalculateTargetRatio(){		
 		return 0;
 	}
 	/*
