@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
+import com.google.common.collect.ImmutableMap;
+
 import uk.ac.ic.kyoto.actions.AddRemoveFromMonitor;
 import uk.ac.ic.kyoto.actions.AddRemoveFromMonitor.addRemoveType;
 import uk.ac.ic.kyoto.actions.AddToCarbonTarget;
@@ -145,7 +148,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			
 			// Check if the initialised function has already been called.
 			if (this.initialised) {
-				throw new AlreadyInitialisedException();
+				throw new IllegalAccessException("Participant " + this.ISO + " already initialised");
 			} else {
 				this.initialised = true;
 			}
@@ -201,7 +204,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		} catch (ActionHandlingException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
-		} catch (AlreadyInitialisedException e) {
+		} catch (IllegalAccessException e) {
 			e.printStackTrace();
 		}
 		
@@ -321,7 +324,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	public Map<Integer,Double> getCarbonEmissionReports(){
-		return this.carbonEmissionReports;
+		return ImmutableMap.copyOf(this.carbonEmissionReports);
 	}
 	
 	/**
