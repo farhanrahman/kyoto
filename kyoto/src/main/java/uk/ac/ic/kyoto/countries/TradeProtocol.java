@@ -416,14 +416,22 @@ public abstract class TradeProtocol extends FSMProtocol {
 		return all;
 	}
 
-	public void offer(NetworkAddress to, double quantity, double unitPrice, OfferMessage offerMessage)
+	public boolean offer(NetworkAddress to, double quantity, double unitPrice, OfferMessage offerMessage)
 			throws FSMException {
+		if(offerMessage.getOfferMessageType().equals(OfferMessageType.BROADCAST_MESSAGE)){
+			/*Start an offer if the message type is BROADCAST_MESSAGE i.e. not part of the 
+			 * message passing in the TradeProtocol states*/
 			this.spawnAsInititor(
 					new TradeSpawnEvent(
 							to, 
 							quantity, unitPrice, 
 							offerMessage.getOfferType(), offerMessage.getOfferInvestmentType(), 
 							offerMessage));
+			return true;
+		}else{
+			/*Else let the participant know that the offer didn't go*/
+			return false;
+		}
 	}
 
 	protected abstract boolean acceptExchange(NetworkAddress from,
