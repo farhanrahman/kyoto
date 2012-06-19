@@ -26,7 +26,18 @@ public class AvgCount extends AbstractCountry {
 	@Override
 	protected void behaviour() {
 		
-		
+		try {
+			logger.debug("Cost to reduce carbon by 1m: "+ carbonReductionHandler.getInvestmentRequired(1000000));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			logger.debug("Cost to absorb carbon by 1m: "+ carbonAbsorptionHandler.getInvestmentRequired(1000000));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		logger.debug("Current GDP: " + this.getGDP());
 		logger.debug("Current Cash: " + this.getAvailableToSpend());
 		logger.debug("Current GDP Rate: " + this.getGDPRate());

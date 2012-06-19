@@ -11,12 +11,6 @@ public final class GameConst {
 	private static double STABLE_MARKET_CHANCE = 0.8;
 	private static double RECESSION_MARKET_CHANCE = 0.1;
 	
-
-	/**
-	 * The cost of investment in one extra ton of carbon per year
-	 */
-	private static double CARBON_INVESTMENT_PRICE = 1;
-	
 	/**
 	 * Normalises value of GDP rate increase
 	 */
@@ -31,6 +25,7 @@ public final class GameConst {
 	private static double PERCENTAGE_OF_GDP = 0.005;
 	
 	
+	
 	/**
 	 * The price of reducing carbon reduction by one unit when we have 100% dirty industry
 	 */
@@ -39,19 +34,26 @@ public final class GameConst {
 	 * The price of reducing carbon reduction by one unit when we have 0% dirty industry
 	 */
 	private static double CARBON_REDUCTION_PRICE_MAX = 200;
+
+	/**
+	 * The cost of investment in one extra ton of carbon per year
+	 */
+	private static double CARBON_INVESTMENT_PRICE = 1;
+	
 	
 	/**
 	 * The price of increasing carbon absorption by one unit when we have 100% arable area
 	 */
-	private static double CARBON_ABSORPTION_PRICE_MIN = 10;
+	private static double CARBON_ABSORPTION_PRICE_MIN = 1;
 	/**
 	 * The price of increasing carbon absorption by one unit when we have 0% arable area
 	 */
-	private static double CARBON_ABSORPTION_PRICE_MAX = 200;
+	private static double CARBON_ABSORPTION_PRICE_MAX = 50;
 	/**
 	 * Forest area that absorbs single ton of carbon
 	 */
-	private static double FOREST_CARBON_ABSORPTION = 1;
+	private static double FOREST_CARBON_ABSORPTION = 0.01;
+	
 	
 	/**
 	 * Percentage of GDP that is levied from availiableToSpend for monitoring
@@ -70,9 +72,14 @@ public final class GameConst {
 	private static double MONITORING_PRICE = 847;
 	
 	/**
+	 * Target penalty coefficient
+	 */
+	private static double PENALTY_COEF = 0.3;
+	
+	/**
 	 * Number of ticks in a year
 	 */
-	private static int TICKS_IN_YEAR = 365;
+	private static int TICKS_IN_YEAR = 20;
 	
 	/**
 	 * Number of years in a session
@@ -187,6 +194,10 @@ public final class GameConst {
 
 	public static double getMonitoringPrice() {
 		return MONITORING_PRICE;
+	}
+	
+	public static double getPenaltyCoef() {
+		return PENALTY_COEF;
 	}
 
 	public static int getTicksInYear() {

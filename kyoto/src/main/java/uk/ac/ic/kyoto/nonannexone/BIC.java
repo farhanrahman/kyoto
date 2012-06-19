@@ -27,6 +27,8 @@ public class BIC extends AbstractCountry {
 	protected boolean green_lands = false; // variable to check if country met environment target or not. 
 	int times_aim_met = 0; //the consecutive times the energy aim is met.
 	boolean aim_success = false; // variable that controls whether the energy aim was met or not
+	int ticks_in_a_year; //how many ticks are in a year
+	int current_tick; //tick currently operating
 	//............................................................................................ 
 	
 	public BIC(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
@@ -97,6 +99,7 @@ public class BIC extends AbstractCountry {
 	
 	protected void behaviour() {
 		
+		
 		try {
 			economy();
 		} catch (IllegalArgumentException e) {
@@ -112,8 +115,8 @@ public class BIC extends AbstractCountry {
 	
 	protected void initialiseCountry() {
 		// TODO Auto-generated method stub
-		energy_aim = getEnergyOutput() + CountryConstants.INITIAL_ENERGY_THRESHOLD ; //initialise an aim (to be decided)
-		environment_friendly_target = 50000; //initialise a target (to be decided)
+		energy_aim = getEnergyOutput() + CountryConstants.INITIAL_ENERGY_THRESHOLD ; //initialise energy aim.
+		environment_friendly_target = CountryConstants.INITIAL_CARBON_TARGET; //initialise a target 
 		setKyotoMemberLevel(KyotoMember.NONANNEXONE);
 		
 	}
@@ -149,12 +152,13 @@ public class BIC extends AbstractCountry {
 		energy_difference = energy_aim - getEnergyOutput(); //difference in energy aim and current energy output.
 		invest_money = energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(energy_difference) ;
 		money_available=getAvailableToSpend();
+		
 		if (invest_money <= money_available)
 				{
-					buildIndustry(invest_money); //!!!!!!!
+					buildIndustry(invest_money); 
 					aim_success = true; // energy target met
 					times_aim_met +=1; //how many consecutive times the target was met.
-					logger.info("Country met its yearly energy output goal");
+					logger.info("Country met its energy output goal");
 				}
 		else{
 			times_aim_met = 0; //reset the counter.
@@ -278,9 +282,29 @@ public class BIC extends AbstractCountry {
 		
 		private void update_energy_aim(double previous_aim,boolean success,int counter)
 		{
+			ticks_in_a_year = timeService.getTicksInYear();
+			current_tick = timeService.getCurrentTick();
+			System.out.println("Time report:");
+			System.out.println("Current tick: " + current_tick + "  Ticks in a year: " + ticks_in_a_year + ".");
+			
 			if (success)
 			{ // country met goal, change goal
-				
+				if (current_tick < 345) //steady increase every tick
+				{
+					energy_aim = previous_aim + CountryConstants.STEADY_TICK_ENERGY_INCREASE;
+					
+				}
+				if (current_tick ==345)
+				{
+				ticks_in_a_year = timeService.getTicksInYear();
+				current_tick = timeService.getCurrentTick();
+				System.out.println("Time report:");
+				System.out.println("Current tick: " + current_tick + "  Ticks in a year: " + ticks_in_a_year + ".");
+				times_aim_met = 0; //reset counter
+				}
+				else
+				{
+					
 					switch (counter)
 					{
 					case 0:
@@ -315,6 +339,7 @@ public class BIC extends AbstractCountry {
 					}	
 					
 					}
+				}
 			}
 				
 			
@@ -343,7 +368,7 @@ public class BIC extends AbstractCountry {
 	{
 		if (succeed) //country met environment target goal, change goal.
 			
-		environment_friendly_target = previous_target + previous_target * CountryConstants.TARGET_AIM_GROWTH;
+		environment_friendly_target = previous_target - previous_target * CountryConstants.TARGET_AIM_GROWTH;
 		
 	}
 	

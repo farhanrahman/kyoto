@@ -73,19 +73,22 @@ public class AverageCountry extends InjectedSimulation {
 	@Override
 	protected void addToScenario(Scenario s) {
 		
-		// Germany Stats
+		// Average Stats
 		final double landArea = 714392;
 		final double arableLandArea = 74918;
-		final double GDP = 158788.326413;
-		final double energyOutput = 224727380;
-		final double carbonOutput = 128058581;
+		
+		// For annexOne only
+		final double energyOutput = 263593238;
+		final double carbonOutput = 216634722;
+		
+		final double GDP = 158788326413.0;
 		final double GDPRate = 0.0379;
 		
 			String name = "Average";
 			String ISO = "AV";
 			AbstractParticipant p = new AvgCount(Random.randomUUID(), name, ISO, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput);
 			s.addParticipant(p);
-			CarbonData1990.addCountry(ISO, 118558737);
+			CarbonData1990.addCountry(ISO, 242111167);
 		
 	}
 }

@@ -88,7 +88,7 @@ public class Monitor extends EnvironmentService {
 			double emissionTarget = carbonTargetingService.queryYearTarget(country.getID(), (timeService.getCurrentYear()));
 
 			if (Math.round(reportedEmission) > Math.round(emissionTarget)) {
-				targetSanction(country, emissionTarget - reportedEmission);
+				targetSanction(country,  reportedEmission - emissionTarget);
 			}
 		}
 	}
@@ -200,6 +200,8 @@ public class Monitor extends EnvironmentService {
 		
 		int sinCount;
 		
+		System.out.println("SANCTIONING: " + sanctionee.getName());
+		
 		// Update the list of countries that have cheated
 		if (sinBin.containsKey(sanctionee)) {
 			sinCount = sinBin.get(sanctionee) + 1;
@@ -220,7 +222,7 @@ public class Monitor extends EnvironmentService {
 	 * The country to be sanctioned
 	 */
 	public void targetSanction(AbstractCountry country, double carbonExcess) {
-		double penalty = carbonExcess * 1.3;
+		double penalty = carbonExcess * GameConst.getPenaltyCoef();
 		carbonTargetingService.addCountryPenalty(country.getID(), penalty);
 		
 		// Charge the country for not meeting the target - financial penalties aren't applied by kyoto

@@ -1,9 +1,12 @@
-package uk.ac.ic.kyoto.countries;
+package uk.ac.ic.kyoto.testagents;
 
 import java.util.Set;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
+import uk.ac.ic.kyoto.countries.AbstractCountry;
+import uk.ac.ic.kyoto.countries.Offer;
+import uk.ac.ic.kyoto.countries.OfferMessage;
 import uk.ac.ic.kyoto.exceptions.NotEnoughCarbonOutputException;
 import uk.ac.ic.kyoto.exceptions.NotEnoughCashException;
 import uk.ac.ic.kyoto.trade.InvestmentType;
@@ -75,7 +78,7 @@ public class TestAgent extends AbstractCountry {
 		//logger.info("I have this much money: " + availableToSpend);
 		
 		try {
-			environment.act(new SubmitCarbonEmissionReport(carbonOutput), getID(), authkey);
+			environment.act(new SubmitCarbonEmissionReport(getCarbonOutput()), getID(), authkey);
 		} catch (ActionHandlingException e1) {
 			e1.printStackTrace();
 		}
@@ -93,7 +96,7 @@ public class TestAgent extends AbstractCountry {
 		
 		try {
 			//logger.info("I am investing " + carbonAbsorptionHandler.getInvestmentRequired(1000) + " in carbon absorption.");
-			double bang = carbonAbsorption;
+			double bang = getCarbonAbsorption();
 			carbonAbsorptionHandler.investInCarbonAbsorption(1000);
 			//logger.info("My carbon absorption change is " + (carbonAbsorption - bang));
 		} catch (NotEnoughCarbonOutputException e) {
@@ -106,10 +109,10 @@ public class TestAgent extends AbstractCountry {
 		
 		try {
 			//logger.info("I am reducing my energy output by " + energyOutput*0.01);
-			energyUsageHandler.reduceEnergyOutput(energyOutput*0.01);
+			energyUsageHandler.reduceEnergyOutput(getEnergyOutput()*0.01);
 			//logger.info("My energy output is " + energyOutput);
 			//logger.info("I am investing " + availableToSpend*0.01 + " in carbon industry.");
-			energyUsageHandler.investInCarbonIndustry(availableToSpend*0.01);
+			energyUsageHandler.investInCarbonIndustry(getAvailableToSpend()*0.01);
 			//logger.info("My energy output has gone back up by " + energyOutput);
 		} catch (NotEnoughCashException e) {
 			//logger.warn(e.getMessage(), e);
@@ -121,7 +124,7 @@ public class TestAgent extends AbstractCountry {
 		
 		try {
 			//logger.info("I am investing " + carbonReductionHandler.getInvestmentRequired(5000) + " in carbon reduction.");
-			double bang = carbonOutput;
+			double bang = getCarbonOutput();
 			carbonReductionHandler.investInCarbonReduction(5000);
 			//logger.info("My carbon output change is " + (carbonOutput - bang));
 		} catch (NotEnoughCarbonOutputException e) {
