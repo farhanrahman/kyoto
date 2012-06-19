@@ -90,7 +90,7 @@ public class CarbonTarget extends EnvironmentService {
 	}
 	
 	public double queryYearTarget(UUID countryID, int year) {
-		countryObject obj = findCountryObject(countryID);
+		countryObject obj = findCountryObject(countryID);				
 		return obj.yearTargets.get(year);
 	}
 	
@@ -172,21 +172,21 @@ public class CarbonTarget extends EnvironmentService {
 				result = CarbonData1990.get(findCountryObject(countryID).obj.getISO());
 			} else {
 				Map<Integer, Double> reports = reportingService.getReport(countryID);
-				int simTime = timeService.getTicksInYear() * (year +1);
+				int simTime = (timeService.getTicksInYear() * (year +1)) - 3;
 				result = reports.get(simTime);
 			}
 		}
 		return result;
 	}
 	
-	private countryObject findCountryObject(UUID countryID) {
-		countryObject result = null;
+	private countryObject findCountryObject(UUID countryID){
 		for (countryObject country : participantCountries) {
 			if (country.obj.getID() == countryID) {
-				result = country;
+				return country;
 			}
-		}		
-		return result;
+		}
+		
+		throw new NullPointerException("countryID " + countryID + " does not exist in list of carbon targt participants");
 	}
 	
 	@EventListener

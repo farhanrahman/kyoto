@@ -142,56 +142,65 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	@Override
 	final public void initialise(){
 		try{
-			if(this.initialised == false){
-				super.initialise();
-				
-				try {
-					environment.act(new AddToCarbonTarget(this), getID(), authkey);
-				} catch (ActionHandlingException e2) {
-					e2.printStackTrace();
-				}
-				try {
-					if (isKyotoMember() == KyotoMember.ANNEXONE)
-						environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
-				} catch (ActionHandlingException e2) {
-					e2.printStackTrace();
-				}
-				// Initialize the Action Handlers TODO: DO THEY HAVE TO BE INSTANTIATED ALL THE TIME?
-				try {
-					timeService = getEnvironmentService(ParticipantTimeService.class);
-				} catch (UnavailableServiceException e1) {
-					System.out.println("TimeService doesn't work");
-					e1.printStackTrace();
-				}
-				// Initialize the Action Handlers
-				carbonAbsorptionHandler = new CarbonAbsorptionHandler(this);
-				carbonReductionHandler = new CarbonReductionHandler(this);
-				energyUsageHandler = new EnergyUsageHandler(this);
-				
-				// Connect to the Reporting Service
-				try {
-					this.reportingService = this.getEnvironmentService(ParticipantCarbonReportingService.class);
-				} catch (UnavailableServiceException e) {
-					System.out.println("Unable to reach emission reporting service.");
-					e.printStackTrace();
-				}
-				
-				this.tradeProtocol = new TradeProtocol(getID(), this.authkey, environment, network, this) {
-					
-					@Override
-					protected boolean acceptExchange(NetworkAddress from, Offer trade) {
-						return acceptTrade(from, trade);
-					}
-				};	
-				this.initialised = true;
-				initialiseCountry();
-			}else{
+			
+			if (this.initialised) {
 				throw new AlreadyInitialisedException();
+			} else {
+				this.initialised = true;
 			}
-		} catch(AlreadyInitialisedException ex){
-			ex.printStackTrace();
+			
+			super.initialise();
+				
+			environment.act(new AddToCarbonTarget(this), getID(), authkey);
+			
+			if (isKyotoMember() == KyotoMember.ANNEXONE){
+				environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
+			}				
+
+			//TODO: Initialize the Action Handlers (DO THEY HAVE TO BE INSTANTIATED ALL THE TIME?)
+			
+			try {
+				timeService = getEnvironmentService(ParticipantTimeService.class);
+			} catch (UnavailableServiceException e) {
+				System.out.println("Unable to reach time service service.");
+				throw e;
+			}
+			
+			// Initialize the Action Handlers
+			carbonAbsorptionHandler = new CarbonAbsorptionHandler(this);
+			carbonReductionHandler = new CarbonReductionHandler(this);
+			energyUsageHandler = new EnergyUsageHandler(this);
+			
+			// Connect to the Reporting Service
+			try {
+				this.reportingService = this.getEnvironmentService(ParticipantCarbonReportingService.class);
+			} catch (UnavailableServiceException e) {
+				System.out.println("Unable to reach emission reporting service.");
+				throw e;
+			}
+			
+
+			this.tradeProtocol = new TradeProtocol(getID(), this.authkey, environment, network, this) {
+				
+				@Override
+				protected boolean acceptExchange(NetworkAddress from, Offer trade) {
+					return acceptTrade(from, trade);
+				}
+				
+			};
+			
+			initialiseCountry();
+			
 		} catch (FSMException e) {
-			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		} catch (UnavailableServiceException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		} catch (ActionHandlingException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		} catch (AlreadyInitialisedException e) {
 			e.printStackTrace();
 		}
 		
