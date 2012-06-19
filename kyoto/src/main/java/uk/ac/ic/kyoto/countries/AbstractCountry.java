@@ -5,15 +5,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import com.google.common.collect.ImmutableMap;
-
 import uk.ac.ic.kyoto.actions.AddRemoveFromMonitor;
 import uk.ac.ic.kyoto.actions.AddRemoveFromMonitor.addRemoveType;
 import uk.ac.ic.kyoto.actions.AddToCarbonTarget;
 import uk.ac.ic.kyoto.actions.ApplyMonitorTax;
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
 import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
-import uk.ac.ic.kyoto.exceptions.UnauthorisedExecuteException;
 import uk.ac.ic.kyoto.services.Economy;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
@@ -30,6 +27,8 @@ import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
 import uk.ac.imperial.presage2.util.fsm.FSMException;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
+
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Class from which all countries are derived
@@ -217,10 +216,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				if(!this.isExecuteLocked()){
 					this.acquireExecuteLock(); //acquire the lock
 				}else{
-					throw new UnauthorisedExecuteException(
-							SimTime.get().intValue(),
-							this.getID(),
-							this.getName());
+					throw new IllegalAccessException("Execute function called more than once in one tick. Simulation time: " 
+							+ SimTime.get().intValue()
+							+ ", Participant ID: "
+							+ this.getID()
+							+ ", name: "
+							+ this.getName());
 				}
 				
 				
@@ -265,8 +266,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			
 			this.releaseExecuteLock();
 			
-		} catch(UnauthorisedExecuteException e){
+		} catch(IllegalAccessException e){
 			logger.warn(e);
+			e.printStackTrace();
 		}
 	}
 	

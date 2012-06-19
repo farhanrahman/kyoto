@@ -30,6 +30,7 @@ public class BIC extends AbstractCountry {
 	int ticks_in_a_year; //how many ticks are in a year
 	int current_tick; //tick currently operating
 	int current_year; //year currently operating
+	int imaginary_tick; //current tick modulo imaginary tick
 	//............................................................................................ 
 	
 	public BIC(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
@@ -107,7 +108,7 @@ public class BIC extends AbstractCountry {
 		} catch (Exception e) {
 		e.printStackTrace();
 		} 
-		//calculate carbon output every year
+		
 		
 	}
 
@@ -287,24 +288,27 @@ public class BIC extends AbstractCountry {
 		private void update_energy_aim(double previous_aim,boolean success,int counter)
 		{
 				current_tick = timeService.getCurrentTick();
-				
+				imaginary_tick = current_tick % 365 ;
 			if (success)
 			{ // country met goal, change goal
-				if (current_tick < 345) //steady increase every tick
+				if ((imaginary_tick < 350)) //steady increase every tick
 				{
 					energy_aim = previous_aim + CountryConstants.STEADY_TICK_ENERGY_INCREASE;
 					
 				}
-				if (current_tick == 345)
+				if (imaginary_tick == 350)
 				{
 				
 				times_aim_met = 0; //reset counter
 				
 				}
-				if (current_tick > 345)
+				if (imaginary_tick > 350)
 				{
-					if (current_tick == 365)
-						current_tick=0;
+					if (imaginary_tick == 365)
+					{
+						energy_aim = 30;
+						
+					}
 					switch (counter)
 					{
 					case 0:
