@@ -5,6 +5,7 @@ import java.util.UUID;
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.Offer;
 import uk.ac.ic.kyoto.countries.OfferMessage;
+import uk.ac.ic.kyoto.countries.AbstractCountry.KyotoMember;
 import uk.ac.ic.kyoto.exceptions.NotEnoughCarbonOutputException;
 import uk.ac.ic.kyoto.exceptions.NotEnoughCashException;
 import uk.ac.ic.kyoto.exceptions.NotEnoughLandException;
@@ -72,7 +73,7 @@ public class AnnexOneSustain extends AbstractCountry {
 	 */
 	@Override
 	protected void initialiseCountry() {
-		// TODO initialisation
+		setKyotoMemberLevel(KyotoMember.ANNEXONE);
 	}
 	
 	/**
@@ -116,7 +117,9 @@ public class AnnexOneSustain extends AbstractCountry {
 	@Override
 	public void yearlyFunction() {
 		investInIndustry();
+		scaleDecisionTreshold();
 		updateSurplusCarbonTarget();
+		resetSurplusCarbonSold();
 	}
 	
 	/**
@@ -128,69 +131,51 @@ public class AnnexOneSustain extends AbstractCountry {
 	}
 	
 	
-	protected void upscaleDecisionTreshold() {
-		decisionTreshold *= Constants.DECISION_TRESHOLD_SCALING;
-	}
-	
-	protected void downscaleDecisionTreshold() {
-		decisionTreshold /= Constants.DECISION_TRESHOLD_SCALING;
-	}
-	
-	
 	protected void investInIndustry() {
 		// Find a point at which investing in industry and scaling back carbon with reduction/absorption
 		//  costs availableToSpend() * constant.
 		// Use binary search, do the cheaper option, or reduction if not enough land.
 	}
 	
+	protected void scaleDecisionTreshold() {
+		double percentageSold;
+		
+		try {
+			percentageSold = surplusCarbonSold / surplusCarbonTarget;
+			
+			if (percentageSold > decisionTreshold) {
+				decisionTreshold /= Constants.DECISION_TRESHOLD_SCALER;
+				logger.info("Sold more than expected, decreasing perceived profitability treshold");
+			}
+			else {
+				decisionTreshold *= Constants.DECISION_TRESHOLD_SCALER;
+				logger.info("Sold less than expected, increasing perceived profitability treshold");
+			}
+		}
+		catch (ArithmeticException e) {
+			logger.info("There was no surplus carbon to sell, nothing to do");
+		}
+		catch (Exception e) {
+			logger.warn("Problem with scaling decision treshold: " + e.getMessage());
+		}
+	}
 	
 	protected void updateSurplusCarbonTarget() {
 		surplusCarbonTarget = this.getEmissionsTarget() - (this.getCarbonOutput() - this.getCarbonAbsorption()) + this.getCarbonOffset();
 	}
 	
+	protected void resetSurplusCarbonSold() {
+		surplusCarbonSold = 0;
+	}
 	
 	protected void finalInvestments() {
-		double reductionPrice;
-		double absorptionPrice;
-		boolean investmentsSuccessful = true;
-		
 		try {
-			// Get prices of required reduction and absorption
-			reductionPrice = carbonReductionHandler.getInvestmentRequired(carbonToReduce);
-			absorptionPrice = carbonAbsorptionHandler.getInvestmentRequired(carbonToAbsorb);
-			
-			// Attempt to invest in carbon reduction
-			if (reductionPrice <= this.getAvailableToSpend()) {
-				carbonReductionHandler.investInCarbonReduction(reductionPrice);
-			}
-			else {
-				double possibleReduction = carbonReductionHandler.getCarbonOutputChange(this.getAvailableToSpend());
-				carbonReductionHandler.investInCarbonReduction(possibleReduction);
-				investmentsSuccessful = false;
-			}
-			
-			// Attempt to invest in carbon absorption
-			if (absorptionPrice <= this.getAvailableToSpend()) {
-				carbonAbsorptionHandler.investInCarbonAbsorption(absorptionPrice);
-			}
-			else {
-				double possibleAbsorption = carbonAbsorptionHandler.getCarbonAbsorptionChange(this.getAvailableToSpend());
-				carbonAbsorptionHandler.investInCarbonAbsorption(possibleAbsorption);
-				investmentsSuccessful = false;
-			}
-			
-			// If country had enough money, downscale treshold. If not, reduce industry, and upscale treshold.
-			if (investmentsSuccessful) {
-				decisionTreshold /= Constants.DECISION_TRESHOLD_SCALING;
-			}
-			else {
-				double necessaryClosures = (this.getCarbonOutput() - this.getCarbonAbsorption()) - (this.getEmissionsTarget() + this.getCarbonOffset());
-				energyUsageHandler.reduceEnergyOutput(necessaryClosures);
-				decisionTreshold *= Constants.DECISION_TRESHOLD_SCALING;
-			}
+			carbonReductionHandler.investInCarbonReduction(carbonToReduce);
+			carbonAbsorptionHandler.investInCarbonAbsorption(carbonToAbsorb);
 		}
 		catch (Exception e) {
-			logger.warn("Problem with final tick planned investments: " + e.getMessage());
+			logger.warn("Problem with end of year investments: " + e.getMessage());
 		}
 	}
+	
 }
