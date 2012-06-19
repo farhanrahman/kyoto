@@ -324,7 +324,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	public Map<Integer,Double> getCarbonEmissionReports(){
-		return ImmutableMap.copyOf(this.carbonEmissionReports);
+		return this.carbonEmissionReports;
 	}
 	
 	/**
