@@ -482,7 +482,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 							if (trade.itype.equals(InvestmentType.ABSORB)) {
 								try {
 									participant.carbonAbsorptionHandler.investInCarbonAbsorption(trade.getQuantity());
-								} catch (NotEnoughCarbonOutputException e) {
+								} catch (NotEnoughCashException e) {
 									logger.warn(e);
 									return false; /*Trade must fail*/
 								} catch (NotEnoughLandException e) {
