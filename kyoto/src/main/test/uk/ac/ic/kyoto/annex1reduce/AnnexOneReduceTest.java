@@ -18,7 +18,7 @@ public class AnnexOneReduceTest {
 		double GDPRate = 0.03;
 		double energyOutput = 1000000;
 		double carbonOutput = 900000;
-		double availableToSpend = GDP * 0.05;
+		double availableToSpend = GDP * 0.1;
 		double emissionsTarget = 0.99 * carbonOutput;
 		
 		test = new AnnexOneReduce(UUID.randomUUID(), "JunitTest", "JUT",

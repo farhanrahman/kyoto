@@ -100,7 +100,7 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 //		}
 
 		CountrySimulator.CountryState optimalState = 
-				simulator.simulate(getCarbonOutput(),getEnergyOutput(),getPrevEnergyOutput(),
+				simulator.simulate(getCarbonOutput(),getEnergyOutput(),getPrevEnergyOut(),
 				getCarbonOffset(),getCarbonAbsorption(), getEmissionsTarget(), getAvailableToSpend(),
 				getGDP(),getGDPRate(),getArableLandArea());
 	}
@@ -263,7 +263,12 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 		return (Double.MAX_VALUE / 1000000);
 	}
 	
-	//TODO
+	/**
+	 * Returns 0 if selling negative amounts of carbon offset
+	 * @param carbonOffset
+	 * @param year
+	 * @return
+	 */
 	public double getMarketSellPrice(double carbonOffset, int year) {
 		return 0;
 	}

@@ -707,10 +707,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return kyotoMemberLevel;
 	}
 	
-	public double getCarbonAbsorption() {
-		return carbonAbsorption;
-	}
-	
 	public void setKyotoMemberLevel(KyotoMember level) throws IllegalStateException{
 		if (SimTime.get().intValue() == 0) {
 			kyotoMemberLevel = level;

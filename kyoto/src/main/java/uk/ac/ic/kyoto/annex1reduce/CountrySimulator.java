@@ -15,7 +15,7 @@ class CountrySimulator {
 
 	// TODO, look ahead a minimum of 5 years or a maximum of 15 years. Always
 	// end at a session end.
-	final private static int LOOK_AHEAD_YEARS = 10;
+	final private static int LOOK_AHEAD_YEARS = 15;
 
 	public CountrySimulator(AnnexOneReduce country) {
 		this.country = country;
@@ -331,36 +331,36 @@ class CountrySimulator {
 			stateList[this.year].addMaintain(this);
 
 			// energy Increase = carbon Increase when investing in factories
-			double energyCost = action.industryFrac
+			double energyIncreasePrice = action.industryFrac
 					* previousState.availableToSpend;
-			double energyIncrease = country.getCarbonEnergyIncrease(energyCost);
+			double energyIncrease = country
+					.getCarbonEnergyIncrease(energyIncreasePrice);
 
 			// Number of carbon credits gained by buying credits
 			double carbonCreditIncrease = action.buyCreditOffsetFrac
 					* energyIncrease;
-			double marketBuyCost = country.getMarketBuyPrice(
+			double marketBuyPrice = country.getMarketBuyPrice(
 					carbonCreditIncrease, this.year);
 
-			// Cost of investing in absorption and reduction
-			double CarbonInvestOffset = action.investOffsetFrac
-					* energyIncrease;
+			// Amount of carbon we need to reduce by investing in offsets
 			double[] investments = new double[2];
-			double investmentCost = country.getAbsorbReduceInvestment(
-					CarbonInvestOffset, previousState, investments);
-			double arableLandCost = country.getArableLandCost(investments[0],
-					previousState.arableLandArea);
+			double investmentPrice = country.getAbsorbReduceInvestment(
+					action.investOffsetFrac * energyIncrease, previousState,
+					investments);
+			double arableLandReduction = country.getArableLandCost(
+					investments[0], previousState.arableLandArea);
 			double absorptionIncrease = country.getCarbonAbsorptionChange(
 					investments[0], previousState.arableLandArea);
-			double carbonOutputReduced = country.getCarbonReduction(
+			double carbonOutputReduction = country.getCarbonReduction(
 					investments[1], previousState);
 
 			energyOutput = previousState.energyOutput + energyIncrease;
 			carbonOutput = previousState.carbonOutput + energyIncrease
-					- carbonOutputReduced;
+					- carbonOutputReduction;
 
 			carbonOffset = previousState.carbonOffset + carbonCreditIncrease;
 
-			arableLandArea = previousState.arableLandArea - arableLandCost;
+			arableLandArea = previousState.arableLandArea - arableLandReduction;
 
 			carbonAbsorption = previousState.carbonAbsorption
 					+ absorptionIncrease;
@@ -370,8 +370,9 @@ class CountrySimulator {
 
 			GDP = previousState.GDP + previousState.GDP * GDPRate;
 
-			availableToSpend = previousState.availableToSpend - investmentCost
-					- marketBuyCost + (GDP * GameConst.getPercentageOfGdp());
+			availableToSpend = previousState.availableToSpend - investmentPrice
+					- marketBuyPrice - energyIncreasePrice
+					+ (GDP * GameConst.getPercentageOfGdp());
 
 			carbonDiff = carbonOutput - carbonAbsorption;
 		}
@@ -389,13 +390,14 @@ class CountrySimulator {
 			this.GDP = previousState.GDP;
 			stateList[this.year].addSell(this);
 
-			// Our current total carbon output.
+			// Our current total carbon output, including any offsets
 			double totalCarbonOutput = previousState.carbonOutput
 					- previousState.carbonOffset
 					- previousState.carbonAbsorption;
 
 			// Shut down factories
-			double shutDownCarbon = totalCarbonOutput * action.shutDownFrac;
+			double shutDownCarbonReduction = totalCarbonOutput
+					* action.shutDownFrac;
 
 			// Invest in being clean
 			double carbonAbsorbedReduced = totalCarbonOutput
@@ -403,30 +405,33 @@ class CountrySimulator {
 			double[] investments = new double[2];
 			double investmentCost = country.getAbsorbReduceInvestment(
 					carbonAbsorbedReduced, previousState, investments);
+			double arableLandReduction = country.getArableLandCost(investments[0],
+					previousState.arableLandArea);
 			double absorptionIncrease = country.getCarbonAbsorptionChange(
 					investments[0], previousState.arableLandArea);
-			double arableLandCost = country.getArableLandCost(investments[0],
-					previousState.arableLandArea);
-			double carbonOutputReduced = country.getCarbonReduction(
+			double carbonOutputReduction = country.getCarbonReduction(
 					investments[1], previousState);
 
 			// Sell additional offset over next years target
-			double newCarbonOutput = totalCarbonOutput - shutDownCarbon
-					- carbonAbsorbedReduced;
+			double newCarbonOutput = totalCarbonOutput
+					- shutDownCarbonReduction - carbonAbsorbedReduced;
 			double carbonBelowTarget = emissionsTarget - newCarbonOutput;
+			
+			
 			double totalCreditsSold = carbonBelowTarget * action.sellFrac;
 
-			double marketSellGain = country.getMarketSellPrice(
+			double marketSellEarnings = country.getMarketSellPrice(
 					totalCreditsSold, this.year);
 
 			this.availableToSpend = previousState.availableToSpend
-					- investmentCost + marketSellGain;
-			this.arableLandArea = previousState.arableLandArea - arableLandCost;
+					- investmentCost + marketSellEarnings;
+			this.arableLandArea = previousState.arableLandArea - arableLandReduction;
 			this.carbonAbsorption = previousState.carbonAbsorption
 					+ absorptionIncrease;
-			this.energyOutput = previousState.energyOutput - shutDownCarbon;
-			this.carbonOutput = previousState.carbonOutput - shutDownCarbon
-					- carbonOutputReduced;
+			this.energyOutput = previousState.energyOutput
+					- shutDownCarbonReduction;
+			this.carbonOutput = previousState.carbonOutput
+					- shutDownCarbonReduction - carbonOutputReduction;
 			this.carbonOffset = previousState.carbonOffset - totalCreditsSold;
 
 			carbonDiff = this.carbonOutput - carbonAbsorption;
@@ -439,14 +444,20 @@ class CountrySimulator {
 			float shutDown;
 			float buyCredit;
 			float invest;
+			
+			int maxGrains = 10;
+			
+			int numGrains = maxGrains - 3 * this.year;
+			numGrains = Math.max(numGrains, 1);
+			float grain = 100f/numGrains;
 
 			// If we actually need to reduce our carbon
 			if (this.getCarbonDifference() > 0) {
 
-				for (int i = 0; i <= 100; i = i + 10) {
+				for (float i = 0; i <= 100; i = i + grain) {
 					shutDown = i;
 
-					for (int j = 0; j <= 100 - shutDown; j = j + 10) {
+					for (float j = 0; j <= 100 - shutDown; j = j + grain) {
 						buyCredit = j;
 
 						invest = 100 - shutDown - buyCredit;
@@ -468,6 +479,12 @@ class CountrySimulator {
 
 			// Invest some chunk of our available cash in industry, offset it by
 			// buying credits or absorbing
+			
+			int maxGrains = 10;
+			
+			int numGrains = maxGrains - 3 * this.year;
+			numGrains = Math.max(numGrains, 1);
+			float grain = 100f/numGrains;
 
 			float industryFrac;
 			float investOffsetFrac;
@@ -475,16 +492,21 @@ class CountrySimulator {
 
 			// If last action we didn't buy carbon,
 			if (((ReduceAction) action).buyCreditFrac == 0) {
-				for (int i = 10; i <= 100; i = i + 10) {
+				for (float i = grain; i <= 100; i = i + grain) {
 					industryFrac = i;
+					investOffsetFrac = 100;
+					buyCreditOffsetFrac = 0;
+
 					new CountryState(this, new MaintainAction(
-							industryFrac / 100, 1, 0));
+							industryFrac / 100, investOffsetFrac / 100,
+							buyCreditOffsetFrac / 100));
 				}
 			} else {
-				for (int i = 10; i <= 100; i = i + 10) {
+
+				for (float i = grain; i <= 100; i = i + grain) {
 					industryFrac = i;
 
-					for (int j = 0; j <= 100; j = j + 10) {
+					for (float j = 0; j <= 100; j = j + grain) {
 						investOffsetFrac = j;
 						buyCreditOffsetFrac = 100 - investOffsetFrac;
 						new CountryState(this, new MaintainAction(
@@ -503,27 +525,40 @@ class CountrySimulator {
 			float shutDownFrac;
 			float investFrac;
 			float sellFrac;
+			
+			
+			int maxGrain1s = 10;
+			int numGrain1s = maxGrain1s - 4 * this.year;
+			numGrain1s = Math.max(numGrain1s, 1);
+			float grain1max = 100;
+			float grain1 = grain1max/numGrain1s;
+			
+			int maxGrain2s = 10;
+			int numGrain2s = maxGrain2s - 4 * this.year;
+			numGrain2s = Math.max(numGrain2s, 1);
+			float grain2max = 5;
+			float grain2 = grain2max/numGrain2s;
 
-			// If we've bough any credits, selling them is pointless
+			// If we've bought any credits, selling them is pointless
 			if (previousState.carbonOffset > 0) {
 				new CountryState(this, new SellAction(0, 0, 0));
 			} else {
-				for (int k = 0; k <= 100; k = k + 10) {
+				for (float k = 0; k <= grain1max; k = k + grain1) {
 					sellFrac = k;
 					new CountryState(this, new SellAction(0, 0, sellFrac / 100));
 				}
 
-				for (int i = 1; i <= 10; i = i + 1) {
+				for (float i = grain2; i <= grain2max; i = i + grain2) {
 					shutDownFrac = i;
-					for (int k = 0; k <= 100; k = k + 25) {
+					for (float k = 0; k <= grain1max; k = k + grain1) {
 						sellFrac = k;
 						new CountryState(this, new SellAction(
 								shutDownFrac / 100, 0, sellFrac / 100));
 					}
 				}
-				for (int i = 1; i <= 10; i = i + 1) {
+				for (float i = grain2; i <= grain2max; i = i + grain2) {
 					investFrac = i;
-					for (int k = 0; k <= 100; k = k + 25) {
+					for (float k = 0; k <= grain1max; k = k + grain1) {
 						sellFrac = k;
 						new CountryState(this, new SellAction(0,
 								investFrac / 100, sellFrac / 100));
@@ -639,6 +674,13 @@ class CountrySimulator {
 			boolean isBetter = true;
 			boolean isWorse = true;
 
+			// If we have more money
+			if (state1.availableToSpend > state2.availableToSpend) {
+				isWorse = false;
+			} else if (state1.availableToSpend < state2.availableToSpend) {
+				isBetter = false;
+			}
+
 			// If we have a higher GDP
 			if (state1.GDP > state2.GDP) {
 				isWorse = false;
@@ -650,13 +692,6 @@ class CountrySimulator {
 			if (state1.GDPRate > state2.GDPRate) {
 				isWorse = false;
 			} else if (state1.GDPRate < state2.GDPRate) {
-				isBetter = false;
-			}
-
-			// If we have more money
-			if (state1.availableToSpend > state2.availableToSpend) {
-				isWorse = false;
-			} else if (state1.availableToSpend < state2.availableToSpend) {
 				isBetter = false;
 			}
 
@@ -696,9 +731,10 @@ class CountrySimulator {
 			double energyOutput, double prevEnergyOutput) {
 
 		double sum;
+		double marketStateFactor = 0.5;
 		if (energyOutput - prevEnergyOutput >= 0) {
 			sum = (((energyOutput - prevEnergyOutput) / prevEnergyOutput)
-					* GameConst.getEnergyGrowthScaler() * 0.5 + oldGDPRate * 100) / 2;
+					* GameConst.getEnergyGrowthScaler() * marketStateFactor + oldGDPRate * 100) / 2;
 		} else {
 			sum = ((((energyOutput - prevEnergyOutput) / prevEnergyOutput) * GameConst
 					.getEnergyGrowthScaler()));
@@ -752,6 +788,13 @@ class CountrySimulator {
 			boolean isBetter = true;
 			boolean isWorse = true;
 
+			// If we have more money
+			if (state1.availableToSpend > state2.availableToSpend) {
+				isWorse = false;
+			} else if (state1.availableToSpend < state2.availableToSpend) {
+				isBetter = false;
+			}
+			
 			// If we have a higher GDP
 			if (state1.GDP > state2.GDP) {
 				isWorse = false;
@@ -765,11 +808,11 @@ class CountrySimulator {
 			} else if (state1.GDPRate < state2.GDPRate) {
 				isBetter = false;
 			}
-
-			// If we have more money
-			if (state1.availableToSpend > state2.availableToSpend) {
+			
+			// If we make more energy
+			if (state1.energyOutput > state2.energyOutput) {
 				isWorse = false;
-			} else if (state1.availableToSpend < state2.availableToSpend) {
+			} else if (state1.energyOutput < state2.energyOutput) {
 				isBetter = false;
 			}
 
@@ -833,26 +876,62 @@ class CountrySimulator {
 			boolean isBetter = true;
 			boolean isWorse = true;
 
-			// If we have a higher GDP
-			if (state1.GDP > state2.GDP) {
-				isWorse = false;
-			} else if (state1.GDP < state2.GDP) {
-				isBetter = false;
-			}
-
-			// If we have a higher GDP
-			if (state1.GDPRate > state2.GDPRate) {
-				isWorse = false;
-			} else if (state1.GDPRate < state2.GDPRate) {
-				isBetter = false;
-			}
-
 			// If we have more money
 			if (state1.availableToSpend > state2.availableToSpend) {
 				isWorse = false;
 			} else if (state1.availableToSpend < state2.availableToSpend) {
 				isBetter = false;
 			}
+			
+			// If our expected income over the next 3 years is greater
+			
+			double s1GDPRate = calculateGDPRate(state1.GDPRate, state1.energyOutput, state1.previousEnergyOutput);
+			double s1GDP = state1.GDP + state1.GDP*s1GDPRate;
+			double s1earn = s1GDP;
+			
+			double s2GDPRate = calculateGDPRate(state2.GDPRate, state2.energyOutput, state2.previousEnergyOutput);
+			double s2GDP = state2.GDP + state2.GDP*s2GDPRate;
+			double s2earn = s2GDP;
+			
+			for (int i=0; i<3; i++) {
+				s1GDPRate = calculateGDPRate(s1GDPRate, state1.energyOutput, state1.energyOutput);
+				s1GDP += s1GDP *s1GDPRate;
+				s1earn += s1GDP;
+				
+				s2GDPRate = calculateGDPRate(s2GDPRate, state2.energyOutput, state2.energyOutput);
+				s2GDP += s2GDP *s2GDPRate;
+				s2earn+= s2GDP;
+			}
+			
+			// If we have a higher GDP
+			if (s1earn > s2earn) {
+				isWorse = false;
+			} else if (s1earn < s2earn) {
+				isBetter = false;
+			}
+			
+			
+
+//			// If we have a higher GDP
+//			if (state1.GDP > state2.GDP) {
+//				isWorse = false;
+//			} else if (state1.GDP < state2.GDP) {
+//				isBetter = false;
+//			}
+//
+//			// If we have a higher GDP
+//			if (state1.GDPRate > state2.GDPRate) {
+//				isWorse = false;
+//			} else if (state1.GDPRate < state2.GDPRate) {
+//				isBetter = false;
+//			}
+//			
+//			// If we make more energy
+//			if (state1.energyOutput > state2.energyOutput) {
+//				isWorse = false;
+//			} else if (state1.energyOutput < state2.energyOutput) {
+//				isBetter = false;
+//			}
 
 			// If we have less carbon output
 			if (state1.carbonDiff < state2.carbonDiff) {
