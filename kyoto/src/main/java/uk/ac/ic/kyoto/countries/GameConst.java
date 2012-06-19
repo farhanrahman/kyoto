@@ -72,6 +72,11 @@ public final class GameConst {
 	private static double MONITORING_PRICE = 847;
 	
 	/**
+	 * Target penalty coefficient
+	 */
+	private static double PENALTY_COEF = 1.3;
+	
+	/**
 	 * Number of ticks in a year
 	 */
 	private static int TICKS_IN_YEAR = 20;
@@ -189,6 +194,10 @@ public final class GameConst {
 
 	public static double getMonitoringPrice() {
 		return MONITORING_PRICE;
+	}
+	
+	public static double getPenaltyCoef() {
+		return PENALTY_COEF;
 	}
 
 	public static int getTicksInYear() {
