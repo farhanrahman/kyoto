@@ -44,15 +44,15 @@ public final class GameConst {
 	/**
 	 * The price of increasing carbon absorption by one unit when we have 100% arable area
 	 */
-	private static double CARBON_ABSORPTION_PRICE_MIN = 2;
+	private static double CARBON_ABSORPTION_PRICE_MIN = 1;
 	/**
 	 * The price of increasing carbon absorption by one unit when we have 0% arable area
 	 */
-	private static double CARBON_ABSORPTION_PRICE_MAX = 75;
+	private static double CARBON_ABSORPTION_PRICE_MAX = 50;
 	/**
 	 * Forest area that absorbs single ton of carbon
 	 */
-	private static double FOREST_CARBON_ABSORPTION = 0.1;
+	private static double FOREST_CARBON_ABSORPTION = 0.01;
 	
 	
 	/**
@@ -74,7 +74,7 @@ public final class GameConst {
 	/**
 	 * Number of ticks in a year
 	 */
-	private static int TICKS_IN_YEAR = 17;
+	private static int TICKS_IN_YEAR = 20;
 	
 	/**
 	 * Number of years in a session

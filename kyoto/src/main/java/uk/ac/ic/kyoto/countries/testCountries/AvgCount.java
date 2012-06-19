@@ -27,13 +27,13 @@ public class AvgCount extends AbstractCountry {
 	protected void behaviour() {
 		
 		try {
-			logger.debug("Cost to reduce carbon by 1m: "+ carbonReductionHandler.getInvestmentRequired(13000000));
+			logger.debug("Cost to reduce carbon by 1m: "+ carbonReductionHandler.getInvestmentRequired(1000000));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		try {
-			logger.debug("Cost to absorb carbon by 1m: "+ carbonAbsorptionHandler.getInvestmentRequired(13000000));
+			logger.debug("Cost to absorb carbon by 1m: "+ carbonAbsorptionHandler.getInvestmentRequired(1000000));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
