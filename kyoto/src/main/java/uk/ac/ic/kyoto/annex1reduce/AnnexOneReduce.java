@@ -20,7 +20,7 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 	public AnnexOneReduce(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP, double GDPRate, double energyOutput, 
 			double carbonOutput) {
 		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput);
-		simulator = new CountrySimulator(this,20);
+		simulator = new CountrySimulator(this,10);
 	}
 
 	@Override
@@ -207,7 +207,8 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 			return 0;
 		}
 		//TODO return something other than a very big number
-		return (Double.MAX_VALUE / 1000000);
+//		return (Double.MAX_VALUE / 1000000);
+		return carbonOffset*600;
 	}
 	
 	/**
@@ -217,7 +218,7 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 	 * @return
 	 */
 	public double getMarketSellPrice(double carbonOffset, int year) {
-		return 0;
+		return carbonOffset*000;
 	}
 	
 	public double getCarbonEnergyIncrease(double industryInvestment){
