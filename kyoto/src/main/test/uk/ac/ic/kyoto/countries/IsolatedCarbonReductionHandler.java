@@ -31,7 +31,7 @@ public final class IsolatedCarbonReductionHandler{
 	 * Cost of reducing carbon by the specified amount.
 	 */
 	public final double getInvestmentRequired(double carbonOutputChange) {
-		return getInvestmentRequired(carbonOutputChange, country.carbonOutput, country.energyOutput);
+		return getInvestmentRequired(Math.floor(carbonOutputChange), country.carbonOutput, country.energyOutput);
 	}
 	
 	/**
@@ -79,7 +79,7 @@ public final class IsolatedCarbonReductionHandler{
 	 * Change in carbon output from specified cost.
 	 */
 	public final double getCarbonOutputChange(double investmentAmount) {
-		return getCarbonOutputChange(investmentAmount, country.carbonOutput, country.energyOutput);
+		return getCarbonOutputChange(Math.floor(investmentAmount), country.carbonOutput, country.energyOutput);
 	}
 	
 	/**
