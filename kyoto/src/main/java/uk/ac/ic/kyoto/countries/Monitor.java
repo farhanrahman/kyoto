@@ -41,6 +41,9 @@ public class Monitor extends EnvironmentService {
 	
 	/* List of all the countries registered for the service */
 	private Map<UUID, AbstractCountry> memberStates = new ConcurrentHashMap<UUID, AbstractCountry>();
+	
+	/* List of all other countries which exist, but are not part of Kyoto */
+	private Map<UUID, AbstractCountry> nonSanctionedStates = new ConcurrentHashMap<UUID, AbstractCountry>();
 
 	/* Structure that counts the number of times the country cheated */
 	private Map<AbstractCountry, Integer> sinBin = new ConcurrentHashMap<AbstractCountry, Integer>();
@@ -70,8 +73,16 @@ public class Monitor extends EnvironmentService {
 		memberStates.put(state.getID(), state);
 	}
 	
+	public void addNonSanctionedState(AbstractCountry state) {
+		nonSanctionedStates.put(state.getID(), state);
+	}
+	
 	public void removeMemberState(AbstractCountry state) {
 		memberStates.remove(state.getID());
+	}
+	
+	public void removeNonSanctionedState(AbstractCountry state) {
+		nonSanctionedStates.remove(state.getID());
 	}
 	
 	@Inject
@@ -83,12 +94,23 @@ public class Monitor extends EnvironmentService {
 	@EventListener
 	public void yearlyFunction(EndOfYearCycle e) {
 		if (e.getEndedYear() >= 0) {
+			nonSanctionedReports();
 			System.out.println("Yearly monitoring starting");
 			checkReports();
 			System.out.println("Checked reports");
 			monitorCountries();
 			System.out.println("Monitored country");
 			carbonTargetingService.targetsForMonitor();
+		}
+	}
+	
+	private void nonSanctionedReports() {
+		for (AbstractCountry country: nonSanctionedStates.values()) {
+			try {
+				country.reportCarbonOutput();
+			} catch (ActionHandlingException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	

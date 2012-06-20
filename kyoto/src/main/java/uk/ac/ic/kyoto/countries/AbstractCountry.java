@@ -156,10 +156,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				
 			environment.act(new AddToCarbonTarget(this), getID(), authkey);
 			
-			if (isKyotoMember() == KyotoMember.ANNEXONE){
-				environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
-			}				
-
+			environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
 			//TODO: Initialize the Action Handlers (DO THEY HAVE TO BE INSTANTIATED ALL THE TIME?)
 			
 			try {
@@ -282,7 +279,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	public final void reportCarbonOutput() throws ActionHandlingException {
-		logger.info("Reporting bullshit");
+		logger.info("Reporting bullshit, I am " + getName());
 		double reportedValue = getReportedCarbonOutput();
 		addToReports(SimTime.get(), reportedValue);
 		environment.act(new SubmitCarbonEmissionReport(reportedValue), getID(), authkey);
