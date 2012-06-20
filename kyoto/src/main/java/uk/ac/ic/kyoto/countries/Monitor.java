@@ -236,8 +236,9 @@ public class Monitor extends EnvironmentService {
 		
 		// Deduct the cash from the country that has cheated
 		// newCash = oldCash - GDP * cash_penalty
+		System.out.println("GDP: " + sanctionee.getGDP());
 		System.out.println("Old money: " + sanctionee.getAvailableToSpend());
-		sanctionee.setAvailableToSpend(Math.round((sanctionee.getAvailableToSpend()-sanctionee.getGDP()*(sinCount-1)* GameConst.getSanctionRate())));
+		sanctionee.setAvailableToSpend(Math.round((sanctionee.getAvailableToSpend()-sanctionee.getGDP()*(sinCount)* GameConst.getSanctionRate())));
 		System.out.println("New money: " + sanctionee.getAvailableToSpend());
 	}
 	

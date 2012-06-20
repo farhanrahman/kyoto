@@ -19,6 +19,7 @@ import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.ic.kyoto.testagents.CheatingAgent;
+import uk.ac.ic.kyoto.testagents.RidiculousReportingAgent;
 import uk.ac.ic.kyoto.testagents.TestAgent;
 import uk.ac.imperial.presage2.core.simulator.InjectedSimulation;
 import uk.ac.imperial.presage2.core.simulator.Scenario;
@@ -275,14 +276,27 @@ public class BugTestingSimulation extends InjectedSimulation {
 		//AbstractParticipant p1 = new TestAgent(Random.randomUUID(), "Stuart", "LOL", 2000000, 1500000, 99999999999.00, 0.03, 70000, 50000);
 		//AbstractParticipant p2 = new TestAgent(Random.randomUUID(), "Lolocaust", "LOL2", 500000, 200000, 100000, 0.07, 10000, 7000);
 		AbstractParticipant p3 = new CheatingAgent(Random.randomUUID(), "Kekeke", "KEK", 10000, 2000, 500000, 0.01, 70000, 60000);
+		AbstractParticipant p5 = new CheatingAgent(Random.randomUUID(), "Kekeke2", "KE2", 10000, 2000, 500000, 0.01, 70000, 60000);
+		AbstractParticipant p6 = new CheatingAgent(Random.randomUUID(), "Kekeke3", "KE3", 10000, 2000, 500000, 0.01, 70000, 60000);
+		AbstractParticipant p7 = new CheatingAgent(Random.randomUUID(), "Kekeke4", "KE4", 10000, 2000, 500000, 0.01, 70000, 60000);
+		AbstractParticipant p4 = new RidiculousReportingAgent(Random.randomUUID(), "Evilstan", "EVL", 5000, 1000, 20000, 0.05, 1000000, 800000);
 		
 		//s.addParticipant(p1);
 		//s.addParticipant(p2);
 		s.addParticipant(p3);
+		s.addParticipant(p4);
+		s.addParticipant(p5);
+		s.addParticipant(p6);
+		s.addParticipant(p7);
+		
 		
 		//CarbonData1990.addCountry("LOL", 50000);
 		//CarbonData1990.addCountry("LOL2", 9000);
 		CarbonData1990.addCountry("KEK", 60000);
+		CarbonData1990.addCountry("KE2", 60000);
+		CarbonData1990.addCountry("KE3", 60000);
+		CarbonData1990.addCountry("KE4", 60000);
+		CarbonData1990.addCountry("EVL", 750000);
 
 	}
 }

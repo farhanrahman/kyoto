@@ -347,7 +347,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * @param t: Simulation time at which report submission was made
 	 * @return
 	 */
-	public Double reportCarbonEmission(Time t){
+	public final Double reportCarbonEmission(Time t){
 		
 		// TODO implement a method to cheat
 		this.addToReports(t, carbonOutput);
