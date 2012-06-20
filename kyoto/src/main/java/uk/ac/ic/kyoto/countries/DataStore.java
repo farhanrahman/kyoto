@@ -34,6 +34,7 @@ public class DataStore {
 	public static final String carbonOutputKey = "carbon_output";
 	public static final String energyOutputKey = "energy_output";
 	public static final String isKyotoMemberKey = "is_kyoto_member";
+	public static final String cheated = "cheated";
 	
 	/**
 	 * 

@@ -282,6 +282,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		logger.info("Reporting bullshit, I am " + getName());
 		double reportedValue = getReportedCarbonOutput();
 		addToReports(SimTime.get(), reportedValue);
+		dumpCheatingData(reportedValue,this.getCarbonOutput());
 		environment.act(new SubmitCarbonEmissionReport(reportedValue), getID(), authkey);
 	}
 	
@@ -452,7 +453,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
     // Log simulation data function
     //================================================================================
 	/**
-	 * Stores all simulation data into MongoDB
+	 * Logs simulation data into local datastore
 	 * @author waffles
 	 */
 	private final void logSimulationData() {
@@ -471,17 +472,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			 */
 	}
 	
-	private final void dumpSimulationData(){
-		
-		this.persist.setProperty(DataStore.gdpKey, this.dataStore.getGdpHistory().toString());
-		this.persist.setProperty(DataStore.gdpRateKey, this.dataStore.getGdpRateHistory().toString());
-		this.persist.setProperty(DataStore.availableToSpendKey, this.dataStore.getAvailableToSpendHistory().toString());
-		this.persist.setProperty(DataStore.emissionTargetKey, this.dataStore.getEmissionsTargetHistory().toString());
-		this.persist.setProperty(DataStore.carbonOffsetKey, this.dataStore.getCarbonOffsetHistory().toString());
-		this.persist.setProperty(DataStore.carbonOutputKey, this.dataStore.getCarbonOutputHistory().toString());
-		this.persist.setProperty(DataStore.isKyotoMemberKey, this.dataStore.getIsKyotoMemberHistory().toString());
-	}
-	
+	/**
+	 * Dumps the data into the database for current tick
+	 */
 	private final void dumpCurrentTickData(){
 		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.gdpKey, Double.toString(this.getGDP()));
 		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.gdpRateKey, Double.toString(this.getGDPRate()));
@@ -490,11 +483,20 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.carbonOffsetKey, Double.toString(this.getCarbonOffset()));
 		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.carbonOutputKey, Double.toString(this.getCarbonOutput()));
 		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.isKyotoMemberKey, this.isKyotoMember().name());
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.cheated, "n/a");
 	}
 	
-	@Override
-	public void onSimulationComplete(){
-		this.dumpSimulationData();
+	/**
+	 * Dumps whether the participant was cheating or not for the current simulation tick
+	 * @param reportedValue
+	 * @param originalOutput
+	 */
+	public final void dumpCheatingData(Double reportedValue, Double originalOutput){
+		if(reportedValue.equals(originalOutput)){
+			this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.cheated, "reported true emission");
+		}else{
+			this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.cheated, "cheated");
+		}
 	}
 	
 	//================================================================================

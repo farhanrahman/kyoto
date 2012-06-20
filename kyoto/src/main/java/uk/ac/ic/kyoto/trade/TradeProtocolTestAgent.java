@@ -74,17 +74,16 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 			//if(counter == 0){
 				int quantity = 10;
 				double unitCost = 2;
-				//this.broadcastBuyOffer(quantity, unitCost);
+				this.broadcastBuyOffer(quantity, unitCost);
 			//	counter++;
 			
 			  	InvestmentType i = InvestmentType.ABSORB;
 			  	//InvestmentType i = InvestmentType.REDUCE;
 		  
-			  	this.broadcastInvesteeOffer(quantity, i);
+//			  	this.broadcastInvesteeOffer(quantity, i);
 			
 			//}
 		}
-		
 		
 		//this.tradeProtocol.incrementTime();
 		logger.info("Myname: " + this.getName() + ", I have this much money: " + this.getAvailableToSpend() + ".");
