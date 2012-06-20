@@ -75,7 +75,7 @@ public class GDPTest extends InjectedSimulation {
 		// Germany Stats
 		final double landArea = 348672;
 		final double arableLandArea = 115698;
-		final double GDP = 1976272.728895;
+		final double GDP = 1976272728895.0;
 		final double energyOutput = 1054601548;
 		final double carbonOutput = 895533000;
 		final double GDPRate = 0.0206;

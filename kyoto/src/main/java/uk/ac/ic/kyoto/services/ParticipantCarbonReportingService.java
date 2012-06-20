@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.apache.log4j.Logger;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
@@ -46,6 +47,7 @@ public class ParticipantCarbonReportingService extends EnvironmentService {
 	public Map<UUID, Map<Integer,Double>> getAllReports(){
 		Map<UUID,Map<Integer,Double>> allReports = new HashMap<UUID,Map<Integer,Double>>();
 		//need to get a list of all the participants
+		//TODO Should this return ImmutableMap?
 		return allReports;
 	}
 	
@@ -61,10 +63,10 @@ public class ParticipantCarbonReportingService extends EnvironmentService {
 		Serializable data = this.sharedState.get(CarbonReportingService.name, participantId);
 		try{
 			report = (Map<Integer,Double>) data;
-			return report;
+			return ImmutableMap.copyOf(report);
 		}catch(ClassCastException e){
 			logger.warn(e);
-			return null;
+			throw new NullPointerException();
 		}
 
 	}

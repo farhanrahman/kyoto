@@ -24,39 +24,42 @@ public final class GameConst {
 	 */
 	private static double PERCENTAGE_OF_GDP = 0.005;
 	
+
+	/**
+	 * The cost of investment in one extra ton of carbon per year
+	 * A larger number increases the cost of carbon investment
+	 */
+	private static double CARBON_INVESTMENT_PRICE = 200;
 	
 	
 	/**
 	 * The price of reducing carbon reduction by one unit when we have 100% dirty industry
 	 */
-	private static double CARBON_REDUCTION_PRICE_MIN = 10;
+	private static double CARBON_REDUCTION_PRICE_MIN = 60;
 	/**
 	 * The price of reducing carbon reduction by one unit when we have 0% dirty industry
 	 */
-	private static double CARBON_REDUCTION_PRICE_MAX = 200;
+	private static double CARBON_REDUCTION_PRICE_MAX = 1200;
 
-	/**
-	 * The cost of investment in one extra ton of carbon per year
-	 */
-	private static double CARBON_INVESTMENT_PRICE = 1;
 	
 	
 	/**
 	 * The price of increasing carbon absorption by one unit when we have 100% arable area
 	 */
-	private static double CARBON_ABSORPTION_PRICE_MIN = 1;
+	private static double CARBON_ABSORPTION_PRICE_MIN = 15;
 	/**
 	 * The price of increasing carbon absorption by one unit when we have 0% arable area
 	 */
-	private static double CARBON_ABSORPTION_PRICE_MAX = 50;
+	private static double CARBON_ABSORPTION_PRICE_MAX = 300;
 	/**
 	 * Forest area that absorbs single ton of carbon
 	 */
-	private static double FOREST_CARBON_ABSORPTION = 0.01;
+	private static double FOREST_CARBON_ABSORPTION = 0.0156;
 	
 	
 	/**
 	 * Percentage of GDP that is levied from availiableToSpend for monitoring
+	 * Currently allows for a 10th of countries to be monitored.
 	 */
 	private static double MONITOR_COST_PERCENTAGE = 0.00025;   // 2.5% of absolute cash given out
 	

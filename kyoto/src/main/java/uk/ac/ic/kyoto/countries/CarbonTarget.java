@@ -91,7 +91,7 @@ public class CarbonTarget extends EnvironmentService {
 	}
 	
 	public double queryYearTarget(UUID countryID, int year) {
-		countryObject obj = findCountryObject(countryID);
+		countryObject obj = findCountryObject(countryID);				
 		return obj.yearTargets.get(year);
 	}
 	
@@ -180,14 +180,14 @@ public class CarbonTarget extends EnvironmentService {
 		return result;
 	}
 	
-	private countryObject findCountryObject(UUID countryID) {
-		countryObject result = null;
+	private countryObject findCountryObject(UUID countryID){
 		for (countryObject country : participantCountries) {
 			if (country.obj.getID() == countryID) {
-				result = country;
+				return country;
 			}
-		}		
-		return result;
+		}
+		
+		throw new NullPointerException("countryID " + countryID + " does not exist in list of carbon targt participants");
 	}
 	
 	@EventListener

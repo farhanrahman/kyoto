@@ -55,7 +55,7 @@ public class CheatingAgent extends AbstractCountry {
 	}
 	
 	@Override
-	protected void reportCarbonOutput() throws ActionHandlingException {
+	public void reportCarbonOutput() throws ActionHandlingException {
 		double output = getCarbonOutput();
 		logger.info("Actual output: " + output);
 		logger.info("Reported output: " + output/2);
