@@ -151,7 +151,7 @@ public final class CarbonReductionHandler{
 				}
 			}
 			else {
-				throw new NotEnoughCashException();
+				throw new NotEnoughCashException(this.country.availableToSpend, investmentAmount);
 			}
 		}
 		catch (NotEnoughCarbonOutputException e) {
