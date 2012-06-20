@@ -91,7 +91,6 @@ public class Monitor extends EnvironmentService {
 	}
 
 	
-	@SuppressWarnings("unused")
 	@EventListener
 	public void initialize(EndOfTimeCycle e) {
 		if (SimTime.get().intValue() == 1) {
