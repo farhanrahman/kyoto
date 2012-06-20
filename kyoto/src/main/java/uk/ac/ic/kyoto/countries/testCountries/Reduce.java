@@ -5,10 +5,8 @@ import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.Offer;
 import uk.ac.ic.kyoto.exceptions.NotEnoughCarbonOutputException;
 import uk.ac.ic.kyoto.exceptions.NotEnoughCashException;
-import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
-import uk.ac.imperial.presage2.core.simulator.SimTime;
 
 /**
  * 
@@ -34,12 +32,25 @@ public class Reduce extends AbstractCountry {
 		/*
 		 * Attempt to minimise carbon output, spend all available money on carbon absorption & reduction
 		 */
+		int time = timeService.getCurrentTick();
+		
 		double reduction = carbonReductionHandler.getCarbonOutputChange(getAvailableToSpend());
+		double cost = carbonReductionHandler.getInvestmentRequired(reduction);
+		
+		while (cost > getAvailableToSpend()) {
+			reduction = carbonReductionHandler.getCarbonOutputChange(getAvailableToSpend()*.999);
+			cost = carbonReductionHandler.getInvestmentRequired(reduction);
+		}
+		
 		logger.debug("Available Cash: " + getAvailableToSpend());
 		logger.debug("CO2 Reduction Max: "+ reduction);
 		logger.debug("This should cost: " + carbonReductionHandler.getInvestmentRequired(reduction));
-		if (reduction < 1){
-			logger.debug("Reduction too small");
+		logger.debug("Current GDP: " + this.getGDP());
+		logger.debug("Current Energy Output: " + this.getEnergyOutput());
+		logger.debug("Current CO2 Output: " + this.getCarbonOutput());
+
+		if (reduction < 0.1){
+			logger.debug("Reduction too small, don't bother!");
 		} else {
 			logger.debug("Attempting reduction of: "+reduction+" Tonnes");
 			
@@ -51,18 +62,6 @@ public class Reduce extends AbstractCountry {
 			} catch (NotEnoughCashException e) {
 				throw new RuntimeException(e);
 			}
-
-			logger.debug("Current GDP: " + this.getGDP());
-			logger.debug("Current Energy Output: " + this.getEnergyOutput());
-			logger.debug("Current CO2 Output: " + this.getCarbonOutput());
-		}
-		
-		int time = timeService.getCurrentTick();
-		
-		if (this.persist != null) {
-			this.persist.getState(time).setProperty("GDP", new Double(this.getGDP()).toString());
-			this.persist.getState(time).setProperty("Energy Output", new Double(this.getEnergyOutput()).toString());
-			this.persist.getState(time).setProperty("CO2 Output", new Double(this.getCarbonOutput()).toString());
 		}
 	}
 

@@ -116,7 +116,7 @@ public class BIC extends AbstractCountry {
 	protected void initialiseCountry() {
 		// TODO Auto-generated method stub
 		energy_aim = getEnergyOutput() + CountryConstants.INITIAL_ENERGY_THRESHOLD ; //initialise energy aim.
-		environment_friendly_target = CountryConstants.INITIAL_CARBON_TARGET; //initialise a target 
+		environment_friendly_target = getCarbonOutput() + CountryConstants.INITIAL_CARBON_TARGET; //initialise a target 
 		setKyotoMemberLevel(KyotoMember.NONANNEXONE);
 		
 	}
@@ -293,20 +293,20 @@ public class BIC extends AbstractCountry {
 				imaginary_tick = current_tick % 365 ;
 			if (success)
 			{ // country met goal, change goal
-				if ((imaginary_tick < 350)) //steady increase every tick
+				if ((imaginary_tick < 355)) //steady increase every tick
 				{
 					energy_aim = previous_aim + CountryConstants.STEADY_TICK_ENERGY_INCREASE;
 					
 				}
-				if (imaginary_tick == 350)
+				if (imaginary_tick == 355)
 				{
 				
-				times_aim_met = 0; //reset counter
+				times_aim_met = 0; //reset counter, wait a tick to operate
 				
 				}
-				if (imaginary_tick > 350)
+				if (imaginary_tick > 355)
 				{
-					if (imaginary_tick == 365)
+					if (imaginary_tick == 365) //reset the energy aim every year
 					{
 						energy_aim = 30;
 						
