@@ -329,6 +329,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	/**
 	 * Private setter function for personal reports
+	 * If you don't do this carbon reporting service does not work!!
 	 * @param simTime
 	 * @param emission
 	 * @return
