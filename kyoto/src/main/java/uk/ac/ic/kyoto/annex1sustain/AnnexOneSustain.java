@@ -95,23 +95,6 @@ public class AnnexOneSustain extends AbstractCountry {
     //================================================================================
 	
 	/**
-	 * Function called at the end of each tick.
-	 * - Updates the internal variables.
-	 * - Decides on and initiates investments
-	 * 
-	 * @param e
-	 * The event that is called every simulation tick
-	 */
-	@EventListener
-	public void TickFunction(EndOfTimeCycle e) {
-		//updateUncommittedTransactions();
-		//updateCommittedTransactions();
-		//updateInternalPrice();
-		//logger.info("Internal Data of Post-Communist Country " + this.getName() + " was updated");
-		//makeInvestments();
-	}
-	
-	/**
 	 * Function called at the beginning of each year.
 	 */
 	@Override
@@ -132,9 +115,48 @@ public class AnnexOneSustain extends AbstractCountry {
 	
 	
 	protected void investInIndustry() {
-		// Find a point at which investing in industry and scaling back carbon with reduction/absorption
-		//  costs availableToSpend() * constant.
-		// Use binary search, do the cheaper option, or reduction if not enough land.
+		double totalInvestment;
+		double industryInvestment;
+		double investmentDiff;
+		double carbonGained = 0;
+		double carbonRedCost = 0;
+		double carbonAbsCost = 0;
+		double carbonAbsTrees = 0;
+		
+		try {
+			totalInvestment = this.getAvailableToSpend() * Constants.INDUSTRY_GROWTH_MONEY_PERCENTAGE / 2;
+			industryInvestment = totalInvestment / 2;
+			investmentDiff = industryInvestment;
+			
+			for (int i = 0 ; i < 30 ; i++) {
+				investmentDiff /= 2;
+				carbonGained = energyUsageHandler.calculateCarbonIndustryGrowth(industryInvestment);
+				carbonRedCost = carbonReductionHandler.getInvestmentRequired(carbonGained, (this.getCarbonOutput() + carbonGained), (this.getEnergyOutput() + carbonGained));
+				carbonAbsCost = carbonAbsorptionHandler.getInvestmentRequired(carbonGained);
+				carbonAbsTrees = carbonAbsorptionHandler.getForestAreaRequired(carbonGained);
+				
+				if ((carbonRedCost + industryInvestment < totalInvestment) ||
+					((carbonAbsCost + industryInvestment < totalInvestment) && (carbonAbsTrees < this.getArableLandArea())))
+				{
+					industryInvestment += investmentDiff;
+				}
+				else {
+					industryInvestment -= investmentDiff;
+				}
+			}
+			
+			energyUsageHandler.investInCarbonIndustry(industryInvestment);
+			
+			if ((carbonAbsCost < carbonRedCost) && (carbonAbsTrees < this.getArableLandArea())) {
+				carbonAbsorptionHandler.investInCarbonAbsorption(carbonGained);
+			}
+			else {
+				carbonReductionHandler.investInCarbonReduction(carbonGained);
+			}
+		}
+		catch (Exception e) {
+			logger.warn("Problem with investing in industry: " + e.getMessage());
+		}
 	}
 	
 	protected void scaleDecisionTreshold() {
