@@ -13,6 +13,7 @@ import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfYearCycle;
 import uk.ac.ic.kyoto.services.GlobalTimeService.TimeToMonitor;
+import uk.ac.imperial.presage2.core.environment.ActionHandlingException;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentServiceProvider;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
@@ -82,19 +83,25 @@ public class Monitor extends EnvironmentService {
 	public void yearlyFunction(TimeToMonitor e) {
 		checkReports();
 		monitorCountries();
+		carbonTargetingService.targetsForMonitor();
 	}
 	
 	private void checkReports () {
 		for (AbstractCountry country : memberStates.values()) {
 			if(country instanceof AbstractCountry){
-				double reportedEmission = carbonReportingService.getReport(country.getID(), SimTime.get().intValue()-1);
-				System.out.println("Current Year: " + timeService.getCurrentYear());
-				System.out.println("This Country ID: " + country.getID());
-				System.out.println("carbotTargetingService: " + carbonTargetingService.toString());
-				double emissionTarget = carbonTargetingService.queryYearTarget(country.getID(), (timeService.getCurrentYear()));
-	
-				if (Math.round(reportedEmission) > Math.round(emissionTarget)) {
-					targetSanction(country,  reportedEmission - emissionTarget);
+				try {
+					country.reportCarbonOutput();
+					double reportedEmission = carbonReportingService.getReport(country.getID(), SimTime.get().intValue()-1);
+					System.out.println("Current Year: " + timeService.getCurrentYear());
+					System.out.println("This Country ID: " + country.getID());
+					System.out.println("carbotTargetingService: " + carbonTargetingService.toString());
+					double emissionTarget = carbonTargetingService.queryYearTarget(country.getID(), (timeService.getCurrentYear()-1));
+					
+					if (Math.round(reportedEmission) > Math.round(emissionTarget)) {
+						targetSanction(country,  reportedEmission - emissionTarget);
+					}
+				} catch (ActionHandlingException e) {
+					e.printStackTrace();
 				}
 			} else {
 				throw new RuntimeException("this country is not an instance of AbstractCountry");
@@ -158,6 +165,7 @@ public class Monitor extends EnvironmentService {
 						targetSanction(country, targetDiff);
 					}
 				}
+				country.updateCarbonOffsetYearly();
 			}
 			// TODO log the information about it
 		} else {

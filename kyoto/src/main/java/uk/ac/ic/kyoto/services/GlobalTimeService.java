@@ -50,13 +50,13 @@ public class GlobalTimeService extends EnvironmentService {
 	@EventListener
 	public void updateTickCounter (EndOfTimeCycle e) {
 		System.out.println("updateTickCounter called. SimTime: "+SimTime.get().intValue());
-		if (SimTime.get().intValue() - getCurrentYear() * ticksInYear == ticksInYear-2) {
-			System.out.println("2 ticks before the end of year: "+getCurrentYear());
+		if (SimTime.get().intValue() - getCurrentYear() * ticksInYear == ticksInYear) {
+			System.out.println("END OF YEAR "+getCurrentYear());
 			TimeToMonitor m = new TimeToMonitor(SimTime.get().intValue());
 			eb.publish(m);
 		}
-		if (SimTime.get().intValue() - getCurrentYear() * ticksInYear == ticksInYear-1) {
-			System.out.println("1 tick before the end of year: "+getCurrentYear());
+		if (SimTime.get().intValue() - getCurrentYear() * ticksInYear == ticksInYear) {
+			System.out.println("END OF YEAR "+getCurrentYear());
 			EndOfYearCycle y = new EndOfYearCycle(getCurrentYear());
 			eb.publish(y);
 		}

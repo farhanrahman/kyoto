@@ -217,13 +217,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 					if (kyotoMemberLevel == KyotoMember.ANNEXONE) {
 						MonitorTax();
 					}
-
-					updateCarbonOffsetYearly();
-					try {
-						reportCarbonOutput();
-					} catch (ActionHandlingException e) {
-						e.printStackTrace();
-					}
 					
 					yearlyFunction();
 				}
@@ -278,7 +271,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return this.executeLock;
 	}
 	
-	protected void reportCarbonOutput() throws ActionHandlingException {
+	public void reportCarbonOutput() throws ActionHandlingException {
 		logger.info("Reporting bullshit");
 		environment.act(new SubmitCarbonEmissionReport(carbonOutput), getID(), authkey);
 	}
@@ -416,7 +409,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * Adjusts the amount of CarbonOffset depending on the last years usage
 	 * @author ct
 	 */
-	private final void updateCarbonOffsetYearly() {
+	final void updateCarbonOffsetYearly() {
 		if (kyotoMemberLevel == KyotoMember.ANNEXONE) {
 			if (emissionsTarget <= carbonOffset +carbonAbsorption +carbonOutput ){
 				if (carbonOffset > 0) {

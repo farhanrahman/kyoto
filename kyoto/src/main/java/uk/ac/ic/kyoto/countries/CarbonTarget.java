@@ -197,8 +197,7 @@ public class CarbonTarget extends EnvironmentService {
 		}
 	}
 	
-	@EventListener
-	public void onEndOfYear(EndOfYearCycle e) {
+	public void targetsForMonitor() {
 		if (timeService.getCurrentYear() != 0) {
 			if ((timeService.getCurrentYear() % timeService.getYearsInSession()) == 0)
 			{
