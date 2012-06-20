@@ -109,7 +109,7 @@ public class CarbonTarget extends EnvironmentService {
 		
 		countryObject target= findCountryObject(countryID);
 		target.penalty = penaltyValue;
-		generateYearTarget(target);
+		/*generateYearTarget(target);*/
 		
 		this.exclusiveAccess.release();
 	}
@@ -232,10 +232,19 @@ public class CarbonTarget extends EnvironmentService {
 	 */
 	private void generateYearTarget(countryObject country)
 	{
+		int year = timeService.getCurrentYear();
+		if (timeService.getCurrentTick() > 5) {
+			year++;
+		}
+		
 		double sessionProgress = (double) ( timeService.getCurrentYear() % GameConst.getYearsInSession()) / GameConst.getYearsInSession();
 		double diffTargets = country.lastSessionTarget - country.currentSessionTarget;
 		double newTarget = country.lastSessionTarget - (diffTargets * sessionProgress) - country.penalty;
-		country.yearTargets.put(timeService.getCurrentYear(), newTarget);
+		
+		System.out.println("About to update target for year " + (year));
+		country.yearTargets.put(year, newTarget);
+		System.out.println("Just updated target for year " + (year));
+		System.out.println("Target = " + country.yearTargets.get(year));
 		country.obj.emissionsTarget = newTarget;
 	}	
 	
@@ -245,7 +254,11 @@ public class CarbonTarget extends EnvironmentService {
 		double worldOutput = 0;
 		double rogueCarbonOutput = 0;
 		
-		int lastYear = timeService.getCurrentYear() - 1;
+		int lastYear = timeService.getCurrentYear() -1;
+		int session = timeService.getCurrentSession();
+		if (timeService.getCurrentTick()>5) {
+			session++;
+		}
 		
 		for (countryObject country : participantCountries) {
 			double output = getReportedCarbonOutput(country.obj.getID(), lastYear);
@@ -261,7 +274,10 @@ public class CarbonTarget extends EnvironmentService {
 			if (country.obj.isKyotoMember() == KyotoMember.ANNEXONE){
 				double output = getReportedCarbonOutput(country.obj.getID(), lastYear);
 				country.proportion = output / (worldOutput - rogueCarbonOutput);
+				System.out.println("About to update target for session " + session);
 				generateSessionTarget(country, kyotoTarget);
+				System.out.println("Just updated target for session " + session);
+				System.out.println("Target = " + country.currentSessionTarget);
 			}
 		}
 	}

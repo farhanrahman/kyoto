@@ -88,6 +88,8 @@ public class Monitor extends EnvironmentService {
 	
 	private void checkReports () {
 		for (AbstractCountry country : memberStates.values()) {
+			carbonTargetingService.targetsForMonitor();
+
 			if(country instanceof AbstractCountry){
 				try {
 					country.reportCarbonOutput();
