@@ -449,7 +449,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 		try{
 			switch(trade.getType()){
 			case BUY:	if(this.participant.getAvailableToSpend() < trade.getTotalCost()){
-							throw new NotEnoughCashException();
+							throw new NotEnoughCashException(this.participant.getAvailableToSpend(), trade.getTotalCost());
 						}
 						participant.receiveOffset(trade.getQuantity());
 						participant.payMoney(trade.getTotalCost());
@@ -473,7 +473,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 
 			case INVEST:	
 						if(this.participant.getAvailableToSpend() < trade.getTotalCost()){
-							throw new NotEnoughCashException();
+							throw new NotEnoughCashException(this.participant.getAvailableToSpend(), trade.getTotalCost());
 						}
 							participant.receiveOffset(trade.getQuantity());
 							participant.payMoney(trade.getTotalCost());
@@ -492,6 +492,9 @@ public abstract class TradeProtocol extends FSMProtocol {
 									participant.carbonAbsorptionHandler.investInCarbonAbsorption(trade.getQuantity());
 								} catch (NotEnoughCashException e) {
 									logger.warn(e);
+									System.err.println("Country: " + participant.ISO +
+											"\nAvailable to spend: " + e.getAvailableToSpend() +
+											"\nInvestment required: "  + e.getInvestmentRequired());
 									return false; /*Trade must fail*/
 								} catch (NotEnoughLandException e) {
 									logger.warn(e);
@@ -519,6 +522,9 @@ public abstract class TradeProtocol extends FSMProtocol {
 									return false; /*Trade must fail*/
 								} catch (NotEnoughCashException e) {
 									logger.warn(e);
+									System.err.println("Country: " + participant.ISO +
+											"\nAvailable to spend: " + e.getAvailableToSpend() +
+											"\nInvestment required: "  + e.getInvestmentRequired());
 									return false; /*Trade must fail*/
 								} catch (Exception e) {
 									logger.warn(e);
@@ -539,6 +545,9 @@ public abstract class TradeProtocol extends FSMProtocol {
 		}catch(NotEnoughCashException e){
 			/*Trade MUST FAIL*/
 			logger.warn(e);
+			System.err.println("Country: " + participant.ISO +
+					"\nAvailable to spend: " + e.getAvailableToSpend() +
+					"\nInvestment required: "  + e.getInvestmentRequired());
 			return false;
 		}
 		
