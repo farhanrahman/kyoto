@@ -649,7 +649,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 	 * @throws ClassCastException
 	 * @throws Exception
 	 */
-	public static OfferMessage decodeInput(Input in) throws ClassCastException, IllegalArgumentException{
+	public OfferMessage decodeInput(Input in) throws ClassCastException, IllegalArgumentException{
 		if(in instanceof Message){
 				@SuppressWarnings("unchecked")
 				Message<OfferMessage> m = (Message<OfferMessage>) in;
@@ -669,18 +669,24 @@ public abstract class TradeProtocol extends FSMProtocol {
 	 * @param unitcost
 	 * @param o
 	 */
-	public void respondToOffer(NetworkAddress from, double quantity, double unitcost, OfferMessage o){
-		if(!this.getActiveConversationMembers()
-					.contains(from)){
-			try {
-				this.offer(
-						from, 
-						quantity, 
-						unitcost, 
-						o);
-			} catch (FSMException e) {
-				logger.warn(e);
-			}
+	public void respondToOffer(NetworkAddress from, double quantity, double unitcost, OfferMessage o) throws FSMException, IllegalArgumentException{
+		if(this.getActiveConversationMembers().contains(from)){
+			throw new IllegalArgumentException("A conversation with this agent already exists");
+		} else {
+			this.offer(
+					from, 
+					quantity, 
+					unitcost, 
+					o);
+		}
+	}
+	
+	public NetworkAddress extractNetworkAddress(Input in) throws IllegalArgumentException{
+		if(in instanceof Message){
+			Message<?> message = (Message<?>) in;
+			return message.getFrom();
+		}else{
+			throw new IllegalArgumentException("Argument not an instance of Message");
 		}
 	}
 }
