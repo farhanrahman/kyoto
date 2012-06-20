@@ -203,4 +203,54 @@ public class AnnexOneSustain extends AbstractCountry {
 		}
 	}
 	
+	
+	//================================================================================
+    // Trade decisions
+    //================================================================================
+	
+	protected double calculateExpectedProfit(double carbon, double price) {
+		double expectedProfit;
+		
+		try {
+			expectedProfit = calculateSessionOffsetGain(carbon) * price * (decisionTreshold + generateRandomModifier());
+		}
+		catch (Exception e) {
+			logger.warn("Problem with calculating expected profit of invesment: " + e.getMessage());
+			expectedProfit = 0;
+		}
+		
+		return expectedProfit;
+	}
+	
+	protected double generateRandomModifier() {
+		double randomModifier;
+		
+		try {
+			randomModifier = (Math.random() - 0.5) * 2 * Constants.DECISION_TRESHOLD_RANDOM_MODIFIER;
+		}
+		catch (Exception e) {
+			logger.warn("Problem with generating random modifier: " + e.getMessage());
+			randomModifier = 0;
+		}
+		
+		return randomModifier;
+	}
+	
+	protected double calculateSessionOffsetGain(double carbonDifference) {
+		double sessionOffsetGain;
+		
+		try {
+			int yearsInSession = timeService.getYearsInSession();
+			int yearNumber = timeService.getCurrentYear() % yearsInSession;
+			int yearsUntilEnd = yearsInSession - yearNumber - 1;
+			sessionOffsetGain = carbonDifference * yearsUntilEnd;
+		}
+		catch (Exception e) {
+			logger.warn("Problem with calculating offset gain :" + e.getMessage());
+			sessionOffsetGain = 0;
+		}
+		
+		return sessionOffsetGain;
+	}
+	
 }
