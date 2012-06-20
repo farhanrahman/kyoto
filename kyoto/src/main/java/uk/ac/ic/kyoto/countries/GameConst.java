@@ -27,8 +27,9 @@ public final class GameConst {
 
 	/**
 	 * The cost of investment in one extra ton of carbon per year
+	 * A larger number increases the cost of carbon investment
 	 */
-	private static double CARBON_INVESTMENT_PRICE = 1;
+	private static double CARBON_INVESTMENT_PRICE = 200;
 	
 	
 	/**

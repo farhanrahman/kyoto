@@ -17,35 +17,54 @@ public class GDPTestCount extends AbstractCountry {
 				carbonOutput);
 		// TODO Auto-generated constructor stub
 	}
-
+	int i =0 ;
 	@Override
 	protected void behaviour() {
 		double GDPRate = getGDPRate();
 		double GDP = getGDP();
-		try {
-			System.out.println("Investment of 100000: " + energyUsageHandler.calculateCarbonIndustryGrowth(100000));
-			energyUsageHandler.investInCarbonIndustry(100000);
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		double sum = (((getEnergyOutput()-getPrevEnergyOut())/getPrevEnergyOut())*GameConst.getEnergyGrowthScaler() +getGDPRate()*100)/2;
-		GDPRate = GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler());
-		
-		GDPRate /= 100;
 		double prevGDP = GDP;
-		GDP += GDP*GDPRate;
-		double cash = GDP*GameConst.getPercentageOfGdp()-prevGDP*GameConst.getPercentageOfGdp();
+		double cash = 0;
+		double prevGDPRate = GDPRate;
+		/*
+		 * Looking to find the difference between if there had been investment and if there hadn't
+		 */
+//		if (i == 0){
+//			try {
+//				System.out.println("Investment of 1000000: " + energyUsageHandler.calculateCarbonIndustryGrowth(1000000));
+//				energyUsageHandler.investInCarbonIndustry(1000000);
+//			} catch (IllegalArgumentException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			i++;
+//			
+//		}
+//		
+//		double sum = (((getEnergyOutput()-getPrevEnergyOut())/getPrevEnergyOut())*GameConst.getEnergyGrowthScaler() +getGDPRate()*100)/2;
+//		GDPRate = GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler());
+//		GDPRate /= 100;
+//		
+//		double prevSum = (((getPrevEnergyOut()-getPrevEnergyOut())/getPrevEnergyOut())*GameConst.getEnergyGrowthScaler() +getGDPRate()*100)/2;
+//		double prevGDPRate = GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-prevSum*GameConst.getGrowthScaler());;
+//		prevGDPRate /=100;
+//		
+//		GDP += GDP*GDPRate;
+//		prevGDP +=prevGDP*prevGDPRate;
+//		cash += GDP*GameConst.getPercentageOfGdp()-prevGDP*GameConst.getPercentageOfGdp();
+//		
 		
-		logger.debug("Previous GDP: " + getGDP());
+		
+		
+		
+		logger.debug("Previous GDP: " + prevGDP);
 		logger.debug("Current GDP: " + GDP);
 		logger.debug("Current Return Cash: " + cash);
+		logger.debug("Previous GDP Rate: " +prevGDPRate*100);
 		logger.debug("Current GDP Rate: " + GDPRate*100);
-		
-		
+		logger.debug("Availiable to Spend: " + getAvailableToSpend());
 		logger.debug("Current Energy Output: " + this.getEnergyOutput());
 		logger.debug("Current Previous Energy Output: " + this.getPrevEnergyOut());
 		logger.debug("Current CO2 Output: " + this.getCarbonOutput());
