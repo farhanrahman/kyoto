@@ -639,4 +639,48 @@ public abstract class TradeProtocol extends FSMProtocol {
 	public UUID getAuthkey() {
 		return authkey;
 	}
+	
+	/*UTILITY FUNCTIONS*/
+	/**
+	 * Static function that decodes an object of type
+	 * Input to type OfferMessage
+	 * @param in
+	 * @return a decoded Input in to OfferMessage
+	 * @throws ClassCastException
+	 * @throws Exception
+	 */
+	public static OfferMessage decodeInput(Input in) throws ClassCastException, IllegalArgumentException{
+		if(in instanceof Message){
+				@SuppressWarnings("unchecked")
+				Message<OfferMessage> m = (Message<OfferMessage>) in;
+				OfferMessage o = m.getData();
+				return o;
+
+		}else{
+			throw new IllegalArgumentException("Input not instanceof Message");
+		}
+	}
+	
+	/**
+	 * Function allowing participants to respond to offers without
+	 * doing all the internal conversions
+	 * @param from
+	 * @param quantity
+	 * @param unitcost
+	 * @param o
+	 */
+	public void respondToOffer(NetworkAddress from, double quantity, double unitcost, OfferMessage o){
+		if(!this.getActiveConversationMembers()
+					.contains(from)){
+			try {
+				this.offer(
+						from, 
+						quantity, 
+						unitcost, 
+						o);
+			} catch (FSMException e) {
+				logger.warn(e);
+			}
+		}
+	}
 }
