@@ -333,7 +333,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * @param emission
 	 * @return
 	 */
-	private Map<Integer,Double> addToReports(Time simTime, double emission){
+	protected Map<Integer,Double> addToReports(Time simTime, double emission){
 		this.carbonEmissionReports.put(simTime.intValue(), emission);
 		return this.carbonEmissionReports;
 	}

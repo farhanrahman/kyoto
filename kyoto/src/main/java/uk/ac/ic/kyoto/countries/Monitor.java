@@ -42,7 +42,7 @@ public class Monitor extends EnvironmentService {
 	private Map<UUID, AbstractCountry> memberStates = new ConcurrentHashMap<UUID, AbstractCountry>();
 
 	/* Structure that counts the number of times the country cheated */
-	private Map<AbstractCountry, Integer> sinBin;
+	private Map<AbstractCountry, Integer> sinBin = new ConcurrentHashMap<AbstractCountry, Integer>();
 	
 	EventBus eb;
 	
