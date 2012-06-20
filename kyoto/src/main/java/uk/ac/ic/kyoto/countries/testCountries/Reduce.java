@@ -34,7 +34,8 @@ public class Reduce extends AbstractCountry {
 		 */
 		double reduction = carbonReductionHandler.getCarbonOutputChange(getAvailableToSpend());
 		logger.debug("Available Cash: " + getAvailableToSpend());
-		logger.debug("CO2 Reduction Max: "+ carbonReductionHandler.getCarbonOutputChange(getAvailableToSpend()));
+		logger.debug("CO2 Reduction Max: "+ reduction);
+		logger.debug("This should cost: " + carbonReductionHandler.getInvestmentRequired(reduction));
 		if (reduction < 1){
 			logger.debug("Reduction too small");
 		} else {
