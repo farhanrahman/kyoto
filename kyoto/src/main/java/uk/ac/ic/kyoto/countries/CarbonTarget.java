@@ -187,7 +187,7 @@ public class CarbonTarget extends EnvironmentService {
 			}
 		}
 		
-		throw new NullPointerException("countryID " + countryID + " does not exist in list of carbon targt participants");
+		throw new NullPointerException("countryID " + countryID + " does not exist in list of carbon target participants");
 	}
 	
 	@EventListener
@@ -283,5 +283,8 @@ public class CarbonTarget extends EnvironmentService {
 	{	
 		country.lastSessionTarget = country.currentSessionTarget;
 		country.currentSessionTarget = country.proportion * kyotoTarget;
+		if ((country.lastSessionTarget - country.currentSessionTarget) / country.lastSessionTarget > 0.1 ) {
+			country.currentSessionTarget = country.lastSessionTarget*0.9;
+		}
 	}
 }

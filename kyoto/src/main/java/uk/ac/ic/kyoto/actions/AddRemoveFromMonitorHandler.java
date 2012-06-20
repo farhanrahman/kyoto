@@ -1,6 +1,8 @@
 package uk.ac.ic.kyoto.actions;
 
 import java.util.UUID;
+
+import uk.ac.ic.kyoto.countries.AbstractCountry.KyotoMember;
 import uk.ac.ic.kyoto.countries.Monitor;
 import uk.ac.imperial.presage2.core.Action;
 import uk.ac.imperial.presage2.core.environment.ActionHandler;
@@ -36,10 +38,16 @@ public class AddRemoveFromMonitorHandler implements ActionHandler {
 		if (obj.country.getID() == actor) {
 			switch (obj.actionToImplement) {
 			case ADD :
-				this.monitor.addMemberState(obj.country);
+				if (obj.country.isKyotoMember() == KyotoMember.ANNEXONE)
+					this.monitor.addMemberState(obj.country);
+				else
+					this.monitor.addNonSanctionedState(obj.country);
 				break;
 			case REMOVE:
-				this.monitor.removeMemberState(obj.country);
+				if (obj.country.isKyotoMember() == KyotoMember.ANNEXONE)
+					this.monitor.removeMemberState(obj.country);
+				else
+					this.monitor.removeNonSanctionedState(obj.country);
 				break;
 			}
 
