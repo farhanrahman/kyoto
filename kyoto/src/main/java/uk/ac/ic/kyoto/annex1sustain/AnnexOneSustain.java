@@ -77,12 +77,25 @@ public class AnnexOneSustain extends AbstractCountry {
 	protected void behaviour() {
 		int ticksUntilEnd = getTicksUntilEnd();
 		
-		if (ticksUntilEnd < 10) {
-			// Normal behaviour during all but last 10 ticks of the year
+		if (isKyotoMember() == KyotoMember.ANNEXONE) {
+			if (ticksUntilEnd > 10) {
+				// Normal behaviour during all but last 10 ticks of the year
+				//	Look at offers:
+				//	-> good buy offer exists:
+				//		- accept, scale price up
+				//	-> else:
+				//		- post own offer
+				//		- scale up if taken, down every turn failed
+				//	-> repeat until surplus <= 0, then:
+				//		- accept profitable buy offers only
+			}
+			else if (ticksUntilEnd == 7) {
+				// End-of-year function
+				finalInvestments();
+			}
 		}
-		else if (ticksUntilEnd == 10) {
-			// End-of-year function
-			finalInvestments();
+		else {
+			// What to do when not in Kyoto?
 		}
 	}
 	
@@ -106,7 +119,9 @@ public class AnnexOneSustain extends AbstractCountry {
 	
 	@Override
 	public void sessionFunction() {
-		// TODO implement
+		if ((surplusCarbonTarget < 0) && (isKyotoMember() == KyotoMember.ANNEXONE)) {
+			leaveKyoto();
+		}
 	}
 	
 	protected void initialInvestments() {
