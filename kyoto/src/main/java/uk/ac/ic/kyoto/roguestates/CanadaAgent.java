@@ -4,12 +4,16 @@ import java.util.Set;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
+import uk.ac.ic.kyoto.services.ParticipantTimeService;
+import uk.ac.ic.kyoto.trade.InvestmentType;
 
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
+import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.messaging.Input;
 
 public class CanadaAgent extends AbstractCountry {
 
+	
 	public CanadaAgent(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
 			double GDPRate, double emissionsTarget, double energyOutput, double carbonOutput) {
 		super(id, name, ISO, landArea, arableLandArea, GDP,
@@ -34,12 +38,95 @@ public class CanadaAgent extends AbstractCountry {
 		// TODO Auto-generated method stub
 	}
 	
+	
+	/**
+	 * Increase carbon absorption as long as you have land area and money
+	 */
+	private void investMax() {
+		double carbonAbsorptionChange = 1000;
+		
+		try {
+			double investmentRequired = carbonAbsorptionHandler.getInvestmentRequired(carbonAbsorptionChange);
+			double areaRequired = carbonAbsorptionHandler.getForestAreaRequired(carbonAbsorptionChange);
+			double reverseCarbonAbsorption = carbonAbsorptionHandler.getCarbonAbsorptionChange(investmentRequired);
+			
+			System.out.println("****************************************");
+			
+			System.out.println("* " + this.getName() + ": Carbon Absorption before: " + carbonAbsorption);
+			System.out.println("* " + this.getName() + ": Money before: " + availableToSpend);
+			System.out.println("* " + this.getName() + ": Arable land before: " + arableLandArea);
+			
+			System.out.println("* " + this.getName() + ": I want to invest in " + carbonAbsorptionChange + " carbon absorption");
+			System.out.println("* " + this.getName() + ": It will cost me: " + investmentRequired);
+			System.out.println("* " + this.getName() + ": It will reduce my land by: " + areaRequired);
+			
+			System.out.println("* " + this.getName() + ": For that investment, I should get at least " + reverseCarbonAbsorption + " carbon absorption");
+
+			carbonAbsorptionHandler.investInCarbonAbsorption(carbonAbsorptionChange);
+			
+			System.out.println("* " + this.getName() + ": Success!");
+			
+			System.out.println("* " + this.getName() + ": Carbon Absorption after: " + carbonAbsorption);
+			System.out.println("* " + this.getName() + ": Money after: " + availableToSpend);
+			System.out.println("* " + this.getName() + ": Arable land after: " + arableLandArea);
+			
+			System.out.println("****************************************");
+
+			//investmentAmount = (long) (availableToSpend * 0.1);
+			//carbonAbsorptionHandler.invest(investmentAmount);
+		}
+				
+		
+		private void CalculateAverageGDP() {
+			// Previous cumulative GDP changes divided by new total years elapsed. 
+				try {
+					ParticipantTimeService timeService = getEnvironmentService(ParticipantTimeService.class);			
+				} 
+				catch (UnavailableServiceException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				int YearsElapsed = timeService.getCurrentYear(); // returns years elapsed from year 0
+				
+				if(YearsElapsed==0) {
+					AverageGDPRate = GDPRate; // GDPRates are seeded from historical data. 
+				}
+				else {
+					AverageGDPRate = (AverageGDPRate + GDPRate) / YearsElapsed;
+				}
+			}
+		
+		
+	public boolean JoiningCriteriaMet()
+	{
+		if((this.getCarbonOutput() - this.getCarbonOffset()) >this.getEmissionsTarget()){
+			return true;
+		}
+		//Only useful after 2011 when canada leaves
+		else return false;
+		
+		//If GDP growth achieved in the past 4 years
+		//
+	}
+	
+	@Override
+	//Check Carbon Output data and decide a feasible target to set 
+			//as we are intially part of kyoto 
+	public double SetEmissionsTarget(){
+		return this.getEmissionsTarget();
+		
+	}
+	
+	
 	@Override
 	public void sessionFunction() {
 		if (getCarbonOutput() - getCarbonOffset() > getEmissionsTarget()) {
 			// leave Kyoto here
 		}
+			
 	}
+	
 	
 	@Override
 	public void initialiseCountry() {
@@ -97,4 +184,6 @@ public class CanadaAgent extends AbstractCountry {
 		System.out.println("My energy output is : " + getEnergyOutput());
 	}
 
+	
+	
 }
