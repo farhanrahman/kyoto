@@ -173,7 +173,7 @@ public class CarbonTarget extends EnvironmentService {
 				result = CarbonData1990.get(findCountryObject(countryID).obj.getISO());
 			} else {
 				Map<Integer, Double> reports = reportingService.getReport(countryID);
-				int simTime = (timeService.getTicksInYear() * (year +1)) - 3;
+				int simTime = (timeService.getTicksInYear() * (year +1));
 				result = reports.get(simTime);
 			}
 		}
@@ -233,9 +233,6 @@ public class CarbonTarget extends EnvironmentService {
 	private void generateYearTarget(countryObject country)
 	{
 		int year = timeService.getCurrentYear();
-		if (timeService.getCurrentTick() > 5) {
-			year++;
-		}
 		
 		double sessionProgress = (double) ( timeService.getCurrentYear() % GameConst.getYearsInSession()) / GameConst.getYearsInSession();
 		double diffTargets = country.lastSessionTarget - country.currentSessionTarget;
@@ -256,9 +253,6 @@ public class CarbonTarget extends EnvironmentService {
 		
 		int lastYear = timeService.getCurrentYear() -1;
 		int session = timeService.getCurrentSession();
-		if (timeService.getCurrentTick()>5) {
-			session++;
-		}
 		
 		for (countryObject country : participantCountries) {
 			double output = getReportedCarbonOutput(country.obj.getID(), lastYear);

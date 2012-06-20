@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
+import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfYearCycle;
 import uk.ac.ic.kyoto.services.GlobalTimeService.TimeToMonitor;
 import uk.ac.imperial.presage2.core.environment.ActionHandlingException;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
@@ -79,23 +80,26 @@ public class Monitor extends EnvironmentService {
 	}
 	
 	@EventListener
-	public void yearlyFunction(TimeToMonitor e) {
-		checkReports();
-		monitorCountries();
-		carbonTargetingService.targetsForMonitor();
+	public void yearlyFunction(EndOfYearCycle e) {
+		if (e.getEndedYear() >= 0) {
+			System.out.println("Yearly monitoring starting");
+			checkReports();
+			System.out.println("Checked reports");
+			monitorCountries();
+			System.out.println("Monitored country");
+			carbonTargetingService.targetsForMonitor();
+		}
 	}
 	
 	private void checkReports () {
 		for (AbstractCountry country : memberStates.values()) {
-			carbonTargetingService.targetsForMonitor();
-
 			if(country instanceof AbstractCountry){
 				try {
 					country.reportCarbonOutput();
-					double reportedEmission = carbonReportingService.getReport(country.getID(), SimTime.get().intValue()-1);
+					System.out.println("Looking for report from this time: " + SimTime.get().intValue());
 					System.out.println("Current Year: " + timeService.getCurrentYear());
 					System.out.println("This Country ID: " + country.getID());
-					System.out.println("carbotTargetingService: " + carbonTargetingService.toString());
+					double reportedEmission = carbonReportingService.getReport(country.getID(), SimTime.get().intValue());
 					double emissionTarget = carbonTargetingService.queryYearTarget(country.getID(), (timeService.getCurrentYear()-1));
 					
 					if (Math.round(reportedEmission) > Math.round(emissionTarget)) {
@@ -158,7 +162,7 @@ public class Monitor extends EnvironmentService {
 			for (AbstractCountry country: memberStates.values()) {
 				double realCarbonOutput = country.getCarbonOutput();
 				cash -= GameConst.getMonitoringPrice();
-				double reportedCarbonOutput = carbonReportingService.getReport(country.getID(), SimTime.get().intValue() - 1);
+				double reportedCarbonOutput = carbonReportingService.getReport(country.getID(), SimTime.get().intValue());
 				if (Math.round(realCarbonOutput) != Math.round(reportedCarbonOutput)) {
 					cheaters.add(country.getID());
 					cheatSanction(country);

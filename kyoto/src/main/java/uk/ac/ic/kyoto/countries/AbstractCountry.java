@@ -248,14 +248,14 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			}
 			
 			//assume by this point all trades are complete and it's safe to report
-			else if (timeService.getCurrentTick() % timeService.getTicksInYear() == timeService.getTicksInYear() - 3 ){
-				try {
-					System.out.println(this.ISO + "reporting on tick " + timeService.getCurrentTick());
-					reportCarbonOutput();
-				} catch (ActionHandlingException e) {
-					e.printStackTrace();
-				}
-			}
+//			else if (timeService.getCurrentTick() % timeService.getTicksInYear() == timeService.getTicksInYear() - 3 ){
+//				try {
+//					System.out.println(this.ISO + "reporting on tick " + timeService.getCurrentTick());
+//					reportCarbonOutput();
+//				} catch (ActionHandlingException e) {
+//					e.printStackTrace();
+//				}
+//			}
 			
 			logSimulationData();
 			dumpCurrentTickData();
@@ -293,6 +293,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	public void reportCarbonOutput() throws ActionHandlingException {
 		logger.info("Reporting bullshit");
+		addToReports(SimTime.get(), carbonOutput);
 		environment.act(new SubmitCarbonEmissionReport(carbonOutput), getID(), authkey);
 	}
 	

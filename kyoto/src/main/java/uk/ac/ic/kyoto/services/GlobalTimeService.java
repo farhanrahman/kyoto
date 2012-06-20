@@ -55,9 +55,9 @@ public class GlobalTimeService extends EnvironmentService {
 			TimeToMonitor m = new TimeToMonitor(SimTime.get().intValue());
 			eb.publish(m);
 		}
-		if (SimTime.get().intValue() - getCurrentYear() * ticksInYear == ticksInYear) {
-			System.out.println("END OF YEAR "+getCurrentYear());
-			EndOfYearCycle y = new EndOfYearCycle(getCurrentYear());
+		if (SimTime.get().intValue() % getTicksInYear() == 0) {
+			System.out.println("END OF YEAR "+(getCurrentYear()-1));
+			EndOfYearCycle y = new EndOfYearCycle(getCurrentYear()-1);
 			eb.publish(y);
 		}
 		System.out.println("updateTickCounter returning. SimTime: "+SimTime.get().intValue());
@@ -90,6 +90,10 @@ public class GlobalTimeService extends EnvironmentService {
 		
 		EndOfYearCycle(int yearCounter) {
 			this.endedYear = yearCounter;
+		}
+		
+		public int getEndedYear() {
+			return endedYear;
 		}
 	}
 	
