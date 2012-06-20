@@ -38,7 +38,7 @@ public class AnnexOneSustain extends AbstractCountry {
 	
 	
 	//================================================================================
-    // Constructors
+    // Constructor / Initialisation
     //================================================================================
 	
 	public AnnexOneSustain(UUID id, String name, String ISO,
@@ -49,15 +49,23 @@ public class AnnexOneSustain extends AbstractCountry {
 		
 		this.surplusCarbonTarget = 0;
 		this.surplusCarbonSold = 0;
-		this.surplusCarbonPrice = 1;
+		this.surplusCarbonPrice = 0;
 		this.carbonToReduce = 0;
 		this.carbonToAbsorb = 0;
-		this.decisionTreshold = 0.5;
+		this.decisionTreshold = 0;
+	}
+	
+	@Override
+	protected void initialiseCountry() {
+		setKyotoMemberLevel(KyotoMember.ANNEXONE);
+		resetYearlyTargets();
+		surplusCarbonPrice = carbonReductionHandler.getInvestmentRequired(surplusCarbonTarget);
+		decisionTreshold = Constants.DECISION_TRESHOLD_INITIAL;
 	}
 	
 	
 	//================================================================================
-    // Input function
+    // Behaviour
     //================================================================================
 	
 	/**
@@ -66,14 +74,6 @@ public class AnnexOneSustain extends AbstractCountry {
 	@Override
 	protected void processInput(Input input) {
 		// TODO process input (if any)
-	}
-	
-	/**
-	 * Initialisation function
-	 */
-	@Override
-	protected void initialiseCountry() {
-		setKyotoMemberLevel(KyotoMember.ANNEXONE);
 	}
 	
 	/**
@@ -90,6 +90,7 @@ public class AnnexOneSustain extends AbstractCountry {
 		return false;
 	}
 	
+	
 	//================================================================================
     // Periodic functions
     //================================================================================
@@ -101,8 +102,7 @@ public class AnnexOneSustain extends AbstractCountry {
 	public void yearlyFunction() {
 		investInIndustry();
 		scaleDecisionTreshold();
-		updateSurplusCarbonTarget();
-		resetSurplusCarbonSold();
+		resetYearlyTargets();
 	}
 	
 	/**
@@ -113,6 +113,10 @@ public class AnnexOneSustain extends AbstractCountry {
 		// TODO implement
 	}
 	
+	
+	//================================================================================
+    // Internal functions
+    //================================================================================
 	
 	protected void investInIndustry() {
 		double totalInvestment;
@@ -182,12 +186,11 @@ public class AnnexOneSustain extends AbstractCountry {
 		}
 	}
 	
-	protected void updateSurplusCarbonTarget() {
+	protected void resetYearlyTargets() {
 		surplusCarbonTarget = this.getEmissionsTarget() - (this.getCarbonOutput() - this.getCarbonAbsorption()) + this.getCarbonOffset();
-	}
-	
-	protected void resetSurplusCarbonSold() {
 		surplusCarbonSold = 0;
+		carbonToReduce = 0;
+		carbonToAbsorb = 0;
 	}
 	
 	protected void finalInvestments() {
