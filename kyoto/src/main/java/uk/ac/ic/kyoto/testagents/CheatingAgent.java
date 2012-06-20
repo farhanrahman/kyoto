@@ -56,12 +56,8 @@ public class CheatingAgent extends AbstractCountry {
 	}
 	
 	@Override
-	public void reportCarbonOutput() throws ActionHandlingException {
-		double output = getCarbonOutput();
-		logger.info("Actual output: " + output);
-		logger.info("Reported output: " + output/2);
-		addToReports(SimTime.get(), output/2);
-		environment.act(new SubmitCarbonEmissionReport(output/2), getID(), authkey);
+	protected double getReportedCarbonOutput() {
+		return getCarbonOutput()/2;
 	}
 
 }
