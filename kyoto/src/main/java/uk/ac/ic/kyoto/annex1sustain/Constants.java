@@ -10,7 +10,5 @@ public final class Constants {
 	
 	// Profitability of absorption/reduction for selling
 	public static final double	DECISION_TRESHOLD_INITIAL = 0.5;
-	public static final double	DECISION_TRESHOLD_SCALER = 1.1;
-	public static final double	DECISION_TRESHOLD_RANDOM_MODIFIER = 0.2;
 	
 }

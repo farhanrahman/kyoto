@@ -68,17 +68,11 @@ public class AnnexOneSustain extends AbstractCountry {
     // Behaviour
     //================================================================================
 	
-	/**
-	 * Function processing input
-	 */
 	@Override
 	protected void processInput(Input input) {
-		// TODO process input (if any)
+		// TODO process input
 	}
 	
-	/**
-	 * Behaviour function
-	 */
 	@Override
 	protected void behaviour() {
 		// TODO behaviour
@@ -95,30 +89,19 @@ public class AnnexOneSustain extends AbstractCountry {
     // Periodic functions
     //================================================================================
 	
-	/**
-	 * Function called at the beginning of each year.
-	 */
 	@Override
 	public void yearlyFunction() {
-		investInIndustry();
+		initialInvestments();
 		scaleDecisionTreshold();
 		resetYearlyTargets();
 	}
 	
-	/**
-	 * Function called at the end of each session.
-	 */
 	@Override
 	public void sessionFunction() {
 		// TODO implement
 	}
 	
-	
-	//================================================================================
-    // Internal functions
-    //================================================================================
-	
-	protected void investInIndustry() {
+	protected void initialInvestments() {
 		double totalInvestment;
 		double industryInvestment;
 		double investmentDiff;
@@ -163,26 +146,50 @@ public class AnnexOneSustain extends AbstractCountry {
 		}
 	}
 	
+	protected void finalInvestments() {
+		try {
+			// Invest in planned carbon reduction and absorption, to offset credits sold
+			carbonReductionHandler.investInCarbonReduction(carbonToReduce);
+			carbonAbsorptionHandler.investInCarbonAbsorption(carbonToAbsorb);
+			
+			// If credits are left, increase energy output if money available, as probably won't sell them next year either
+			double unsoldCarbon = surplusCarbonTarget - surplusCarbonSold;
+			if (unsoldCarbon > 0) {
+				double investmentCost = energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(unsoldCarbon);
+				double availableFunds = this.getAvailableToSpend();
+				if (investmentCost < availableFunds) {
+					energyUsageHandler.investInCarbonIndustry(investmentCost);
+				}
+				else {
+					energyUsageHandler.investInCarbonIndustry(availableFunds);
+				}
+			}
+		}
+		catch (Exception e) {
+			logger.warn("Problem with end of year investments: " + e.getMessage());
+		}
+	}
+	
 	protected void scaleDecisionTreshold() {
 		double percentageSold;
 		
 		try {
 			percentageSold = surplusCarbonSold / surplusCarbonTarget;
 			
-			if (percentageSold > decisionTreshold) {
-				decisionTreshold /= Constants.DECISION_TRESHOLD_SCALER;
-				logger.info("Sold more than expected, decreasing perceived profitability treshold");
+			if (percentageSold > 1) {
+				decisionTreshold = 1;
+				logger.info("AnnexOneSustain country " + this.getName() + ": Setting profitability treshold to 100%");
 			}
 			else {
-				decisionTreshold *= Constants.DECISION_TRESHOLD_SCALER;
-				logger.info("Sold less than expected, increasing perceived profitability treshold");
+				decisionTreshold = percentageSold;
+				logger.info("AnnexOneSustain country " + this.getName() + ": Setting profitability treshold to " + String.valueOf(percentageSold * 100) + "%");
 			}
 		}
 		catch (ArithmeticException e) {
-			logger.info("There was no surplus carbon to sell, nothing to do");
+			logger.info("AnnexOneSustain country " + this.getName() + ": There was no surplus carbon to sell, nothing to do");
 		}
 		catch (Exception e) {
-			logger.warn("Problem with scaling decision treshold: " + e.getMessage());
+			logger.warn("Problem with setting: " + e.getMessage());
 		}
 	}
 	
@@ -191,16 +198,6 @@ public class AnnexOneSustain extends AbstractCountry {
 		surplusCarbonSold = 0;
 		carbonToReduce = 0;
 		carbonToAbsorb = 0;
-	}
-	
-	protected void finalInvestments() {
-		try {
-			carbonReductionHandler.investInCarbonReduction(carbonToReduce);
-			carbonAbsorptionHandler.investInCarbonAbsorption(carbonToAbsorb);
-		}
-		catch (Exception e) {
-			logger.warn("Problem with end of year investments: " + e.getMessage());
-		}
 	}
 	
 	
@@ -212,7 +209,7 @@ public class AnnexOneSustain extends AbstractCountry {
 		double expectedProfit;
 		
 		try {
-			expectedProfit = calculateSessionOffsetGain(carbon) * price * (decisionTreshold + generateRandomModifier());
+			expectedProfit = calculateSessionOffsetGain(carbon) * price * decisionTreshold;
 		}
 		catch (Exception e) {
 			logger.warn("Problem with calculating expected profit of invesment: " + e.getMessage());
@@ -220,20 +217,6 @@ public class AnnexOneSustain extends AbstractCountry {
 		}
 		
 		return expectedProfit;
-	}
-	
-	protected double generateRandomModifier() {
-		double randomModifier;
-		
-		try {
-			randomModifier = (Math.random() - 0.5) * 2 * Constants.DECISION_TRESHOLD_RANDOM_MODIFIER;
-		}
-		catch (Exception e) {
-			logger.warn("Problem with generating random modifier: " + e.getMessage());
-			randomModifier = 0;
-		}
-		
-		return randomModifier;
 	}
 	
 	protected double calculateSessionOffsetGain(double carbonDifference) {
