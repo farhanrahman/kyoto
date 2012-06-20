@@ -27,8 +27,9 @@ public final class GameConst {
 
 	/**
 	 * The cost of investment in one extra ton of carbon per year
+	 * A larger number increases the cost of carbon investment
 	 */
-	private static double CARBON_INVESTMENT_PRICE = 1;
+	private static double CARBON_INVESTMENT_PRICE = 200;
 	
 	
 	/**
@@ -81,12 +82,12 @@ public final class GameConst {
 	/**
 	 * Number of ticks in a year
 	 */
-	private static int TICKS_IN_YEAR = 20;
+	private static int TICKS_IN_YEAR = 15;
 	
 	/**
 	 * Number of years in a session
 	 */
-	private static int YEARS_IN_SESSION = 10;
+	private static int YEARS_IN_SESSION = 3;
 	
 	/**
 	 * Session to session world target reduction

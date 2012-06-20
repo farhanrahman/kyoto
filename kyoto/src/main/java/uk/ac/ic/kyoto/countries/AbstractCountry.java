@@ -326,7 +326,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	public Map<Integer,Double> getCarbonEmissionReports(){
-		return ImmutableMap.copyOf(this.carbonEmissionReports);
+		return this.carbonEmissionReports;
 	}
 	
 	/**
@@ -395,12 +395,14 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			
 			if (energyOutput-prevEnergyOutput >= 0){	
 				sum = (((energyOutput-prevEnergyOutput)/prevEnergyOutput)*GameConst.getEnergyGrowthScaler() *marketStateFactor+GDPRate*100)/2;
+				GDPRate = GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler());
 			}
 			else{
 				sum = ((energyOutput-prevEnergyOutput)/prevEnergyOutput)*GameConst.getEnergyGrowthScaler();
+				sum = Math.abs(sum);
+				GDPRate = -(GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler()));
 			}
 
-			GDPRate = GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler());
 			
 			GDPRate /= 100; // Needs to be a % for rate formula
 			

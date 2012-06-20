@@ -3,7 +3,6 @@ package uk.ac.ic.kyoto.countries.testCountries;
 import java.util.UUID;
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.Offer;
-import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
