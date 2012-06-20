@@ -144,7 +144,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	@Override
 	final public void initialise(){
 		try{
-			
+			this.persist.setProperty("ISO", this.getISO());
 			// Check if the initialised function has already been called.
 			if (this.initialised) {
 				throw new IllegalAccessException("Participant " + this.ISO + " already initialised");
