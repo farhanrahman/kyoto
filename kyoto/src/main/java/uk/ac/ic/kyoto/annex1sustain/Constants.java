@@ -9,6 +9,6 @@ public final class Constants {
 	public static final double	PRICE_SCALER = 2;
 	
 	// Profitability of absorption/reduction for selling
-	public static final double	DECISION_TRESHOLD_INITIAL = 0.5;
+	public static final double	EXPECTED_SALES_INITIAL = 0.5;
 	
 }

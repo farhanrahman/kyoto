@@ -34,7 +34,7 @@ public class AnnexOneSustain extends AbstractCountry {
 	protected double	surplusCarbonPrice;			// Price of surplus carbon while within target
 	protected double	carbonToReduce;				// Carbon reduction that we need to perform before end of year to match target
 	protected double	carbonToAbsorb;				// Carbon absorption that we need to perform before end of year to match target
-	protected double	decisionTreshold;			// Specifies where our acceptable price will lie between two extreme profitability points
+	protected double	expectedSales;			// Specifies where our acceptable price will lie between two extreme profitability points
 	
 	
 	//================================================================================
@@ -52,7 +52,7 @@ public class AnnexOneSustain extends AbstractCountry {
 		this.surplusCarbonPrice = 0;
 		this.carbonToReduce = 0;
 		this.carbonToAbsorb = 0;
-		this.decisionTreshold = 0;
+		this.expectedSales = 0;
 	}
 	
 	@Override
@@ -60,7 +60,7 @@ public class AnnexOneSustain extends AbstractCountry {
 		setKyotoMemberLevel(KyotoMember.ANNEXONE);
 		resetYearlyTargets();
 		surplusCarbonPrice = carbonReductionHandler.getInvestmentRequired(surplusCarbonTarget);
-		decisionTreshold = Constants.DECISION_TRESHOLD_INITIAL;
+		expectedSales = Constants.EXPECTED_SALES_INITIAL;
 	}
 	
 	
@@ -75,7 +75,15 @@ public class AnnexOneSustain extends AbstractCountry {
 	
 	@Override
 	protected void behaviour() {
-		// TODO behaviour
+		int ticksUntilEnd = getTicksUntilEnd();
+		
+		if (ticksUntilEnd < 10) {
+			// Normal behaviour during all but last 10 ticks of the year
+		}
+		else if (ticksUntilEnd == 10) {
+			// End-of-year function
+			finalInvestments();
+		}
 	}
 	
 	@Override
@@ -92,7 +100,7 @@ public class AnnexOneSustain extends AbstractCountry {
 	@Override
 	public void yearlyFunction() {
 		initialInvestments();
-		scaleDecisionTreshold();
+		updateExpectedSales();
 		resetYearlyTargets();
 	}
 	
@@ -170,18 +178,18 @@ public class AnnexOneSustain extends AbstractCountry {
 		}
 	}
 	
-	protected void scaleDecisionTreshold() {
+	protected void updateExpectedSales() {
 		double percentageSold;
 		
 		try {
 			percentageSold = surplusCarbonSold / surplusCarbonTarget;
 			
 			if (percentageSold > 1) {
-				decisionTreshold = 1;
+				expectedSales = 1;
 				logger.info("AnnexOneSustain country " + this.getName() + ": Setting profitability treshold to 100%");
 			}
 			else {
-				decisionTreshold = percentageSold;
+				expectedSales = percentageSold;
 				logger.info("AnnexOneSustain country " + this.getName() + ": Setting profitability treshold to " + String.valueOf(percentageSold * 100) + "%");
 			}
 		}
@@ -209,7 +217,7 @@ public class AnnexOneSustain extends AbstractCountry {
 		double expectedProfit;
 		
 		try {
-			expectedProfit = calculateSessionOffsetGain(carbon) * price * decisionTreshold;
+			expectedProfit = calculateSessionOffsetGain(carbon) * price * expectedSales;
 		}
 		catch (Exception e) {
 			logger.warn("Problem with calculating expected profit of invesment: " + e.getMessage());
@@ -234,6 +242,25 @@ public class AnnexOneSustain extends AbstractCountry {
 		}
 		
 		return sessionOffsetGain;
+	}
+	
+	
+	//================================================================================
+    // Time functions
+    //================================================================================
+	
+	protected int getTicksUntilEnd() {
+		int ticksUntilEnd;
+		
+		try {
+			ticksUntilEnd = timeService.getTicksInYear() - (timeService.getCurrentTick() % timeService.getTicksInYear());
+		}
+		catch (Exception e) {
+			logger.warn("Problem with calculating time: " + e.getMessage());
+			ticksUntilEnd = 0;
+		}
+		
+		return ticksUntilEnd;
 	}
 	
 }
