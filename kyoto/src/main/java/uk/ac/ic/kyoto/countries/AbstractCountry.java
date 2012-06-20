@@ -62,7 +62,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * TODO: What are the units of these?
 	 */
 	final double landArea;
-	protected double arableLandArea;
+	double arableLandArea;
 	
 	/*
 	 * These variables are related to carbon emissions and 
