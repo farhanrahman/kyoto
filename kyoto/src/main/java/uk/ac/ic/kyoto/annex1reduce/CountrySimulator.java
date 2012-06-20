@@ -15,15 +15,20 @@ class CountrySimulator {
 
 	// TODO, look ahead a minimum of 5 years or a maximum of 15 years. Always
 	// end at a session end.
-	final private static int LOOK_AHEAD_YEARS = 10;
+	final private int LOOK_AHEAD_YEARS;
+	final private int SANCTION_YEAR;
 
-	public CountrySimulator(AnnexOneReduce country) {
+	public CountrySimulator(AnnexOneReduce country, int yearsUntilSanctions) {
 		this.country = country;
+		this.SANCTION_YEAR = yearsUntilSanctions;
+		this.LOOK_AHEAD_YEARS = yearsUntilSanctions + 1;
+
+		stateList = new StateList[LOOK_AHEAD_YEARS];
 	}
 
 	final private AnnexOneReduce country;
 
-	private StateList[] stateList = new StateList[LOOK_AHEAD_YEARS];
+	private StateList[] stateList;
 
 	private CountryState startState;
 
@@ -122,8 +127,8 @@ class CountrySimulator {
 			System.out.println();
 			iterator.next().printPath();
 		}
-
-		System.out.println("Size = " + startSellStates.size());
+		System.out.println();
+		System.out.println("NumStates = " + startSellStates.size());
 
 		return null;
 	}
@@ -259,7 +264,7 @@ class CountrySimulator {
 		 */
 		private CountryState(CountryState previousState, ReduceAction action) {
 
-			this.previousEnergyOutput = previousState.energyOutput;
+			this.previousEnergyOutput = previousState.previousEnergyOutput;
 
 			this.previousState = previousState;
 			this.action = action;
@@ -322,7 +327,7 @@ class CountrySimulator {
 		 */
 		private CountryState(CountryState previousState, MaintainAction action) {
 
-			this.previousEnergyOutput = previousState.energyOutput;
+			this.previousEnergyOutput = previousState.previousEnergyOutput;
 
 			this.previousState = previousState;
 			this.action = action;
@@ -358,13 +363,18 @@ class CountrySimulator {
 			carbonOutput = previousState.carbonOutput + energyIncrease
 					- carbonOutputReduction;
 
-			carbonOffset = previousState.carbonOffset + carbonCreditIncrease;
+			if (this.year == SANCTION_YEAR) {
+				carbonOffset = 0;
+			} else {
+				carbonOffset = previousState.carbonOffset
+						+ carbonCreditIncrease;
+			}
 
 			arableLandArea = previousState.arableLandArea - arableLandReduction;
 
 			carbonAbsorption = previousState.carbonAbsorption
 					+ absorptionIncrease;
-
+			
 			GDPRate = calculateGDPRate(previousState.GDPRate,
 					this.energyOutput, this.previousEnergyOutput);
 
@@ -445,7 +455,7 @@ class CountrySimulator {
 			float buyCredit;
 			float invest;
 
-			int maxGrains = 5;
+			int maxGrains = 10;
 			int minGrains = 2;
 			int yearModifier = Math.max(0, 2 * this.year);
 			int numGrains = Math.max(maxGrains - yearModifier, minGrains);
@@ -481,38 +491,42 @@ class CountrySimulator {
 
 			new CountryState(this, new MaintainAction(0, 0, 0));
 
+			// If we shut down factories last phase, it's pointless to invest in
+			// factories this phase
+			if (((ReduceAction) action).shutDownFrac != 0) {
+				return;
+			}
+
 			// Invest some chunk of our available cash in industry, offset it by
 			// buying credits or absorbing
 
-			int maxGrains = 5;
+			int maxGrains = 10;
 			int minGrains = 2;
 			int yearModifier = Math.max(0, 2 * this.year);
 			int numGrains = Math.max(maxGrains - yearModifier, minGrains);
 			float grain = 100f / numGrains;
 
-			// If last action we didn't buy carbon,
-			if (((ReduceAction) action).buyCreditFrac == 0) {
+			for (float i = grain; i <= 100; i = i + grain) {
+				industryFrac = i;
+				investOffsetFrac = 100;
+				buyCreditOffsetFrac = 0;
+
+				new CountryState(this, new MaintainAction(industryFrac / 100,
+						investOffsetFrac / 100, buyCreditOffsetFrac / 100));
+			}
+
+			// If last phase we didn't buy carbon, there's no point in buying
+			// more as it's not going to be a good price.
+			if (((ReduceAction) action).buyCreditFrac != 0) {
 				for (float i = grain; i <= 100; i = i + grain) {
 					industryFrac = i;
-					investOffsetFrac = 100;
-					buyCreditOffsetFrac = 0;
+					investOffsetFrac = 0;
+					buyCreditOffsetFrac = 100;
 
 					new CountryState(this, new MaintainAction(
 							industryFrac / 100, investOffsetFrac / 100,
 							buyCreditOffsetFrac / 100));
-				}
-			} else {
 
-				for (float i = grain; i <= 100; i = i + grain) {
-					industryFrac = i;
-
-					for (float j = 0; j <= 100; j = j + grain) {
-						investOffsetFrac = j;
-						buyCreditOffsetFrac = 100 - investOffsetFrac;
-						new CountryState(this, new MaintainAction(
-								industryFrac / 100, investOffsetFrac / 100,
-								buyCreditOffsetFrac / 100));
-					}
 				}
 			}
 		}
@@ -526,9 +540,9 @@ class CountrySimulator {
 			float investFrac;
 			float sellFrac = 100;
 
-			int maxGrains = 5;
+			int maxGrains = 10;
 			int minGrains = 2;
-			int yearModifier = Math.max(0, 1 * this.year);
+			int yearModifier = Math.max(0, 2 * this.year);
 			int numGrains = Math.max(maxGrains - yearModifier, minGrains);
 			float max = 1;
 			float grain = max / numGrains;
@@ -571,14 +585,14 @@ class CountrySimulator {
 
 		public void printState() {
 			System.out.println("Year " + year);
-			if (action != null) {
-				action.printDetails();
-			}
 			System.out.println("AvailToSpend " + this.availableToSpend);
 			System.out.println("CNetOutput " + this.carbonDiff);
 			System.out.println("energyOutput " + this.energyOutput);
 			System.out.println("GDP " + this.GDP);
 			System.out.println("GDPRate " + this.GDPRate);
+			if (action != null) {
+				action.printDetails();
+			}
 		}
 
 		public void printPath() {
@@ -876,62 +890,62 @@ class CountrySimulator {
 
 			// If our expected income over the next 3 years is greater
 
-			double s1GDPRate = calculateGDPRate(state1.GDPRate,
-					state1.energyOutput, state1.previousEnergyOutput);
-			double s1GDP = state1.GDP + state1.GDP * s1GDPRate;
-			double s1earn = s1GDP;
+			// double s1GDPRate = calculateGDPRate(state1.GDPRate,
+			// state1.energyOutput, state1.previousEnergyOutput);
+			// double s1GDP = state1.GDP + state1.GDP * s1GDPRate;
+			// double s1earn = s1GDP;
+			//
+			// double s2GDPRate = calculateGDPRate(state2.GDPRate,
+			// state2.energyOutput, state2.previousEnergyOutput);
+			// double s2GDP = state2.GDP + state2.GDP * s2GDPRate;
+			// double s2earn = s2GDP;
+			//
+			// for (int i = 0; i < 3; i++) {
+			// s1GDPRate = calculateGDPRate(s1GDPRate, state1.energyOutput,
+			// state1.energyOutput);
+			// s1GDP += s1GDP * s1GDPRate;
+			// s1earn += s1GDP;
+			//
+			// s2GDPRate = calculateGDPRate(s2GDPRate, state2.energyOutput,
+			// state2.energyOutput);
+			// s2GDP += s2GDP * s2GDPRate;
+			// s2earn += s2GDP;
+			// }
+			//
+			// // If we have a higher projected earnings
+			// if (s1earn > s2earn) {
+			// isWorse = false;
+			// } else if (s1earn < s2earn) {
+			// isBetter = false;
+			// }
 
-			double s2GDPRate = calculateGDPRate(state2.GDPRate,
-					state2.energyOutput, state2.previousEnergyOutput);
-			double s2GDP = state2.GDP + state2.GDP * s2GDPRate;
-			double s2earn = s2GDP;
-
-			for (int i = 0; i < 10; i++) {
-				s1GDPRate = calculateGDPRate(s1GDPRate, state1.energyOutput,
-						state1.energyOutput);
-				s1GDP += s1GDP * s1GDPRate;
-				s1earn += s1GDP;
-
-				s2GDPRate = calculateGDPRate(s2GDPRate, state2.energyOutput,
-						state2.energyOutput);
-				s2GDP += s2GDP * s2GDPRate;
-				s2earn += s2GDP;
+			// If we have a higher GDP
+			if (state1.GDP > state2.GDP) {
+				isWorse = false;
+			} else if (state1.GDP < state2.GDP) {
+				isBetter = false;
 			}
 
 			// If we have a higher GDP
-			if (s1earn > s2earn) {
+			if (state1.GDPRate > state2.GDPRate) {
 				isWorse = false;
-			} else if (s1earn < s2earn) {
+			} else if (state1.GDPRate < state2.GDPRate) {
 				isBetter = false;
 			}
 
-			// // If we have a higher GDP
-			// if (state1.GDP > state2.GDP) {
-			// isWorse = false;
-			// } else if (state1.GDP < state2.GDP) {
-			// isBetter = false;
-			// }
-			//
-			// // If we have a higher GDP
-			// if (state1.GDPRate > state2.GDPRate) {
-			// isWorse = false;
-			// } else if (state1.GDPRate < state2.GDPRate) {
-			// isBetter = false;
-			// }
-			//
-			// // If we make more energy
-			// if (state1.energyOutput > state2.energyOutput) {
-			// isWorse = false;
-			// } else if (state1.energyOutput < state2.energyOutput) {
-			// isBetter = false;
-			// }
-
-			// If we have less carbon output
-			if (state1.carbonDiff < state2.carbonDiff) {
+			// If we make more energy
+			if (state1.energyOutput > state2.energyOutput) {
 				isWorse = false;
-			} else if (state1.carbonDiff > state2.carbonDiff) {
+			} else if (state1.energyOutput < state2.energyOutput) {
 				isBetter = false;
 			}
+
+			// // If we have less carbon output
+			// if (state1.carbonDiff < state2.carbonDiff) {
+			// isWorse = false;
+			// } else if (state1.carbonDiff > state2.carbonDiff) {
+			// isBetter = false;
+			// }
 
 			if (isBetter) {
 				return Compare.BETTER;
