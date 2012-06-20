@@ -41,6 +41,7 @@ public class SubmitCarbonEmissionReportHandler implements ActionHandler{
 			synchronized(crs){
 				this.crs.updateReport(actor, reportAction.getCarbonEmission(), reportAction.getSimTime());
 			}
+			System.out.println("REPORT HERE, TIME: " + reportAction.getSimTime() + " AND EMISSION: " + reportAction.getCarbonEmission());
 			return null;
 		}
 		throw new ActionHandlingException("Action not recognized (From SubmitCarbonEmissionReportHandler)");

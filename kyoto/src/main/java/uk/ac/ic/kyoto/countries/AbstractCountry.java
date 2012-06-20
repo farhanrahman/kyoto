@@ -224,28 +224,23 @@ public abstract class AbstractCountry extends AbstractParticipant {
 							+ this.getName());
 				}
 				
-				
-				if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {	
+				if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
+					System.out.println(this.ISO + " first day of new year on tick " + timeService.getCurrentTick());
+					
 					updateGDPRate();
 					updateGDP();
 					updateAvailableToSpend();
 					if (kyotoMemberLevel == KyotoMember.ANNEXONE) {
 						MonitorTax();
 					}
-
-					updateCarbonOffsetYearly();
-					try {
-						reportCarbonOutput();
-					} catch (ActionHandlingException e) {
-						e.printStackTrace();
-					}
 					
 					yearlyFunction();
 				}
-				if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
-					resetCarbonOffset();
-					sessionFunction();
-				}
+				
+			if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
+				resetCarbonOffset();
+				sessionFunction();
+			}
 	
 			//leave a 10-tick grace period to allow current trades to complete before performing end of year routine
 			if (timeService.getCurrentTick() % timeService.getTicksInYear() < timeService.getTicksInYear() - 10 ) {
@@ -253,13 +248,14 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			}
 			
 			//assume by this point all trades are complete and it's safe to report
-			else if (timeService.getCurrentTick() % timeService.getTicksInYear() == timeService.getTicksInYear() - 3 ){
-				try {
-					reportCarbonOutput();
-				} catch (ActionHandlingException e) {
-					e.printStackTrace();
-				}
-			}
+//			else if (timeService.getCurrentTick() % timeService.getTicksInYear() == timeService.getTicksInYear() - 3 ){
+//				try {
+//					System.out.println(this.ISO + "reporting on tick " + timeService.getCurrentTick());
+//					reportCarbonOutput();
+//				} catch (ActionHandlingException e) {
+//					e.printStackTrace();
+//				}
+//			}
 			
 			logSimulationData();
 			dumpCurrentTickData();
@@ -295,7 +291,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return this.executeLock;
 	}
 	
-	protected void reportCarbonOutput() throws ActionHandlingException {
+	public void reportCarbonOutput() throws ActionHandlingException {
+		logger.info("Reporting bullshit");
+		addToReports(SimTime.get(), carbonOutput);
 		environment.act(new SubmitCarbonEmissionReport(carbonOutput), getID(), authkey);
 	}
 	
@@ -331,11 +329,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	/**
 	 * Private setter function for personal reports
+	 * If you don't do this carbon reporting service does not work!!
 	 * @param simTime
 	 * @param emission
 	 * @return
 	 */
-	private Map<Integer,Double> addToReports(Time simTime, double emission){
+	protected Map<Integer,Double> addToReports(Time simTime, double emission){
 		this.carbonEmissionReports.put(simTime.intValue(), emission);
 		return this.carbonEmissionReports;
 	}
@@ -434,7 +433,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * Adjusts the amount of CarbonOffset depending on the last years usage
 	 * @author ct
 	 */
-	private final void updateCarbonOffsetYearly() {
+	final void updateCarbonOffsetYearly() {
 		if (kyotoMemberLevel == KyotoMember.ANNEXONE) {
 			if (emissionsTarget <= carbonOffset +carbonAbsorption +carbonOutput ){
 				if (carbonOffset > 0) {

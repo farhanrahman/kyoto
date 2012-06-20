@@ -8,6 +8,7 @@ import uk.ac.ic.kyoto.countries.Offer;
 import uk.ac.imperial.presage2.core.environment.ActionHandlingException;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
+import uk.ac.imperial.presage2.core.simulator.SimTime;
 
 public class CheatingAgent extends AbstractCountry {
 
@@ -55,10 +56,11 @@ public class CheatingAgent extends AbstractCountry {
 	}
 	
 	@Override
-	protected void reportCarbonOutput() throws ActionHandlingException {
+	public void reportCarbonOutput() throws ActionHandlingException {
 		double output = getCarbonOutput();
 		logger.info("Actual output: " + output);
 		logger.info("Reported output: " + output/2);
+		addToReports(SimTime.get(), output/2);
 		environment.act(new SubmitCarbonEmissionReport(output/2), getID(), authkey);
 	}
 
