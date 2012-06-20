@@ -1,6 +1,7 @@
 package uk.ac.ic.kyoto.countries;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
@@ -184,9 +185,13 @@ public class Monitor extends EnvironmentService {
 			for (int i = 0; i < noToMonitor; i++) {
 				// Pick a country that was not yet monitored
 				AbstractCountry pickedCountry;
+				ArrayList<AbstractCountry> memberStatesArray = new ArrayList<AbstractCountry>();
+				for(UUID id : memberStates.keySet()){
+					memberStatesArray.add(memberStates.get(id));
+				}
 				do {
-					int randomCountryIndex = randGenerator.nextInt(memberStates.size());
-					pickedCountry = memberStates.get(randomCountryIndex);
+					int randomCountryIndex = randGenerator.nextInt(memberStatesArray.size());
+					pickedCountry = memberStatesArray.get(randomCountryIndex);
 				} while (monitoredCountries.contains(pickedCountry));
 				
 				// Monitor the country
