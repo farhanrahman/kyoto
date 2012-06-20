@@ -100,29 +100,31 @@ public class Monitor extends EnvironmentService {
 		if (SimTime.get().intValue() == 1) {
 			try {
 				this.timeService = provider.getEnvironmentService(GlobalTimeService.class);
-			} catch (UnavailableServiceException i) {
-				System.out.println("Unable to get environment service 'TimeService'.");
-				i.printStackTrace();
+			} catch (UnavailableServiceException ex) {
+				ex.printStackTrace();
+				throw new RuntimeException(ex);
 			}
 			
 			// Register for the carbon reporting service
 			try {
 				this.carbonReportingService = provider.getEnvironmentService(CarbonReportingService.class);
-			} catch (UnavailableServiceException i) {
-				i.printStackTrace();
+			} catch (UnavailableServiceException ex) {
+				ex.printStackTrace();
+				throw new RuntimeException(ex);
 			}
 			if (this.carbonReportingService == null) {
-				System.err.println("PROBLEM");
+				throw new RuntimeException("Null carbonReportingService provided");
 			}
 			
 			// Register for the carbon emissions targeting service
 			try {
 				this.carbonTargetingService = provider.getEnvironmentService(CarbonTarget.class);
-			} catch (UnavailableServiceException i) {
-				i.printStackTrace();
+			} catch (UnavailableServiceException ex) {
+				ex.printStackTrace();
+				throw new RuntimeException(ex);
 			}
 			if (this.carbonTargetingService == null) {
-				System.err.println("PROBLEM");
+				throw new RuntimeException("Null carbonTargetingService provided");
 			}
 		}
 	}
