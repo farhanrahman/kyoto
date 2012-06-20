@@ -224,41 +224,27 @@ public abstract class AbstractCountry extends AbstractParticipant {
 							+ this.getName());
 				}
 				
-				
-				if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {	
+				if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
+					System.out.println(this.ISO + " first day of new year on tick " + timeService.getCurrentTick());
+					
 					updateGDPRate();
 					updateGDP();
 					updateAvailableToSpend();
 					if (kyotoMemberLevel == KyotoMember.ANNEXONE) {
 						MonitorTax();
 					}
-
-					updateCarbonOffsetYearly();
-					try {
-						reportCarbonOutput();
-					} catch (ActionHandlingException e) {
-						e.printStackTrace();
-					}
 					
 					yearlyFunction();
 				}
-				if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
-					resetCarbonOffset();
-					sessionFunction();
-				}
+				
+			if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
+				resetCarbonOffset();
+				sessionFunction();
+			}
 	
 			//leave a 10-tick grace period to allow current trades to complete before performing end of year routine
-			if (timeService.getCurrentTick() % timeService.getTicksInYear() < timeService.getTicksInYear() - 10 ) {
+			if (timeService.getCurrentTick() % timeService.getTicksInYear() < timeService.getTicksInYear() - 5 ) {
 				behaviour();
-			}
-			
-			//assume by this point all trades are complete and it's safe to report
-			else if (timeService.getCurrentTick() % timeService.getTicksInYear() == timeService.getTicksInYear() - 3 ){
-				try {
-					reportCarbonOutput();
-				} catch (ActionHandlingException e) {
-					e.printStackTrace();
-				}
 			}
 			
 			logSimulationData();
@@ -295,8 +281,21 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return this.executeLock;
 	}
 	
-	protected void reportCarbonOutput() throws ActionHandlingException {
-		environment.act(new SubmitCarbonEmissionReport(carbonOutput), getID(), authkey);
+	public final void reportCarbonOutput() throws ActionHandlingException {
+		logger.info("Reporting bullshit");
+		double reportedValue = getReportedCarbonOutput();
+		addToReports(SimTime.get(), reportedValue);
+		environment.act(new SubmitCarbonEmissionReport(reportedValue), getID(), authkey);
+	}
+	
+	/**
+	 * If you want to cheat, override this function and create new logic to return
+	 * an output value you want to be reported.
+	 * @return Your reported carbon output, in tons of carbon
+	 */
+	
+	protected double getReportedCarbonOutput() {
+		return carbonOutput;
 	}
 	
 	/**
@@ -331,6 +330,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	/**
 	 * Private setter function for personal reports
+	 * If you don't do this carbon reporting service does not work!!
 	 * @param simTime
 	 * @param emission
 	 * @return
@@ -434,7 +434,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	 * Adjusts the amount of CarbonOffset depending on the last years usage
 	 * @author ct
 	 */
-	private final void updateCarbonOffsetYearly() {
+	final void updateCarbonOffsetYearly() {
 		if (kyotoMemberLevel == KyotoMember.ANNEXONE) {
 			if (emissionsTarget <= carbonOffset +carbonAbsorption +carbonOutput ){
 				if (carbonOffset > 0) {
@@ -649,67 +649,67 @@ public abstract class AbstractCountry extends AbstractParticipant {
     // Public getters
     //================================================================================
 	
-	public String getISO() {
+	public final String getISO() {
 		return ISO;
 	}
 		
-	public double getLandArea() {
+	public final double getLandArea() {
 		return landArea;
 	}
 
-	public double getArableLandArea() {
+	public final double getArableLandArea() {
 		return arableLandArea;
 	}
 
-	public double getGDP() {
+	public final double getGDP() {
 		return GDP;
 	}
 
-	public double getGDPRate() {
+	public final double getGDPRate() {
 		return GDPRate;
 	}
 
-	public double getEmissionsTarget() {
+	public final double getEmissionsTarget() {
 		return emissionsTarget;
 	}
 
-	public double getCarbonOffset() {
+	public final double getCarbonOffset() {
 		return carbonOffset;
 	}
 
-	public double getEnergyOutput(){
+	public final double getEnergyOutput(){
 		return energyOutput;
 	}
 	
-	public double getPrevEnergyOut(){
+	public final double getPrevEnergyOut(){
 		return prevEnergyOutput;
 	}
 	
-	public double getCarbonOutput(){
+	public final double getCarbonOutput(){
 		return carbonOutput;
 	}
 	
-	public double getCarbonAbsorption() {
-		return carbonAbsorption;
-	}
-
-	public double getAvailableToSpend() {
+	public final double getAvailableToSpend() {
 		return availableToSpend;
 	}
 	
-	void setEmissionsTarget(double emissionsTarget) {
+	final void setEmissionsTarget(double emissionsTarget) {
 		this.emissionsTarget = emissionsTarget;
 	}
 	
-	void setAvailableToSpend(double availableToSpend) {
+	final void setAvailableToSpend(double availableToSpend) {
 		this.availableToSpend = availableToSpend;
 	}
 	
-	public KyotoMember isKyotoMember() {
+	public final KyotoMember isKyotoMember() {
 		return kyotoMemberLevel;
 	}
 	
-	public void setKyotoMemberLevel(KyotoMember level) throws IllegalStateException{
+	public final double getCarbonAbsorption() {
+		return carbonAbsorption;
+	}
+	
+	public final void setKyotoMemberLevel(KyotoMember level) throws IllegalStateException{
 		if (SimTime.get().intValue() == 0) {
 			kyotoMemberLevel = level;
 		}else{

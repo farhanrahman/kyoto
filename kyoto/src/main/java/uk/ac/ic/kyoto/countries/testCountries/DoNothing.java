@@ -59,7 +59,7 @@ public class DoNothing extends AbstractCountry {
 		 * Do nothing: basic test.
 		 */
 		
-		int time = SimTime.get().intValue();
+		int time = timeService.getCurrentTick();
 		
 		if (this.persist != null) {
 			this.persist.getState(time).setProperty("GDP", new Double(this.getGDP()).toString());

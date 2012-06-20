@@ -82,12 +82,12 @@ public final class GameConst {
 	/**
 	 * Number of ticks in a year
 	 */
-	private static int TICKS_IN_YEAR = 15;
+	private static int TICKS_IN_YEAR = 20;
 	
 	/**
 	 * Number of years in a session
 	 */
-	private static int YEARS_IN_SESSION = 3;
+	private static int YEARS_IN_SESSION = 5;
 	
 	/**
 	 * Session to session world target reduction

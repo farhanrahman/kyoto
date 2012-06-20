@@ -5,9 +5,15 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
+
+import org.apache.log4j.Logger;
+
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
+import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfYearCycle;
 import uk.ac.ic.kyoto.services.GlobalTimeService.TimeToMonitor;
+import uk.ac.imperial.presage2.core.environment.ActionHandlingException;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentServiceProvider;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
@@ -36,8 +42,8 @@ public class Monitor extends EnvironmentService {
 	private Map<UUID, AbstractCountry> memberStates = new ConcurrentHashMap<UUID, AbstractCountry>();
 
 	/* Structure that counts the number of times the country cheated */
-	private Map<AbstractCountry, Integer> sinBin;
-
+	private Map<AbstractCountry, Integer> sinBin = new ConcurrentHashMap<AbstractCountry, Integer>();
+	
 	EventBus eb;
 	
 	private EnvironmentServiceProvider provider;
@@ -74,18 +80,36 @@ public class Monitor extends EnvironmentService {
 	}
 	
 	@EventListener
-	public void yearlyFunction(TimeToMonitor e) {
-		checkReports();
-		monitorCountries();
+	public void yearlyFunction(EndOfYearCycle e) {
+		if (e.getEndedYear() >= 0) {
+			System.out.println("Yearly monitoring starting");
+			checkReports();
+			System.out.println("Checked reports");
+			monitorCountries();
+			System.out.println("Monitored country");
+			carbonTargetingService.targetsForMonitor();
+		}
 	}
 	
 	private void checkReports () {
 		for (AbstractCountry country : memberStates.values()) {
-			double reportedEmission = carbonReportingService.getReport(country.getID(), SimTime.get().intValue()-1);
-			double emissionTarget = carbonTargetingService.queryYearTarget(country.getID(), (timeService.getCurrentYear()));
-
-			if (Math.round(reportedEmission) > Math.round(emissionTarget)) {
-				targetSanction(country,  reportedEmission - emissionTarget);
+			if(country instanceof AbstractCountry){
+				try {
+					country.reportCarbonOutput();
+					System.out.println("Looking for report from this time: " + SimTime.get().intValue());
+					System.out.println("Current Year: " + timeService.getCurrentYear());
+					System.out.println("This Country ID: " + country.getID());
+					double reportedEmission = carbonReportingService.getReport(country.getID(), SimTime.get().intValue());
+					double emissionTarget = carbonTargetingService.queryYearTarget(country.getID(), (timeService.getCurrentYear()-1));
+					
+					if (Math.round(reportedEmission) > Math.round(emissionTarget)) {
+						targetSanction(country,  reportedEmission - emissionTarget);
+					}
+				} catch (ActionHandlingException e) {
+					e.printStackTrace();
+				}
+			} else {
+				throw new RuntimeException("this country is not an instance of AbstractCountry");
 			}
 		}
 	}
@@ -131,14 +155,14 @@ public class Monitor extends EnvironmentService {
 
 		// Find how many countries can be monitored with the available cash
 		int noToMonitor = (int) Math.floor(cash / GameConst.getMonitoringPrice());
-		// Check if all the countries can be monitored
+		// Check if all the countries can be monitored 
 		if (noToMonitor >= memberStates.size()) {
 			// monitor all the countries
 			
 			for (AbstractCountry country: memberStates.values()) {
 				double realCarbonOutput = country.getCarbonOutput();
 				cash -= GameConst.getMonitoringPrice();
-				double reportedCarbonOutput = carbonReportingService.getReport(country.getID(), SimTime.get());
+				double reportedCarbonOutput = carbonReportingService.getReport(country.getID(), SimTime.get().intValue());
 				if (Math.round(realCarbonOutput) != Math.round(reportedCarbonOutput)) {
 					cheaters.add(country.getID());
 					cheatSanction(country);
@@ -147,6 +171,7 @@ public class Monitor extends EnvironmentService {
 						targetSanction(country, targetDiff);
 					}
 				}
+				country.updateCarbonOffsetYearly();
 			}
 			// TODO log the information about it
 		} else {
@@ -211,7 +236,9 @@ public class Monitor extends EnvironmentService {
 		
 		// Deduct the cash from the country that has cheated
 		// newCash = oldCash - GDP * cash_penalty
+		System.out.println("Old money: " + sanctionee.getAvailableToSpend());
 		sanctionee.setAvailableToSpend(Math.round((sanctionee.getAvailableToSpend()-sanctionee.getGDP()*(sinCount-1)* GameConst.getSanctionRate())));
+		System.out.println("New money: " + sanctionee.getAvailableToSpend());
 	}
 	
 	/**
