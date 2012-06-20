@@ -254,7 +254,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			
 		} catch(IllegalAccessException e){
 			logger.warn(e);
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 	
