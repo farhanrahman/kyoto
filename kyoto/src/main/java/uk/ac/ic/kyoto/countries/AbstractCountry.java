@@ -40,8 +40,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	//================================================================================
     // Definitions of Parameters of a Country
     //================================================================================
-
-	// TODO Change visibility of fields?
 	
 	final protected String 		ISO;		//ISO 3166-1 alpha-3
 	
@@ -59,10 +57,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	/*
 	 * These variables are related to land area for
 	 * dealing with carbon absorption prices
-	 * TODO: What are the units of these?
+	 * 
 	 */
-	final double landArea;
-	double arableLandArea;
+	final double landArea;    // In km^2
+	double arableLandArea;    // In km^2
 	
 	/*
 	 * These variables are related to carbon emissions and 
@@ -122,7 +120,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP, double GDPRate, double energyOutput,
 			double carbonOutput) {
 
-		//TODO Validate parameters
 		super(id, name);
 		
 		this.landArea = landArea;
@@ -157,7 +154,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			environment.act(new AddToCarbonTarget(this), getID(), authkey);
 			
 			environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
-			//TODO: Initialize the Action Handlers (DO THEY HAVE TO BE INSTANTIATED ALL THE TIME?)
 			
 			try {
 				timeService = getEnvironmentService(ParticipantTimeService.class);
@@ -604,21 +600,23 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	protected final void leaveKyoto() throws IllegalStateException {
 		if (timeService.getCurrentTick() == 0) {
-			kyotoMemberLevel = KyotoMember.ROGUE;
 			
 			try {
 				environment.act(new AddRemoveFromMonitor(this, addRemoveType.REMOVE), getID(), authkey);
+				kyotoMemberLevel = KyotoMember.ROGUE;
+				environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
 			} catch (ActionHandlingException e) {
 				System.out.println("Exception wilst removing from monitor: " + e);
 				e.printStackTrace();
 			}
 		}
 		else if (timeService.getCurrentTick() - joinTime >= timeService.getTicksInYear()*GameConst.getMinimumKyotoMembershipDuration()) {
-			kyotoMemberLevel = KyotoMember.ROGUE;
 			leaveTime=timeService.getCurrentTick();
 			
 			try {
 				environment.act(new AddRemoveFromMonitor(this, addRemoveType.REMOVE), getID(), authkey);
+				kyotoMemberLevel = KyotoMember.ROGUE;
+				environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
 			} catch (ActionHandlingException e) {
 				System.out.println("Exception wilst removing from monitor: " + e);
 				e.printStackTrace();
@@ -630,10 +628,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	protected final void joinKyoto() throws IllegalStateException {
 		if (timeService.getCurrentTick() - leaveTime >= timeService.getTicksInYear()*GameConst.getMinimumKyotoRejoinTime()) {
-			kyotoMemberLevel = KyotoMember.ANNEXONE;
 			joinTime = timeService.getCurrentTick();
 			
 			try {
+				environment.act(new AddRemoveFromMonitor(this, addRemoveType.REMOVE), getID(), authkey);
+				kyotoMemberLevel = KyotoMember.ANNEXONE;
 				environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
 			} catch (ActionHandlingException e) {
 				System.out.println("Exception whilst adding to monitor: " + e);
@@ -680,7 +679,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return energyOutput;
 	}
 	
-	public final double getPrevEnergyOut(){
+	public final double getPrevEnergyOutput(){
 		return prevEnergyOutput;
 	}
 	
