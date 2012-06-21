@@ -2,6 +2,7 @@ package uk.ac.ic.kyoto.annex1reduce;
 
 import java.util.UUID;
 
+import uk.ac.ic.kyoto.annex1reduce.CountrySimulator.*;
 import uk.ac.ic.kyoto.countries.IsolatedAbstractCountry;
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.Offer;
@@ -47,9 +48,16 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 	protected void behaviour() {
 
 		CountrySimulator.CountryState optimalState = 
-				simulator.simulate(getCarbonOutput(),getEnergyOutput(),getPrevEnergyOut(),
+				simulator.simulate(getCarbonOutput(),getEnergyOutput(),getPrevEnergyOutput(),
 				getCarbonOffset(),getCarbonAbsorption(), getEmissionsTarget(), getAvailableToSpend(),
 				getGDP(),getGDPRate(),getArableLandArea(),10);
+		
+		SellAction sellAction = (SellAction) optimalState.action;
+		MaintainAction maintainAction = (MaintainAction) optimalState.previousState.action;
+		ReduceAction reduceAction = (ReduceAction) optimalState.previousState.previousState.action;
+
+		double carbonDifference = this.getCarbonOutput() - this.getCarbonAbsorption() - this.getCarbonOffset();
+		reduceAction.
 	}
 
 	/**
@@ -207,8 +215,8 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 			return 0;
 		}
 		//TODO return something other than a very big number
-//		return (Double.MAX_VALUE / 1000000);
-		return carbonOffset*600;
+		return (Double.MAX_VALUE / 1000000);
+//		return carbonOffset*600;
 	}
 	
 	/**

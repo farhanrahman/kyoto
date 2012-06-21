@@ -15,7 +15,7 @@ class CountrySimulator {
 
 	// TODO, look ahead a minimum of 5 years or a maximum of 15 years. Always
 	// end at a session end.
-	final private int LOOK_AHEAD_YEARS = 10;
+	final private int LOOK_AHEAD_YEARS = 11;
 	private int SANCTION_YEAR;
 
 	public CountrySimulator(AnnexOneReduce country) {
@@ -507,13 +507,15 @@ class CountrySimulator {
 			// Invest some chunk of our available cash in industry, offset it by
 			// buying credits or absorbing
 
-			int maxGrains = 5;
+			int maxGrains = 8;
 			int minGrains = 3;
 			int yearModifier = Math.max(0, 1 * this.year);
 			int numGrains = Math.max(maxGrains - yearModifier, minGrains);
-			float grain = 100f / numGrains;
+			float max = 70f;
+			float grain = max / numGrains;
+			float min = grain;
 
-			for (float i = grain; i <= 100; i = i + grain) {
+			for (float i = min; i <= max; i = i + grain) {
 				industryFrac = i;
 				investOffsetFrac = 100;
 				buyCreditOffsetFrac = 0;
@@ -528,7 +530,7 @@ class CountrySimulator {
 				return;
 			}
 
-			for (float i = grain; i <= 100; i = i + grain) {
+			for (float i = min; i <= max; i = i + grain) {
 				industryFrac = i;
 				investOffsetFrac = 0;
 				buyCreditOffsetFrac = 100;
@@ -639,6 +641,31 @@ class CountrySimulator {
 		}
 
 	}
+	
+	private static double calculateGDPRate(double oldGDPRate,
+			double energyOutput, double prevEnergyOutput) {
+
+		double sum;
+		double marketStateFactor = 0.5;
+		double GDPRate = oldGDPRate;
+		if (energyOutput - prevEnergyOutput >= 0) {
+			sum = (((energyOutput - prevEnergyOutput) / prevEnergyOutput)
+					* GameConst.getEnergyGrowthScaler() * marketStateFactor + GDPRate * 100) / 2;
+			GDPRate = GameConst.getMaxGDPGrowth() - GameConst.getMaxGDPGrowth()
+					* Math.exp(-sum * GameConst.getGrowthScaler());
+		} else {
+			sum = ((energyOutput - prevEnergyOutput) / prevEnergyOutput)
+					* GameConst.getEnergyGrowthScaler();
+			sum = Math.abs(sum);
+			GDPRate = -(GameConst.getMaxGDPGrowth() - GameConst
+					.getMaxGDPGrowth()
+					* Math.exp(-sum * GameConst.getGrowthScaler()));
+		}
+
+		GDPRate /= 100; // Needs to be a % for rate formula
+
+		return GDPRate;
+	}
 
 	/**
 	 * Structure containing a list of states performed in a given year, after
@@ -672,7 +699,7 @@ class CountrySimulator {
 	 * @author Nik
 	 * 
 	 */
-	private static class ReduceAction extends Action {
+	static class ReduceAction extends Action {
 
 		public ReduceAction(float shutDown, float buyCredit, float invest) {
 			this.shutDownFrac = shutDown;
@@ -746,38 +773,13 @@ class CountrySimulator {
 		}
 	}
 
-	private static double calculateGDPRate(double oldGDPRate,
-			double energyOutput, double prevEnergyOutput) {
-
-		double sum;
-		double marketStateFactor = 0.5;
-		double GDPRate = oldGDPRate;
-		if (energyOutput - prevEnergyOutput >= 0) {
-			sum = (((energyOutput - prevEnergyOutput) / prevEnergyOutput)
-					* GameConst.getEnergyGrowthScaler() * marketStateFactor + GDPRate * 100) / 2;
-			GDPRate = GameConst.getMaxGDPGrowth() - GameConst.getMaxGDPGrowth()
-					* Math.exp(-sum * GameConst.getGrowthScaler());
-		} else {
-			sum = ((energyOutput - prevEnergyOutput) / prevEnergyOutput)
-					* GameConst.getEnergyGrowthScaler();
-			sum = Math.abs(sum);
-			GDPRate = -(GameConst.getMaxGDPGrowth() - GameConst
-					.getMaxGDPGrowth()
-					* Math.exp(-sum * GameConst.getGrowthScaler()));
-		}
-
-		GDPRate /= 100; // Needs to be a % for rate formula
-
-		return GDPRate;
-	}
-
 	/**
 	 * A maintain action
 	 * 
 	 * @author Nik
 	 * 
 	 */
-	private static class MaintainAction extends Action {
+	static class MaintainAction extends Action {
 		public MaintainAction(float industryFrac, float investOffsetFrac,
 				float buyCreditOffsetFrac) {
 			this.industryFrac = industryFrac;
@@ -864,7 +866,7 @@ class CountrySimulator {
 		}
 	}
 
-	private static class SellAction extends Action {
+	static class SellAction extends Action {
 
 		public SellAction(float shutDownFrac, float investFrac, float sellFrac) {
 			this.shutDownFrac = shutDownFrac;

@@ -167,7 +167,7 @@ public final class IsolatedCarbonAbsorptionHandler {
 			}
 		}
 		else {
-			throw new NotEnoughCashException();
+			throw new NotEnoughCashException(this.country.availableToSpend, investmentAmount);
 		}
 	}
 	

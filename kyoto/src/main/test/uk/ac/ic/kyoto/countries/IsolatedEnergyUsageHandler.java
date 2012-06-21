@@ -98,7 +98,7 @@ public final class IsolatedEnergyUsageHandler {
 			country.availableToSpend -= investment;
 		}
 		else {
-			throw new NotEnoughCashException();
+			throw new NotEnoughCashException(country.availableToSpend, investment);
 		}
 	}
 }

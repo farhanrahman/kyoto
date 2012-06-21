@@ -31,7 +31,7 @@ public final class IsolatedCarbonReductionHandler{
 	 * Cost of reducing carbon by the specified amount.
 	 */
 	public final double getInvestmentRequired(double carbonOutputChange) {
-		return getInvestmentRequired(Math.floor(carbonOutputChange), country.carbonOutput, country.energyOutput);
+		return getInvestmentRequired(carbonOutputChange, country.carbonOutput, country.energyOutput);
 	}
 	
 	/**
@@ -76,10 +76,11 @@ public final class IsolatedCarbonReductionHandler{
 	 * Amount of money that we want to spend on investment.
 	 * 
 	 * @return
-	 * Change in carbon output from specified cost.
+	 * APPROXIMATE Change in carbon output from specified cost.
 	 */
+	@Deprecated 
 	public final double getCarbonOutputChange(double investmentAmount) {
-		return getCarbonOutputChange(Math.floor(investmentAmount), country.carbonOutput, country.energyOutput);
+		return getCarbonOutputChange(investmentAmount, country.carbonOutput, country.energyOutput);
 	}
 	
 	/**
@@ -151,7 +152,7 @@ public final class IsolatedCarbonReductionHandler{
 				}
 			}
 			else {
-				throw new NotEnoughCashException();
+				throw new NotEnoughCashException(this.country.availableToSpend, investmentAmount);
 			}
 		}
 		catch (NotEnoughCarbonOutputException e) {

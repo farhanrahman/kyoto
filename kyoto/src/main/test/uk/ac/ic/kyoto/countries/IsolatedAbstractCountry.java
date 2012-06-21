@@ -5,6 +5,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import uk.ac.ic.kyoto.actions.AddRemoveFromMonitor;
+import uk.ac.ic.kyoto.actions.AddRemoveFromMonitor.addRemoveType;
+import uk.ac.ic.kyoto.actions.AddToCarbonTarget;
 import uk.ac.ic.kyoto.actions.ApplyMonitorTax;
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
 import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
@@ -22,7 +25,10 @@ import uk.ac.imperial.presage2.core.messaging.Performative;
 import uk.ac.imperial.presage2.core.network.MulticastMessage;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
+import uk.ac.imperial.presage2.util.fsm.FSMException;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
+
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Class from which all countries are derived
@@ -34,8 +40,6 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 	// ================================================================================
 	// Definitions of Parameters of a Country
 	// ================================================================================
-
-	// TODO Change visibility of fields?
 
 	final protected String ISO; // ISO 3166-1 alpha-3
 
@@ -51,10 +55,10 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 
 	/*
 	 * These variables are related to land area for dealing with carbon
-	 * absorption prices TODO: What are the units of these?
+	 * absorption prices
 	 */
-	final double landArea;
-	protected double arableLandArea;
+	final double landArea; // In km^2
+	double arableLandArea; // In km^2
 
 	/*
 	 * These variables are related to carbon emissions and calculating
@@ -126,7 +130,6 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 			double landArea, double arableLandArea, double GDP, double GDPRate,
 			double energyOutput, double carbonOutput) {
 
-		// TODO Validate parameters
 		super(id, name);
 
 		this.landArea = landArea;
@@ -147,8 +150,12 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 
 	@Override
 	final public void initialise() {
-		// TODO: Initialize the Action Handlers (DO THEY HAVE TO BE INSTANTIATED
-		// ALL THE TIME?)
+		// Check if the initialised function has already been called.
+		if (this.initialised) {
+		} else {
+			this.initialised = true;
+		}
+
 		// Initialize the Action Handlers
 		carbonAbsorptionHandler = new IsolatedCarbonAbsorptionHandler(this);
 		carbonReductionHandler = new IsolatedCarbonReductionHandler(this);
@@ -171,6 +178,9 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 			}
 
 			if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
+				System.out.println(this.ISO + " first day of new year on tick "
+						+ timeService.getCurrentTick());
+
 				updateGDPRate();
 				updateGDP();
 				updateAvailableToSpend();
@@ -178,15 +188,9 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 					MonitorTax();
 				}
 
-				updateCarbonOffsetYearly();
-				try {
-					reportCarbonOutput();
-				} catch (ActionHandlingException e) {
-					e.printStackTrace();
-				}
-
 				yearlyFunction();
 			}
+
 			if ((timeService.getCurrentYear() % timeService.getYearsInSession())
 					+ (timeService.getCurrentTick() % timeService
 							.getTicksInYear()) == 0) {
@@ -197,20 +201,8 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 			// leave a 10-tick grace period to allow current trades to complete
 			// before performing end of year routine
 			if (timeService.getCurrentTick() % timeService.getTicksInYear() < timeService
-					.getTicksInYear() - 10) {
+					.getTicksInYear() - 5) {
 				behaviour();
-			}
-
-			// assume by this point all trades are complete and it's safe to
-			// report
-			else if (timeService.getCurrentTick()
-					% timeService.getTicksInYear() == timeService
-					.getTicksInYear() - 3) {
-				try {
-					reportCarbonOutput();
-				} catch (ActionHandlingException e) {
-					e.printStackTrace();
-				}
 			}
 
 			logSimulationData();
@@ -220,7 +212,7 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 
 		} catch (IllegalAccessException e) {
 			logger.warn(e);
-			e.printStackTrace();
+			// e.printStackTrace();
 		}
 	}
 
@@ -247,9 +239,24 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 		return this.executeLock;
 	}
 
-	protected void reportCarbonOutput() throws ActionHandlingException {
-		environment.act(new SubmitCarbonEmissionReport(carbonOutput), getID(),
+	public final void reportCarbonOutput() throws ActionHandlingException {
+		logger.info("Reporting bullshit, I am " + getName());
+		double reportedValue = getReportedCarbonOutput();
+		addToReports(SimTime.get(), reportedValue);
+		dumpCheatingData(reportedValue, this.getCarbonOutput());
+		environment.act(new SubmitCarbonEmissionReport(reportedValue), getID(),
 				authkey);
+	}
+
+	/**
+	 * If you want to cheat, override this function and create new logic to
+	 * return an output value you want to be reported.
+	 * 
+	 * @return Your reported carbon output, in tons of carbon
+	 */
+
+	protected double getReportedCarbonOutput() {
+		return carbonOutput;
 	}
 
 	/**
@@ -286,7 +293,8 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 	}
 
 	/**
-	 * Private setter function for personal reports
+	 * Private setter function for personal reports If you don't do this carbon
+	 * reporting service does not work!!
 	 * 
 	 * @param simTime
 	 * @param emission
@@ -306,7 +314,7 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 	 *            : Simulation time at which report submission was made
 	 * @return
 	 */
-	public Double reportCarbonEmission(Time t) {
+	public final Double reportCarbonEmission(Time t) {
 
 		// TODO implement a method to cheat
 		this.addToReports(t, carbonOutput);
@@ -323,6 +331,36 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 	abstract protected void initialiseCountry();
 
 	abstract protected boolean acceptTrade(NetworkAddress from, Offer trade);
+
+	/**
+	 * Override this method to get notified when trade was successful
+	 * 
+	 * @param from
+	 * @param trade
+	 */
+	protected void tradeWasSuccessful(NetworkAddress from, Offer trade) {
+
+	}
+
+	/**
+	 * Override this method to get notified when trade failed
+	 * 
+	 * @param from
+	 * @param trade
+	 */
+	protected void tradeHasFailed(NetworkAddress from, Offer trade) {
+
+	}
+
+	/**
+	 * Override this method to get notified when trade was rejected
+	 * 
+	 * @param from
+	 * @param trade
+	 */
+	protected void tradeWasRejected(NetworkAddress from, Offer trade) {
+
+	}
 
 	// ================================================================================
 	// Private methods
@@ -403,7 +441,7 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 	 * 
 	 * @author ct
 	 */
-	private final void updateCarbonOffsetYearly() {
+	final void updateCarbonOffsetYearly() {
 		if (kyotoMemberLevel == KyotoMember.ANNEXONE) {
 			if (emissionsTarget <= carbonOffset + carbonAbsorption
 					+ carbonOutput) {
@@ -425,7 +463,7 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 	// Log simulation data function
 	// ================================================================================
 	/**
-	 * Stores all simulation data into MongoDB
+	 * Logs simulation data into local datastore
 	 * 
 	 * @author waffles
 	 */
@@ -442,24 +480,9 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 		 */
 	}
 
-	private final void dumpSimulationData() {
-
-		this.persist.setProperty(DataStore.gdpKey, this.dataStore
-				.getGdpHistory().toString());
-		this.persist.setProperty(DataStore.gdpRateKey, this.dataStore
-				.getGdpRateHistory().toString());
-		this.persist.setProperty(DataStore.availableToSpendKey, this.dataStore
-				.getAvailableToSpendHistory().toString());
-		this.persist.setProperty(DataStore.emissionTargetKey, this.dataStore
-				.getEmissionsTargetHistory().toString());
-		this.persist.setProperty(DataStore.carbonOffsetKey, this.dataStore
-				.getCarbonOffsetHistory().toString());
-		this.persist.setProperty(DataStore.carbonOutputKey, this.dataStore
-				.getCarbonOutputHistory().toString());
-		this.persist.setProperty(DataStore.isKyotoMemberKey, this.dataStore
-				.getIsKyotoMemberHistory().toString());
-	}
-
+	/**
+	 * Dumps the data into the database for current tick
+	 */
 	private final void dumpCurrentTickData() {
 		this.persist.getState(SimTime.get().intValue()).setProperty(
 				DataStore.gdpKey, Double.toString(this.getGDP()));
@@ -479,11 +502,26 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 				Double.toString(this.getCarbonOutput()));
 		this.persist.getState(SimTime.get().intValue()).setProperty(
 				DataStore.isKyotoMemberKey, this.isKyotoMember().name());
+		this.persist.getState(SimTime.get().intValue()).setProperty(
+				DataStore.cheated, "n/a");
 	}
 
-	@Override
-	public void onSimulationComplete() {
-		this.dumpSimulationData();
+	/**
+	 * Dumps whether the participant was cheating or not for the current
+	 * simulation tick
+	 * 
+	 * @param reportedValue
+	 * @param originalOutput
+	 */
+	public final void dumpCheatingData(Double reportedValue,
+			Double originalOutput) {
+		if (reportedValue.equals(originalOutput)) {
+			this.persist.getState(SimTime.get().intValue()).setProperty(
+					DataStore.cheated, "reported true emission");
+		} else {
+			this.persist.getState(SimTime.get().intValue()).setProperty(
+					DataStore.cheated, "cheated");
+		}
 	}
 
 	// ================================================================================
@@ -577,67 +615,67 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 	// Public getters
 	// ================================================================================
 
-	public String getISO() {
+	public final String getISO() {
 		return ISO;
 	}
 
-	public double getLandArea() {
+	public final double getLandArea() {
 		return landArea;
 	}
 
-	public double getArableLandArea() {
+	public final double getArableLandArea() {
 		return arableLandArea;
 	}
 
-	public double getGDP() {
+	public final double getGDP() {
 		return GDP;
 	}
 
-	public double getGDPRate() {
+	public final double getGDPRate() {
 		return GDPRate;
 	}
 
-	public double getEmissionsTarget() {
+	public final double getEmissionsTarget() {
 		return emissionsTarget;
 	}
 
-	public double getCarbonOffset() {
+	public final double getCarbonOffset() {
 		return carbonOffset;
 	}
 
-	public double getEnergyOutput() {
+	public final double getEnergyOutput() {
 		return energyOutput;
 	}
 
-	public double getPrevEnergyOut() {
+	public final double getPrevEnergyOutput() {
 		return prevEnergyOutput;
 	}
 
-	public double getCarbonOutput() {
+	public final double getCarbonOutput() {
 		return carbonOutput;
 	}
 
-	public double getCarbonAbsorption() {
-		return carbonAbsorption;
-	}
-
-	public double getAvailableToSpend() {
+	public final double getAvailableToSpend() {
 		return availableToSpend;
 	}
 
-	public void setEmissionsTarget(double emissionsTarget) {
+	public final void setEmissionsTarget(double emissionsTarget) {
 		this.emissionsTarget = emissionsTarget;
 	}
 
-	public void setAvailableToSpend(double availableToSpend) {
+	public final void setAvailableToSpend(double availableToSpend) {
 		this.availableToSpend = availableToSpend;
 	}
 
-	public KyotoMember isKyotoMember() {
+	public final KyotoMember isKyotoMember() {
 		return kyotoMemberLevel;
 	}
 
-	public void setKyotoMemberLevel(KyotoMember level)
+	public final double getCarbonAbsorption() {
+		return carbonAbsorption;
+	}
+
+	public final void setKyotoMemberLevel(KyotoMember level)
 			throws IllegalStateException {
 		if (SimTime.get().intValue() == 0) {
 			kyotoMemberLevel = level;
