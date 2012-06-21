@@ -1,8 +1,5 @@
 package uk.ac.ic.kyoto.util.sim.jsonobjects.tradedata;
 
-import java.util.Map;
-import java.util.UUID;
-
 import uk.ac.ic.kyoto.countries.OfferMessage;
 
 /**
@@ -14,13 +11,13 @@ import uk.ac.ic.kyoto.countries.OfferMessage;
 public class TradeData {
 	private String tick;
 	private String simID;
-	private TradeObject trades;
+	private TradeObject tradeObject;
 	
 	
-	public TradeData(Map<UUID, OfferMessage> trades, String simTick, String simID){
+	public TradeData(OfferMessage offerMessage, String simTick, String simID){
 		this.tick = simTick;
 		this.simID = simID;
-		this.trades = new TradeObject(trades);
+		this.tradeObject = new TradeObject(offerMessage);
 	}
 	
 	@Override
@@ -28,7 +25,7 @@ public class TradeData {
 		String s = "{";
 		s += " \"simID\" : \"" + this.simID + "\",";
 		s += " \"tick\" : \"" + this.tick + "\",";
-		s += " \"trades\" : " + this.trades.toString();
+		s += this.tradeObject.toString();
 		s += "}";
 		return s;
 	}
@@ -46,18 +43,7 @@ public class TradeData {
 	public void setTime(String tick) {
 		this.tick = tick;
 	}
-	/**
-	 * @return the trades
-	 */
-	public TradeObject getTrades() {
-		return trades;
-	}
-	/**
-	 * @param trades the trades to set
-	 */
-	public void setTrades(TradeObject trades) {
-		this.trades = trades;
-	}
+
 	/**
 	 * @return the simID
 	 */

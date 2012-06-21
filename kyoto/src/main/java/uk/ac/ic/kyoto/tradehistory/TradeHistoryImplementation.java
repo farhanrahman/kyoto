@@ -105,9 +105,15 @@ public class TradeHistoryImplementation implements TradeHistory{
 			}
 		
 			synchronized(history){
-				TradeData data = new TradeData(history.get(SimTime.get().intValue()), Integer.toString(SimTime.get().intValue()), this.simID);
-				dataStorer.storeTradeData(data.toString());
-				logger.debug(data.toString());
+				Integer simTick = SimTime.get().intValue();
+				Map<UUID,OfferMessage> trades = history.get(simTick);
+				if(trades != null){
+					for(UUID id : trades.keySet()){
+						TradeData data = new TradeData(trades.get(id), simTick.toString(), this.simID);
+						dataStorer.storeTradeData(data.toString());
+						logger.debug(data.toString());
+					}
+				}
 			}
 		} catch(Exception e){
 			logger.warn(e);
