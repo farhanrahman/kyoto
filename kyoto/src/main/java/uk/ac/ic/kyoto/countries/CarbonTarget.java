@@ -157,9 +157,6 @@ public class CarbonTarget extends EnvironmentService {
 			this.worldCurrentSessionTarget += data;
 		}		
 		
-		this.worldLastSessionTarget = this.worldCurrentSessionTarget;
-		this.worldCurrentSessionTarget = worldLastSessionTarget * GameConst.getTargetReduction(); 
-
 		updateSessionTargets();
 		updateYearTargets();
 	}
@@ -201,8 +198,6 @@ public class CarbonTarget extends EnvironmentService {
 		if (timeService.getCurrentYear() != 0) {
 			if ((timeService.getCurrentYear() % timeService.getYearsInSession()) == 0)
 			{
-				this.worldLastSessionTarget = this.worldCurrentSessionTarget;
-				this.worldCurrentSessionTarget = worldLastSessionTarget * GameConst.getTargetReduction(); 
 				updateSessionTargets();
 			}
 			

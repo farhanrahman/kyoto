@@ -61,7 +61,6 @@ public class BIC extends AbstractCountry {
 							this.tradeProtocol.offer(
 									m.getFrom(), 
 									o.getOfferQuantity(), 
-									o.getOfferUnitCost(), 
 									o);
 						} catch (FSMException e) {
 							e.printStackTrace();
@@ -237,7 +236,7 @@ public class BIC extends AbstractCountry {
 				
 				if (carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend() )
 					{
-					carbonAbsorptionHandler.investInCarbonAbsorption(carbonAbsorptionHandler.getInvestmentRequired(carbon_difference));
+					carbonAbsorptionHandler.investInCarbonAbsorption(carbon_difference);
 					logger.info("Country invests in carbon absorption to increase carbon absorption and thus reach environment target carbon output");
 					}
 				
@@ -256,6 +255,7 @@ public class BIC extends AbstractCountry {
 						
 					logger.info("Country has insufficient funds to reach environment friendly target");
 					green_care = false;
+					
 					}
 					
 			}
@@ -425,4 +425,5 @@ broadcastInvesteeOffer(change_required,InvestmentType.REDUCE);
 
 		
 	
+
 
