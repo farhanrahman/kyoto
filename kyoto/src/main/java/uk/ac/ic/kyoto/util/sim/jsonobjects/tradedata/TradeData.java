@@ -5,6 +5,12 @@ import java.util.UUID;
 
 import uk.ac.ic.kyoto.countries.OfferMessage;
 
+/**
+ * Object used to store JSON Object to
+ * store into the mongodb
+ * @author farhanrahman
+ *
+ */
 public class TradeData {
 	private String tick;
 	private String simID;
