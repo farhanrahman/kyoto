@@ -31,10 +31,11 @@ public class AnnexOneSustain extends AbstractCountry {
 	
 	protected double	surplusCarbonTarget;		// Number of credits we can and want to sell without carbon absorption/reduction
 	protected double	surplusCarbonSold;			// Number of credits that we sold this year
+	protected double	surplusCarbonTemp;			// Number of credits that we will have sold providing that current transactions are successful
 	protected double	surplusCarbonPrice;			// Price of surplus carbon while within target
 	protected double	carbonToReduce;				// Carbon reduction that we need to perform before end of year to match target
 	protected double	carbonToAbsorb;				// Carbon absorption that we need to perform before end of year to match target
-	protected double	expectedSales;			// Specifies where our acceptable price will lie between two extreme profitability points
+	protected double	expectedSales;				// Specifies where our acceptable price will lie between two extreme profitability points
 	
 	
 	//================================================================================
@@ -43,12 +44,13 @@ public class AnnexOneSustain extends AbstractCountry {
 	
 	public AnnexOneSustain(UUID id, String name, String ISO,
 			double landArea, double arableLandArea, double GDP, double GDPRate,
-			long energyOutput, long carbonOutput)
+			double energyOutput, double carbonOutput)
 	{
 		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput);
 		
 		this.surplusCarbonTarget = 0;
 		this.surplusCarbonSold = 0;
+		this.surplusCarbonTemp = 0;
 		this.surplusCarbonPrice = 0;
 		this.carbonToReduce = 0;
 		this.carbonToAbsorb = 0;
@@ -58,7 +60,6 @@ public class AnnexOneSustain extends AbstractCountry {
 	@Override
 	protected void initialiseCountry() {
 		setKyotoMemberLevel(KyotoMember.ANNEXONE);
-		resetYearlyTargets();
 		surplusCarbonPrice = carbonReductionHandler.getInvestmentRequired(surplusCarbonTarget);
 		expectedSales = Constants.EXPECTED_SALES_INITIAL;
 	}
@@ -90,7 +91,6 @@ public class AnnexOneSustain extends AbstractCountry {
 				//		- accept profitable buy offers only
 			}
 			else if (ticksUntilEnd == 7) {
-				// End-of-year function
 				finalInvestments();
 			}
 		}
@@ -120,7 +120,7 @@ public class AnnexOneSustain extends AbstractCountry {
 	@Override
 	public void sessionFunction() {
 		if ((surplusCarbonTarget < 0) && (isKyotoMember() == KyotoMember.ANNEXONE)) {
-			leaveKyoto();
+			//leaveKyoto();
 		}
 	}
 	
@@ -155,14 +155,30 @@ public class AnnexOneSustain extends AbstractCountry {
 				}
 			}
 			
+			System.out.println("*** Money before investment: " + this.getAvailableToSpend());
+			System.out.println("*** Of which for investment: " + totalInvestment);
+			System.out.println("*** Carbon output before investment: " + this.getCarbonOutput());
+			System.out.println("*** Which we will increase by: " + carbonGained);
+			System.out.println("*** ArableLandArea before investment: " + this.getArableLandArea());
+			System.out.println("*** Absorption before investment: " + this.getCarbonAbsorption());
+			
 			energyUsageHandler.investInCarbonIndustry(industryInvestment);
+			
+			System.out.println("*** INVESTED");
 			
 			if ((carbonAbsCost < carbonRedCost) && (carbonAbsTrees < this.getArableLandArea())) {
 				carbonAbsorptionHandler.investInCarbonAbsorption(carbonGained);
+				System.out.println("*** Absorption done");
 			}
 			else {
 				carbonReductionHandler.investInCarbonReduction(carbonGained);
+				System.out.println("*** Reduction done");
 			}
+			
+			System.out.println("*** Moneyafter investment: " + this.getAvailableToSpend());
+			System.out.println("*** Carbon output after investment: " + this.getCarbonOutput());
+			System.out.println("*** ArableLandArea after investment: " + this.getArableLandArea());
+			System.out.println("*** Absorption after investment: " + this.getCarbonAbsorption());
 		}
 		catch (Exception e) {
 			logger.warn("Problem with investing in industry: " + e.getMessage());
@@ -197,19 +213,21 @@ public class AnnexOneSustain extends AbstractCountry {
 		double percentageSold;
 		
 		try {
-			percentageSold = surplusCarbonSold / surplusCarbonTarget;
-			
-			if (percentageSold > 1) {
-				expectedSales = 1;
-				logger.info("AnnexOneSustain country " + this.getName() + ": Setting profitability treshold to 100%");
+			if (surplusCarbonTarget < 0.1) {
+				logger.info("AnnexOneSustain country " + this.getName() + ": There was no surplus carbon to sell, nothing to do");
 			}
 			else {
-				expectedSales = percentageSold;
-				logger.info("AnnexOneSustain country " + this.getName() + ": Setting profitability treshold to " + String.valueOf(percentageSold * 100) + "%");
+				percentageSold = surplusCarbonSold / surplusCarbonTarget;
+				
+				if (percentageSold > 1) {
+					expectedSales = 1;
+					logger.info("AnnexOneSustain country " + this.getName() + ": Setting profitability treshold to 100%");
+				}
+				else {
+					expectedSales = percentageSold;
+					logger.info("AnnexOneSustain country " + this.getName() + ": Setting profitability treshold to " + String.valueOf(percentageSold * 100) + "%");
+				}
 			}
-		}
-		catch (ArithmeticException e) {
-			logger.info("AnnexOneSustain country " + this.getName() + ": There was no surplus carbon to sell, nothing to do");
 		}
 		catch (Exception e) {
 			logger.warn("Problem with setting: " + e.getMessage());
@@ -218,7 +236,13 @@ public class AnnexOneSustain extends AbstractCountry {
 	
 	protected void resetYearlyTargets() {
 		surplusCarbonTarget = this.getEmissionsTarget() - (this.getCarbonOutput() - this.getCarbonAbsorption()) + this.getCarbonOffset();
+		System.out.println("*** emissionsTarget: " + this.getEmissionsTarget());
+		System.out.println("*** carbonOutput: " + this.getCarbonOutput());
+		System.out.println("*** carbonAbsorption: " + this.getCarbonAbsorption());
+		System.out.println("*** carbonOffset: " + this.getCarbonOffset());
+		System.out.println("*** surplusCarbonTarget: " + surplusCarbonTarget);
 		surplusCarbonSold = 0;
+		surplusCarbonTemp = 0;
 		carbonToReduce = 0;
 		carbonToAbsorb = 0;
 	}
