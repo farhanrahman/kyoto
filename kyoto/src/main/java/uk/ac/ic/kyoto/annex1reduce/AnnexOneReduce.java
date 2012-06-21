@@ -16,11 +16,11 @@ import uk.ac.imperial.presage2.core.network.NetworkAddress;
  */
 public class AnnexOneReduce extends IsolatedAbstractCountry {
 	private EU eu;
-	private CountrySimulator simulator;
+	final private CountrySimulator simulator;
 	public AnnexOneReduce(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP, double GDPRate, double energyOutput, 
 			double carbonOutput) {
 		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput);
-		simulator = new CountrySimulator(this,10);
+		simulator = new CountrySimulator(this);
 	}
 
 	@Override
@@ -49,7 +49,7 @@ public class AnnexOneReduce extends IsolatedAbstractCountry {
 		CountrySimulator.CountryState optimalState = 
 				simulator.simulate(getCarbonOutput(),getEnergyOutput(),getPrevEnergyOut(),
 				getCarbonOffset(),getCarbonAbsorption(), getEmissionsTarget(), getAvailableToSpend(),
-				getGDP(),getGDPRate(),getArableLandArea());
+				getGDP(),getGDPRate(),getArableLandArea(),10);
 	}
 
 	/**

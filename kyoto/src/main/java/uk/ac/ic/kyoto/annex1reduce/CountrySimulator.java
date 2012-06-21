@@ -15,20 +15,16 @@ class CountrySimulator {
 
 	// TODO, look ahead a minimum of 5 years or a maximum of 15 years. Always
 	// end at a session end.
-	final private int LOOK_AHEAD_YEARS;
-	final private int SANCTION_YEAR;
+	final private int LOOK_AHEAD_YEARS = 10;
+	private int SANCTION_YEAR;
 
-	public CountrySimulator(AnnexOneReduce country, int yearsUntilSanctions) {
+	public CountrySimulator(AnnexOneReduce country) {
 		this.country = country;
-		this.SANCTION_YEAR = yearsUntilSanctions;
-		this.LOOK_AHEAD_YEARS = yearsUntilSanctions + 2;
-
-		stateList = new StateList[LOOK_AHEAD_YEARS];
 	}
 
 	final private AnnexOneReduce country;
 
-	private StateList[] stateList;
+	private StateList[] stateList = new StateList[LOOK_AHEAD_YEARS];
 
 	private CountryState startState;
 
@@ -36,7 +32,9 @@ class CountrySimulator {
 			double prevEnergyOutput, double carbonOffset,
 			double carbonAbsorption, double emissionsTarget,
 			double availableToSpend, double GDP, double GDPRate,
-			double arableLandArea) {
+			double arableLandArea, int yearsUntilSanctions) {
+		
+		this.SANCTION_YEAR = yearsUntilSanctions;
 
 		// Initialise the starting point in the simulation
 		startState = new CountryState(carbonOutput, energyOutput,
@@ -109,7 +107,7 @@ class CountrySimulator {
 	}
 
 	/**
-	 * Look at the given array of countryStates and return the best one
+	 * Look at the given array of countryStates and return one of the optimal states
 	 * 
 	 * @return
 	 */
@@ -133,8 +131,10 @@ class CountrySimulator {
 
 		System.out.println();
 		System.out.println("NumStates = " + startSellStates.size());
+		
+		iterator = startSellStates.iterator();
 
-		return null;
+		return iterator.next();
 	}
 
 	/**
