@@ -671,21 +671,29 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		}
 	}
 	
+	/**
+	 * Deprecated method, no longer permitted!
+	 * 
+	 * @throws IllegalStateException
+	 */
+	@Deprecated 
 	protected final void joinKyoto() throws IllegalStateException {
-		if (timeService.getCurrentTick() - leaveTime >= timeService.getTicksInYear()*GameConst.getMinimumKyotoRejoinTime()) {
-			joinTime = timeService.getCurrentTick();
-			
-			try {
-				environment.act(new AddRemoveFromMonitor(this, addRemoveType.REMOVE), getID(), authkey);
-				kyotoMemberLevel = KyotoMember.ANNEXONE;
-				environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
-			} catch (ActionHandlingException e) {
-				System.out.println("Exception whilst adding to monitor: " + e);
-				e.printStackTrace();
-			}
-		} else {
-			throw new IllegalStateException("Cannot join Kyoto Protocol.");
-		}
+		throw new IllegalStateException("Cannot join Kyoto Protocol");
+		
+//		if (timeService.getCurrentTick() - leaveTime >= timeService.getTicksInYear()*GameConst.getMinimumKyotoRejoinTime()) {
+//			joinTime = timeService.getCurrentTick();
+//			
+//			try {
+//				environment.act(new AddRemoveFromMonitor(this, addRemoveType.REMOVE), getID(), authkey);
+//				kyotoMemberLevel = KyotoMember.ANNEXONE;
+//				environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
+//			} catch (ActionHandlingException e) {
+//				System.out.println("Exception whilst adding to monitor: " + e);
+//				e.printStackTrace();
+//			}
+//		} else {
+//			throw new IllegalStateException("Cannot join Kyoto Protocol.");
+//		}
 	}
 	
 	//================================================================================
