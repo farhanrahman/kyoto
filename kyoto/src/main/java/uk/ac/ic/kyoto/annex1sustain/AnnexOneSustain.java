@@ -33,8 +33,6 @@ public class AnnexOneSustain extends AbstractCountry {
 	protected double	surplusCarbonSold;			// Number of credits that we sold this year
 	protected double	surplusCarbonTemp;			// Number of credits that we will have sold providing that current transactions are successful
 	protected double	surplusCarbonPrice;			// Price of surplus carbon while within target
-	protected double	carbonToReduce;				// Carbon reduction that we need to perform before end of year to match target
-	protected double	carbonToAbsorb;				// Carbon absorption that we need to perform before end of year to match target
 	protected double	expectedSales;				// Specifies where our acceptable price will lie between two extreme profitability points
 	
 	
@@ -52,8 +50,6 @@ public class AnnexOneSustain extends AbstractCountry {
 		this.surplusCarbonSold = 0;
 		this.surplusCarbonTemp = 0;
 		this.surplusCarbonPrice = 0;
-		this.carbonToReduce = 0;
-		this.carbonToAbsorb = 0;
 		this.expectedSales = 0;
 	}
 	
@@ -115,6 +111,8 @@ public class AnnexOneSustain extends AbstractCountry {
 		initialInvestments();
 		updateExpectedSales();
 		resetYearlyTargets();
+		System.out.println("+++ Tick " + timeService.getCurrentTick());
+		System.out.println("+++ Year " + timeService.getCurrentYear());
 	}
 	
 	@Override
@@ -189,10 +187,6 @@ public class AnnexOneSustain extends AbstractCountry {
 	
 	protected void finalInvestments() {
 		try {
-			// Invest in planned carbon reduction and absorption, to offset credits sold
-			carbonReductionHandler.investInCarbonReduction(carbonToReduce);
-			carbonAbsorptionHandler.investInCarbonAbsorption(carbonToAbsorb);
-			
 			// If credits are left, increase energy output if money available, as probably won't sell them next year either
 			double unsoldCarbon = surplusCarbonTarget - surplusCarbonSold;
 			if (unsoldCarbon > 0) {
@@ -245,8 +239,6 @@ public class AnnexOneSustain extends AbstractCountry {
 		System.out.println("*** surplusCarbonTarget: " + surplusCarbonTarget);
 		surplusCarbonSold = 0;
 		surplusCarbonTemp = 0;
-		carbonToReduce = 0;
-		carbonToAbsorb = 0;
 	}
 	
 	
@@ -283,6 +275,58 @@ public class AnnexOneSustain extends AbstractCountry {
 		}
 		
 		return sessionOffsetGain;
+	}
+	
+	protected boolean isReductionPossible(double reduction) {
+		boolean possible;
+		
+		try {
+			double fundsLeft = this.getAvailableToSpend();
+			double fundsRequired = carbonReductionHandler.getInvestmentRequired(reduction);
+			
+			if (fundsLeft < fundsRequired) {
+				possible = false;
+			}
+			else if (reduction > this.getCarbonOutput()) {
+				possible = false;
+			}
+			else {
+				possible = true;
+			}
+		}
+		catch (Exception e) {
+			logger.warn("Problem with assessing possibility of carbon reduction: " + e.getMessage());
+			possible = false;
+		}
+		
+		return possible;
+	}
+	
+	protected boolean isAbsorptionPossible(double absorption) {
+		boolean possible;
+		
+		try {
+			double fundsLeft = this.getAvailableToSpend();
+			double fundsRequired = carbonAbsorptionHandler.getInvestmentRequired(absorption);
+			double areaLeft = this.getArableLandArea();
+			double areaRequired = carbonAbsorptionHandler.getForestAreaRequired(absorption);
+			
+			if (fundsLeft < fundsRequired) {
+				possible = false;
+			}
+			else if (areaLeft < areaRequired) {
+				possible = false;
+			}
+			else {
+				possible = true;
+			}
+		}
+		catch (Exception e) {
+			logger.warn("Problem with assessing possibility of carbon absorption: " + e.getMessage());
+			possible = false;
+		}
+		
+		return possible;
 	}
 	
 	
