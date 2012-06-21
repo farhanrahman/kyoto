@@ -4,8 +4,10 @@ import java.util.UUID;
 
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
+import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.core.util.random.Random;
 import uk.ac.ic.kyoto.countries.AbstractCountry;
+import uk.ac.ic.kyoto.countries.Offer;
 /*
  * ToDo
  * 
@@ -24,6 +26,7 @@ import uk.ac.ic.kyoto.countries.AbstractCountry;
  * 
  * - Calculate what target would be under Kyoto.
  * 	-> Used then for testing
+ *  -> if Kyoto joined will be taxed. 
  */
 public class USAgent extends AbstractCountry {
 
@@ -52,20 +55,12 @@ public class USAgent extends AbstractCountry {
 	 * @see uk.ac.ic.kyoto.countries.AbstractCountry#YearlyFunction()
 	 * Called by execute() every year.
 	 */
-<<<<<<< HEAD
-	public void yearlyFunction() {
-		/*
-		 * Function is executed at the end of every year. 
-		 */
-		
 		// Election results are affected by the previous years GDPEate
-=======
-	public void YearlyFunction() {
+	public void yearlyFunction() {
 		// GDPRate function calculates what the GDPRate was for the previous year.
 		CalculateAverageGDP(); // takes the previously saved AverageGDPRate, adds the just calculated
 		// value and divides by the elapsed number of years.
 		// Election results are affected by the previous years GDPRate
->>>>>>> group4
 		if(IsElectionYear()) {
 			HoldElection(); // will set democratElected to either true or false
 		}
@@ -79,16 +74,14 @@ public class USAgent extends AbstractCountry {
 	 * Called by execute every session.
 	 * Notes:
 	 * Carbon offsets are wiped at the beginning of each session. 
-	 */ 
-<<<<<<< HEAD
-	public void sessionFunction() {
-=======
-	public void SessionFunction() {
+	 */
+	//
 /*
+ * 
  * Emissions must decrease in absolute terms, rather than just the intensity. 
- */
+ */public void sessionFunction() {
 		if(JoiningCriteriaMet()) {
-			KyotoMember.NONANNEXONE;
+			//KyotoMember.NONANNEXONE;
 		}
 			
 		
@@ -96,9 +89,11 @@ public class USAgent extends AbstractCountry {
 	
 	boolean JoiningCriteriaMet() {
 		// Calculate what target would be under Kyoto
->>>>>>> group4
-		if (carbonOutput <= emissionsTarget) {
-			// Consider joining Kyoto here
+		if (getCarbonOutput() <= getEmissionsTarget()) {
+			return(true);
+		}
+		else {
+			return(false);
 		}
 	}
 	
@@ -183,10 +178,10 @@ public class USAgent extends AbstractCountry {
 		int YearsElapsed = timeService.getCurrentYear(); // returns years elapsed from year 0
 		
 		if(YearsElapsed==0) {
-			AverageGDPRate = GDPRate; // GDPRates are seeded from historical data. 
+			AverageGDPRate = getGDPRate(); // GDPRates are seeded from historical data. 
 		}
 		else {
-			AverageGDPRate = (AverageGDPRate + GDPRate) / YearsElapsed;
+			AverageGDPRate = (AverageGDPRate + getGDPRate()) / YearsElapsed;
 		}
 	}
 	
@@ -218,7 +213,8 @@ public class USAgent extends AbstractCountry {
 	 * Calculation based on the currently held values. 
 	 */
 	private void CalculateIntensityRatio() {
-		this.IntensityRatio = (long) (this.GDP / this.carbonOutput); // can remove the casting if AbstractCountry standardises types. 
+		
+		//this.IntensityRatio = this.GDP / this.carbonOutput; // can remove the casting if AbstractCountry standardises types. 
 	}
 	
 	@Override
@@ -239,6 +235,12 @@ public class USAgent extends AbstractCountry {
 	@Override
 	public void behaviour() {
 		
+	}
+
+	@Override
+	protected boolean acceptTrade(NetworkAddress from, Offer trade) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }
