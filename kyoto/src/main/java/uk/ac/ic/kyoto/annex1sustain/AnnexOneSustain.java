@@ -148,7 +148,7 @@ public class AnnexOneSustain extends AbstractCountry {
 		
 		if (isKyotoMember() == KyotoMember.ANNEXONE) {
 			
-			// Scale price, reset tradeDone flag
+			// Scale price
 			if (surplusCarbonSold < surplusCarbonTarget) {
 				if (tradeDone) {
 					surplusCarbonPrice *= Constants.PRICE_SCALER;
