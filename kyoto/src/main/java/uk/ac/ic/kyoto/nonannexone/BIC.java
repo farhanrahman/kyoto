@@ -60,8 +60,7 @@ public class BIC extends AbstractCountry {
 						try {
 							this.tradeProtocol.offer(
 									m.getFrom(), 
-									o.getOfferQuantity(), 
-									o.getOfferUnitCost(), 
+									o.getOfferQuantity(),
 									o);
 						} catch (FSMException e) {
 							e.printStackTrace();
