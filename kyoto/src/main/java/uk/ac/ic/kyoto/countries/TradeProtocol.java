@@ -269,7 +269,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 													ResponderReplies.ACCEPT.name(), t,
 													from, to, offerMessage));
 								TradeProtocol.this.tradeHistory.addToHistory(
-										SimTime.get(), offerMessage.getTradeID(), trade); /*Add to trade history*/									
+										SimTime.get(), offerMessage.getTradeID(), offerMessage); /*Add to trade history*/									
 								logger.debug("Accepting exchange proposal: "
 										+ trade);
 								}else{
