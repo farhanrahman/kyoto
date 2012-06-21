@@ -74,6 +74,8 @@ public class AnnexOneSustain extends AbstractCountry {
 	protected void behaviour() {
 		int ticksUntilEnd = getTicksUntilEnd();
 		
+		System.out.println("/// Tick" + timeService.getCurrentTick());
+		
 		if (isKyotoMember() == KyotoMember.ANNEXONE) {
 			if (ticksUntilEnd > 10) {
 				// Normal behaviour during all but last 10 ticks of the year
@@ -120,7 +122,6 @@ public class AnnexOneSustain extends AbstractCountry {
 		if ((surplusCarbonTarget < 0) && (isKyotoMember() == KyotoMember.ANNEXONE) && (timeService.getCurrentTick() != 0)) {
 			leaveKyoto();
 			logger.info("Leaving Kyoto, my target is below my output");
-			//System.out.println("*** Leaving Kyoto");
 		}
 	}
 	
