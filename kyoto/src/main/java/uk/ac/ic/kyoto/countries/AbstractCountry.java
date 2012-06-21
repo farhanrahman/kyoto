@@ -182,6 +182,24 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				protected boolean acceptExchange(NetworkAddress from, Offer trade) {
 					return acceptTrade(from, trade);
 				}
+
+				@Override
+				protected void tradeSuccessful(NetworkAddress from, Offer trade) {
+					tradeWasSuccessful(from, trade);
+					
+				}
+
+				@Override
+				protected void tradeRejected(NetworkAddress from, Offer trade) {
+					tradeWasRejected(from,trade);
+					
+				}
+
+				@Override
+				protected void tradeFailed(NetworkAddress from, Offer trade) {
+					tradeHasFailed(from,trade);
+					
+				}
 				
 			};
 			
@@ -355,6 +373,33 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	abstract protected void sessionFunction();
 	abstract protected void initialiseCountry();
 	abstract protected boolean acceptTrade(NetworkAddress from, Offer trade);
+	/**
+	 * Override this method to get notified when trade was successful
+	 * @param from
+	 * @param trade
+	 */
+	protected void tradeWasSuccessful(NetworkAddress from, Offer trade){
+		
+	}
+	
+	/**
+	 * Override this method to get notified when trade failed
+	 * @param from
+	 * @param trade
+	 */
+	protected void tradeHasFailed(NetworkAddress from, Offer trade){
+		
+	}
+	
+	/**
+	 * Override this method to get notified when trade was rejected
+	 * @param from
+	 * @param trade
+	 */
+	protected void tradeWasRejected(NetworkAddress from, Offer trade){
+		
+	}
+	
 	
 	//================================================================================
     // Private methods

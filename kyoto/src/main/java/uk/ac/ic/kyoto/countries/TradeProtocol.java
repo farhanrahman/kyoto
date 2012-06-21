@@ -169,6 +169,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 											.getAddress();
 									NetworkAddress to = message.getFrom();
 									Time t = SimTime.get();
+									tradeSuccessful(from, trade);
 									conv.getNetwork().sendMessage(
 											new UnicastMessage<OfferMessage>(
 													Performative.CONFIRM,
@@ -190,6 +191,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 									Time t = SimTime.get();
 									conv.setEntity(offerMessage);
 									revertInitiator(trade.reverse());
+									tradeFailed(from,trade);
 									conv.getNetwork().sendMessage(
 											new UnicastMessage<OfferMessage>(
 													Performative.FAILURE,
@@ -215,6 +217,8 @@ public abstract class TradeProtocol extends FSMProtocol {
 								NetworkAddress to = message.getFrom();
 								Time t = SimTime.get();
 								conv.setEntity(offerMessage);
+								Offer trade = new Offer(offerMessage.getOfferQuantity(), offerMessage.getOfferUnitCost(), offerMessage.getOfferType(), offerMessage.getOfferInvestmentType());
+								tradeRejected(from,trade);
 								conv.getNetwork().sendMessage(
 										new UnicastMessage<Object>(
 												Performative.INFORM,
@@ -416,7 +420,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 		return all;
 	}
 
-	public boolean offer(NetworkAddress to, double quantity, double unitPrice, OfferMessage offerMessage)
+	public boolean offer(NetworkAddress to, double quantity, OfferMessage offerMessage)
 			throws FSMException {
 		if(offerMessage.getOfferMessageType().equals(OfferMessageType.BROADCAST_MESSAGE)){
 			/*Start an offer if the message type is BROADCAST_MESSAGE i.e. not part of the 
@@ -424,7 +428,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 			this.spawnAsInititor(
 					new TradeSpawnEvent(
 							to, 
-							quantity, unitPrice, 
+							quantity, offerMessage.getOfferUnitCost(), 
 							offerMessage.getOfferType(), offerMessage.getOfferInvestmentType(), 
 							offerMessage));
 			return true;
@@ -435,6 +439,15 @@ public abstract class TradeProtocol extends FSMProtocol {
 	}
 
 	protected abstract boolean acceptExchange(NetworkAddress from,
+			Offer trade);
+	
+	protected abstract void tradeSuccessful(NetworkAddress from,
+			Offer trade);
+	
+	protected abstract void tradeRejected(NetworkAddress from,
+			Offer trade);
+	
+	protected abstract void tradeFailed(NetworkAddress from,
 			Offer trade);
 
 	/**
@@ -678,14 +691,13 @@ public abstract class TradeProtocol extends FSMProtocol {
 	 * @param unitcost
 	 * @param o
 	 */
-	public void respondToOffer(NetworkAddress from, double quantity, double unitcost, OfferMessage o) throws FSMException, IllegalArgumentException{
+	public void respondToOffer(NetworkAddress from, double quantity, OfferMessage o) throws FSMException, IllegalArgumentException{
 		if(this.getActiveConversationMembers().contains(from)){
 			throw new IllegalArgumentException("A conversation with this agent already exists");
 		} else {
 			this.offer(
 					from, 
 					quantity, 
-					unitcost, 
 					o);
 		}
 	}
