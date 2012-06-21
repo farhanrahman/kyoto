@@ -5,8 +5,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import uk.ac.ic.kyoto.countries.Offer;
+import org.apache.log4j.Logger;
+
+import uk.ac.ic.kyoto.countries.OfferMessage;
+import uk.ac.ic.kyoto.util.sim.jsonobjects.DataStorer;
+import uk.ac.ic.kyoto.util.sim.jsonobjects.tradedata.TradeData;
 import uk.ac.imperial.presage2.core.Time;
+import uk.ac.imperial.presage2.core.simulator.SimTime;
 
 import com.google.inject.Singleton;
 
@@ -19,14 +24,19 @@ import com.google.inject.Singleton;
  */
 @Singleton
 public class TradeHistoryImplementation implements TradeHistory{
-	private static Map<Integer, Map<UUID, Offer>> history = new HashMap<Integer,Map<UUID,Offer>>();
+	private static Map<Integer, Map<UUID, OfferMessage>> history = new HashMap<Integer,Map<UUID,OfferMessage>>();
 	
+	private String simID = null;
+	
+	private Logger logger = Logger.getLogger(TradeHistoryImplementation.class);
+	
+	private DataStorer dataStorer = new DataStorer();
 	/**
 	 * @return returns a history of all the trade histories in the form of
 	 * a map simulation time -> map of trades that happened in that simulation time
 	 */
-	public final Map<Integer,Map<UUID,Offer>> getHistory(){
-		return Collections.unmodifiableMap(new HashMap<Integer, Map<UUID,Offer>>(history));
+	public final Map<Integer,Map<UUID,OfferMessage>> getHistory(){
+		return Collections.unmodifiableMap(new HashMap<Integer, Map<UUID,OfferMessage>>(history));
 	}
 
 	/**
@@ -34,7 +44,7 @@ public class TradeHistoryImplementation implements TradeHistory{
 	 * @return the history of trades for simulation
 	 * time = simTime
 	 */
-	public Map<UUID,Offer> getHistoryForTime(Time simTime){
+	public Map<UUID,OfferMessage> getHistoryForTime(Time simTime){
 		return Collections.unmodifiableMap(history.get(simTime.intValue()));
 	}
 	
@@ -60,9 +70,9 @@ public class TradeHistoryImplementation implements TradeHistory{
 	 * the given information
 	 * @param simTime, tradeID, trade
 	 */
-	public void addToHistory(Time simTime, UUID tradeID, Offer trade){
+	public void addToHistory(Time simTime, UUID tradeID, OfferMessage trade){
 		synchronized(history){
-			Map<UUID, Offer> t = new HashMap<UUID,Offer>();
+			Map<UUID, OfferMessage> t = new HashMap<UUID,OfferMessage>();
 			t.put(tradeID, trade);
 			history.put(simTime.intValue(), t);
 		}
@@ -82,5 +92,36 @@ public class TradeHistoryImplementation implements TradeHistory{
 			}
 		}		
 	}
-	
+
+
+	/**
+	 * Dumps the trade data in the current tick into
+	 * the database
+	 */
+	public void dumpData() {
+		try{
+			if(this.simID == null){
+				throw new Exception("sim id is null, please initialise it in the simulation file");
+			}
+		
+			synchronized(history){
+				Integer simTick = SimTime.get().intValue();
+				Map<UUID,OfferMessage> trades = history.get(simTick);
+				if(trades != null){
+					for(UUID id : trades.keySet()){
+						TradeData data = new TradeData(trades.get(id), simTick.toString(), this.simID);
+						dataStorer.storeTradeData(data.toString());
+						logger.debug(data.toString());
+					}
+				}
+			}
+		} catch(Exception e){
+			logger.warn(e);
+		}
+	}
+
+	@Override
+	public void setSimID(Long simID) {
+		this.simID = Long.toString(simID);
+	}
 }

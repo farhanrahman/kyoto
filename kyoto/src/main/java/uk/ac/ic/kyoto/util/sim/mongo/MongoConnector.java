@@ -18,6 +18,7 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
+import com.mongodb.util.JSON;
 
 /**
  * @author farhanrahman
@@ -176,6 +177,32 @@ public class MongoConnector {
 		this.closeConnection();
         
 		return Collections.unmodifiableList(list);
+	}
+	
+	/**
+	 * Stores a json object into the collection
+	 * name provided as an argument.
+	 * @param colName
+	 * @param jsonObject
+	 */
+	public void storeObject(String colName, String jsonObject){
+		if(this.openConnection() == false){
+			return;
+		}
+		
+		this.db = m.getDB(this.dbName);
+		
+		if(this.SHOULD_AUTHENTICATE == true){
+			this.authenticate();
+		}		
+		
+		DBCollection collection = db.getCollection(colName);
+        
+		DBObject dbObject = (DBObject) JSON.parse(jsonObject);
+		
+		collection.insert(dbObject);
+        
+		this.closeConnection();
 	}
 	
 	/**

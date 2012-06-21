@@ -1,6 +1,7 @@
 package uk.ac.ic.kyoto.countries;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
@@ -40,6 +41,9 @@ public class Monitor extends EnvironmentService {
 	
 	/* List of all the countries registered for the service */
 	private Map<UUID, AbstractCountry> memberStates = new ConcurrentHashMap<UUID, AbstractCountry>();
+	
+	/* List of all other countries which exist, but are not part of Kyoto */
+	private Map<UUID, AbstractCountry> nonSanctionedStates = new ConcurrentHashMap<UUID, AbstractCountry>();
 
 	/* Structure that counts the number of times the country cheated */
 	private Map<AbstractCountry, Integer> sinBin = new ConcurrentHashMap<AbstractCountry, Integer>();
@@ -69,8 +73,16 @@ public class Monitor extends EnvironmentService {
 		memberStates.put(state.getID(), state);
 	}
 	
+	public void addNonSanctionedState(AbstractCountry state) {
+		nonSanctionedStates.put(state.getID(), state);
+	}
+	
 	public void removeMemberState(AbstractCountry state) {
 		memberStates.remove(state.getID());
+	}
+	
+	public void removeNonSanctionedState(AbstractCountry state) {
+		nonSanctionedStates.remove(state.getID());
 	}
 	
 	@Inject
@@ -82,12 +94,23 @@ public class Monitor extends EnvironmentService {
 	@EventListener
 	public void yearlyFunction(EndOfYearCycle e) {
 		if (e.getEndedYear() >= 0) {
+			nonSanctionedReports();
 			System.out.println("Yearly monitoring starting");
 			checkReports();
 			System.out.println("Checked reports");
 			monitorCountries();
 			System.out.println("Monitored country");
 			carbonTargetingService.targetsForMonitor();
+		}
+	}
+	
+	private void nonSanctionedReports() {
+		for (AbstractCountry country: nonSanctionedStates.values()) {
+			try {
+				country.reportCarbonOutput();
+			} catch (ActionHandlingException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -184,9 +207,13 @@ public class Monitor extends EnvironmentService {
 			for (int i = 0; i < noToMonitor; i++) {
 				// Pick a country that was not yet monitored
 				AbstractCountry pickedCountry;
+				ArrayList<AbstractCountry> memberStatesArray = new ArrayList<AbstractCountry>();
+				for(UUID id : memberStates.keySet()){
+					memberStatesArray.add(memberStates.get(id));
+				}
 				do {
-					int randomCountryIndex = randGenerator.nextInt(memberStates.size());
-					pickedCountry = memberStates.get(randomCountryIndex);
+					int randomCountryIndex = randGenerator.nextInt(memberStatesArray.size());
+					pickedCountry = memberStatesArray.get(randomCountryIndex);
 				} while (monitoredCountries.contains(pickedCountry));
 				
 				// Monitor the country
@@ -236,8 +263,9 @@ public class Monitor extends EnvironmentService {
 		
 		// Deduct the cash from the country that has cheated
 		// newCash = oldCash - GDP * cash_penalty
+		System.out.println("GDP: " + sanctionee.getGDP());
 		System.out.println("Old money: " + sanctionee.getAvailableToSpend());
-		sanctionee.setAvailableToSpend(Math.round((sanctionee.getAvailableToSpend()-sanctionee.getGDP()*(sinCount-1)* GameConst.getSanctionRate())));
+		sanctionee.setAvailableToSpend(Math.round((sanctionee.getAvailableToSpend()-sanctionee.getGDP()*(sinCount)* GameConst.getSanctionRate())));
 		System.out.println("New money: " + sanctionee.getAvailableToSpend());
 	}
 	

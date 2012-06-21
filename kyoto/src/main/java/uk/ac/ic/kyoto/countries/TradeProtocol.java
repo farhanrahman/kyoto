@@ -169,6 +169,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 											.getAddress();
 									NetworkAddress to = message.getFrom();
 									Time t = SimTime.get();
+									tradeSuccessful(from, trade);
 									conv.getNetwork().sendMessage(
 											new UnicastMessage<OfferMessage>(
 													Performative.CONFIRM,
@@ -190,6 +191,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 									Time t = SimTime.get();
 									conv.setEntity(offerMessage);
 									revertInitiator(trade.reverse());
+									tradeFailed(from,trade);
 									conv.getNetwork().sendMessage(
 											new UnicastMessage<OfferMessage>(
 													Performative.FAILURE,
@@ -215,6 +217,8 @@ public abstract class TradeProtocol extends FSMProtocol {
 								NetworkAddress to = message.getFrom();
 								Time t = SimTime.get();
 								conv.setEntity(offerMessage);
+								Offer trade = new Offer(offerMessage.getOfferQuantity(), offerMessage.getOfferUnitCost(), offerMessage.getOfferType(), offerMessage.getOfferInvestmentType());
+								tradeRejected(from,trade);
 								conv.getNetwork().sendMessage(
 										new UnicastMessage<Object>(
 												Performative.INFORM,
@@ -269,7 +273,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 													ResponderReplies.ACCEPT.name(), t,
 													from, to, offerMessage));
 								TradeProtocol.this.tradeHistory.addToHistory(
-										SimTime.get(), offerMessage.getTradeID(), trade); /*Add to trade history*/									
+										SimTime.get(), offerMessage.getTradeID(), offerMessage); /*Add to trade history*/									
 								logger.debug("Accepting exchange proposal: "
 										+ trade);
 								}else{
@@ -416,7 +420,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 		return all;
 	}
 
-	public boolean offer(NetworkAddress to, double quantity, double unitPrice, OfferMessage offerMessage)
+	public boolean offer(NetworkAddress to, double quantity, OfferMessage offerMessage)
 			throws FSMException {
 		if(offerMessage.getOfferMessageType().equals(OfferMessageType.BROADCAST_MESSAGE)){
 			/*Start an offer if the message type is BROADCAST_MESSAGE i.e. not part of the 
@@ -424,7 +428,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 			this.spawnAsInititor(
 					new TradeSpawnEvent(
 							to, 
-							quantity, unitPrice, 
+							quantity, offerMessage.getOfferUnitCost(), 
 							offerMessage.getOfferType(), offerMessage.getOfferInvestmentType(), 
 							offerMessage));
 			return true;
@@ -435,6 +439,15 @@ public abstract class TradeProtocol extends FSMProtocol {
 	}
 
 	protected abstract boolean acceptExchange(NetworkAddress from,
+			Offer trade);
+	
+	protected abstract void tradeSuccessful(NetworkAddress from,
+			Offer trade);
+	
+	protected abstract void tradeRejected(NetworkAddress from,
+			Offer trade);
+	
+	protected abstract void tradeFailed(NetworkAddress from,
 			Offer trade);
 
 	/**
@@ -449,7 +462,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 		try{
 			switch(trade.getType()){
 			case BUY:	if(this.participant.getAvailableToSpend() < trade.getTotalCost()){
-							throw new NotEnoughCashException();
+							throw new NotEnoughCashException(this.participant.getAvailableToSpend(), trade.getTotalCost());
 						}
 						participant.receiveOffset(trade.getQuantity());
 						participant.payMoney(trade.getTotalCost());
@@ -473,7 +486,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 
 			case INVEST:	
 						if(this.participant.getAvailableToSpend() < trade.getTotalCost()){
-							throw new NotEnoughCashException();
+							throw new NotEnoughCashException(this.participant.getAvailableToSpend(), trade.getTotalCost());
 						}
 							participant.receiveOffset(trade.getQuantity());
 							participant.payMoney(trade.getTotalCost());
@@ -492,6 +505,9 @@ public abstract class TradeProtocol extends FSMProtocol {
 									participant.carbonAbsorptionHandler.investInCarbonAbsorption(trade.getQuantity());
 								} catch (NotEnoughCashException e) {
 									logger.warn(e);
+									System.err.println("Country: " + participant.ISO +
+											"\nAvailable to spend: " + e.getAvailableToSpend() +
+											"\nInvestment required: "  + e.getInvestmentRequired());
 									return false; /*Trade must fail*/
 								} catch (NotEnoughLandException e) {
 									logger.warn(e);
@@ -519,6 +535,9 @@ public abstract class TradeProtocol extends FSMProtocol {
 									return false; /*Trade must fail*/
 								} catch (NotEnoughCashException e) {
 									logger.warn(e);
+									System.err.println("Country: " + participant.ISO +
+											"\nAvailable to spend: " + e.getAvailableToSpend() +
+											"\nInvestment required: "  + e.getInvestmentRequired());
 									return false; /*Trade must fail*/
 								} catch (Exception e) {
 									logger.warn(e);
@@ -539,6 +558,9 @@ public abstract class TradeProtocol extends FSMProtocol {
 		}catch(NotEnoughCashException e){
 			/*Trade MUST FAIL*/
 			logger.warn(e);
+			System.err.println("Country: " + participant.ISO +
+					"\nAvailable to spend: " + e.getAvailableToSpend() +
+					"\nInvestment required: "  + e.getInvestmentRequired());
 			return false;
 		}
 		
@@ -649,7 +671,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 	 * @throws ClassCastException
 	 * @throws Exception
 	 */
-	public static OfferMessage decodeInput(Input in) throws ClassCastException, IllegalArgumentException{
+	public OfferMessage decodeInput(Input in) throws ClassCastException, IllegalArgumentException{
 		if(in instanceof Message){
 				@SuppressWarnings("unchecked")
 				Message<OfferMessage> m = (Message<OfferMessage>) in;
@@ -669,18 +691,23 @@ public abstract class TradeProtocol extends FSMProtocol {
 	 * @param unitcost
 	 * @param o
 	 */
-	public void respondToOffer(NetworkAddress from, double quantity, double unitcost, OfferMessage o){
-		if(!this.getActiveConversationMembers()
-					.contains(from)){
-			try {
-				this.offer(
-						from, 
-						quantity, 
-						unitcost, 
-						o);
-			} catch (FSMException e) {
-				logger.warn(e);
-			}
+	public void respondToOffer(NetworkAddress from, double quantity, OfferMessage o) throws FSMException, IllegalArgumentException{
+		if(this.getActiveConversationMembers().contains(from)){
+			throw new IllegalArgumentException("A conversation with this agent already exists");
+		} else {
+			this.offer(
+					from, 
+					quantity, 
+					o);
+		}
+	}
+	
+	public NetworkAddress extractNetworkAddress(Input in) throws IllegalArgumentException{
+		if(in instanceof Message){
+			Message<?> message = (Message<?>) in;
+			return message.getFrom();
+		}else{
+			throw new IllegalArgumentException("Argument not an instance of Message");
 		}
 	}
 }

@@ -87,7 +87,7 @@ public final class GameConst {
 	/**
 	 * Number of years in a session
 	 */
-	private static int YEARS_IN_SESSION = 5;
+	private static int YEARS_IN_SESSION = 10;
 	
 	/**
 	 * Session to session world target reduction
