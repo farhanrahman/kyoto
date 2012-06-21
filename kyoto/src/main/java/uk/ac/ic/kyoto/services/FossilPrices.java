@@ -2,7 +2,9 @@ package uk.ac.ic.kyoto.services;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.log4j.Logger;
@@ -19,7 +21,13 @@ public class FossilPrices extends EnvironmentService {
 	
 	protected FossilPrices(EnvironmentSharedStateAccess sharedState) {
 		super(sharedState);
-		initializeGasAndOilMaps();
+		
+		try {
+			initializeGasAndOilMaps();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+			
 	}
 
 	private final String FOSSIL_FUEL_PRICES_PATH = "src/main/resources/FossilFuelPrices.csv";
@@ -33,35 +41,29 @@ public class FossilPrices extends EnvironmentService {
 	/**
 	 * Reads the values from specified file into two maps.
 	 * In case of any problems, clears the maps.
+	 * @throws IOException 
 	 */
-	private void initializeGasAndOilMaps() {
+	private void initializeGasAndOilMaps() throws IOException {
 		String line;
 		String[] entries;
 		long year;
 		double oilPrice;
 		double gasPrice;
 		
-		try {
-			File file = new File(FOSSIL_FUEL_PRICES_PATH);
-			BufferedReader reader = new BufferedReader(new FileReader(file));
+		File file = new File(FOSSIL_FUEL_PRICES_PATH);
+		BufferedReader reader = new BufferedReader(new FileReader(file));
 
-			// Read the values into two maps
-			line = reader.readLine(); // Drop title line
-			while ((line = reader.readLine()) != null) {
-				entries = line.split(",");
-				year = Long.parseLong(entries[0]);
-				oilPrice = Double.parseDouble(entries[1]);
-				gasPrice = Double.parseDouble(entries[2]);
-				oilPriceMap.put(year, oilPrice);
-				gasPriceMap.put(year, gasPrice);
-			}
-			reader.close();
+		// Read the values into two maps
+		line = reader.readLine(); // Drop title line
+		while ((line = reader.readLine()) != null) {
+			entries = line.split(",");
+			year = Long.parseLong(entries[0]);
+			oilPrice = Double.parseDouble(entries[1]);
+			gasPrice = Double.parseDouble(entries[2]);
+			oilPriceMap.put(year, oilPrice);
+			gasPriceMap.put(year, gasPrice);
 		}
-		catch (Exception e) {
-			logger.warn("Problem with opening the file " + FOSSIL_FUEL_PRICES_PATH + ": " + e);
-			oilPriceMap.clear();
-			gasPriceMap.clear();
-		}
+		reader.close();
 	}
 	
 	/**

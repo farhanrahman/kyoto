@@ -106,7 +106,7 @@ public final class CarbonAbsorptionHandler {
 		
 		double tempInvestmentAmount = getInvestmentRequired(carbonAbsorptionChange, arableLandArea);
 
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 30; i++) {
 			carbonDiff /= 2;
 			
 			//If value is higher, lower our estimate, else increase it
@@ -167,7 +167,7 @@ public final class CarbonAbsorptionHandler {
 			}
 		}
 		else {
-			throw new NotEnoughCashException();
+			throw new NotEnoughCashException(this.country.availableToSpend, investmentAmount);
 		}
 	}
 	

@@ -25,10 +25,18 @@ public class SubmitCarbonEmissionReport implements Action {
 				+ this.carbonEmission+ "]";
 	}
 
+	/**
+	 * 
+	 * @return simulation time when action was called
+	 */
 	public Time getSimTime() {
 		return simTime;
 	}
 	
+	/**
+	 * 
+	 * @return reported carbonEmission
+	 */
 	public Double getCarbonEmission() {
 		return carbonEmission;
 	}

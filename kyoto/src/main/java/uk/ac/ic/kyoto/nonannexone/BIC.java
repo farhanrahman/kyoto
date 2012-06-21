@@ -30,6 +30,7 @@ public class BIC extends AbstractCountry {
 	int ticks_in_a_year; //how many ticks are in a year
 	int current_tick; //tick currently operating
 	int current_year; //year currently operating
+	int imaginary_tick; //current tick modulo imaginary tick
 	//............................................................................................ 
 	
 	public BIC(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
@@ -85,8 +86,7 @@ public class BIC extends AbstractCountry {
 		// TODO implement
 		//functions that are implemented every year
 				
-				yearly_emissions();
-										
+											
 	}
 /*****************************************************************************************/
 	
@@ -107,7 +107,7 @@ public class BIC extends AbstractCountry {
 		} catch (Exception e) {
 		e.printStackTrace();
 		} 
-		//calculate carbon output every year
+		
 		
 	}
 
@@ -116,7 +116,7 @@ public class BIC extends AbstractCountry {
 	protected void initialiseCountry() {
 		// TODO Auto-generated method stub
 		energy_aim = getEnergyOutput() + CountryConstants.INITIAL_ENERGY_THRESHOLD ; //initialise energy aim.
-		environment_friendly_target = CountryConstants.INITIAL_CARBON_TARGET; //initialise a target 
+		environment_friendly_target = getCarbonOutput() + CountryConstants.INITIAL_CARBON_TARGET; //initialise a target 
 		setKyotoMemberLevel(KyotoMember.NONANNEXONE);
 		
 	}
@@ -208,7 +208,7 @@ public class BIC extends AbstractCountry {
 		available_area = getArableLandArea();
 		
 		
-		if (getCarbonOutput() + energyUsageHandler.calculateCarbonIndustryGrowth(money_invest) < environment_friendly_target)
+		if (getCarbonOutput() + energyUsageHandler.calculateCarbonIndustryGrowth(money_invest) <= environment_friendly_target)
 		{ //invest but also check if we meet our environment friendly target.
 			try{
 				energyUsageHandler.investInCarbonIndustry(money_invest);
@@ -233,14 +233,16 @@ public class BIC extends AbstractCountry {
 			}
 			
 			try{ //also since country exceeds its own carbon target, invests in carbon absorption or carbon reduction in order to get carbon offset.
-				carbon_difference = environment_friendly_target - (getCarbonOutput() + energyUsageHandler.calculateCarbonIndustryGrowth(money_invest));
-				if (carbonAbsorptionHandler.getForestAreaRequired(carbon_difference) < available_area)
+				carbon_difference = (getCarbonOutput() + energyUsageHandler.calculateCarbonIndustryGrowth(money_invest)) - environment_friendly_target;
+				
 				if (carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend() )
 					{
 					carbonAbsorptionHandler.investInCarbonAbsorption(carbonAbsorptionHandler.getInvestmentRequired(carbon_difference));
 					logger.info("Country invests in carbon absorption to increase carbon absorption and thus reach environment target carbon output");
 					}
+				
 				else if ((carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend() ) && (carbonAbsorptionHandler.getForestAreaRequired(carbon_difference) >= available_area))
+				
 					{
 					logger.info("Country reach limit of available pre-set land, not possible to invest in carbon absorption, try invest in carbon reduction");
 					if (carbonReductionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend())
@@ -251,6 +253,7 @@ public class BIC extends AbstractCountry {
 					}
 				else 
 					{
+						
 					logger.info("Country has insufficient funds to reach environment friendly target");
 					green_care = false;
 					}
@@ -287,24 +290,27 @@ public class BIC extends AbstractCountry {
 		private void update_energy_aim(double previous_aim,boolean success,int counter)
 		{
 				current_tick = timeService.getCurrentTick();
-				
+				imaginary_tick = current_tick % 365 ;
 			if (success)
 			{ // country met goal, change goal
-				if (current_tick < 345) //steady increase every tick
+				if ((imaginary_tick < 355)) //steady increase every tick
 				{
 					energy_aim = previous_aim + CountryConstants.STEADY_TICK_ENERGY_INCREASE;
 					
 				}
-				if (current_tick == 345)
+				if (imaginary_tick == 355)
 				{
 				
-				times_aim_met = 0; //reset counter
+				times_aim_met = 0; //reset counter, wait a tick to operate
 				
 				}
-				if (current_tick > 345)
+				if (imaginary_tick > 355)
 				{
-					if (current_tick == 365)
-						current_tick=0;
+					if (imaginary_tick == 365) //reset the energy aim every year
+					{
+						energy_aim = 30;
+						
+					}
 					switch (counter)
 					{
 					case 0:
@@ -354,14 +360,7 @@ public class BIC extends AbstractCountry {
 		CDM_reduction(money_to_invest);
 		
 	}
-/*******************************************************************************************************/
-	
-	//calculates carbon output every year in order to check environment friendly target.
-	private void yearly_emissions()
-	{
-		//this.carbonOutput = getCarbonOutput() - (get.carbonAbsorption() + get.carbonOffset());  
-	}
-	
+
 /*******************************************************************************************************/
 	//change the emission target every year
 	private void change_emission_target(double previous_target,boolean succeed)

@@ -416,14 +416,22 @@ public abstract class TradeProtocol extends FSMProtocol {
 		return all;
 	}
 
-	public void offer(NetworkAddress to, double quantity, double unitPrice, OfferMessage offerMessage)
+	public boolean offer(NetworkAddress to, double quantity, double unitPrice, OfferMessage offerMessage)
 			throws FSMException {
+		if(offerMessage.getOfferMessageType().equals(OfferMessageType.BROADCAST_MESSAGE)){
+			/*Start an offer if the message type is BROADCAST_MESSAGE i.e. not part of the 
+			 * message passing in the TradeProtocol states*/
 			this.spawnAsInititor(
 					new TradeSpawnEvent(
 							to, 
 							quantity, unitPrice, 
 							offerMessage.getOfferType(), offerMessage.getOfferInvestmentType(), 
 							offerMessage));
+			return true;
+		}else{
+			/*Else let the participant know that the offer didn't go*/
+			return false;
+		}
 	}
 
 	protected abstract boolean acceptExchange(NetworkAddress from,
@@ -441,7 +449,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 		try{
 			switch(trade.getType()){
 			case BUY:	if(this.participant.getAvailableToSpend() < trade.getTotalCost()){
-							throw new NotEnoughCashException();
+							throw new NotEnoughCashException(this.participant.getAvailableToSpend(), trade.getTotalCost());
 						}
 						participant.receiveOffset(trade.getQuantity());
 						participant.payMoney(trade.getTotalCost());
@@ -465,7 +473,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 
 			case INVEST:	
 						if(this.participant.getAvailableToSpend() < trade.getTotalCost()){
-							throw new NotEnoughCashException();
+							throw new NotEnoughCashException(this.participant.getAvailableToSpend(), trade.getTotalCost());
 						}
 							participant.receiveOffset(trade.getQuantity());
 							participant.payMoney(trade.getTotalCost());
@@ -482,8 +490,11 @@ public abstract class TradeProtocol extends FSMProtocol {
 							if (trade.itype.equals(InvestmentType.ABSORB)) {
 								try {
 									participant.carbonAbsorptionHandler.investInCarbonAbsorption(trade.getQuantity());
-								} catch (NotEnoughCarbonOutputException e) {
+								} catch (NotEnoughCashException e) {
 									logger.warn(e);
+									System.err.println("Country: " + participant.ISO +
+											"\nAvailable to spend: " + e.getAvailableToSpend() +
+											"\nInvestment required: "  + e.getInvestmentRequired());
 									return false; /*Trade must fail*/
 								} catch (NotEnoughLandException e) {
 									logger.warn(e);
@@ -511,6 +522,9 @@ public abstract class TradeProtocol extends FSMProtocol {
 									return false; /*Trade must fail*/
 								} catch (NotEnoughCashException e) {
 									logger.warn(e);
+									System.err.println("Country: " + participant.ISO +
+											"\nAvailable to spend: " + e.getAvailableToSpend() +
+											"\nInvestment required: "  + e.getInvestmentRequired());
 									return false; /*Trade must fail*/
 								} catch (Exception e) {
 									logger.warn(e);
@@ -531,6 +545,9 @@ public abstract class TradeProtocol extends FSMProtocol {
 		}catch(NotEnoughCashException e){
 			/*Trade MUST FAIL*/
 			logger.warn(e);
+			System.err.println("Country: " + participant.ISO +
+					"\nAvailable to spend: " + e.getAvailableToSpend() +
+					"\nInvestment required: "  + e.getInvestmentRequired());
 			return false;
 		}
 		
@@ -630,5 +647,55 @@ public abstract class TradeProtocol extends FSMProtocol {
 
 	public UUID getAuthkey() {
 		return authkey;
+	}
+	
+	/*UTILITY FUNCTIONS*/
+	/**
+	 * Static function that decodes an object of type
+	 * Input to type OfferMessage
+	 * @param in
+	 * @return a decoded Input in to OfferMessage
+	 * @throws ClassCastException
+	 * @throws Exception
+	 */
+	public OfferMessage decodeInput(Input in) throws ClassCastException, IllegalArgumentException{
+		if(in instanceof Message){
+				@SuppressWarnings("unchecked")
+				Message<OfferMessage> m = (Message<OfferMessage>) in;
+				OfferMessage o = m.getData();
+				return o;
+
+		}else{
+			throw new IllegalArgumentException("Input not instanceof Message");
+		}
+	}
+	
+	/**
+	 * Function allowing participants to respond to offers without
+	 * doing all the internal conversions
+	 * @param from
+	 * @param quantity
+	 * @param unitcost
+	 * @param o
+	 */
+	public void respondToOffer(NetworkAddress from, double quantity, double unitcost, OfferMessage o) throws FSMException, IllegalArgumentException{
+		if(this.getActiveConversationMembers().contains(from)){
+			throw new IllegalArgumentException("A conversation with this agent already exists");
+		} else {
+			this.offer(
+					from, 
+					quantity, 
+					unitcost, 
+					o);
+		}
+	}
+	
+	public NetworkAddress extractNetworkAddress(Input in) throws IllegalArgumentException{
+		if(in instanceof Message){
+			Message<?> message = (Message<?>) in;
+			return message.getFrom();
+		}else{
+			throw new IllegalArgumentException("Argument not an instance of Message");
+		}
 	}
 }

@@ -76,8 +76,9 @@ public final class CarbonReductionHandler{
 	 * Amount of money that we want to spend on investment.
 	 * 
 	 * @return
-	 * Change in carbon output from specified cost.
+	 * APPROXIMATE Change in carbon output from specified cost.
 	 */
+	@Deprecated 
 	public final double getCarbonOutputChange(double investmentAmount) {
 		return getCarbonOutputChange(investmentAmount, country.carbonOutput, country.energyOutput);
 	}
@@ -108,7 +109,7 @@ public final class CarbonReductionHandler{
 		
 		double tempInvestmentAmount = getInvestmentRequired(carbonOutputChange, carbonOutput, energyOutput);
 		
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 30; i++) {
 			carbonDiff /= 2;
 			
 			// If value is higher, lower our estimate, else increase it
@@ -151,7 +152,7 @@ public final class CarbonReductionHandler{
 				}
 			}
 			else {
-				throw new NotEnoughCashException();
+				throw new NotEnoughCashException(this.country.availableToSpend, investmentAmount);
 			}
 		}
 		catch (NotEnoughCarbonOutputException e) {

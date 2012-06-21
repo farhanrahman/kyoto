@@ -32,29 +32,18 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 		if (this.tradeProtocol.canHandle(in)) {
 			this.tradeProtocol.handle(in);
 		}else{
-
-			if(in instanceof Message){
-				try{
-					@SuppressWarnings("unchecked")
-					Message<OfferMessage> m = (Message<OfferMessage>) in;
-					OfferMessage o = m.getData();
-					if(!this.tradeProtocol
-							.getActiveConversationMembers()
-								.contains(m.getFrom())){
-						try {
-							this.tradeProtocol.offer(
-									m.getFrom(), 
-									o.getOfferQuantity(), 
-									o.getOfferUnitCost(), 
-									o);
-						} catch (FSMException e) {
-							e.printStackTrace();
-						}
-					}
-				}catch(ClassCastException e){
-					logger.warn("Class cast exception");
-					logger.warn(e);
-				}
+			OfferMessage offerMessage = this.tradeProtocol.decodeInput(in);
+			/*analyse the offer*/
+			try {
+				this.tradeProtocol.respondToOffer(
+						this.tradeProtocol.extractNetworkAddress(in), 
+						offerMessage.getOfferQuantity(), 
+						offerMessage.getOfferUnitCost(), 
+						offerMessage);
+			} catch (IllegalArgumentException e1) {
+				logger.warn(e1);
+			} catch (FSMException e1) {
+				logger.warn(e1);
 			}
 		}
 	}
@@ -81,22 +70,20 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 
 	@Override
 	protected void behaviour() {
-		super.execute();
-		if(this.getName().equals("Stuart")){
+		if(this.getName().equals("Test1")){
 			//if(counter == 0){
 				int quantity = 10;
-				//double unitCost = 2;
-				//this.broadcastBuyOffer(quantity, unitCost);
+				double unitCost = 2;
+				this.broadcastBuyOffer(quantity, unitCost);
 			//	counter++;
 			
 			  	InvestmentType i = InvestmentType.ABSORB;
 			  	//InvestmentType i = InvestmentType.REDUCE;
 		  
-			  	this.broadcastInvesteeOffer(quantity, i);
+//			  	this.broadcastInvesteeOffer(quantity, i);
 			
 			//}
 		}
-		
 		
 		//this.tradeProtocol.incrementTime();
 		logger.info("Myname: " + this.getName() + ", I have this much money: " + this.getAvailableToSpend() + ".");
