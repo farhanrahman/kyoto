@@ -600,21 +600,23 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	protected final void leaveKyoto() throws IllegalStateException {
 		if (timeService.getCurrentTick() == 0) {
-			kyotoMemberLevel = KyotoMember.ROGUE;
 			
 			try {
 				environment.act(new AddRemoveFromMonitor(this, addRemoveType.REMOVE), getID(), authkey);
+				kyotoMemberLevel = KyotoMember.ROGUE;
+				environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
 			} catch (ActionHandlingException e) {
 				System.out.println("Exception wilst removing from monitor: " + e);
 				e.printStackTrace();
 			}
 		}
 		else if (timeService.getCurrentTick() - joinTime >= timeService.getTicksInYear()*GameConst.getMinimumKyotoMembershipDuration()) {
-			kyotoMemberLevel = KyotoMember.ROGUE;
 			leaveTime=timeService.getCurrentTick();
 			
 			try {
 				environment.act(new AddRemoveFromMonitor(this, addRemoveType.REMOVE), getID(), authkey);
+				kyotoMemberLevel = KyotoMember.ROGUE;
+				environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
 			} catch (ActionHandlingException e) {
 				System.out.println("Exception wilst removing from monitor: " + e);
 				e.printStackTrace();
@@ -626,10 +628,11 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	protected final void joinKyoto() throws IllegalStateException {
 		if (timeService.getCurrentTick() - leaveTime >= timeService.getTicksInYear()*GameConst.getMinimumKyotoRejoinTime()) {
-			kyotoMemberLevel = KyotoMember.ANNEXONE;
 			joinTime = timeService.getCurrentTick();
 			
 			try {
+				environment.act(new AddRemoveFromMonitor(this, addRemoveType.REMOVE), getID(), authkey);
+				kyotoMemberLevel = KyotoMember.ANNEXONE;
 				environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
 			} catch (ActionHandlingException e) {
 				System.out.println("Exception whilst adding to monitor: " + e);
