@@ -32,7 +32,7 @@ public class BIC extends AbstractCountry {
 	int current_tick; //tick currently operating
 	int current_year; //year currently operating
 	int imaginary_tick; //current tick modulo imaginary tick
-	int ticks_in_year; //the number of ticks in every year
+	int ticks_in_a_year_threshold; //the number of ticks in every year
 	//............................................................................................ 
 	
 	public BIC(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
@@ -78,13 +78,10 @@ public class BIC extends AbstractCountry {
 /*****************************************************************************************/
 	@EventListener
 	public void TickFunction(EndOfTimeCycle e){
-		//TODO implement functions that are done every tick
 				
 	}
 /*****************************************************************************************/
 	public void yearlyFunction() {
-		// TODO implement
-		//functions that are implemented every year
 				
 											
 	}
@@ -92,8 +89,7 @@ public class BIC extends AbstractCountry {
 	
 	@Override
 	public void sessionFunction() {
-		// TODO implement 
-		// carbonAbsorption to carbonOffset
+		
 	}
 
 /******************************************************************************************/
@@ -290,30 +286,26 @@ public class BIC extends AbstractCountry {
 		
 		private void update_energy_aim(double previous_aim,boolean success,int counter)
 		{
-				
+			ticks_in_a_year_threshold =  GameConst.getTicksInYear() - 10;
 			current_tick = timeService.getCurrentTick();
-			imaginary_tick = current_tick % 365 ;
-			ticks_in_year = GameConst.getTicksInYear() - 5 ;
+			imaginary_tick = current_tick % GameConst.getTicksInYear() ;
+			
 			if (success)
 			{ // country met goal, change goal
-				if ((imaginary_tick < ticks_in_year)) //steady increase every tick
+				if ((imaginary_tick < ticks_in_a_year_threshold)) //steady increase every tick
 				{
 					energy_aim = previous_aim + CountryConstants.STEADY_TICK_ENERGY_INCREASE;
 					
 				}
-				if (imaginary_tick == ticks_in_year)
+				if (imaginary_tick == ticks_in_a_year_threshold)
 				{
 				
 				times_aim_met = 0; //reset counter, wait a tick to operate
-				
+				energy_aim= previous_aim + 1;
 				}
-				if (imaginary_tick > ticks_in_year)
+				if (imaginary_tick > ticks_in_a_year_threshold )
 				{
-					if (imaginary_tick == ticks_in_year) //reset the energy aim every year
-					{
-						energy_aim = 30;
-						
-					}
+					
 					switch (counter)
 					{
 					case 0:
@@ -371,6 +363,10 @@ public class BIC extends AbstractCountry {
 		if (succeed) //country met environment target goal, change goal.
 			
 		environment_friendly_target = previous_target - CountryConstants.DECREASING_CARBON_TARGET;
+		
+		if (succeed == false)
+		
+		environment_friendly_target = previous_target + CountryConstants.DECREASING_CARBON_TARGET;
 		
 	}
 	
