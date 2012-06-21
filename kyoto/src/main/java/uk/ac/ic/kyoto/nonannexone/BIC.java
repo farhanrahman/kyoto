@@ -286,7 +286,7 @@ public class BIC extends AbstractCountry {
 		
 		private void update_energy_aim(double previous_aim,boolean success,int counter)
 		{
-			ticks_in_a_year_threshold =  GameConst.getTicksInYear() - 5;
+			ticks_in_a_year_threshold =  GameConst.getTicksInYear() - 10;
 			current_tick = timeService.getCurrentTick();
 			imaginary_tick = current_tick % GameConst.getTicksInYear() ;
 			
@@ -301,15 +301,11 @@ public class BIC extends AbstractCountry {
 				{
 				
 				times_aim_met = 0; //reset counter, wait a tick to operate
-				
+				energy_aim= previous_aim + 1;
 				}
 				if (imaginary_tick > ticks_in_a_year_threshold )
 				{
-					if (imaginary_tick == ticks_in_a_year_threshold) //reset the energy aim every year
-					{
-						energy_aim = 30;
-						
-					}
+					
 					switch (counter)
 					{
 					case 0:
@@ -367,6 +363,10 @@ public class BIC extends AbstractCountry {
 		if (succeed) //country met environment target goal, change goal.
 			
 		environment_friendly_target = previous_target - CountryConstants.DECREASING_CARBON_TARGET;
+		
+		if (succeed == false)
+		
+		environment_friendly_target = previous_target + CountryConstants.DECREASING_CARBON_TARGET;
 		
 	}
 	
