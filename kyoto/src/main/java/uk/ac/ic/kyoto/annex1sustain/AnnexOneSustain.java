@@ -180,7 +180,6 @@ public class AnnexOneSustain extends AbstractCountry {
 	
 	@Override
 	protected boolean acceptTrade(NetworkAddress address, Offer offer) {
-		// TODO accepting trade
 		return false;
 	}
 	
