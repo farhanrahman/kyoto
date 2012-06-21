@@ -9,7 +9,7 @@
 <booleanAttribute key="org.eclipse.jdt.debug.ui.CONSIDER_INHERITED_MAIN" value="true"/>
 <stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.eclipse.m2e.launchconfig.classpathProvider"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="uk.ac.imperial.presage2.core.simulator.RunnableSimulation"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="uk.ac.ic.kyoto.simulations.AnnexOneSustainTest finishTime=22"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="uk.ac.ic.kyoto.simulations.AnnexOneSustainTest finishTime=202"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="kyoto"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
 </launchConfiguration>

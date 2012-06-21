@@ -95,7 +95,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			}
 		}
 		else {
-			// What to do when not in Kyoto?
+			// TODO: What to do when not in Kyoto?
 		}
 	}
 	
@@ -119,8 +119,10 @@ public class AnnexOneSustain extends AbstractCountry {
 	
 	@Override
 	public void sessionFunction() {
-		if ((surplusCarbonTarget < 0) && (isKyotoMember() == KyotoMember.ANNEXONE)) {
-			//leaveKyoto();
+		if ((surplusCarbonTarget < 0) && (isKyotoMember() == KyotoMember.ANNEXONE) && (timeService.getCurrentTick() != 0)) {
+			leaveKyoto();
+			logger.info("Leaving Kyoto, my target is below my output");
+			//System.out.println("*** Leaving Kyoto");
 		}
 	}
 	
