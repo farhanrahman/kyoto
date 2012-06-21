@@ -1,6 +1,7 @@
 package uk.ac.ic.kyoto.nonannexone;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
+import uk.ac.ic.kyoto.countries.GameConst;
 import uk.ac.ic.kyoto.countries.Offer;
 import uk.ac.ic.kyoto.countries.OfferMessage;
 import uk.ac.ic.kyoto.trade.InvestmentType;
@@ -31,6 +32,7 @@ public class BIC extends AbstractCountry {
 	int current_tick; //tick currently operating
 	int current_year; //year currently operating
 	int imaginary_tick; //current tick modulo imaginary tick
+	int ticks_in_year; //the number of ticks in every year
 	//............................................................................................ 
 	
 	public BIC(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
@@ -61,7 +63,6 @@ public class BIC extends AbstractCountry {
 							this.tradeProtocol.offer(
 									m.getFrom(), 
 									o.getOfferQuantity(), 
-									o.getOfferUnitCost(), 
 									o);
 						} catch (FSMException e) {
 							e.printStackTrace();
@@ -81,7 +82,6 @@ public class BIC extends AbstractCountry {
 				
 	}
 /*****************************************************************************************/
-	@Override
 	public void yearlyFunction() {
 		// TODO implement
 		//functions that are implemented every year
@@ -237,7 +237,7 @@ public class BIC extends AbstractCountry {
 				
 				if (carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend() )
 					{
-					carbonAbsorptionHandler.investInCarbonAbsorption(carbonAbsorptionHandler.getInvestmentRequired(carbon_difference));
+					carbonAbsorptionHandler.investInCarbonAbsorption(carbon_difference);
 					logger.info("Country invests in carbon absorption to increase carbon absorption and thus reach environment target carbon output");
 					}
 				
@@ -256,6 +256,7 @@ public class BIC extends AbstractCountry {
 						
 					logger.info("Country has insufficient funds to reach environment friendly target");
 					green_care = false;
+					
 					}
 					
 			}
@@ -289,24 +290,26 @@ public class BIC extends AbstractCountry {
 		
 		private void update_energy_aim(double previous_aim,boolean success,int counter)
 		{
-				current_tick = timeService.getCurrentTick();
-				imaginary_tick = current_tick % 365 ;
+				
+			current_tick = timeService.getCurrentTick();
+			imaginary_tick = current_tick % 365 ;
+			ticks_in_year = GameConst.getTicksInYear() - 5 ;
 			if (success)
 			{ // country met goal, change goal
-				if ((imaginary_tick < 355)) //steady increase every tick
+				if ((imaginary_tick < ticks_in_year)) //steady increase every tick
 				{
 					energy_aim = previous_aim + CountryConstants.STEADY_TICK_ENERGY_INCREASE;
 					
 				}
-				if (imaginary_tick == 355)
+				if (imaginary_tick == ticks_in_year)
 				{
 				
 				times_aim_met = 0; //reset counter, wait a tick to operate
 				
 				}
-				if (imaginary_tick > 355)
+				if (imaginary_tick > ticks_in_year)
 				{
-					if (imaginary_tick == 365) //reset the energy aim every year
+					if (imaginary_tick == ticks_in_year) //reset the energy aim every year
 					{
 						energy_aim = 30;
 						
@@ -425,4 +428,5 @@ broadcastInvesteeOffer(change_required,InvestmentType.REDUCE);
 
 		
 	
+
 

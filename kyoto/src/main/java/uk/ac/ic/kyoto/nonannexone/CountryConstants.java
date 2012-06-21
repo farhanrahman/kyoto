@@ -12,5 +12,5 @@ public static final double AREA_LIMIT = 0.0675;
 public static final double STEADY_TICK_ENERGY_INCREASE = 30;
 public static final double INITIAL_ENERGY_THRESHOLD = 30; 
 public static final double LAND_AREA_UNIT_DIVIDE = 10;
-public static final double INITIAL_CARBON_TARGET = 100000; // to be decided
+public static final double INITIAL_CARBON_TARGET = 10;// to be decided
 }

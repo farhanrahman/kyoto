@@ -420,7 +420,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 		return all;
 	}
 
-	public boolean offer(NetworkAddress to, double quantity, double unitPrice, OfferMessage offerMessage)
+	public boolean offer(NetworkAddress to, double quantity, OfferMessage offerMessage)
 			throws FSMException {
 		if(offerMessage.getOfferMessageType().equals(OfferMessageType.BROADCAST_MESSAGE)){
 			/*Start an offer if the message type is BROADCAST_MESSAGE i.e. not part of the 
@@ -428,7 +428,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 			this.spawnAsInititor(
 					new TradeSpawnEvent(
 							to, 
-							quantity, unitPrice, 
+							quantity, offerMessage.getOfferUnitCost(), 
 							offerMessage.getOfferType(), offerMessage.getOfferInvestmentType(), 
 							offerMessage));
 			return true;
@@ -691,14 +691,13 @@ public abstract class TradeProtocol extends FSMProtocol {
 	 * @param unitcost
 	 * @param o
 	 */
-	public void respondToOffer(NetworkAddress from, double quantity, double unitcost, OfferMessage o) throws FSMException, IllegalArgumentException{
+	public void respondToOffer(NetworkAddress from, double quantity, OfferMessage o) throws FSMException, IllegalArgumentException{
 		if(this.getActiveConversationMembers().contains(from)){
 			throw new IllegalArgumentException("A conversation with this agent already exists");
 		} else {
 			this.offer(
 					from, 
 					quantity, 
-					unitcost, 
 					o);
 		}
 	}
