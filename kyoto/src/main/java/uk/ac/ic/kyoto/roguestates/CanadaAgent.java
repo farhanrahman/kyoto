@@ -1,5 +1,6 @@
 package uk.ac.ic.kyoto.roguestates;
 
+import java.util.Random; 
 import java.util.Set;
 import java.util.UUID;
 
@@ -7,6 +8,7 @@ import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.ic.kyoto.trade.InvestmentType;
 import uk.ac.ic.kyoto.services.FossilPrices;
+import uk.ac.ic.kyoto.roguestates.USAgent;
 
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
@@ -15,9 +17,13 @@ import uk.ac.imperial.presage2.core.messaging.Input;
 
 public class CanadaAgent extends AbstractCountry {
 
-	private double			AverageGDPRate; // to be stored in an array or DB for furhter analysis.
-	long year;
-	long p_year=year-1;
+	private double	AverageGDPRate; // to be stored in an array or DB for furhter analysis.
+	long Currentyear;				//The present year global	
+	long Prevyear=Currentyear-1;	//Previous year
+	int n=8,m=3;
+	int industry_players=0;
+	int industry_projects=0;
+	double ratio;
 	public CanadaAgent(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
 			double GDPRate, double emissionsTarget, double energyOutput, double carbonOutput) {
 		super(id, name, ISO, landArea, arableLandArea, GDP,
@@ -26,7 +32,6 @@ public class CanadaAgent extends AbstractCountry {
 		// TODO Auto-generated constructor stub
 	}
 	
-	FossilPrices price = new FossilPrices();
 	
 	@Override
 	protected Set<ParticipantSharedState> getSharedState() {
@@ -123,10 +128,11 @@ public class CanadaAgent extends AbstractCountry {
 			//If GDP growth achieved in the past 4 years
 			//
 		}
+		FossilPrices price = new FossilPrices();
 		
-		
-		
-	boolean check_oil_prices(long year){
+	
+		/*Function to check oil prices to ramp or reduce production  */
+		boolean check_oil_prices(long year){
 			if(((price.getOilPrice(year)) > 100)){
 				System.out.print("We can reduce production");
 				return true;
@@ -135,23 +141,37 @@ public class CanadaAgent extends AbstractCountry {
 			}
 		
 		
-				
+	/*Emmisions target to be cheked against to gauge performance  */			
 	public double SetEmissionsTarget(){
 		return this.getEmissionsTarget();
 		
 	}
 	
+	/*Check our performancce  */
 	boolean check_emmision(long year){
-		if((this.check_emmision(year)) <= (this.check_emmision(p_year))){
+		if((this.getEnergyOutput()) <= (this.getPrevEnergyOutput())){
 			System.out.print("Good progress");
 			return true;
 		}
 		else return false;
 	}
 	
-	anything
-	//BLALALAALALAL
-	
+	Random rand1= new Random();
+	Random rand2= new Random();
+	/*This function checks the industry projects against players  */
+	/*to determine feasibility of carbon reduction  */
+	public boolean get_ratio(){
+				
+		industry_players=rand1.nextInt(n);
+		industry_projects=rand2.nextInt(m);
+		if((industry_players<=8) && (industry_projects<=5)){
+			return true;
+		}
+		
+				
+	}
+
+	///////////
 	@Override
 	public void SessionFunction() {
 		if(JoiningCriteriaMet()){
@@ -244,7 +264,8 @@ public class CanadaAgent extends AbstractCountry {
 	
 	
 
-	
+	// Add a function to check the gdp rte against emmsision
+	//Add a function for ratio of GDP against the emmision
 	
 	
 	
