@@ -1,8 +1,7 @@
-package uk.ac.ic.kyoto.testagents;
+package uk.ac.ic.kyoto.countries.testCountries;
 
 import java.util.Set;
 import java.util.UUID;
-
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.Offer;
@@ -49,11 +48,7 @@ public class TestAgent extends AbstractCountry {
 							.getActiveConversationMembers()
 								.contains(m.getFrom())){
 						try {
-							this.tradeProtocol.offer(
-									m.getFrom(), 
-									o.getOfferQuantity(), 
-									o.getOfferUnitCost(), 
-									o);
+							this.tradeProtocol.offer(m.getFrom(), o.getOfferQuantity(), o);
 						} catch (FSMException e) {
 							e.printStackTrace();
 						}

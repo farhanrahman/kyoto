@@ -1,11 +1,9 @@
 package uk.ac.ic.kyoto.countries;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Semaphore;
 
 import uk.ac.ic.kyoto.CarbonData1990;
 import uk.ac.ic.kyoto.countries.AbstractCountry.KyotoMember;
@@ -50,6 +48,7 @@ public class CarbonTarget extends EnvironmentService {
 	
 	private ArrayList<countryObject> participantCountries= new ArrayList<countryObject>();
 	private ArrayList<UUID> cheatersList = new ArrayList<UUID>();
+	public ArrayList<UUID> queueToJoin = new ArrayList<UUID>();
 	
 	private double worldLastSessionTarget = 0;
 	private double worldCurrentSessionTarget = 0;
@@ -58,7 +57,7 @@ public class CarbonTarget extends EnvironmentService {
 	private EventBus eb;
 	private GlobalTimeService timeService;
 	private CarbonReportingService reportingService;
-	private Semaphore exclusiveAccess = new Semaphore(1);
+	private Monitor monitor;
 	
 	private EnvironmentServiceProvider provider;
 	
@@ -84,6 +83,16 @@ public class CarbonTarget extends EnvironmentService {
 			participantCountries.add(memberState);
 	}
 	
+	private void addRejoiningCountries() {
+		for (UUID  countryID : queueToJoin) {
+			countryObject ref = findCountryObject(countryID);
+			ref.currentSessionTarget = getReportedCarbonOutput(countryID, (timeService.getCurrentYear() - 1));
+			ref.obj.kyotoMemberLevel = KyotoMember.ANNEXONE;
+			monitor.addMemberState(ref.obj);
+		}
+		queueToJoin.clear();
+	}
+	
 	public double querySessionTarget(UUID countryID) {
 		countryObject obj = findCountryObject(countryID);
 		return obj.currentSessionTarget;
@@ -99,29 +108,13 @@ public class CarbonTarget extends EnvironmentService {
 	}
 	
 	void addCountryPenalty(UUID countryID, double penaltyValue) {
-		try {
-			this.exclusiveAccess.acquire();
-		} catch (InterruptedException e) {
-			System.out.println("Interrupted Exception" + e);
-			e.printStackTrace();
-		}
-		
 		countryObject target= findCountryObject(countryID);
-		target.penalty = penaltyValue;
-		/*generateYearTarget(target);*/
 		
-		this.exclusiveAccess.release();
-	}
-	
-	void retargetDueToCheaters(ArrayList<UUID> theCheaters) {
-		this.cheatersList = theCheaters;
-
-		if ((timeService.getCurrentYear() % GameConst.getYearsInSession() + (timeService.getCurrentTick() % timeService.getTicksInYear())) == 0) {
-			updateSessionTargets();
-			updateYearTargets();
+		if (penaltyValue >= 0) {
+			target.penalty = penaltyValue;
+		} else {
+			target.penalty = 0;
 		}
-
-		this.cheatersList.clear();
 	}
 
 	/*
@@ -138,6 +131,13 @@ public class CarbonTarget extends EnvironmentService {
 			this.reportingService = provider.getEnvironmentService(CarbonReportingService.class);
 		} catch (UnavailableServiceException e) {
 			System.out.println("Unable to get environment service 'CarbonReportingService'.");
+			e.printStackTrace();
+		}
+		
+		try {
+			this.monitor = provider.getEnvironmentService(Monitor.class);
+		} catch (UnavailableServiceException e) {
+			System.out.println("Unable to get environment service 'Monitor'.");
 			e.printStackTrace();
 		}
 		
@@ -193,7 +193,8 @@ public class CarbonTarget extends EnvironmentService {
 		}
 	}
 	
-	public void targetsForMonitor() {
+	public void targetsForMonitor(ArrayList<UUID> theCheaters) {
+		cheatersList = theCheaters;
 		if (timeService.getCurrentYear() != 0) {
 			if ((timeService.getCurrentYear() % timeService.getYearsInSession()) == 0)
 			{
@@ -206,19 +207,10 @@ public class CarbonTarget extends EnvironmentService {
 	
 	public void updateYearTargets()
 	{
-		try {
-			this.exclusiveAccess.acquire();
-		} catch (InterruptedException e) {
-			System.out.println("Interrupted Exception : " + e);
-			e.printStackTrace();
-		}
-		
 		for (countryObject country : participantCountries) {
 			if (country.obj.isKyotoMember() == KyotoMember.ANNEXONE)
 				generateYearTarget(country);
 		}
-		
-		this.exclusiveAccess.release();
 	}
 	
 	/*
@@ -243,6 +235,8 @@ public class CarbonTarget extends EnvironmentService {
 	}	
 	
 	private void updateSessionTargets(){
+		addRejoiningCountries();
+		
 		this.worldLastSessionTarget = this.worldCurrentSessionTarget;
 		this.worldCurrentSessionTarget = worldLastSessionTarget * GameConst.getTargetReduction(); 
 		double worldOutput = 0;
@@ -279,9 +273,15 @@ public class CarbonTarget extends EnvironmentService {
 	private void generateSessionTarget(countryObject country, double kyotoTarget)
 	{	
 		country.lastSessionTarget = country.currentSessionTarget;
-		country.currentSessionTarget = country.proportion * kyotoTarget;
-		if ((country.lastSessionTarget - country.currentSessionTarget) / country.lastSessionTarget > 0.1 ) {
-			country.currentSessionTarget = country.lastSessionTarget*0.9;
+		double newTarget = country.proportion * kyotoTarget;
+		double diffTargets  = country.lastSessionTarget - newTarget;
+		
+		if (diffTargets < 0) {
+			newTarget = country.lastSessionTarget;
+		} else if (diffTargets / country.lastSessionTarget > 0.1) {
+			newTarget = country.lastSessionTarget * 0.9;
 		}
+		
+		country.currentSessionTarget = newTarget;
 	}
 }

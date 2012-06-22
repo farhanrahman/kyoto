@@ -2,7 +2,6 @@ package uk.ac.ic.kyoto.roguestates;
 
 import java.util.Set;
 import java.util.UUID;
-
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.exceptions.NotEnoughCarbonOutputException;
 import uk.ac.ic.kyoto.exceptions.NotEnoughCashException;

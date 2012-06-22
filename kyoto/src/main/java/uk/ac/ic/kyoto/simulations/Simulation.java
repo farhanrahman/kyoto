@@ -18,6 +18,7 @@ import uk.ac.ic.kyoto.annex1sustain.AnnexOneSustain;
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.CarbonTarget;
 import uk.ac.ic.kyoto.countries.Monitor;
+import uk.ac.ic.kyoto.countries.testCountries.TestAgent;
 import uk.ac.ic.kyoto.exceptions.NoCountryDataException;
 import uk.ac.ic.kyoto.nonannexone.NonAnnexOne;
 import uk.ac.ic.kyoto.roguestates.CanadaAgent;
@@ -28,7 +29,6 @@ import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.ic.kyoto.singletonfactory.SingletonProvider;
-import uk.ac.ic.kyoto.testagents.TestAgent;
 import uk.ac.ic.kyoto.trade.TradeProtocolTestAgent;
 import uk.ac.ic.kyoto.tradehistory.TradeHistoryService;
 import uk.ac.ic.kyoto.util.sim.jsonobjects.DataProvider;
@@ -148,16 +148,16 @@ public class Simulation extends InjectedSimulation {
 										Double.parseDouble(countryData.getEnergyOutput()), 
 										Double.parseDouble(countryData.getCarbonOutput()));
 					} else if(className.equals("AnnexOneReduce")){
-//						abstractCountry = new AnnexOneReduce(
-//										Random.randomUUID(), 
-//										countryData.getName(),
-//										countryData.getISO(), 
-//										Double.parseDouble(countryData.getLandArea()), 
-//										Double.parseDouble(countryData.getArableLandArea()), 
-//										Double.parseDouble(countryData.getGDP()),
-//										Double.parseDouble(countryData.getGDPRate()), 
-//										Double.parseDouble(countryData.getEnergyOutput()), 
-//										Double.parseDouble(countryData.getCarbonOutput()));
+						abstractCountry = new AnnexOneReduce(
+										Random.randomUUID(), 
+										countryData.getName(),
+										countryData.getISO(), 
+										Double.parseDouble(countryData.getLandArea()), 
+										Double.parseDouble(countryData.getArableLandArea()), 
+										Double.parseDouble(countryData.getGDP()),
+										Double.parseDouble(countryData.getGDPRate()), 
+										Double.parseDouble(countryData.getEnergyOutput()), 
+										Double.parseDouble(countryData.getCarbonOutput()));
 					} else if(className.equals("CanadaAgent")){
 //						abstractCountry = new CanadaAgent(
 //										Random.randomUUID(), 
