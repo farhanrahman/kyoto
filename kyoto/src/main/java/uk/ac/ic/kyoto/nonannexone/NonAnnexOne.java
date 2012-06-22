@@ -148,14 +148,16 @@ public class NonAnnexOne extends AbstractCountry {
 					times_aim_met +=1; //how many consecutive times the target was met.
 					logger.info("Country met its energy output goal");
 				}
-		else{
+		else 
+		{
 			times_aim_met = 0; //reset the counter.
 			aim_success = false; //energy target not met
-			logger.info("Country has insufficient funds to meet its energy output goal");
-			}
+			logger.info("Country has insufficient funds to meet its energy output goal");	
+		}
 		update_energy_aim(energy_aim , aim_success,times_aim_met); //update the energy aim for the next year.	
 		
 		//clean development mechanism only if country cares for environment
+		
 		if (green_care)
 		{
 			clean_development_mechanism(invest_money);
@@ -163,17 +165,13 @@ public class NonAnnexOne extends AbstractCountry {
 		
 		
 	}
-		
-	
-		/*function that uses EnergyUsageHandler to create factories and increase energy output
-	 * however carbon output also increases   
-	*
-	*/
-/************************************************************************************************/
+			
+/****************************************Invest in carbon industry with care or not for the environment ********************************************************/
+	//function that uses EnergyUsageHandler to create factories 
+	//and increase energy output however carbon output also increases 
 	
 	private void buildIndustry(double invest) throws IllegalArgumentException, Exception 
 	{
-		 //the difference between environmentally friendly target and actual carbon emission.
 		if (green_care == true)
 			energy_increase_with_care(invest);
 		else
@@ -181,7 +179,7 @@ public class NonAnnexOne extends AbstractCountry {
 		
 	}
 	
-/*******************************************************************************************************/	
+/******************************************Invest in carbon industry and care for environment*************************************************************/	
 	
 	private void energy_increase_with_care(double money_invest) throws IllegalArgumentException, Exception
 	{
@@ -191,7 +189,7 @@ public class NonAnnexOne extends AbstractCountry {
 		
 		
 		if (getCarbonOutput() + energyUsageHandler.calculateCarbonIndustryGrowth(money_invest) <= environment_friendly_target)
-		{ //invest but also check if we meet our environment friendly target.
+		{ //invest but also check if the environment friendly target is met.
 			try{
 				energyUsageHandler.investInCarbonIndustry(money_invest);
 				logger.info("Invest in carbon industry successful");
