@@ -517,6 +517,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.dataStore.addCarbonOffset(this.getCarbonOffset());
 		this.dataStore.addCarbonOutput(this.getCarbonOutput());
 		this.dataStore.addEnergyOutput(this.getEnergyOutput());
+		this.dataStore.addLandArea(this.getLandArea());
 		this.dataStore.addIsKyotoMember(this.isKyotoMember());	
 			/* TODO
 			 * is cheating?
@@ -537,6 +538,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.carbonOffsetKey, Double.toString(this.getCarbonOffset()));
 		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.carbonOutputKey, Double.toString(this.getCarbonOutput()));
 		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.energyOutputKey, Double.toString(this.getEnergyOutput()));
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.landAreaKey,Double.toString(this.landArea));
 		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.isKyotoMemberKey, this.isKyotoMember().name());
 		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.cheated, "n/a");
 	}

@@ -23,6 +23,7 @@ public class DataStore {
 	private Map<Integer, String> carbonOffsetHistory = new TreeMap<Integer,String>();
 	private Map<Integer, String> carbonOutputHistory = new TreeMap<Integer,String>();
 	private Map<Integer, String> energyOutputHistory = new TreeMap<Integer,String>();
+	private Map<Integer, String> landAreaHistory = new TreeMap<Integer,String>();
 	private Map<Integer, String> isKyotoMemberHistory = new TreeMap<Integer,String>();
 
 	
@@ -33,6 +34,7 @@ public class DataStore {
 	public static final String carbonOffsetKey = "carbon_offset";
 	public static final String carbonOutputKey = "carbon_output";
 	public static final String energyOutputKey = "energy_output";
+	public static final String landAreaKey = "land_area";
 	public static final String isKyotoMemberKey = "is_kyoto_member";
 	public static final String cheated = "cheated";
 	
@@ -95,6 +97,9 @@ public class DataStore {
 		this.energyOutputHistory.put(SimTime.get().intValue(), Double.toString(energyOutput));
 	}
 	
+	public void addLandArea(double landArea){
+		this.landAreaHistory.put(SimTime.get().intValue(), Double.toString(landArea));
+	}
 	/**
 	 * update whether the particpant is a member
 	 * of the kyoto protocol
@@ -160,6 +165,15 @@ public class DataStore {
 		return ImmutableMap.copyOf(energyOutputHistory);
 	}
 
+	/**
+	 * @return a map of land area history
+	 * 
+	 */
+	
+	public Map<Integer, String> getLandAreaHistory() {
+		return ImmutableMap.copyOf(landAreaHistory);
+	}
+	
 	/**
 	 * 
 	 * @return returns a map of kyoto member state history
