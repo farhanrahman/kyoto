@@ -67,7 +67,7 @@ public final class GameConst {
 	 * Percentage of GDP taken from country if they fail to meet their targets.  
 	 * Increases in linear amounts for each transgression.
 	 */
-	private static double SANCTION_RATE = 0.0075;
+	private static double SANCTION_RATE = 0.0025;
 	
 	/**
 	 * Price for each monitor
