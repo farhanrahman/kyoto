@@ -466,6 +466,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		}
 	}
 	
+	
+	
 	/**
 	 * Updates GDP using GDPRate for the past year
 	 * @author sc1109

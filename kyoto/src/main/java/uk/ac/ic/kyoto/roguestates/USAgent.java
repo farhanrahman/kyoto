@@ -7,11 +7,16 @@ import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.core.util.random.Random;
+import uk.ac.imperial.presage2.util.fsm.FSMException;
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.CarbonAbsorptionHandler;
 import uk.ac.ic.kyoto.countries.CarbonReductionHandler;
+import uk.ac.ic.kyoto.countries.GameConst;
 import uk.ac.ic.kyoto.countries.Offer;
+import uk.ac.ic.kyoto.countries.OfferMessage;
 import uk.ac.ic.kyoto.countries.AbstractCountry.KyotoMember;
+import uk.ac.ic.kyoto.services.FossilPrices;
+import uk.ac.ic.kyoto.trade.TradeType;
 
 public class USAgent extends AbstractCountry {
 
@@ -26,6 +31,7 @@ public class USAgent extends AbstractCountry {
 	private double IntensityTarget; 			// Target for the year
 	private double IntensityRatio;				// Ratio achieved at the end of the year
 	private double GDPRateTarget;	
+	private double GDPTarget; 					// (GDP level needed got target growth rate)
 	private int 	 PrevailingAttitude; 		// Ranges from -5 to +5, represents attitude of 
 												// public toward the carbon reduction where
 												// a value of 10 is positive, 0 is ambivalent
@@ -52,8 +58,8 @@ public class USAgent extends AbstractCountry {
 	
 	//private ParticipantTimeService timeService;
 	private int CurrentYear; // numerous functions use the current year, so made global. 
-	
-	
+	private boolean debug;
+
 	
 	@Override
 	/*
@@ -62,19 +68,23 @@ public class USAgent extends AbstractCountry {
 	 * called every tick
 	 */
 	public void behaviour() {
-		double ProjectedGDPRate = this.CalculateProjectedGDP();
+		double ProjectedGDP = this.CalculateProjectedGDP();
 		double ProjectedIntensityRatio = this.CalculateIntensityRatio(); 
+		double RequiredEnergyIncrease;
+		double InvestmentNeeded;
 		
 		// if republicans in power
 		if(!this.isDemocratElected()) { // the order in which meeting targets are prioritised 
 			// differs depending on the party in power
-			if(ProjectedGDPRate < this.getGDPRateTarget()) {
-				
-				//IncreaseEnergy
+			if(this.CalculateProjectedGDP() < this.getGDPTarget()) {
+				RequiredEnergyIncrease = this.getEnergyOutput()*getGDPRateTarget()/100;				
+				InvestmentNeeded = energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(RequiredEnergyIncrease);				
+				energyUsageHandler.investInCarbonIndustry(InvestmentNeeded);
 			}
 			else { // if the 
 				if(ProjectedIntensityRatio > this.getIntensityTarget()) {
-					if(IsKyotoMember()) {
+					/*
+					if(isKyotoMember()) {
 						if(TradeOffersExist()) {
 							// if trade is more cost effective than normal reduction methods, accept
 						}
@@ -85,19 +95,15 @@ public class USAgent extends AbstractCountry {
 							// quantity propose at average of these
 						}
 					}
-					if(CDMOffersExist()) {
-						// if cmd offer is more cost effective than normal reduction methods accept
-					}
+					*/
 				}
 			}
-			
-			if(LastTick) {
+								
+			// if its the last tick of the year
+			if(timeService.getCurrentTick()==timeService.getTicksInYear()-1) {
 				// perform all action to meet targets if needed
 				if(ProjectedIntensityRatio > this.getIntensityTarget()) {
 					// 
-				}
-				if(ProjectedGDPRate < this.getGDPRateTarget()) {				
-					//IncreaseEnergy
 				}
 				// if the party might lose even after meeting targets
 				if(CalculateGDPRateScore(USAgent.ElectionRandomAdjust/2) 
@@ -110,7 +116,8 @@ public class USAgent extends AbstractCountry {
 		else { // if democrats in power
 			// try to fulfil commitments through cost effective trades
 			if(ProjectedIntensityRatio > this.getIntensityTarget()) {
-				if(IsKyotoMember()) {
+				/*
+				if(isKyotoMember()==KyotoMember.ANNEXONE) {
 					if(TradeOffersExist()) {
 						// if trade is more cost effective than normal reduction methods, accept
 					}
@@ -121,6 +128,7 @@ public class USAgent extends AbstractCountry {
 						// quantity propose at average of these
 					}
 				}
+				*/
 				if(CDMOffersExist()) {
 					// if cmd offer is more cost effective than normal reduction methods accept
 				}
@@ -130,11 +138,13 @@ public class USAgent extends AbstractCountry {
 					//IncreaseEnergy
 				}
 			}
+
 			// if its the last tick
-			if(LastTick) {
+			if(timeService.getCurrentTick()==timeService.getTicksInYear()-1) {
 				// perform all action to meet targets if needed
 				if(ProjectedIntensityRatio > this.getIntensityTarget()) {
 					// 
+					
 				}
 				if(ProjectedGDPRate < this.getGDPRateTarget()) {				
 					//IncreaseEnergy
@@ -149,24 +159,34 @@ public class USAgent extends AbstractCountry {
 		}
 	}
 	
-	private boolean TradeProposalsExist(int i) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	private boolean CDMOffersExist() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	private boolean TradeOffersExist() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	
 
 	private double CalculateProjectedGDP() {
-		// TODO Auto-generated method stub
-		return 0;
+		double ProjectedGDP;
+		double marketStateFactor = GameConst.getStableMarketState();
+		double sum;
+		double EnergyOutput = getEnergyOutput();
+		double PreviousEnergyOutput = getPrevEnergyOutput();
+		double EnergyDifference = EnergyOutput-PreviousEnergyOutput;
+		
+		if (EnergyDifference >= 0){	
+			sum = (((EnergyDifference)/PreviousEnergyOutput)*GameConst.getEnergyGrowthScaler()*marketStateFactor+getGDPRate()*100)/2;
+			if (sum < 0) {
+				ProjectedGDP = -(GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(sum*GameConst.getGrowthScaler()));
+			}
+			else {
+				ProjectedGDP = GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler());
+			}
+		}
+		else{
+			sum = ((EnergyDifference)/PreviousEnergyOutput)*GameConst.getEnergyGrowthScaler();
+			sum = Math.abs(sum);
+			ProjectedGDP = -(GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler()));
+		}
+		
+		ProjectedGDP /= 100; // Needs to be a % for rate formula
+		logger.info("ProjectedGDP = " + ProjectedGDP);
+		return ProjectedGDP;
 	}
 
 	@Override
@@ -192,6 +212,7 @@ public class USAgent extends AbstractCountry {
 		StoreTargetData();
 		ProcessTargetData();
 		
+		/*
 		if(isKyotoMember()!=KyotoMember.ANNEXONE) { // if we are not currently a member
 			if(JoiningCriteriaMet()) {
 				joinKyoto(); // function sets variable kyotoMemberLevel = KyotoMember.ANNEXONE
@@ -205,6 +226,7 @@ public class USAgent extends AbstractCountry {
 			}
 				
 		}
+		*/
 	}
 	
 	@Override
@@ -218,19 +240,17 @@ public class USAgent extends AbstractCountry {
 	//
 	public void sessionFunction() {
 		
-			
-		
 	}
-	
 
-		
 	private void HoldElection() {		
 		if(CalculateIntensityScore(Random.randomInt(USAgent.ElectionRandomAdjust)) 
 		> CalculateGDPRateScore(Random.randomInt(USAgent.ElectionRandomAdjust))) {
 			setDemocratElected(true);
+			if(debug) logger.info("DemocratElected");
 		}
 		else {
 			setDemocratElected(false);
+			if(debug) logger.info("RepublicanElected");
 		}		
 	}
 	
@@ -244,8 +264,8 @@ public class USAgent extends AbstractCountry {
 		 * +5 very ambivalent, and by extension, pro GDP growth.
 		 * Thus this will adjust the percentage scores achieved according to what the public feel.
 		 */
-		double AdjustedGDPRateScore = GDPRateScore + (CurrentAttitude*GDPRateScore) 
-				+ (Random.randomInt(ElectionAdjust)*GDPRateScore);
+		double AdjustedGDPRateScore = GDPRateScore + (CurrentAttitude*GDPRateScore) + (Random.randomInt(ElectionAdjust)*GDPRateScore);
+		if(debug) logger.info("AdjustedGDPRateScore = " + AdjustedGDPRateScore);
 		return(AdjustedGDPRateScore);
 	}
 	
@@ -259,8 +279,8 @@ public class USAgent extends AbstractCountry {
 		 * +5 very ambivalent, and by extension, pro GDP growth.
 		 * Thus this will adjust the percentage scores achieved according to what the public feel.
 		 */
-		double AdjustedIntensityScore = IntensityScore + (-1*CurrentAttitude*IntensityScore) 
-				+ ElectionAdjust)*IntensityScore);
+		double AdjustedIntensityScore = IntensityScore + (-1*CurrentAttitude*IntensityScore) + ElectionAdjust*IntensityScore;
+		if(debug) logger.info("AdjustedIntensityScore = " + AdjustedIntensityScore);				
 		return AdjustedIntensityScore;
 		
 	}
@@ -269,17 +289,14 @@ public class USAgent extends AbstractCountry {
 	 * This function only called when country is instantiated. 
 	 */
 	private void SetInitialPoliticalParty() {
-		setDemocratElected(true);
-		/*
-		  int rand = Random.randomInt(100);
-		 
+		int rand = Random.randomInt(100);		 
 		if (rand < 50) {
-			DemocratElected = true;
+			setDemocratElected(true);
+			
 		}
 		else {
-			DemocratElected = false;
-		}
-		*/
+			setDemocratElected(false);
+		}		
 	}
 	
 	public void SetTargets() {
@@ -308,14 +325,48 @@ public class USAgent extends AbstractCountry {
 	 * @see uk.ac.ic.kyoto.countries.AbstractCountry#processInput(uk.ac.imperial.presage2.core.messaging.Input)
 	 * Called by execute when input objects are waiting on your agent. 
 	 */
-	protected void processInput(uk.ac.imperial.presage2.core.messaging.Input input) {
-		
+	protected void processInput(uk.ac.imperial.presage2.core.messaging.Input in) {
+		if (this.tradeProtocol.canHandle(in)) {
+			this.tradeProtocol.handle(in);
+		}
+		else{
+			OfferMessage offerMessage = this.tradeProtocol.decodeInput(in);
+			if(AnalyzeOffer(offerMessage) ) {	
+				try {
+					this.tradeProtocol.respondToOffer(
+							this.tradeProtocol.extractNetworkAddress(in), 
+							offerMessage.getOfferQuantity(),
+							offerMessage);
+				} catch (IllegalArgumentException e1) {
+					logger.warn(e1);
+				} catch (FSMException e1) {
+					logger.warn(e1);
+				}
+			}
+		}	
 	};
+	
+	protected boolean AnalyzeOffer(OfferMessage offerMessage) {
+		if(offerMessage.getOfferType()==TradeType.RECEIVE) { // CDM type
+			// Democrats will opt for reduction if it is cost effective regardless of whether target has already been met.
+			if(DemocratElected || getIntensityRatio() > getIntensityTarget()) {
+				double OfferUnitCost = offerMessage.getOfferUnitCost();
+				double OfferQuantity = offerMessage.getOfferQuantity();
+				double  TradeCost = OfferUnitCost*OfferQuantity;
+				double EquivalentAbsorptionCost = carbonAbsorptionHandler.getInvestmentRequired(OfferQuantity);
+				double EquivalentReductionCost = carbonReductionHandler.getInvestmentRequired(OfferQuantity);
+				if(TradeCost < Math.min(EquivalentReductionCost, EquivalentAbsorptionCost)) {					
+					return(true);
+				}
+			}						
+		}
+		return(false);
+	}
 
 	@Override
 	protected boolean acceptTrade(NetworkAddress from, Offer trade) {
 		// TODO Auto-generated method stub
-		return false;
+		return false; 
 	}
 	
 	public USAgent(UUID id, String name,String ISO, double landArea, double arableLandArea, 
@@ -368,8 +419,17 @@ public class USAgent extends AbstractCountry {
 		GDPArray[CurrentYear] =  getGDP();
 		setIntensityRatio(CalculateIntensityRatio()); // Derived from GDP and CarbonOutput
 		IntensityRatioArray[CurrentYear] = getIntensityRatio();
+		setGDPTarget(CalculateGDPTarget());
 	}
 	
+	
+	
+	private double CalculateGDPTarget() {
+		double value = getGDP()*getGDPRateTarget();
+		
+		return value; 
+	}
+
 	private void StoreTargetData() {
 		//IntensityTargetArray[CurrentYear] = getIntensityTarget();
 		IntensityRatioArray[CurrentYear] = getIntensityRatio();
@@ -471,6 +531,12 @@ public class USAgent extends AbstractCountry {
 		double result = getGDP() / getCarbonOutput();
 		return(result);
 	}
+	
+	/*
+	private double CalculateProjectedIntensity() {
+		double result = this.CalculateProjectedGDP() / getCarbonOutput; 
+	}
+	*/
 
 	public void setIntensityRatio(double intensityRatio) {
 		IntensityRatio = intensityRatio;
@@ -494,6 +560,14 @@ public class USAgent extends AbstractCountry {
 
 	public void setGDPRateTarget(double gDPRateTarget) {
 		GDPRateTarget = gDPRateTarget;
+	}
+
+	public double getGDPTarget() {
+		return GDPTarget;
+	}
+
+	public void setGDPTarget(double gDPTarget) {
+		GDPTarget = gDPTarget;
 	}
 
 	public int getPrevailingAttitude() {
