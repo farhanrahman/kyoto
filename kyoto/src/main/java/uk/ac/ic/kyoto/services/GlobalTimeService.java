@@ -50,35 +50,17 @@ public class GlobalTimeService extends EnvironmentService {
 	@EventListener
 	public void updateTickCounter (EndOfTimeCycle e) {
 		System.out.println("updateTickCounter called. SimTime: "+SimTime.get().intValue());
-		if (SimTime.get().intValue() - getCurrentYear() * ticksInYear == ticksInYear) {
-			System.out.println("END OF YEAR "+getCurrentYear());
-			TimeToMonitor m = new TimeToMonitor(SimTime.get().intValue());
-			eb.publish(m);
-		}
 		if (SimTime.get().intValue() % getTicksInYear() == 0) {
 			System.out.println("END OF YEAR "+(getCurrentYear()-1));
 			EndOfYearCycle y = new EndOfYearCycle(getCurrentYear()-1);
 			eb.publish(y);
-		}
-		System.out.println("updateTickCounter returning. SimTime: "+SimTime.get().intValue());
-	}
-	
-	@EventListener
-	public void updateYearCounter (EndOfTimeCycle e) {
-		if (SimTime.get().intValue() % getTicksInYear() == 0) {
-			System.out.println("end of the year");
 			sharedState.changeGlobal("YearCount", getCurrentYear());
 			if (getCurrentYear() - getCurrentSession() * yearsInSession == yearsInSession) {
 				System.out.println("end of the session");
-				EndOfSessionCycle s = new EndOfSessionCycle(getCurrentSession());
-				eb.publish(s);
+				sharedState.changeGlobal("SessionCount", getCurrentSession());
 			}
 		}
-	}
-	
-	@EventListener
-	public void updateSessionCounter (EndOfSessionCycle e) {
-		sharedState.changeGlobal("SessionCount", getCurrentSession());
+		System.out.println("updateTickCounter returning. SimTime: "+SimTime.get().intValue());
 	}
 	
 	//================================================================================
@@ -94,22 +76,6 @@ public class GlobalTimeService extends EnvironmentService {
 		
 		public int getEndedYear() {
 			return endedYear;
-		}
-	}
-	
-	public class EndOfSessionCycle implements Event {
-		final int endedSession;
-		
-		EndOfSessionCycle(int endedSession) {
-			this.endedSession = endedSession;
-		}
-	}
-	
-	public class TimeToMonitor implements Event {
-		final int monitorTick;
-		
-		TimeToMonitor(int tickCounter) {
-			this.monitorTick = tickCounter;
 		}
 	}
 	

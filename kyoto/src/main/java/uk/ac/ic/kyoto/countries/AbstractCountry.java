@@ -244,17 +244,20 @@ public abstract class AbstractCountry extends AbstractParticipant {
 					if (kyotoMemberLevel == KyotoMember.ANNEXONE) {
 						MonitorTax();
 					}
-					
-					yearlyFunction();
 				}
 				
 			if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
 				resetCarbonOffset();
 				sessionFunction();
 			}
+			
+			if (timeService.getCurrentTick() % timeService.getTicksInYear() == 1) {
+				yearlyFunction();
+			}
 	
 			//leave a 10-tick grace period to allow current trades to complete before performing end of year routine
-			if (timeService.getCurrentTick() % timeService.getTicksInYear() < timeService.getTicksInYear() - 5 ) {
+			if (timeService.getCurrentTick() % timeService.getTicksInYear() < timeService.getTicksInYear() - 5
+					&& timeService.getCurrentTick() % timeService.getTicksInYear() > 2) {
 				behaviour();
 			}
 			
