@@ -3,6 +3,8 @@ package uk.ac.ic.kyoto.annex1reduce;
 import java.util.UUID;
 import uk.ac.ic.kyoto.annex1reduce.CountrySimulator.ActionList;
 import uk.ac.ic.kyoto.countries.AbstractCountry;
+import uk.ac.ic.kyoto.countries.GameConst;
+import uk.ac.ic.kyoto.countries.IsolatedAbstractCountry;
 import uk.ac.ic.kyoto.countries.Offer;
 import uk.ac.ic.kyoto.countries.OfferMessage;
 import uk.ac.ic.kyoto.exceptions.NotEnoughCarbonOutputException;
@@ -20,7 +22,6 @@ import uk.ac.imperial.presage2.core.network.NetworkAddress;
  * 
  */
 public class AnnexOneReduce extends AbstractCountry {
-	private EU eu;
 	final private CountrySimulator simulator;
 
 	public AnnexOneReduce(UUID id, String name, String ISO, double landArea,
@@ -33,14 +34,6 @@ public class AnnexOneReduce extends AbstractCountry {
 
 	@Override
 	public void initialiseCountry() {
-		/* Add the country to the EU service */
-		try {
-			this.eu = this.getEnvironmentService(EU.class);
-			this.eu.addMemberState(this);
-		} catch (UnavailableServiceException e) {
-			System.out.println("Unable to reach EU service.");
-			e.printStackTrace();
-		}
 	}
 
 	@Override
@@ -76,14 +69,18 @@ public class AnnexOneReduce extends AbstractCountry {
 				
 				TradeType type = offer.getOfferType();
 				
-				double quantityOffered = offer.getOfferQuantity();
-				double priceOffered = offer.getOfferUnitCost();
+				double quantity = offer.getOfferQuantity();
+				double averagePrice = offer.getOfferUnitCost();
 				
-//				if (type == TradeType.BUY || type == TradeType.INVEST) {
-//					if (quantityOffered <= buyCarbon) {
-//						if (priceOffered )
-//					}
-//				}
+				if (type == TradeType.BUY || type == TradeType.INVEST) {
+					if (quantity <= buyCarbonQuantity) {
+						if (averagePrice <= 1.05 * buyCarbonAveragePrice) {
+							/*
+							 * Accept the buy or invest offer
+							 */
+						}
+					}
+				}
 			}
 		}
 		catch (Exception e) {
@@ -96,7 +93,7 @@ public class AnnexOneReduce extends AbstractCountry {
 	/**
 	 * The amount of carbon we want to buy at the current (or lower) price
 	 */
-	double buyCarbon = 0;
+	double buyCarbonQuantity = 0;
 
 	/**
 	 * Average cost of each carbon credit we want to buy
@@ -156,7 +153,7 @@ public class AnnexOneReduce extends AbstractCountry {
 	 * Runs the simulation with current country information Returns the amount
 	 * of carbon we want to buy and sell and the average buy and sell price
 	 */
-	private ActionList runSimulation() {
+	public ActionList runSimulation() {
 
 		needToSimulate = false;
 
@@ -170,13 +167,13 @@ public class AnnexOneReduce extends AbstractCountry {
 				+ this.getCarbonAbsorption() - this.getCarbonOffset();
 
 		// The amount of carbon we want to buy at the current price
-		buyCarbon = carbonDifference * optimal.reduce.buyCreditFrac;
+		buyCarbonQuantity = carbonDifference * optimal.reduce.buyCreditFrac;
 
 		double r_investCarbon = carbonDifference * optimal.reduce.investFrac;
 		double[] r_investments = new double[2];
 		double totalCost = getAbsorbReduceInvestment(r_investCarbon,
 				r_investments);
-		double creditCost = getMarketBuyPrice(buyCarbon);
+		double creditCost = getMarketBuyPrice(buyCarbonQuantity);
 
 		double estimatedMoney = getAvailableToSpend() - totalCost - creditCost;
 
@@ -186,16 +183,18 @@ public class AnnexOneReduce extends AbstractCountry {
 		double carbonIncrease = energyUsageHandler
 				.calculateCarbonIndustryGrowth(industryInvest);
 
-		buyCarbon += carbonIncrease * optimal.maintain.buyCreditOffsetFrac;
+		buyCarbonQuantity += carbonIncrease * optimal.maintain.buyCreditOffsetFrac;
 
-		buyCarbonAveragePrice = getMarketBuyPrice(buyCarbon) / buyCarbon;
+		buyCarbonAveragePrice = getMarketBuyPrice(buyCarbonQuantity) / buyCarbonQuantity;
 
 		return optimal;
 	}
 
 	// TODO get years until sanctions
 	private int getYearsUntilSanctions() {
-		return 10;
+		int years = timeService.getCurrentYear() % GameConst.getYearsInSession();
+		years = GameConst.getYearsInSession() - years;
+		return years;
 	}
 
 	/**
