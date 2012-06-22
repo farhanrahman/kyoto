@@ -20,7 +20,7 @@ import java.util.UUID;
 
 public class NonAnnexOne extends AbstractCountry {
 	
-	//Variables........................................................................
+	/**************************************Variable Declaration***************************************************/
 	
 	protected double environment_friendly_target; //country environmentally friendly target
 	protected double energy_aim ; // the energy output aim of a country each year.
@@ -33,7 +33,8 @@ public class NonAnnexOne extends AbstractCountry {
 	int current_year; //year currently operating
 	int imaginary_tick; //current tick modulo imaginary tick
 	int ticks_in_a_year_threshold; //the number of ticks in every year
-	//............................................................................................ 
+
+	/********************************************Constructor*******************************************************/
 	
 	public NonAnnexOne(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
 			double GDPRate, double energyOutput, double carbonOutput){
@@ -41,9 +42,7 @@ public class NonAnnexOne extends AbstractCountry {
 		setKyotoMemberLevel(KyotoMember.NONANNEXONE);
 	}
 	
-	//Inherited functions......................................................................
-	//.........................................................................................
-/*****************************************************************************************/
+/*********************************************ProcessInput-Function*******************************************************/
 	@Override
 	protected void processInput(Input in) {
 		if (this.tradeProtocol.canHandle(in)) {
@@ -75,24 +74,22 @@ public class NonAnnexOne extends AbstractCountry {
 			}
 		}		
 	}
-/*****************************************************************************************/
+/*******************************************************************************************************************/
 	@EventListener
 	public void TickFunction(EndOfTimeCycle e){
 				
 	}
-/*****************************************************************************************/
-	public void yearlyFunction() {
-				
-											
+/********************************************************************************************************************/
+	public void yearlyFunction() {							
 	}
-/*****************************************************************************************/
+/********************************************************************************************************************/
 	
 	@Override
 	public void sessionFunction() {
-		
 	}
 
-/******************************************************************************************/
+/*********************************************************************************************************************/
+	//Function executed every tick that defines the behaviour of the country
 	
 	protected void behaviour() {
 			
@@ -106,20 +103,16 @@ public class NonAnnexOne extends AbstractCountry {
 		
 		
 	}
-
-/************************************************************************************************/
+/********************************************Initialise-variables/behaviour****************************************************/
 	
-	protected void initialiseCountry() {
-		// TODO Auto-generated method stub
+	protected void initialiseCountry() 
+	{
 		energy_aim = getEnergyOutput() + CountryConstants.INITIAL_ENERGY_THRESHOLD ; //initialise energy aim.
 		environment_friendly_target = getCarbonOutput() + CountryConstants.INITIAL_CARBON_TARGET; //initialise a target 
-		
-		
+			
 	}
-	//.......................................................................................
-	//........................................................................................
-	
-/***********************************************************************************************/
+		
+/***********************************************Accept CDM offers********************************************************************/
 	@Override
 	protected boolean acceptTrade(NetworkAddress from, Offer trade) {
 		
@@ -134,60 +127,51 @@ public class NonAnnexOne extends AbstractCountry {
 			return true;
 	}
 	
-/************************Functions executed every year *******************************************/
+/************************Functions executed every tick ***************************************************************/
 	
-	//Every round our countries check current energy output and make decisions
+	//Every round country checks current energy output and decides whether to invest in carbon industry or not.
 	
 	private void economy() throws IllegalArgumentException, Exception
 	{
 		double energy_difference;
-		double financial_difference;
 		double invest_money;
 		double money_available;
 		
 		energy_difference = energy_aim - getEnergyOutput(); //difference in energy aim and current energy output.
-		invest_money = energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(energy_difference) ;
-		money_available=getAvailableToSpend();
+		invest_money = energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(energy_difference) ; //find the cost of investment in carbon industry
+		money_available= getAvailableToSpend();
 		
-		if (invest_money <= money_available)
+		if (invest_money <= money_available) //check whether country has enough money available to invest
 				{
-					buildIndustry(invest_money); 
+					buildIndustry(invest_money); //calls the function to invest in industry
 					aim_success = true; // energy target met
 					times_aim_met +=1; //how many consecutive times the target was met.
 					logger.info("Country met its energy output goal");
 				}
-		else{
+		else 
+		{
 			times_aim_met = 0; //reset the counter.
 			aim_success = false; //energy target not met
-			logger.info("Country has insufficient funds to meet its energy output goal");
-			}
+			logger.info("Country has insufficient funds to meet its energy output goal");	
+		}
 		update_energy_aim(energy_aim , aim_success,times_aim_met); //update the energy aim for the next year.	
 		
 		//clean development mechanism only if country cares for environment
+		
 		if (green_care)
 		{
-			if (aim_success==false)
-			{
-			financial_difference = invest_money - getAvailableToSpend();
-			clean_development_mechanism(financial_difference);
-			}
-			else
-				clean_development_mechanism(invest_money);
+			clean_development_mechanism(invest_money);
 		}
 		
 		
 	}
-		
-	
-		/*function that uses EnergyUsageHandler to create factories and increase energy output
-	 * however carbon output also increases   
-	*
-	*/
-/************************************************************************************************/
+			
+/****************************************Invest in carbon industry with care or not for the environment ********************************************************/
+	//function that uses EnergyUsageHandler to create factories 
+	//and increase energy output however carbon output also increases 
 	
 	private void buildIndustry(double invest) throws IllegalArgumentException, Exception 
 	{
-		 //the difference between environmentally friendly target and actual carbon emission.
 		if (green_care == true)
 			energy_increase_with_care(invest);
 		else
@@ -195,7 +179,7 @@ public class NonAnnexOne extends AbstractCountry {
 		
 	}
 	
-/*******************************************************************************************************/	
+/******************************************Invest in carbon industry and care for environment*************************************************************/	
 	
 	private void energy_increase_with_care(double money_invest) throws IllegalArgumentException, Exception
 	{
@@ -205,12 +189,12 @@ public class NonAnnexOne extends AbstractCountry {
 		
 		
 		if (getCarbonOutput() + energyUsageHandler.calculateCarbonIndustryGrowth(money_invest) <= environment_friendly_target)
-		{ //invest but also check if we meet our environment friendly target.
+		{ //invest but also check if the environment friendly target is met.
 			try{
 				energyUsageHandler.investInCarbonIndustry(money_invest);
 				logger.info("Invest in carbon industry successful");
 				logger.info("Country meets its environment friendy target");
-				green_lands = true;
+				green_lands = true; //set the variable to true, to be used when updating the environment friendly target
 			} 
 			catch (Exception e) {
 				logger.warn("Invest in carbon industry not successful");
@@ -218,7 +202,9 @@ public class NonAnnexOne extends AbstractCountry {
 		}	
 		
 		else
-		{
+		{ 
+			//country does not meet its own target, therefore it has to invest in carbon absorption or carbon reduction
+			
 			logger.info("Country exceeded its environment friendly goal, invest in carbon industry but also invest in carbon absorption");
 			green_lands = false;
 			try{
@@ -228,7 +214,8 @@ public class NonAnnexOne extends AbstractCountry {
 				logger.warn("Invest in carbon industry not successful");
 			}
 			
-			try{ //also since country exceeds its own carbon target, invests in carbon absorption or carbon reduction in order to get carbon offset.
+			try
+			{ 
 				carbon_difference = (getCarbonOutput() + energyUsageHandler.calculateCarbonIndustryGrowth(money_invest)) - environment_friendly_target;
 				
 				if ((carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend()) && ((carbonAbsorptionHandler.getForestAreaRequired(carbon_difference) < available_area)))
@@ -239,17 +226,21 @@ public class NonAnnexOne extends AbstractCountry {
 				
 				else if ((carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend() ) && (carbonAbsorptionHandler.getForestAreaRequired(carbon_difference) >= available_area))
 				
-					{
+					{ 
+					// when country does not have enough arable land area to invest in carbon absorption,
+					//invests in carbon reduction
+				
 					logger.info("Country reach limit of available pre-set land, not possible to invest in carbon absorption, try invest in carbon reduction");
 					if (carbonReductionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend())
 						{
 						carbonReductionHandler.investInCarbonReduction(carbon_difference);
-						logger.info("Country has enough cash to invest in carbon reduction, invests!");
+						logger.info("Country has enough cash to invest in carbon reduction, invests");
 						}
 					}
 				else 
+					//when the country does not have enough available to spend
+					//then it does not care anymore about the environment.
 					{
-						
 					logger.info("Country has insufficient funds to reach environment friendly target");
 					green_care = false;
 					
@@ -260,13 +251,14 @@ public class NonAnnexOne extends AbstractCountry {
 				logger.warn("Problem with investing in carbon absorption: " + e);
 			}
 		}
+		//every tick, it updates the "environment" carbon output target
 		
 		change_emission_target(environment_friendly_target,green_lands);
 		
 		
 	}
 	
-/*****************************************************************************************************/	
+/************************************Invest in carbon industry but does not care about environment*****************************************************************/	
 	
 	private void energy_increase_without_care(double money)
 	{
@@ -282,7 +274,7 @@ public class NonAnnexOne extends AbstractCountry {
 		
 	
 	//Function that updates the energy goal each year.
-/*****************************************************************************************************/
+/*******************************************Update the energy aim every tick **********************************************************/
 		
 		private void update_energy_aim(double previous_aim,boolean success,int counter)
 		{
@@ -360,11 +352,11 @@ public class NonAnnexOne extends AbstractCountry {
 	//change the emission target every year
 	private void change_emission_target(double previous_target,boolean succeed)
 	{
-		if (succeed) //country met environment target goal, change goal.
+		if (succeed) //country met environment target goal, decrease goal.
 			
 		environment_friendly_target = previous_target - CountryConstants.DECREASING_CARBON_TARGET;
 		
-		if (succeed == false)
+		if (succeed == false) //country did not meet environment target goal, increase target
 		
 		environment_friendly_target = previous_target + CountryConstants.DECREASING_CARBON_TARGET;
 		
@@ -424,5 +416,6 @@ broadcastInvesteeOffer(change_required,InvestmentType.REDUCE);
 
 		
 	
+
 
 
