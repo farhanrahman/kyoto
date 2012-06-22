@@ -116,18 +116,7 @@ public class CanadaAgent extends AbstractCountry {
 	//as we are intially part of kyoto 
 	 * @return
 	 *********************************************************/
-		@Override	
-		boolean JoiningCriteriaMet()
-		{
-			if(((this.getCarbonOutput() - this.getCarbonOffset()) >this.getEmissionsTarget()) && (Aver)){
-				return true;
-			}
-			//Only useful after 2011 when canada leaves
-			else leaveKyoto();
-			
-			//If GDP growth achieved in the past 4 years
-			//
-		}
+
 		FossilPrices price = new FossilPrices();
 		
 	
@@ -158,29 +147,55 @@ public class CanadaAgent extends AbstractCountry {
 	
 	Random rand1= new Random();
 	Random rand2= new Random();
+	
 	/*This function checks the industry projects against players  */
-	/*to determine feasibility of carbon reduction  */
-	public boolean get_ratio(){
+	/*to determine feasibility of carbon reduction */
+	
+	public boolean check_industry(){
 				
 		industry_players=rand1.nextInt(n);
 		industry_projects=rand2.nextInt(m);
 		if((industry_players<=8) && (industry_projects<=5)){
 			return true;
-		}
-		
-				
+		}	
+		else return false;
 	}
-
+	
+	/*if the GDP rate is less than or equal to the */
+	/*available to spend against gdp ratio we return true and stay in kyoto  */
+	public boolean check_ratio(){
+		double ratio,carb,gdp_r,gdp_a;
+		carb=this.getAvailableToSpend();
+		gdp_r=this.getGDPRate();
+		gdp_a=this.getGDP();
+		ratio=carb/gdp_a;
+		if(ratio <= gdp_r){
+			return true;
+		}
+		else return false;
+	}
+	
 	///////////
-	@Override
-	public void SessionFunction() {
+	
+	/*public void SessionFunction() {
 		if(JoiningCriteriaMet()){
 			KyotoMember.NONANNEXONE;
 		}
 		
 		
-	}
+	}*/
 	
+	boolean JoiningCriteriaMet()
+	{
+		if(((this.getCarbonOutput() - this.getCarbonOffset()) >this.getEmissionsTarget()) && (Aver)){
+			return true;
+		}
+		//Only useful after 2011 when canada leaves
+		else leaveKyoto();
+		
+		//If GDP growth achieved in the past 4 years
+		//
+	}
 	
 	private void energy_increase_with_care(double money_invest) throws IllegalArgumentException, Exception
 	{
