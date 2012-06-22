@@ -37,8 +37,7 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 			try {
 				this.tradeProtocol.respondToOffer(
 						this.tradeProtocol.extractNetworkAddress(in), 
-						offerMessage.getOfferQuantity(), 
-						offerMessage.getOfferUnitCost(), 
+						offerMessage.getOfferQuantity(),
 						offerMessage);
 			} catch (IllegalArgumentException e1) {
 				logger.warn(e1);

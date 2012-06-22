@@ -1,7 +1,6 @@
 package uk.ac.ic.kyoto.countries;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,7 +10,6 @@ import uk.ac.ic.kyoto.CarbonData1990;
 import uk.ac.ic.kyoto.countries.AbstractCountry.KyotoMember;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
-import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfYearCycle;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentServiceProvider;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
@@ -113,17 +111,6 @@ public class CarbonTarget extends EnvironmentService {
 		
 		this.exclusiveAccess.release();
 	}
-	
-	void retargetDueToCheaters(ArrayList<UUID> theCheaters) {
-		this.cheatersList = theCheaters;
-
-		if ((timeService.getCurrentYear() % GameConst.getYearsInSession() + (timeService.getCurrentTick() % timeService.getTicksInYear())) == 0) {
-			updateSessionTargets();
-			updateYearTargets();
-		}
-
-		this.cheatersList.clear();
-	}
 
 	/*
 	 * Function to be called after all countries have been added
@@ -157,9 +144,6 @@ public class CarbonTarget extends EnvironmentService {
 			this.worldCurrentSessionTarget += data;
 		}		
 		
-		this.worldLastSessionTarget = this.worldCurrentSessionTarget;
-		this.worldCurrentSessionTarget = worldLastSessionTarget * GameConst.getTargetReduction(); 
-
 		updateSessionTargets();
 		updateYearTargets();
 	}
@@ -197,12 +181,11 @@ public class CarbonTarget extends EnvironmentService {
 		}
 	}
 	
-	public void targetsForMonitor() {
+	public void targetsForMonitor(ArrayList<UUID> theCheaters) {
+		cheatersList = theCheaters;
 		if (timeService.getCurrentYear() != 0) {
 			if ((timeService.getCurrentYear() % timeService.getYearsInSession()) == 0)
 			{
-				this.worldLastSessionTarget = this.worldCurrentSessionTarget;
-				this.worldCurrentSessionTarget = worldLastSessionTarget * GameConst.getTargetReduction(); 
 				updateSessionTargets();
 			}
 			
@@ -237,6 +220,9 @@ public class CarbonTarget extends EnvironmentService {
 		double sessionProgress = (double) ( timeService.getCurrentYear() % GameConst.getYearsInSession()) / GameConst.getYearsInSession();
 		double diffTargets = country.lastSessionTarget - country.currentSessionTarget;
 		double newTarget = country.lastSessionTarget - (diffTargets * sessionProgress) - country.penalty;
+		
+		if (newTarget < 0)
+			newTarget = 0.0;
 		
 		System.out.println("About to update target for year " + (year));
 		country.yearTargets.put(year, newTarget);

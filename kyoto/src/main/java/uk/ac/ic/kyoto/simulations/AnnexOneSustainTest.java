@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import uk.ac.ic.kyoto.annex1sustain.AnnexOneSustain;
 import uk.ac.ic.kyoto.CarbonData1990;
 import uk.ac.ic.kyoto.actions.AddRemoveFromMonitorHandler;
 import uk.ac.ic.kyoto.actions.AddToCarbonTargetHandler;
@@ -13,14 +14,14 @@ import uk.ac.ic.kyoto.actions.QueryEmissionsTargetHandler;
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReportHandler;
 import uk.ac.ic.kyoto.countries.CarbonTarget;
 import uk.ac.ic.kyoto.countries.Monitor;
+import uk.ac.ic.kyoto.countries.testCountries.GDPTestCount;
+import uk.ac.ic.kyoto.nonannexone.NonAnnexOne;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.Economy;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
-import uk.ac.ic.kyoto.singletonfactory.SingletonProvider;
 import uk.ac.ic.kyoto.trade.TradeProtocolTestAgent;
-import uk.ac.ic.kyoto.tradehistory.TradeHistoryService;
 import uk.ac.imperial.presage2.core.simulator.InjectedSimulation;
 import uk.ac.imperial.presage2.core.simulator.Scenario;
 import uk.ac.imperial.presage2.core.util.random.Random;
@@ -31,11 +32,11 @@ import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 import com.google.inject.AbstractModule;
 
-public class TradeTest extends InjectedSimulation {
+public class AnnexOneSustainTest extends InjectedSimulation {
 	
-		
 	@Override
 	protected Set<AbstractModule> getModules() {
+		
 		
 		Set<AbstractModule> modules = new HashSet<AbstractModule>();
 		
@@ -52,7 +53,6 @@ public class TradeTest extends InjectedSimulation {
 			.addParticipantEnvironmentService(ParticipantTimeService.class)
 			.addParticipantEnvironmentService(Economy.class)
 			.addGlobalEnvironmentService(CarbonTarget.class)
-			.addGlobalEnvironmentService(TradeHistoryService.class)
 			);
 	
 		modules.add(new RuleModule());
@@ -63,24 +63,26 @@ public class TradeTest extends InjectedSimulation {
 		return modules;
 	}
 
-	public TradeTest(Set<AbstractModule> modules) {
+	public AnnexOneSustainTest(Set<AbstractModule> modules) {
 		super(modules);
-		// TODO Auto-generated constructor stub
 	}
 	
 	@Override
-	protected void addToScenario(Scenario s) {		
-		//Something new
-		Logger logger = Logger.getLogger(Simulation.class);
+	protected void addToScenario(Scenario s) {
 		
-		for(int i = 1; i <= 2; i++){
-				AbstractParticipant p = new TradeProtocolTestAgent(Random.randomUUID(), "Test" + i, "CS" + i, 20000, 10000, 5000000, 0.03, 200000, 28000, 50000);
-				s.addParticipant(p);
-				CarbonData1990.addCountry("CS"+i, 50000);
-		}
+		// Germany Stats
+		final double landArea = 400000;
+		final double arableLandArea = 100000;
+		final double GDP = 2000000000000.0;
+		final double energyOutput = 1000000000;
+		final double carbonOutput = 900000000;
+		final double GDPRate = 0.0206;
 		
-		logger.info(this.simPersist.getID());
-		SingletonProvider.getTradeHistory().setSimID(this.simPersist.getID());
-
+			String name = "AnnexOneSustainTester";
+			String ISO = "DE";
+			AbstractParticipant p = new AnnexOneSustain(Random.randomUUID(), name, ISO, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput);
+			s.addParticipant(p);
+			CarbonData1990.addCountry(ISO, 900000000);
+		
 	}
 }

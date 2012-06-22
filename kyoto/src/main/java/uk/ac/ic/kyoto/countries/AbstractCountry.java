@@ -40,8 +40,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	//================================================================================
     // Definitions of Parameters of a Country
     //================================================================================
-
-	// TODO Change visibility of fields?
 	
 	final protected String 		ISO;		//ISO 3166-1 alpha-3
 	
@@ -59,10 +57,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	/*
 	 * These variables are related to land area for
 	 * dealing with carbon absorption prices
-	 * TODO: What are the units of these?
+	 * 
 	 */
-	final double landArea;
-	double arableLandArea;
+	final double landArea;    // In km^2
+	double arableLandArea;    // In km^2
 	
 	/*
 	 * These variables are related to carbon emissions and 
@@ -122,7 +120,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	public AbstractCountry(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP, double GDPRate, double energyOutput,
 			double carbonOutput) {
 
-		//TODO Validate parameters
 		super(id, name);
 		
 		this.landArea = landArea;
@@ -157,7 +154,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			environment.act(new AddToCarbonTarget(this), getID(), authkey);
 			
 			environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
-			//TODO: Initialize the Action Handlers (DO THEY HAVE TO BE INSTANTIATED ALL THE TIME?)
 			
 			try {
 				timeService = getEnvironmentService(ParticipantTimeService.class);
@@ -185,6 +181,24 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				@Override
 				protected boolean acceptExchange(NetworkAddress from, Offer trade) {
 					return acceptTrade(from, trade);
+				}
+
+				@Override
+				protected void tradeSuccessful(NetworkAddress from, OfferMessage offerMessage) {
+					tradeWasSuccessful(from, offerMessage);
+					
+				}
+
+				@Override
+				protected void tradeRejected(NetworkAddress from, OfferMessage offerMessage) {
+					tradeWasRejected(from, offerMessage);
+					
+				}
+
+				@Override
+				protected void tradeFailed(NetworkAddress from, OfferMessage offerMessage) {
+					tradeHasFailed(from, offerMessage);
+					
 				}
 				
 			};
@@ -230,17 +244,20 @@ public abstract class AbstractCountry extends AbstractParticipant {
 					if (kyotoMemberLevel == KyotoMember.ANNEXONE) {
 						MonitorTax();
 					}
-					
-					yearlyFunction();
 				}
 				
 			if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
 				resetCarbonOffset();
 				sessionFunction();
 			}
+			
+			if (timeService.getCurrentTick() % timeService.getTicksInYear() == 2) {
+				yearlyFunction();
+			}
 	
 			//leave a 10-tick grace period to allow current trades to complete before performing end of year routine
-			if (timeService.getCurrentTick() % timeService.getTicksInYear() < timeService.getTicksInYear() - 5 ) {
+			if (timeService.getCurrentTick() % timeService.getTicksInYear() < timeService.getTicksInYear() - 5
+					&& timeService.getCurrentTick() % timeService.getTicksInYear() > 2) {
 				behaviour();
 			}
 			
@@ -360,6 +377,40 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	abstract protected void initialiseCountry();
 	abstract protected boolean acceptTrade(NetworkAddress from, Offer trade);
 	
+	/**
+	 * Override this method to get notified when trade was successful.
+	 * This function is called for both initiator and responder when
+	 * the trade was succesful.
+	 * @param from
+	 * @param offerMessage
+	 */
+	protected void tradeWasSuccessful(NetworkAddress from, OfferMessage offerMessage){
+		
+	}
+	
+	/**
+	 * Override this method to get notified when trade failed.
+	 * This function is called to notify both initiator and responder
+	 * if somehow the trade has failed
+	 * @param from
+	 * @param offerMessage
+	 */
+	protected void tradeHasFailed(NetworkAddress from, OfferMessage offerMessage){
+		
+	}
+	
+	/**
+	 * Override this method to get notified when trade was rejected
+	 * This function is called to notify the initiator that the responder
+	 * has rejected the trade that the initiator has offered.
+	 * @param from
+	 * @param offerMessage
+	 */
+	protected void tradeWasRejected(NetworkAddress from, OfferMessage offerMessage){
+		
+	}
+	
+	
 	//================================================================================
     // Private methods
     //================================================================================
@@ -393,7 +444,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			
 			if (energyOutput-prevEnergyOutput >= 0){	
 				sum = (((energyOutput-prevEnergyOutput)/prevEnergyOutput)*GameConst.getEnergyGrowthScaler() *marketStateFactor+GDPRate*100)/2;
-				GDPRate = GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler());
+				if (sum < 0)
+					GDPRate = -(GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(sum*GameConst.getGrowthScaler()));
+				else
+					GDPRate = GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler());
 			}
 			else{
 				sum = ((energyOutput-prevEnergyOutput)/prevEnergyOutput)*GameConst.getEnergyGrowthScaler();
@@ -519,7 +573,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.carbonOffset += amount;
 	}
 	
-	protected final OfferMessage broadcastSellOffer(int quantity, double unitCost){
+	protected final OfferMessage broadcastSellOffer(double quantity, double unitCost){
 		Offer trade = new Offer(quantity, unitCost, TradeType.SELL);
 		OfferMessage returnObject = new OfferMessage(
 				trade,
@@ -538,7 +592,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			return returnObject;
 	}
 
-	protected final OfferMessage broadcastBuyOffer(int quantity, double unitCost){
+	protected final OfferMessage broadcastBuyOffer(double quantity, double unitCost){
 		Offer trade = new Offer(quantity, unitCost, TradeType.BUY);
 		
 		/*DEBUG*/
@@ -604,21 +658,23 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	protected final void leaveKyoto() throws IllegalStateException {
 		if (timeService.getCurrentTick() == 0) {
-			kyotoMemberLevel = KyotoMember.ROGUE;
 			
 			try {
 				environment.act(new AddRemoveFromMonitor(this, addRemoveType.REMOVE), getID(), authkey);
+				kyotoMemberLevel = KyotoMember.ROGUE;
+				environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
 			} catch (ActionHandlingException e) {
 				System.out.println("Exception wilst removing from monitor: " + e);
 				e.printStackTrace();
 			}
 		}
 		else if (timeService.getCurrentTick() - joinTime >= timeService.getTicksInYear()*GameConst.getMinimumKyotoMembershipDuration()) {
-			kyotoMemberLevel = KyotoMember.ROGUE;
 			leaveTime=timeService.getCurrentTick();
 			
 			try {
 				environment.act(new AddRemoveFromMonitor(this, addRemoveType.REMOVE), getID(), authkey);
+				kyotoMemberLevel = KyotoMember.ROGUE;
+				environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
 			} catch (ActionHandlingException e) {
 				System.out.println("Exception wilst removing from monitor: " + e);
 				e.printStackTrace();
@@ -628,20 +684,29 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		}
 	}
 	
+	/**
+	 * Deprecated method, no longer permitted!
+	 * 
+	 * @throws IllegalStateException
+	 */
+	@Deprecated 
 	protected final void joinKyoto() throws IllegalStateException {
-		if (timeService.getCurrentTick() - leaveTime >= timeService.getTicksInYear()*GameConst.getMinimumKyotoRejoinTime()) {
-			kyotoMemberLevel = KyotoMember.ANNEXONE;
-			joinTime = timeService.getCurrentTick();
-			
-			try {
-				environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
-			} catch (ActionHandlingException e) {
-				System.out.println("Exception whilst adding to monitor: " + e);
-				e.printStackTrace();
-			}
-		} else {
-			throw new IllegalStateException("Cannot join Kyoto Protocol.");
-		}
+		throw new IllegalStateException("Cannot join Kyoto Protocol");
+		
+//		if (timeService.getCurrentTick() - leaveTime >= timeService.getTicksInYear()*GameConst.getMinimumKyotoRejoinTime()) {
+//			joinTime = timeService.getCurrentTick();
+//			
+//			try {
+//				environment.act(new AddRemoveFromMonitor(this, addRemoveType.REMOVE), getID(), authkey);
+//				kyotoMemberLevel = KyotoMember.ANNEXONE;
+//				environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
+//			} catch (ActionHandlingException e) {
+//				System.out.println("Exception whilst adding to monitor: " + e);
+//				e.printStackTrace();
+//			}
+//		} else {
+//			throw new IllegalStateException("Cannot join Kyoto Protocol.");
+//		}
 	}
 	
 	//================================================================================
@@ -680,7 +745,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		return energyOutput;
 	}
 	
-	public final double getPrevEnergyOut(){
+	public final double getPrevEnergyOutput(){
 		return prevEnergyOutput;
 	}
 	

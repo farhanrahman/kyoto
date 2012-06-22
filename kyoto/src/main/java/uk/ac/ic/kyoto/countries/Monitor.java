@@ -1,19 +1,14 @@
 package uk.ac.ic.kyoto.countries;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Semaphore;
-
-import org.apache.log4j.Logger;
 
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfYearCycle;
-import uk.ac.ic.kyoto.services.GlobalTimeService.TimeToMonitor;
 import uk.ac.imperial.presage2.core.environment.ActionHandlingException;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentServiceProvider;
@@ -24,6 +19,7 @@ import uk.ac.imperial.presage2.core.event.EventBus;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
+
 import com.google.inject.Inject;
 
 /**
@@ -47,6 +43,9 @@ public class Monitor extends EnvironmentService {
 
 	/* Structure that counts the number of times the country cheated */
 	private Map<AbstractCountry, Integer> sinBin = new ConcurrentHashMap<AbstractCountry, Integer>();
+	
+	/* List of the countries who have reported false output - cleared yearly */
+	ArrayList<UUID> yearlyCheaters = new ArrayList<UUID>();
 	
 	EventBus eb;
 	
@@ -100,7 +99,8 @@ public class Monitor extends EnvironmentService {
 			System.out.println("Checked reports");
 			monitorCountries();
 			System.out.println("Monitored country");
-			carbonTargetingService.targetsForMonitor();
+			carbonTargetingService.targetsForMonitor(yearlyCheaters);
+			yearlyCheaters.clear();
 		}
 	}
 	
@@ -174,8 +174,6 @@ public class Monitor extends EnvironmentService {
 	
 	// TODO add logging
 	private void monitorCountries () {	
-		ArrayList<UUID> cheaters = new ArrayList<UUID>();
-
 		// Find how many countries can be monitored with the available cash
 		int noToMonitor = (int) Math.floor(cash / GameConst.getMonitoringPrice());
 		// Check if all the countries can be monitored 
@@ -187,7 +185,7 @@ public class Monitor extends EnvironmentService {
 				cash -= GameConst.getMonitoringPrice();
 				double reportedCarbonOutput = carbonReportingService.getReport(country.getID(), SimTime.get().intValue());
 				if (Math.round(realCarbonOutput) != Math.round(reportedCarbonOutput)) {
-					cheaters.add(country.getID());
+					yearlyCheaters.add(country.getID());
 					cheatSanction(country);
 					double targetDiff = realCarbonOutput - carbonTargetingService.queryYearTarget(country.getID(), (timeService.getCurrentYear()-1));
 					if (Math.round(targetDiff) > 0) {
@@ -226,7 +224,7 @@ public class Monitor extends EnvironmentService {
 				// Apply sanctions if a country has cheated and rechecks against target
 				double reportedCarbonOutput = carbonReportingService.getReport(pickedCountry.getID(), SimTime.get());
 				if ( Math.round(realCarbonOutput) != Math.round(reportedCarbonOutput)) {
-					cheaters.add(pickedCountry.getID());
+					yearlyCheaters.add(pickedCountry.getID());
 					cheatSanction(pickedCountry);
 					double targetDiff = Math.round(realCarbonOutput - carbonTargetingService.queryYearTarget(pickedCountry.getID(), (timeService.getCurrentYear() - 1)));
 					if (targetDiff > 0) {
@@ -235,8 +233,6 @@ public class Monitor extends EnvironmentService {
 				}
 			}
 		}
-		if (!cheaters.isEmpty())
-			carbonTargetingService.retargetDueToCheaters(cheaters);
 	}
 	
 	// TODO add emissionTarget change to sanctioning
