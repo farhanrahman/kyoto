@@ -296,9 +296,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	public final void reportCarbonOutput() throws ActionHandlingException {
 		logger.info("Reporting bullshit, I am " + getName());
-		double reportedValue = getReportedCarbonOutput();
+		double reportedValue = getReportedCarbonOutput() - getCarbonAbsorption();
 		addToReports(SimTime.get(), reportedValue);
-		dumpCheatingData(reportedValue,this.getCarbonOutput());
+		dumpCheatingData(reportedValue,this.getCarbonOutput()- getCarbonAbsorption());
 		environment.act(new SubmitCarbonEmissionReport(reportedValue), getID(), authkey);
 	}
 	
@@ -517,6 +517,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.dataStore.addCarbonOffset(this.getCarbonOffset());
 		this.dataStore.addCarbonOutput(this.getCarbonOutput());
 		this.dataStore.addEnergyOutput(this.getEnergyOutput());
+		this.dataStore.addLandArea(this.getLandArea());
+		this.dataStore.addArableLandArea(this.getArableLandArea());
+		this.dataStore.addCarbonAbsorption(this.getCarbonAbsorption());
 		this.dataStore.addIsKyotoMember(this.isKyotoMember());	
 			/* TODO
 			 * is cheating?
@@ -537,6 +540,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.carbonOffsetKey, Double.toString(this.getCarbonOffset()));
 		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.carbonOutputKey, Double.toString(this.getCarbonOutput()));
 		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.energyOutputKey, Double.toString(this.getEnergyOutput()));
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.landAreaKey,Double.toString(this.landArea));
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.arableLandAreaKey,Double.toString(this.arableLandArea));
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.carbonAbsorptionKey,Double.toString(this.carbonAbsorption));
 		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.isKyotoMemberKey, this.isKyotoMember().name());
 		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.cheated, "n/a");
 	}

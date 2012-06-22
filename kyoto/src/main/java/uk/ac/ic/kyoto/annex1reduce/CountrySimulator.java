@@ -118,18 +118,17 @@ class CountrySimulator {
 	 */
 	private ActionList getOptimalState(ArrayList<CountryState> states) {
 
-		HashSet<CountryState> startSellStates = new HashSet<CountryState>();
+//		HashSet<CountryState> startSellStates = new HashSet<CountryState>();
 
 		ArrayList<CountryState> startSellList = new ArrayList<CountryState>();
 
 		for (int i = 0; i < states.size(); i++) {
 			CountryState state = states.get(i).getStartSellState();
-			startSellStates.add(state);
+//			startSellStates.add(state);
 			startSellList.add(state);
 		}
 
 //		Iterator<CountryState> iterator = startSellStates.iterator();
-//
 //		while (iterator.hasNext()) {
 //			System.out.println();
 //			CountryState state = iterator.next();
@@ -137,7 +136,6 @@ class CountrySimulator {
 //			System.out.println();
 //			state.printActionPath();
 //		}
-//
 //		System.out.println();
 //		System.out.println("NumStates = " + startSellStates.size());
 
@@ -188,6 +186,8 @@ class CountrySimulator {
 		r_investFrac /= size;
 		r_shutDownFrac /= size;
 		
+		System.out.println();
+		System.out.println(country.getName());
 		System.out.println("s_investFrac " + s_investFrac);
 		System.out.println("s_sellFrac " + s_sellFrac);
 		System.out.println("s_shutDownFrac " + s_shutDownFrac);
@@ -636,9 +636,6 @@ class CountrySimulator {
 			float max = 2f;
 			float grain = max / numGrains;
 			float min = grain;
-
-			// Sell any offset if we happen to have excess
-			new CountryState(this, new SellAction(0, 0, 1));
 
 			// Do nothing
 			new CountryState(this, new SellAction(0, 0, 0));

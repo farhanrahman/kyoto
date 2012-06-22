@@ -6,6 +6,8 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.drools.command.runtime.GetCalendarsCommand;
+
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.GlobalTimeService.EndOfYearCycle;
@@ -181,7 +183,7 @@ public class Monitor extends EnvironmentService {
 			// monitor all the countries
 			
 			for (AbstractCountry country: memberStates.values()) {
-				double realCarbonOutput = country.getCarbonOutput();
+				double realCarbonOutput = country.getCarbonOutput() - country.getCarbonAbsorption();
 				cash -= GameConst.getMonitoringPrice();
 				double reportedCarbonOutput = carbonReportingService.getReport(country.getID(), SimTime.get().intValue());
 				if (Math.round(realCarbonOutput) != Math.round(reportedCarbonOutput)) {
@@ -216,7 +218,7 @@ public class Monitor extends EnvironmentService {
 				
 				// Monitor the country
 				cash -= GameConst.getMonitoringPrice();
-				double realCarbonOutput = pickedCountry.getCarbonOutput();
+				double realCarbonOutput = pickedCountry.getCarbonOutput() - pickedCountry.getCarbonAbsorption();
 						
 				// Note that the country was monitored
 				monitoredCountries.add(pickedCountry);

@@ -48,7 +48,7 @@ public class AnnexOneReduceTest {
 	@Test
 	public void testbehaviour() {
 
-		test.yearlyFunction();
+		test.runSimulation();
 
 	}
 

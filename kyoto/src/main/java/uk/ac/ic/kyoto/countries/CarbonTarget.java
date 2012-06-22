@@ -163,7 +163,8 @@ public class CarbonTarget extends EnvironmentService {
 	private double getReportedCarbonOutput(UUID countryID, int year){
 		double result;
 		if (cheatersList.contains(countryID)){
-			result = findCountryObject(countryID).obj.getCarbonOutput();
+			countryObject ref = findCountryObject(countryID);
+			result = ref.obj.getCarbonOutput() - ref.obj.getCarbonAbsorption();
 		} else {
 			if (year < 0) {
 				result = CarbonData1990.get(findCountryObject(countryID).obj.getISO());
@@ -273,9 +274,15 @@ public class CarbonTarget extends EnvironmentService {
 	private void generateSessionTarget(countryObject country, double kyotoTarget)
 	{	
 		country.lastSessionTarget = country.currentSessionTarget;
-		country.currentSessionTarget = country.proportion * kyotoTarget;
-		if ((country.lastSessionTarget - country.currentSessionTarget) / country.lastSessionTarget > 0.1 ) {
-			country.currentSessionTarget = country.lastSessionTarget*0.9;
+		double newTarget = country.proportion * kyotoTarget;
+		double diffTargets  = country.lastSessionTarget - newTarget;
+		
+		if (diffTargets < 0) {
+			newTarget = country.lastSessionTarget;
+		} else if (diffTargets / country.lastSessionTarget > 0.1) {
+			newTarget = country.lastSessionTarget * 0.9;
 		}
+		
+		country.currentSessionTarget = newTarget;
 	}
 }
