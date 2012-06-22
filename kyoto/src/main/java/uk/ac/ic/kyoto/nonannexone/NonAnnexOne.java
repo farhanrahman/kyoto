@@ -20,7 +20,7 @@ import java.util.UUID;
 
 public class NonAnnexOne extends AbstractCountry {
 	
-	//Variables........................................................................
+	/**************************************Variable Declaration***************************************************/
 	
 	protected double environment_friendly_target; //country environmentally friendly target
 	protected double energy_aim ; // the energy output aim of a country each year.
@@ -33,7 +33,8 @@ public class NonAnnexOne extends AbstractCountry {
 	int current_year; //year currently operating
 	int imaginary_tick; //current tick modulo imaginary tick
 	int ticks_in_a_year_threshold; //the number of ticks in every year
-	//............................................................................................ 
+
+	/********************************************Constructor*******************************************************/
 	
 	public NonAnnexOne(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
 			double GDPRate, double energyOutput, double carbonOutput){
@@ -41,9 +42,7 @@ public class NonAnnexOne extends AbstractCountry {
 		setKyotoMemberLevel(KyotoMember.NONANNEXONE);
 	}
 	
-	//Inherited functions......................................................................
-	//.........................................................................................
-/*****************************************************************************************/
+/*********************************************ProcessInput-Function*******************************************************/
 	@Override
 	protected void processInput(Input in) {
 		if (this.tradeProtocol.canHandle(in)) {
@@ -75,24 +74,22 @@ public class NonAnnexOne extends AbstractCountry {
 			}
 		}		
 	}
-/*****************************************************************************************/
+/*******************************************************************************************************************/
 	@EventListener
 	public void TickFunction(EndOfTimeCycle e){
 				
 	}
-/*****************************************************************************************/
-	public void yearlyFunction() {
-				
-											
+/********************************************************************************************************************/
+	public void yearlyFunction() {							
 	}
-/*****************************************************************************************/
+/********************************************************************************************************************/
 	
 	@Override
 	public void sessionFunction() {
-		
 	}
 
-/******************************************************************************************/
+/*********************************************************************************************************************/
+	//Function executed every tick that defines the behaviour of the country
 	
 	protected void behaviour() {
 			
@@ -106,20 +103,16 @@ public class NonAnnexOne extends AbstractCountry {
 		
 		
 	}
-
-/************************************************************************************************/
+/********************************************Initialise-variables/behaviour****************************************************/
 	
-	protected void initialiseCountry() {
-		// TODO Auto-generated method stub
+	protected void initialiseCountry() 
+	{
 		energy_aim = getEnergyOutput() + CountryConstants.INITIAL_ENERGY_THRESHOLD ; //initialise energy aim.
 		environment_friendly_target = getCarbonOutput() + CountryConstants.INITIAL_CARBON_TARGET; //initialise a target 
-		
-		
+			
 	}
-	//.......................................................................................
-	//........................................................................................
-	
-/***********************************************************************************************/
+		
+/***********************************************Accept CDM offers********************************************************************/
 	@Override
 	protected boolean acceptTrade(NetworkAddress from, Offer trade) {
 		
@@ -134,9 +127,9 @@ public class NonAnnexOne extends AbstractCountry {
 			return true;
 	}
 	
-/************************Functions executed every year *******************************************/
+/************************Functions executed every tick ***************************************************************/
 	
-	//Every round our countries check current energy output and make decisions
+	//Every round country checks current energy output and decides whether to invest in carbon industry or not.
 	
 	private void economy() throws IllegalArgumentException, Exception
 	{
@@ -146,7 +139,7 @@ public class NonAnnexOne extends AbstractCountry {
 		double money_available;
 		
 		energy_difference = energy_aim - getEnergyOutput(); //difference in energy aim and current energy output.
-		invest_money = energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(energy_difference) ;
+		invest_money = energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(energy_difference) ; //find the cost of investment in carbon industry
 		money_available=getAvailableToSpend();
 		
 		if (invest_money <= money_available)
@@ -360,11 +353,11 @@ public class NonAnnexOne extends AbstractCountry {
 	//change the emission target every year
 	private void change_emission_target(double previous_target,boolean succeed)
 	{
-		if (succeed) //country met environment target goal, change goal.
+		if (succeed) //country met environment target goal, decrease goal.
 			
 		environment_friendly_target = previous_target - CountryConstants.DECREASING_CARBON_TARGET;
 		
-		if (succeed == false)
+		if (succeed == false) //country did not meet environment target goal, increase target
 		
 		environment_friendly_target = previous_target + CountryConstants.DECREASING_CARBON_TARGET;
 		
