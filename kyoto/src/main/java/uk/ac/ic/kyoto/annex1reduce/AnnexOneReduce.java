@@ -4,9 +4,11 @@ import java.util.UUID;
 import uk.ac.ic.kyoto.annex1reduce.CountrySimulator.ActionList;
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.Offer;
+import uk.ac.ic.kyoto.countries.OfferMessage;
 import uk.ac.ic.kyoto.exceptions.NotEnoughCarbonOutputException;
 import uk.ac.ic.kyoto.exceptions.NotEnoughCashException;
 import uk.ac.ic.kyoto.exceptions.NotEnoughLandException;
+import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
@@ -55,7 +57,7 @@ public class AnnexOneReduce extends AbstractCountry {
 	 * Take an input and process the data.
 	 */
 	@Override
-	protected void processInput(Input in) {
+	protected void processInput(Input input) {
 		/*
 		 * Process all given market offers. If we're given an offer to buy
 		 * credits within 5% (or anything lower) of the average carbon credit
@@ -64,8 +66,29 @@ public class AnnexOneReduce extends AbstractCountry {
 		 * Also, update the expected market price for buys and sells
 		 */
 		
-		
-		
+		try {
+			if (this.tradeProtocol.canHandle(input)) {
+				this.tradeProtocol.handle(input);
+			}
+			else {
+				OfferMessage offer = this.tradeProtocol.decodeInput(input);
+				NetworkAddress address = this.tradeProtocol.extractNetworkAddress(input);
+				
+				TradeType type = offer.getOfferType();
+				
+				double quantityOffered = offer.getOfferQuantity();
+				double priceOffered = offer.getOfferUnitCost();
+				
+//				if (type == TradeType.BUY || type == TradeType.INVEST) {
+//					if (quantityOffered <= buyCarbon) {
+//						if (priceOffered )
+//					}
+//				}
+			}
+		}
+		catch (Exception e) {
+			logger.warn(getName() + ": Problem with investments after successful trade: " + e.getMessage());
+		}
 	}
 
 	boolean needToSimulate = true;
@@ -578,7 +601,7 @@ public class AnnexOneReduce extends AbstractCountry {
 			return Double.MAX_VALUE / 1000000;
 		}
 
-		return carbonOffset * 500;
+		return carbonOffset * 99999999;
 	}
 
 	/**
@@ -595,7 +618,7 @@ public class AnnexOneReduce extends AbstractCountry {
 		}
 
 		// TODO calculate a selling price
-		return carbonOffset * 100;
+		return carbonOffset * 0;
 	}
 
 	public double getCarbonEnergyIncrease(double industryInvestment) {
