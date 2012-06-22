@@ -567,7 +567,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.carbonOffset += amount;
 	}
 	
-	protected final OfferMessage broadcastSellOffer(int quantity, double unitCost){
+	protected final OfferMessage broadcastSellOffer(double quantity, double unitCost){
 		Offer trade = new Offer(quantity, unitCost, TradeType.SELL);
 		OfferMessage returnObject = new OfferMessage(
 				trade,
@@ -586,7 +586,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			return returnObject;
 	}
 
-	protected final OfferMessage broadcastBuyOffer(int quantity, double unitCost){
+	protected final OfferMessage broadcastBuyOffer(double quantity, double unitCost){
 		Offer trade = new Offer(quantity, unitCost, TradeType.BUY);
 		
 		/*DEBUG*/
