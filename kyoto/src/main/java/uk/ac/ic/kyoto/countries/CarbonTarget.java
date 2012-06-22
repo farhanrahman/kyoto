@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Semaphore;
 
 import uk.ac.ic.kyoto.CarbonData1990;
 import uk.ac.ic.kyoto.countries.AbstractCountry.KyotoMember;
@@ -59,7 +58,6 @@ public class CarbonTarget extends EnvironmentService {
 	private GlobalTimeService timeService;
 	private CarbonReportingService reportingService;
 	private Monitor monitor;
-	private Semaphore exclusiveAccess = new Semaphore(1);
 	
 	private EnvironmentServiceProvider provider;
 	
@@ -110,18 +108,13 @@ public class CarbonTarget extends EnvironmentService {
 	}
 	
 	void addCountryPenalty(UUID countryID, double penaltyValue) {
-		try {
-			this.exclusiveAccess.acquire();
-		} catch (InterruptedException e) {
-			System.out.println("Interrupted Exception" + e);
-			e.printStackTrace();
-		}
-		
 		countryObject target= findCountryObject(countryID);
-		target.penalty = penaltyValue;
-		/*generateYearTarget(target);*/
 		
-		this.exclusiveAccess.release();
+		if (penaltyValue >= 0) {
+			target.penalty = penaltyValue;
+		} else {
+			target.penalty = 0;
+		}
 	}
 
 	/*
@@ -214,19 +207,10 @@ public class CarbonTarget extends EnvironmentService {
 	
 	public void updateYearTargets()
 	{
-		try {
-			this.exclusiveAccess.acquire();
-		} catch (InterruptedException e) {
-			System.out.println("Interrupted Exception : " + e);
-			e.printStackTrace();
-		}
-		
 		for (countryObject country : participantCountries) {
 			if (country.obj.isKyotoMember() == KyotoMember.ANNEXONE)
 				generateYearTarget(country);
 		}
-		
-		this.exclusiveAccess.release();
 	}
 	
 	/*
