@@ -157,7 +157,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			try {
 				timeService = getEnvironmentService(ParticipantTimeService.class);
 			} catch (UnavailableServiceException e) {
-				System.out.println("Unable to reach time service service.");
+				logger.warn("Unable to reach time service service.");
 				throw e;
 			}
 			
@@ -170,7 +170,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			try {
 				this.reportingService = this.getEnvironmentService(ParticipantCarbonReportingService.class);
 			} catch (UnavailableServiceException e) {
-				System.out.println("Unable to reach emission reporting service.");
+				logger.warn("Unable to reach emission reporting service.");
 				throw e;
 			}
 			
@@ -205,16 +205,16 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			initialiseCountry();
 			
 		} catch (FSMException e) {
-			e.printStackTrace();
+			logger.warn(e);
 			throw new RuntimeException(e);
 		} catch (UnavailableServiceException e) {
-			e.printStackTrace();
+			logger.warn(e);
 			throw new RuntimeException(e);
 		} catch (ActionHandlingException e) {
-			e.printStackTrace();
+			logger.warn(e);
 			throw new RuntimeException(e);
 		} catch (IllegalAccessException e) {
-			e.printStackTrace();
+			logger.warn(e);
 		}
 		
 	}
@@ -235,7 +235,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				}
 				
 				if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
-					System.out.println(this.ISO + " first day of new year on tick " + timeService.getCurrentTick());
+					logger.warn(this.ISO + " first day of new year on tick " + timeService.getCurrentTick());
 					
 					updateGDPRate();
 					updateGDP();
@@ -328,7 +328,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			availableToSpend -= GDP*GameConst.getMonitorCostPercentage();
 		} catch (ActionHandlingException e) {
 			logger.warn(e.getMessage(), e);
-			e.printStackTrace();
+			//e.printStackTrace();
 		} // Take % of GDP for monitoring
 	}
 
@@ -460,8 +460,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			prevEnergyOutput = energyOutput;
 				
 		} catch (UnavailableServiceException e) {
-			System.out.println("Unable to reach economy service.");
-			e.printStackTrace();
+			logger.warn("Unable to reach economy service.");
+			//e.printStackTrace();
 		}
 	}
 	
@@ -604,13 +604,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	protected final OfferMessage broadcastBuyOffer(double quantity, double unitCost){
 		Offer trade = new Offer(quantity, unitCost, TradeType.BUY);
 		
-		/*DEBUG*/
-			System.out.println();
-			System.out.println(this.tradeProtocol.getActiveConversationMembers().toString());
-			System.out.println(this.network.getConnectedNodes());
-			System.out.println();
-		/*DEBUG*/
-		
 		OfferMessage returnObject = new OfferMessage(
 				trade, 
 				this.tradeProtocol.tradeToken.generate(), 
@@ -673,8 +666,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				kyotoMemberLevel = KyotoMember.ROGUE;
 				environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
 			} catch (ActionHandlingException e) {
-				System.out.println("Exception wilst removing from monitor: " + e);
-				e.printStackTrace();
+				logger.warn("Exception wilst removing from monitor: " + e);
+				//e.printStackTrace();
 			}
 		}
 		else if (timeService.getCurrentTick() - joinTime >= timeService.getTicksInYear()*GameConst.getMinimumKyotoMembershipDuration()) {
@@ -685,8 +678,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				kyotoMemberLevel = KyotoMember.ROGUE;
 				environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
 			} catch (ActionHandlingException e) {
-				System.out.println("Exception wilst removing from monitor: " + e);
-				e.printStackTrace();
+				logger.warn("Exception wilst removing from monitor: " + e);
+				//e.printStackTrace();
 			}
 		} else {
 			throw new IllegalStateException("Cannot leave Kyoto Protocol.");
@@ -698,8 +691,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			try {
 				environment.act(new RejoinKyoto(), getID(), authkey);
 			} catch (ActionHandlingException e) {
-				System.out.println("Exception whilst rejoining kyoto: " + e);
-				e.printStackTrace();
+				logger.warn("Exception whilst rejoining kyoto: " + e);
+				//e.printStackTrace();
 			}
 		} else {
 			throw new IllegalStateException("Cannot join Kyoto Protocol in first tick");

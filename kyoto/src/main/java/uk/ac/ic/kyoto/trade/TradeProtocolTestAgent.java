@@ -34,7 +34,7 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 			OfferMessage offerMessage = this.tradeProtocol.decodeInput(in);
 			/*analyse the offer*/
 			try {
-				System.out.println("+++ got an offer at price " + offerMessage.getOfferUnitCost());
+				logger.info("+++ got an offer at price " + offerMessage.getOfferUnitCost());
 				this.tradeProtocol.respondToOffer(
 						this.tradeProtocol.extractNetworkAddress(in), 
 						offerMessage.getOfferQuantity() * 0.66,
