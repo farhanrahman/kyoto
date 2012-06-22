@@ -5,9 +5,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import uk.ac.ic.kyoto.actions.AddRemoveFromMonitor;
-import uk.ac.ic.kyoto.actions.AddRemoveFromMonitor.addRemoveType;
-import uk.ac.ic.kyoto.actions.AddToCarbonTarget;
 import uk.ac.ic.kyoto.actions.ApplyMonitorTax;
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
 import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
@@ -25,10 +22,7 @@ import uk.ac.imperial.presage2.core.messaging.Performative;
 import uk.ac.imperial.presage2.core.network.MulticastMessage;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
-import uk.ac.imperial.presage2.util.fsm.FSMException;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
-
-import com.google.common.collect.ImmutableMap;
 
 /**
  * Class from which all countries are derived
@@ -150,11 +144,6 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 
 	@Override
 	final public void initialise() {
-		// Check if the initialised function has already been called.
-		if (this.initialised) {
-		} else {
-			this.initialised = true;
-		}
 
 		// Initialize the Action Handlers
 		carbonAbsorptionHandler = new IsolatedCarbonAbsorptionHandler(this);
@@ -333,32 +322,40 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 	abstract protected boolean acceptTrade(NetworkAddress from, Offer trade);
 
 	/**
-	 * Override this method to get notified when trade was successful
+	 * Override this method to get notified when trade was successful. This
+	 * function is called for both initiator and responder when the trade was
+	 * succesful.
 	 * 
 	 * @param from
-	 * @param trade
+	 * @param offerMessage
 	 */
-	protected void tradeWasSuccessful(NetworkAddress from, Offer trade) {
+	protected void tradeWasSuccessful(NetworkAddress from,
+			OfferMessage offerMessage) {
 
 	}
 
 	/**
-	 * Override this method to get notified when trade failed
+	 * Override this method to get notified when trade failed. This function is
+	 * called to notify both initiator and responder if somehow the trade has
+	 * failed
 	 * 
 	 * @param from
-	 * @param trade
+	 * @param offerMessage
 	 */
-	protected void tradeHasFailed(NetworkAddress from, Offer trade) {
+	protected void tradeHasFailed(NetworkAddress from, OfferMessage offerMessage) {
 
 	}
 
 	/**
-	 * Override this method to get notified when trade was rejected
+	 * Override this method to get notified when trade was rejected This
+	 * function is called to notify the initiator that the responder has
+	 * rejected the trade that the initiator has offered.
 	 * 
 	 * @param from
-	 * @param trade
+	 * @param offerMessage
 	 */
-	protected void tradeWasRejected(NetworkAddress from, Offer trade) {
+	protected void tradeWasRejected(NetworkAddress from,
+			OfferMessage offerMessage) {
 
 	}
 

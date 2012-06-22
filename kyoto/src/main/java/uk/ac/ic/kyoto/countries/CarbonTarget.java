@@ -233,6 +233,9 @@ public class CarbonTarget extends EnvironmentService {
 		double diffTargets = country.lastSessionTarget - country.currentSessionTarget;
 		double newTarget = country.lastSessionTarget - (diffTargets * sessionProgress) - country.penalty;
 		
+		if (newTarget < 0)
+			newTarget = 0.0;
+		
 		System.out.println("About to update target for year " + (year));
 		country.yearTargets.put(year, newTarget);
 		System.out.println("Just updated target for year " + (year));
