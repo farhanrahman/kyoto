@@ -134,17 +134,16 @@ public class NonAnnexOne extends AbstractCountry {
 	private void economy() throws IllegalArgumentException, Exception
 	{
 		double energy_difference;
-		double financial_difference;
 		double invest_money;
 		double money_available;
 		
 		energy_difference = energy_aim - getEnergyOutput(); //difference in energy aim and current energy output.
 		invest_money = energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(energy_difference) ; //find the cost of investment in carbon industry
-		money_available=getAvailableToSpend();
+		money_available= getAvailableToSpend();
 		
-		if (invest_money <= money_available)
+		if (invest_money <= money_available) //check whether country has enough money available to invest
 				{
-					buildIndustry(invest_money); 
+					buildIndustry(invest_money); //calls the function to invest in industry
 					aim_success = true; // energy target met
 					times_aim_met +=1; //how many consecutive times the target was met.
 					logger.info("Country met its energy output goal");
@@ -159,13 +158,7 @@ public class NonAnnexOne extends AbstractCountry {
 		//clean development mechanism only if country cares for environment
 		if (green_care)
 		{
-			if (aim_success==false)
-			{
-			financial_difference = invest_money - getAvailableToSpend();
-			clean_development_mechanism(financial_difference);
-			}
-			else
-				clean_development_mechanism(invest_money);
+			clean_development_mechanism(invest_money);
 		}
 		
 		
