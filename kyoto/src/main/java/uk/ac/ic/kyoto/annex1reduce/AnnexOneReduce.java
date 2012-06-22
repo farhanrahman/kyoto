@@ -4,16 +4,17 @@ import java.util.UUID;
 import uk.ac.ic.kyoto.annex1reduce.CountrySimulator.ActionList;
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.GameConst;
-import uk.ac.ic.kyoto.countries.IsolatedAbstractCountry;
 import uk.ac.ic.kyoto.countries.Offer;
 import uk.ac.ic.kyoto.countries.OfferMessage;
 import uk.ac.ic.kyoto.exceptions.NotEnoughCarbonOutputException;
 import uk.ac.ic.kyoto.exceptions.NotEnoughCashException;
 import uk.ac.ic.kyoto.exceptions.NotEnoughLandException;
 import uk.ac.ic.kyoto.trade.TradeType;
-import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
+import uk.ac.ic.kyoto.tradehistory.TradeHistory;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
+import uk.ac.ic.kyoto.singletonfactory.*;
+
 
 /**
  * Extends AbstractCountry, provides a skeleton for all EU member countries
@@ -31,9 +32,12 @@ public class AnnexOneReduce extends AbstractCountry {
 				energyOutput, carbonOutput);
 		simulator = new CountrySimulator(this);
 	}
+	
+	TradeHistory tradeHistory;
 
 	@Override
 	public void initialiseCountry() {
+		tradeHistory = SingletonProvider.getTradeHistory();
 	}
 
 	@Override
@@ -152,6 +156,47 @@ public class AnnexOneReduce extends AbstractCountry {
 		// Recalculate everything
 		needToSimulate = true;
 	}
+	
+	/**
+	 * 
+	 * @param carbonOffset
+	 *            The amount of carbon we want to offset by buying credits
+	 * @param year
+	 *            The year we want to get the estimated price for. Year = 1 is
+	 *            current year, Year = 2 is next year etc.
+	 * @return Cost of purchasing credits. Returns a very, very large number if
+	 *         not enough credits available.
+	 */
+	public double getMarketBuyPrice(double carbonOffset) {
+
+		if (carbonOffset == 0) {
+			return 0;
+		}
+
+		if (buyingEnabled == false) {
+			return Double.MAX_VALUE / 1000000;
+		}
+
+		//TODO calculate a buying price
+		return carbonOffset * 99999999;
+	}
+
+	/**
+	 * Returns 0 if selling <=0 amounts of carbon offset
+	 * 
+	 * @param carbonOffset
+	 * @param year
+	 * @return
+	 */
+	public double getMarketSellPrice(double carbonOffset) {
+
+		if (carbonOffset <= 0) {
+			return 0;
+		}
+
+		// TODO calculate a selling price
+		return carbonOffset * 0;
+	}
 
 	boolean needToSimulate = true;
 
@@ -192,6 +237,13 @@ public class AnnexOneReduce extends AbstractCountry {
 		/*
 		 * Now, send out buy and sell offers
 		 */
+		
+		if (buyCarbonQuantity>0) {
+			broadcastSellOffer(buyCarbonQuantity/2, buyCarbonAveragePrice);
+		}
+		else if (sellCarbonQuantity>0) {
+			broadcastBuyOffer(sellCarbonQuantity/2, sellCarbonAveragePrice);
+		}
 
 	}
 
@@ -238,7 +290,7 @@ public class AnnexOneReduce extends AbstractCountry {
 		return optimal;
 	}
 
-	// TODO get years until sanctions
+	// TODO get years until sanctions (when carbon credits reset)
 	private int getYearsUntilSanctions() {
 		int years = timeService.getCurrentYear()
 				% GameConst.getYearsInSession();
@@ -252,6 +304,7 @@ public class AnnexOneReduce extends AbstractCountry {
 	 * sellCarbonAveragePrice to the values they need to be to sell in the next
 	 * session
 	 */
+	@SuppressWarnings("deprecation")
 	private void performReduceMaintainActions() {
 
 		// Assume all buys have been completed, work out new optimal path
@@ -637,46 +690,6 @@ public class AnnexOneReduce extends AbstractCountry {
 	 */
 	private void enableBuying() {
 		buyingEnabled = true;
-	}
-
-	/**
-	 * 
-	 * @param carbonOffset
-	 *            The amount of carbon we want to offset by buying credits
-	 * @param year
-	 *            The year we want to get the estimated price for. Year = 1 is
-	 *            current year, Year = 2 is next year etc.
-	 * @return Cost of purchasing credits. Returns a very, very large number if
-	 *         not enough credits available.
-	 */
-	public double getMarketBuyPrice(double carbonOffset) {
-
-		if (carbonOffset == 0) {
-			return 0;
-		}
-
-		if (buyingEnabled == false) {
-			return Double.MAX_VALUE / 1000000;
-		}
-
-		return carbonOffset * 99999999;
-	}
-
-	/**
-	 * Returns 0 if selling <=0 amounts of carbon offset
-	 * 
-	 * @param carbonOffset
-	 * @param year
-	 * @return
-	 */
-	public double getMarketSellPrice(double carbonOffset) {
-
-		if (carbonOffset <= 0) {
-			return 0;
-		}
-
-		// TODO calculate a selling price
-		return carbonOffset * 0;
 	}
 
 	public double getCarbonEnergyIncrease(double industryInvestment) {
