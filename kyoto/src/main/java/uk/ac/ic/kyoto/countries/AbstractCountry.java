@@ -251,7 +251,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				sessionFunction();
 			}
 			
-			if (timeService.getCurrentTick() % timeService.getTicksInYear() == 1) {
+			if (timeService.getCurrentTick() % timeService.getTicksInYear() == 2) {
 				yearlyFunction();
 			}
 	

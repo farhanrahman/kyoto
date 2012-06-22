@@ -222,7 +222,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			double emissionIncrease = this.getEmissionsTarget() - (this.getCarbonOutput() - this.getCarbonAbsorption());
 			
 			if (Math.round(emissionIncrease) < 0) {
-				leaveKyoto();
+				//leaveKyoto();
 				logger.info("Leaving Kyoto, my target is below my emissions");
 			}
 		}
