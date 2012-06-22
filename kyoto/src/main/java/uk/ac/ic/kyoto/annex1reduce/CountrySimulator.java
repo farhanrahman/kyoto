@@ -1,8 +1,9 @@
 package uk.ac.ic.kyoto.annex1reduce;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
+
+import org.apache.log4j.Logger;
 
 import uk.ac.ic.kyoto.countries.GameConst;
 
@@ -12,6 +13,8 @@ import uk.ac.ic.kyoto.countries.GameConst;
  * 
  */
 class CountrySimulator {
+	
+	private Logger logger = Logger.getLogger(CountrySimulator.class);
 
 	// TODO, look ahead a minimum of 5 years or a maximum of 15 years. Always
 	// end at a session end.
@@ -57,10 +60,10 @@ class CountrySimulator {
 		for (int i = 0; i < LOOK_AHEAD_YEARS; i++) {
 			// Cull the reduce states
 
-//			System.out.println("unculledReduceSize " + i + " = "
+//			logger.info("unculledReduceSize " + i + " = "
 //					+ stateList[i].reduceStates.size());
 			stateList[i].reduceStates = cullStates(stateList[i].reduceStates);
-//			System.out.println("reduceSize " + i + " = "
+//			logger.info("reduceSize " + i + " = "
 //					+ stateList[i].reduceStates.size());
 
 			// Branch off all unculled reduce states by performing a maintain
@@ -71,10 +74,10 @@ class CountrySimulator {
 			}
 
 			// Cull the maintain states
-//			System.out.println("unculledMaintainSize " + i + " = "
+//			logger.info("unculledMaintainSize " + i + " = "
 //					+ stateList[i].maintainStates.size());
 			stateList[i].maintainStates = cullStates(stateList[i].maintainStates);
-//			System.out.println("maintainSize " + i + " = "
+//			logger.info("maintainSize " + i + " = "
 //					+ stateList[i].maintainStates.size());
 
 			// Branch off all unculled maintain states by performing a sell
@@ -86,10 +89,10 @@ class CountrySimulator {
 			}
 
 			// Cull the sell states
-//			System.out.println("unculledSellSize " + i + " = "
+//			logger.info("unculledSellSize " + i + " = "
 //					+ stateList[i].sellStates.size());
 			stateList[i].sellStates = cullStates(stateList[i].sellStates);
-//			System.out.println("sellSize " + i + " = "
+//			logger.info("sellSize " + i + " = "
 //					+ stateList[i].sellStates.size());
 
 			// So long as we aren't in the final year
@@ -130,14 +133,14 @@ class CountrySimulator {
 
 //		Iterator<CountryState> iterator = startSellStates.iterator();
 //		while (iterator.hasNext()) {
-//			System.out.println();
+//			logger.info();
 //			CountryState state = iterator.next();
 //			state.printPath();
-//			System.out.println();
+//			logger.info();
 //			state.printActionPath();
 //		}
-//		System.out.println();
-//		System.out.println("NumStates = " + startSellStates.size());
+//		logger.info();
+//		logger.info("NumStates = " + startSellStates.size());
 
 		float s_investFrac = 0;
 		float s_sellFrac = 0;
@@ -186,19 +189,19 @@ class CountrySimulator {
 		r_investFrac /= size;
 		r_shutDownFrac /= size;
 		
-		System.out.println();
-		System.out.println(country.getName());
-		System.out.println("s_investFrac " + s_investFrac);
-		System.out.println("s_sellFrac " + s_sellFrac);
-		System.out.println("s_shutDownFrac " + s_shutDownFrac);
+		logger.info("");
+		logger.info(country.getName());
+		logger.info("s_investFrac " + s_investFrac);
+		logger.info("s_sellFrac " + s_sellFrac);
+		logger.info("s_shutDownFrac " + s_shutDownFrac);
 		
-		System.out.println("m_buyCreditOffsetFrac " + m_buyCreditOffsetFrac);
-		System.out.println("m_industryFrac " + m_industryFrac);
-		System.out.println("m_investOffsetFrac " + m_investOffsetFrac);
+		logger.info("m_buyCreditOffsetFrac " + m_buyCreditOffsetFrac);
+		logger.info("m_industryFrac " + m_industryFrac);
+		logger.info("m_investOffsetFrac " + m_investOffsetFrac);
 		
-		System.out.println("r_buyCreditFrac " + r_buyCreditFrac);
-		System.out.println("r_investFrac " + r_investFrac);
-		System.out.println("r_shutDownFrac " + r_shutDownFrac);
+		logger.info("r_buyCreditFrac " + r_buyCreditFrac);
+		logger.info("r_investFrac " + r_investFrac);
+		logger.info("r_shutDownFrac " + r_shutDownFrac);
 
 		ActionList megaAction = new ActionList(new ReduceAction(r_shutDownFrac,
 				r_buyCreditFrac, r_investFrac), new MaintainAction(
@@ -680,12 +683,12 @@ class CountrySimulator {
 		}
 
 		public void printState() {
-			System.out.println("Year " + year);
-			System.out.println("AvailToSpend " + this.availableToSpend);
-			System.out.println("CNetOutput " + this.carbonDiff);
-			System.out.println("energyOutput " + this.energyOutput);
-			System.out.println("GDP " + this.GDP);
-			System.out.println("GDPRate " + this.GDPRate);
+			logger.info("Year " + year);
+			logger.info("AvailToSpend " + this.availableToSpend);
+			logger.info("CNetOutput " + this.carbonDiff);
+			logger.info("energyOutput " + this.energyOutput);
+			logger.info("GDP " + this.GDP);
+			logger.info("GDPRate " + this.GDPRate);
 			if (action != null) {
 				action.printDetails();
 			}
