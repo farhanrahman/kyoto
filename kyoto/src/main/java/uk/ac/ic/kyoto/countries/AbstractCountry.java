@@ -180,12 +180,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				
 				@Override
 				protected boolean acceptExchange(NetworkAddress from, Offer trade) {
-					if (kyotoMemberLevel == KyotoMember.ANNEXONE || trade.type == TradeType.INVEST || trade.type == TradeType.RECEIVE) {
-						return acceptTrade(from, trade);
-					}
-					else {
-						return false;
-					}
+					return acceptTrade(from, trade);
 				}
 
 				@Override
