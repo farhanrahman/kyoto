@@ -3,25 +3,19 @@ package uk.ac.ic.kyoto.simulations;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
-
 import org.apache.log4j.Logger;
-
 import uk.ac.ic.kyoto.CarbonData1990;
-import uk.ac.ic.kyoto.actions.AddToCarbonTargetHandler;
 import uk.ac.ic.kyoto.actions.AddRemoveFromMonitorHandler;
+import uk.ac.ic.kyoto.actions.AddToCarbonTargetHandler;
 import uk.ac.ic.kyoto.actions.ApplyMonitorTaxHandler;
 import uk.ac.ic.kyoto.actions.QueryEmissionsTargetHandler;
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReportHandler;
-import uk.ac.ic.kyoto.annex1reduce.AnnexOneReduce;
 import uk.ac.ic.kyoto.annex1sustain.AnnexOneSustain;
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.CarbonTarget;
 import uk.ac.ic.kyoto.countries.Monitor;
-import uk.ac.ic.kyoto.countries.testCountries.TestAgent;
 import uk.ac.ic.kyoto.exceptions.NoCountryDataException;
 import uk.ac.ic.kyoto.nonannexone.NonAnnexOne;
-import uk.ac.ic.kyoto.roguestates.CanadaAgent;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.Decoder;
 import uk.ac.ic.kyoto.services.Economy;
@@ -29,22 +23,18 @@ import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.ic.kyoto.singletonfactory.SingletonProvider;
-import uk.ac.ic.kyoto.trade.TradeProtocolTestAgent;
 import uk.ac.ic.kyoto.tradehistory.TradeHistoryService;
 import uk.ac.ic.kyoto.util.sim.jsonobjects.DataProvider;
 import uk.ac.ic.kyoto.util.sim.jsonobjects.JSONObjectContainer;
 import uk.ac.ic.kyoto.util.sim.jsonobjects.simulations.CountryData;
 import uk.ac.ic.kyoto.util.sim.jsonobjects.simulations.SimulationData;
 import uk.ac.imperial.presage2.core.simulator.InjectedSimulation;
-import uk.ac.imperial.presage2.core.simulator.Parameter;
 import uk.ac.imperial.presage2.core.simulator.Scenario;
 import uk.ac.imperial.presage2.core.util.random.Random;
 import uk.ac.imperial.presage2.rules.RuleModule;
 import uk.ac.imperial.presage2.util.environment.AbstractEnvironmentModule;
 import uk.ac.imperial.presage2.util.network.NetworkModule;
-import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
 
 public class Simulation extends InjectedSimulation {
 	
