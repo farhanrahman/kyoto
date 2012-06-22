@@ -15,7 +15,7 @@ import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
-import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
+//import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 import uk.ac.imperial.presage2.core.network.Message;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.util.fsm.FSMException;
@@ -79,6 +79,7 @@ public class AnnexOneSustain extends AbstractCountry {
 				// Decrease price if semaphore set to 1 (no conversation or offer accepted at the start)
 				if (tradeSemaphore.availablePermits() == 1) {
 					surplusCarbonPrice /= Constants.PRICE_FAILURE_SCALER;
+					logger.info(this.getName() + ": Increased internal price to " + String.valueOf(surplusCarbonPrice));
 					broadcastSellOffer(surplusCarbon, surplusCarbonPrice);
 				}
 			}
@@ -228,7 +229,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			}
 		}
 		catch (Exception e) {
-			logger.warn("Problem with session function: " + e.getMessage());
+			logger.warn(this.getName() + ": Problem with session function: " + e.getMessage());
 		}
 	}
 	
@@ -289,7 +290,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			System.out.println("*** Absorption after investment: " + this.getCarbonAbsorption());
 		}
 		catch (Exception e) {
-			logger.warn("Problem with investing in industry: " + e.getMessage());
+			logger.warn(this.getName() + ": Problem with investing in industry: " + e.getMessage());
 		}
 	}
 	
@@ -311,7 +312,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			}
 		}
 		catch (Exception e) {
-			logger.warn("Problem with end of year investments: " + e.getMessage());
+			logger.warn(this.getName() + ": Problem with end of year investments: " + e.getMessage());
 		}
 	}
 	
@@ -331,7 +332,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			}
 		}
 		catch (Exception e) {
-			logger.warn("Problem with updating expected sales: " + e.getMessage());
+			logger.warn(this.getName() + ": Problem with updating expected sales: " + e.getMessage());
 		}
 	}
 	
@@ -356,7 +357,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			surplusCarbon = this.getEmissionsTarget() - (this.getCarbonOutput() - this.getCarbonAbsorption()) + this.getCarbonOffset();
 		}
 		catch (Exception e) {
-			logger.warn("Problem with calculating surplus carbon: " + e.getMessage());
+			logger.warn(this.getName() + ": Problem with calculating surplus carbon: " + e.getMessage());
 			surplusCarbon = 0;
 		}
 	}
@@ -371,7 +372,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			sessionOffsetGain = carbonDifference * yearsUntilEnd;
 		}
 		catch (Exception e) {
-			logger.warn("Problem with calculating offset gain :" + e.getMessage());
+			logger.warn(this.getName() + ": Problem with calculating offset gain :" + e.getMessage());
 			sessionOffsetGain = 0;
 		}
 		
@@ -396,7 +397,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			}
 		}
 		catch (Exception e) {
-			logger.warn("Problem with assessing possibility of carbon reduction: " + e.getMessage());
+			logger.warn(this.getName() + ": Problem with assessing possibility of carbon reduction: " + e.getMessage());
 			possible = false;
 		}
 		
@@ -423,7 +424,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			}
 		}
 		catch (Exception e) {
-			logger.warn("Problem with assessing possibility of carbon absorption: " + e.getMessage());
+			logger.warn(this.getName() + ": Problem with assessing possibility of carbon absorption: " + e.getMessage());
 			possible = false;
 		}
 		
