@@ -194,7 +194,7 @@ public class NonAnnexOne extends AbstractCountry {
 				energyUsageHandler.investInCarbonIndustry(money_invest);
 				logger.info("Invest in carbon industry successful");
 				logger.info("Country meets its environment friendy target");
-				green_lands = true;
+				green_lands = true; //set the variable to true, to be used when updating the environment friendly target
 			} 
 			catch (Exception e) {
 				logger.warn("Invest in carbon industry not successful");
@@ -212,7 +212,7 @@ public class NonAnnexOne extends AbstractCountry {
 				logger.warn("Invest in carbon industry not successful");
 			}
 			
-			try{ //also since country exceeds its own carbon target, invests in carbon absorption or carbon reduction in order to get carbon offset.
+			try{ //also since country exceeds its own carbon target, invests in carbon absorption or carbon reduction.
 				carbon_difference = (getCarbonOutput() + energyUsageHandler.calculateCarbonIndustryGrowth(money_invest)) - environment_friendly_target;
 				
 				if ((carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend()) && ((carbonAbsorptionHandler.getForestAreaRequired(carbon_difference) < available_area)))
@@ -408,5 +408,6 @@ broadcastInvesteeOffer(change_required,InvestmentType.REDUCE);
 
 		
 	
+
 
 
