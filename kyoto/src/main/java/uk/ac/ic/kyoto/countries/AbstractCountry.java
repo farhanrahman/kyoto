@@ -257,7 +257,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 			//leave a 10-tick grace period to allow current trades to complete before performing end of year routine
 			if (timeService.getCurrentTick() % timeService.getTicksInYear() < timeService.getTicksInYear() - 5
-					&& timeService.getCurrentTick() % timeService.getTicksInYear() < 2) {
+					&& timeService.getCurrentTick() % timeService.getTicksInYear() > 2) {
 				behaviour();
 			}
 			
