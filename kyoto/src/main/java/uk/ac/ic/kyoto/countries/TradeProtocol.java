@@ -511,7 +511,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 									participant.carbonAbsorptionHandler.investInCarbonAbsorption(trade.getQuantity());
 								} catch (NotEnoughCashException e) {
 									logger.warn(e);
-									System.err.println("Country: " + participant.ISO +
+									logger.warn("Country: " + participant.ISO +
 											"\nAvailable to spend: " + e.getAvailableToSpend() +
 											"\nInvestment required: "  + e.getInvestmentRequired());
 									return false; /*Trade must fail*/
@@ -541,7 +541,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 									return false; /*Trade must fail*/
 								} catch (NotEnoughCashException e) {
 									logger.warn(e);
-									System.err.println("Country: " + participant.ISO +
+									logger.warn("Country: " + participant.ISO +
 											"\nAvailable to spend: " + e.getAvailableToSpend() +
 											"\nInvestment required: "  + e.getInvestmentRequired());
 									return false; /*Trade must fail*/
@@ -564,7 +564,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 		}catch(NotEnoughCashException e){
 			/*Trade MUST FAIL*/
 			logger.warn(e);
-			System.err.println("Country: " + participant.ISO +
+			logger.warn("Country: " + participant.ISO +
 					"\nAvailable to spend: " + e.getAvailableToSpend() +
 					"\nInvestment required: "  + e.getInvestmentRequired());
 			return false;

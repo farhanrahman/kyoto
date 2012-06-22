@@ -1,6 +1,9 @@
 package uk.ac.ic.kyoto.actions;
 
 import java.util.UUID;
+
+import org.apache.log4j.Logger;
+
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.imperial.presage2.core.Action;
 import uk.ac.imperial.presage2.core.environment.ActionHandler;
@@ -19,7 +22,7 @@ import com.google.inject.Inject;
  */
 @ServiceDependencies({CarbonReportingService.class})
 public class SubmitCarbonEmissionReportHandler implements ActionHandler{
-
+	private Logger logger = Logger.getLogger(SubmitCarbonEmissionReportHandler.class);
 	final protected CarbonReportingService crs;
 	
 	@Inject
@@ -41,7 +44,7 @@ public class SubmitCarbonEmissionReportHandler implements ActionHandler{
 			synchronized(crs){
 				this.crs.updateReport(actor, reportAction.getCarbonEmission(), reportAction.getSimTime());
 			}
-			System.out.println("REPORT HERE, TIME: " + reportAction.getSimTime() + " AND EMISSION: " + reportAction.getCarbonEmission());
+			logger.info("REPORT HERE, TIME: " + reportAction.getSimTime() + " AND EMISSION: " + reportAction.getCarbonEmission());
 			return null;
 		}
 		throw new ActionHandlingException("Action not recognized (From SubmitCarbonEmissionReportHandler)");

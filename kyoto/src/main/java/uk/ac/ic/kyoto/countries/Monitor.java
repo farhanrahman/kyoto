@@ -6,6 +6,7 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.log4j.Logger;
 import org.drools.command.runtime.GetCalendarsCommand;
 
 import uk.ac.ic.kyoto.services.CarbonReportingService;
@@ -31,7 +32,7 @@ import com.google.inject.Inject;
  */
 @ServiceDependencies({CarbonReportingService.class})
 public class Monitor extends EnvironmentService {
-	
+	private Logger logger = Logger.getLogger(Monitor.class);
 	/*static Semaphore offsetAccess = new Semaphore(1);*/
 	
 	/* The amount that the Monitor can spend on monitoring in a current year */
@@ -96,11 +97,11 @@ public class Monitor extends EnvironmentService {
 	public void yearlyFunction(EndOfYearCycle e) {
 		if (e.getEndedYear() >= 0) {
 			nonSanctionedReports();
-			System.out.println("Yearly monitoring starting");
+			logger.info("Yearly monitoring starting");
 			checkReports();
-			System.out.println("Checked reports");
+			logger.info("Checked reports");
 			monitorCountries();
-			System.out.println("Monitored country");
+			logger.info("Monitored country");
 			carbonTargetingService.targetsForMonitor(yearlyCheaters);
 			yearlyCheaters.clear();
 		}
@@ -121,9 +122,9 @@ public class Monitor extends EnvironmentService {
 			if(country instanceof AbstractCountry){
 				try {
 					country.reportCarbonOutput();
-					System.out.println("Looking for report from this time: " + SimTime.get().intValue());
-					System.out.println("Current Year: " + timeService.getCurrentYear());
-					System.out.println("This Country ID: " + country.getID());
+					logger.info("Looking for report from this time: " + SimTime.get().intValue());
+					logger.info("Current Year: " + timeService.getCurrentYear());
+					logger.info("This Country ID: " + country.getID());
 					double reportedEmission = carbonReportingService.getReport(country.getID(), SimTime.get().intValue());
 					double emissionTarget = carbonTargetingService.queryYearTarget(country.getID(), (timeService.getCurrentYear()-1));
 					
@@ -248,7 +249,7 @@ public class Monitor extends EnvironmentService {
 		
 		int sinCount;
 		
-		System.out.println("SANCTIONING: " + sanctionee.getName());
+		logger.info("SANCTIONING: " + sanctionee.getName());
 		
 		// Update the list of countries that have cheated
 		if (sinBin.containsKey(sanctionee)) {
@@ -261,10 +262,10 @@ public class Monitor extends EnvironmentService {
 		
 		// Deduct the cash from the country that has cheated
 		// newCash = oldCash - GDP * cash_penalty
-		System.out.println("GDP: " + sanctionee.getGDP());
-		System.out.println("Old money: " + sanctionee.getAvailableToSpend());
+		logger.info("GDP: " + sanctionee.getGDP());
+		logger.info("Old money: " + sanctionee.getAvailableToSpend());
 		sanctionee.setAvailableToSpend(Math.round((sanctionee.getAvailableToSpend()-sanctionee.getGDP()*(sinCount)* GameConst.getSanctionRate())));
-		System.out.println("New money: " + sanctionee.getAvailableToSpend());
+		logger.info("New money: " + sanctionee.getAvailableToSpend());
 	}
 	
 	/**
