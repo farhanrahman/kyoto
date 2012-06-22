@@ -297,9 +297,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	public final void reportCarbonOutput() throws ActionHandlingException {
 		logger.info("Reporting bullshit, I am " + getName());
-		double reportedValue = getReportedCarbonOutput();
+		double reportedValue = getReportedCarbonOutput() - getCarbonAbsorption();
 		addToReports(SimTime.get(), reportedValue);
-		dumpCheatingData(reportedValue,this.getCarbonOutput());
+		dumpCheatingData(reportedValue,this.getCarbonOutput()- getCarbonAbsorption());
 		environment.act(new SubmitCarbonEmissionReport(reportedValue), getID(), authkey);
 	}
 	
