@@ -90,7 +90,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			}
 		}
 		else {
-			// TODO: What to do when not in Kyoto?
+			//Do nothing 
 		}
 	}
 	
@@ -441,7 +441,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			reductionMargin = profit - cost;
 		}
 		catch (Exception e) {
-			logger.warn("Problem with assessing margin of carbon reduction: " + e.getMessage());
+			logger.warn(this.getName() + ": Problem with assessing margin of carbon reduction: " + e.getMessage());
 			reductionMargin = -10000000; // To make sure not profitable
 		}
 		
@@ -458,7 +458,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			absorptionMargin = profit - cost;
 		}
 		catch (Exception e) {
-			logger.warn("Problem with assessing margin of carbon absorption: " + e.getMessage());
+			logger.warn(this.getName() + ": Problem with assessing margin of carbon absorption: " + e.getMessage());
 			absorptionMargin = -10000000; // To make sure not profitable
 		}
 		
@@ -472,7 +472,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			surplusSaleMargin = quantity * (surplusCarbonPrice - price);
 		}
 		catch (Exception e) {
-			logger.warn("Problem with assessing profitability of sale: " + e.getMessage());
+			logger.warn(this.getName() + ": Problem with assessing profitability of sale: " + e.getMessage());
 			surplusSaleMargin = -10000000; // To make sure not profitable
 		}
 		
@@ -491,7 +491,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			ticksUntilEnd = timeService.getTicksInYear() - (timeService.getCurrentTick() % timeService.getTicksInYear());
 		}
 		catch (Exception e) {
-			logger.warn("Problem with calculating time: " + e.getMessage());
+			logger.warn(this.getName() + ": Problem with calculating time: " + e.getMessage());
 			ticksUntilEnd = 0;
 		}
 		
