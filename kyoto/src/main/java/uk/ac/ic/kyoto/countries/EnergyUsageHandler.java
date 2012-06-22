@@ -1,5 +1,8 @@
 package uk.ac.ic.kyoto.countries;
 
+import uk.ac.ic.kyoto.exceptions.NotEnoughCarbonOutputException;
+import uk.ac.ic.kyoto.exceptions.NotEnoughCashException;
+
 /**
  * 
  * @author Adam
@@ -12,8 +15,7 @@ public final class EnergyUsageHandler {
 	 * Specify on which country will the handler operate
 	 */
 	EnergyUsageHandler(AbstractCountry abstractCountry) {
-		this.country = abstractCountry;
-		
+		this.country = abstractCountry;		
 	}
 	
 	/**
@@ -26,34 +28,57 @@ public final class EnergyUsageHandler {
 	 * Amount of energyOuput that should be reduced
 	 * It has to be positive and lower than the total carbonOuput
 	 */
-	public void reduceEnergyOutput (long amount) throws IllegalArgumentException{
-		if (amount < this.country.carbonOutput && amount > 0) {
-			this.country.energyOutput -= amount;
-			this.country.carbonOutput -= amount;
+	public void reduceEnergyOutput (double amount)
+			throws NotEnoughCarbonOutputException{
+		
+		if (amount >= 0) {
+			if (amount <= country.carbonOutput) {
+				country.energyOutput -= amount;
+				country.carbonOutput -= amount;
+			}
+			else{
+				throw new NotEnoughCarbonOutputException();
+			}
 		}
-		else
-			throw new IllegalArgumentException("Specified amount should be > 0 and < carbonOutput");
+		else{
+			throw new IllegalArgumentException("Energy cannot be reduced by a negative amount");
+		}
 	}
 	
 	/**
 	 * Calculates the cost of investing in carbon industry
-	 * @param carbon
-	 * The expected increase in carbon output
+	 * @param growth
+	 * The increase in carbon output
 	 * @return
 	 * The cost for the country
 	 */
-	public long calculateCostOfInvestingInCarbonIndustry (long carbon){
-		return (long) (carbon * GameConst.CARBON_INVESTMENT_PRICE);
+	public double calculateCostOfInvestingInCarbonIndustry (double growth){
+		
+		double cost;
+		if (growth >= 0){
+			cost = growth * GameConst.getCarbonInvestmentPrice();
+		} else {
+			throw new IllegalArgumentException("It is impossible to invest in negative carbon industry growth");
+		}
+
+		return cost;
 	}
 	
 	/**
 	 * Calculates the increase of carbon output
 	 * @param cost
 	 * The amount of money to be spent on carbon industry growth
-	 * @e increase of carbon output
+	 * @return increase of carbon output
 	 */
-	public long calculateCarbonIndustryGrowth (long cost){
-		return (long) (cost / GameConst.CARBON_INVESTMENT_PRICE);
+	public double calculateCarbonIndustryGrowth (double cost){
+		double growth;
+		if (cost >= 0){
+			growth = cost / GameConst.getCarbonInvestmentPrice();
+		}else{
+			throw new IllegalArgumentException("It is impossible to invest negative sum in industry growth");
+		}
+
+		return growth;
 	}
 	
 	/**
@@ -62,16 +87,18 @@ public final class EnergyUsageHandler {
 	 * @param carbon
 	 * The increase of the carbon output that will be achieved.
 	 */
-	public final void investInCarbonIndustry(long investment) throws Exception{
+	public final void investInCarbonIndustry(double investment)
+			throws NotEnoughCashException{
+		double growth;
 
-		long carbon = calculateCarbonIndustryGrowth(investment);
-		if (investment < this.country.availableToSpend) {
-			this.country.carbonOutput += carbon;
-			this.country.energyOutput += carbon;
-			this.country.availableToSpend -= investment;
+		growth = calculateCarbonIndustryGrowth(investment);
+		if (investment <= country.availableToSpend) {
+			country.carbonOutput += growth;
+			country.energyOutput += growth;
+			country.availableToSpend -= investment;
 		}
 		else {
-			throw new NotEnoughCashException();
+			throw new NotEnoughCashException(country.availableToSpend, investment);
 		}
 	}
 }

@@ -2,7 +2,7 @@ package uk.ac.ic.kyoto.actions;
 
 import java.util.UUID;
 
-import uk.ac.ic.kyoto.services.CarbonTarget;
+import uk.ac.ic.kyoto.countries.CarbonTarget;
 import uk.ac.imperial.presage2.core.Action;
 import uk.ac.imperial.presage2.core.environment.ActionHandler;
 import uk.ac.imperial.presage2.core.environment.ActionHandlingException;
@@ -37,7 +37,7 @@ public class QueryEmissionsTargetHandler implements ActionHandler {
 	public Input handle(Action action, UUID countryID) throws ActionHandlingException {
 		QueryEmissionsTarget actionObject = (QueryEmissionsTarget) action;
 		
-		long target = 0;
+		double target = 0;
 		
 		switch (actionObject.getTargetPeriod()) {
 			case SESSION:

@@ -1,95 +1,126 @@
 package uk.ac.ic.kyoto.countries;
 
-import uk.ac.ic.kyoto.math.QuadraticEquation;
+import uk.ac.ic.kyoto.exceptions.NotEnoughCarbonOutputException;
+import uk.ac.ic.kyoto.exceptions.NotEnoughCashException;
 
 /**
  * 
- * @author Stuart, Adam, Piotr
+ * @author Piotr, Nikunj
  */
 public final class CarbonReductionHandler{
 	
 	private final AbstractCountry country;
 
 	/**
-	 * Create instance of CarbonReductionHandler
+	 * Create instance of CarbonReductionHandler.
+	 * 
 	 * @param abstractCountry
-	 * Specify on which country will the handler operate
+	 * Specify on which country will the handler operate.
 	 */
 	CarbonReductionHandler(AbstractCountry abstractCountry) {
 		this.country = abstractCountry;
 	}
-
-	//================================================================================
-    // Public functions to calculate the changes
-    //================================================================================
 	
 	/**
-	 * Returns the cost of investment required to
-	 * reduce dirty industry by a specified amount of tons of carbon.
-	 * The cost per unit increases linearly with increase of clean industry %
+	 * Calls getInvestmentRequired function with actual carbonOutput and energyOutput of a country.
 	 * 
 	 * @param carbonOutputChange
-	 * The amount of carbon reduction which we want to price
+	 * The amount of carbon reduction which we want to price.
 	 * 
 	 * @return
-	 * cost of reducing carbon by the specified amount.
-	 * 
-	 * @throws NotEnoughCarbonOutputException 
-	 * when it is impossible for a given country to reduce carbon by the specified amount
-	 * as they don't produce that much carbon
+	 * Cost of reducing carbon by the specified amount.
 	 */
-	public final long getCost(long carbonOutputChange) throws Exception {
-		long cost;
-		
-		try {			
-			// Calculate the initial clean industry rate and the change during investment
-			double cleanIndustryBefore = calculateCleanIndustryMeasure(country.carbonOutput, country.energyOutput);
-			double cleanIndustryChange = calculateCleanIndustryMeasure(carbonOutputChange, country.energyOutput);
-			
-			// Use the formula y = (a * x + b + a / 2 * dx) * dx
-			// to find the total cost
-			// see documentation for the full description
-			
-			cost = (long) ((GameConst.CARBON_REDUCTION_COEFF * cleanIndustryBefore + 
-							GameConst.CARBON_REDUCTION_OFFSET + 
-							GameConst.CARBON_REDUCTION_COEFF * cleanIndustryChange / 2)
-							* cleanIndustryChange);
-		}
-		catch (Exception e) {
-			throw new Exception("getCost function error: " + e);
-		}
-		
-		return cost;
+	public final double getInvestmentRequired(double carbonOutputChange) {
+		return getInvestmentRequired(carbonOutputChange, country.carbonOutput, country.energyOutput);
 	}
 	
 	/**
-	 * Returns the reduction of carbon output
-	 * for a specified cost of investment.
+	 * Returns the investment necessary to reduce carbon output by specified amount, given carbon and energy output.
+	 * The cost of reduction by a single ton of CO2 is linearly proportional to clean industry measure.
 	 * 
-	 * @param investment cost
+	 * @param carbonOutputChange
+	 * The amount of carbon reduction which we want to price.
 	 * 
-	 * @return the change in carbon output from specified cost
+	 * @param carbonOutput
+	 * The current country carbon output.
+	 * 
+	 * @param energyOutput
+	 * The current country energy output.
+	 * 
+	 * @return
+	 * Cost of reducing carbon by the specified amount.
 	 */
-	public final double getCarbonOutputChange(double d) throws Exception {
+	public final double getInvestmentRequired(double carbonOutputChange, double carbonOutput, double energyOutput) {
+		double investmentRequired;
+		
+			// Calculate the clean industry measure after and before investment
+			double cleanIndustryBefore = calculateCleanIndustryMeasure(carbonOutput, energyOutput);
+			double cleanIndustryAfter = calculateCleanIndustryMeasure((carbonOutput - carbonOutputChange), energyOutput);
+			
+			// Get average price of single ton of carbon output reduction
+			double averageUnitPrice = (GameConst.getCarbonReductionPriceMin() +
+									    ( (GameConst.getCarbonReductionPriceMax() - GameConst.getCarbonReductionPriceMin()) * 
+									      (cleanIndustryBefore + cleanIndustryAfter) /
+									      (2) ) ); 
+			
+			// Calculate the investment that is required
+			investmentRequired = (averageUnitPrice * carbonOutputChange);
+		
+		return investmentRequired;
+	}
+	
+	/**
+	 * Calls getCarbonAbsorptionChange with actual carbonOutput and energyOutput of the country.
+	 * 
+	 * @param Investment amount
+	 * Amount of money that we want to spend on investment.
+	 * 
+	 * @return
+	 * APPROXIMATE Change in carbon output from specified cost.
+	 */
+	@Deprecated 
+	public final double getCarbonOutputChange(double investmentAmount) {
+		return getCarbonOutputChange(investmentAmount, country.carbonOutput, country.energyOutput);
+	}
+	
+	/**
+	 * Returns the reduction of carbon output for given investment amount.
+	 * Uses binary search, which is efficient.
+	 * The result might not be 100% accurate - this is only an approximation function.
+	 * 
+	 * @param investmentAmount
+	 * Amount of money that we want to spend on investment.
+	 * 
+	 * @param carbonOutput
+	 * Current carbon output of a country for which we do the calculations.
+	 * 
+	 * @param energyOutput
+	 * Current energy output of a country for which we do the calculations.
+	 * 
+	 * @return
+	 * Change in carbon output achieved with specified investment.
+	 */
+	public final double getCarbonOutputChange(double investmentAmount, double carbonOutput, double energyOutput) {
 		double carbonOutputChange;
 
-		try {
-			// Calculate the clean industry rate before the investment
-			double cleanIndustryBefore = calculateCleanIndustryMeasure(country.carbonOutput, country.energyOutput);
+		double carbonDiff = carbonOutput / 2;
+		
+		carbonOutputChange = carbonDiff;
+		
+		double tempInvestmentAmount = getInvestmentRequired(carbonOutputChange, carbonOutput, energyOutput);
+		
+		for (int i = 0; i < 30; i++) {
+			carbonDiff /= 2;
 			
-			//Solve the quadratic equation to find the change of clean industry
-			double a = GameConst.CARBON_REDUCTION_COEFF / 2;
-			double b = GameConst.CARBON_REDUCTION_COEFF * cleanIndustryBefore + GameConst.CARBON_REDUCTION_OFFSET;
-			double c = - d;
-			QuadraticEquation equation = new QuadraticEquation(a, b, c);
-			System.out.println("Quadradtic roots a: "+equation.getRootOne()+" b: "+equation.getRootTwo());
-			
-			double cleanIndustryChange = Math.max(equation.getRootOne(), equation.getRootTwo() );
-			
-			carbonOutputChange = calculateCarbonOutput(cleanIndustryChange, country.energyOutput);
-		}
-		catch (Exception e) {
-			throw new Exception("getCarbonOutputChange function error: " + e);
+			// If value is higher, lower our estimate, else increase it
+			if (tempInvestmentAmount < investmentAmount) {
+				carbonOutputChange += carbonDiff;
+				tempInvestmentAmount = getInvestmentRequired(carbonOutputChange,carbonOutput,energyOutput);
+			}
+			else if (tempInvestmentAmount > investmentAmount) {
+				carbonOutputChange -= carbonDiff;
+				tempInvestmentAmount = getInvestmentRequired(carbonOutputChange,carbonOutput,energyOutput);
+			}
 		}
 		
 		return carbonOutputChange;
@@ -97,22 +128,23 @@ public final class CarbonReductionHandler{
 		
 	/**
 	 * Executes carbon reduction investment.
-	 * On success, will reduce Carbon Output of a country keeping the Energy Output constant
-	 * On failure, will throw Exception.
+	 * On success, will reduce carbon output of a country keeping the energy output constant.
+	 * On failure, will throw exception.
 	 * 
-	 * @param d
-	 * 
-	 * @throws Exception
+	 * @param carbonOutputChange
+	 * Decrease in carbon output.
 	 */
-	public final void invest(double d) throws Exception, NotEnoughCarbonOutputException, NotEnoughCashException {
-		double carbonOutputChange;
+	public final void investInCarbonReduction(double carbonOutputChange) throws NotEnoughCarbonOutputException, NotEnoughCashException {
+		double investmentAmount;
 		
 		try {
-			carbonOutputChange = getCarbonOutputChange(d);
+			// Calculate the investment necessary to reduce carbon output by specified amount
+			investmentAmount = getInvestmentRequired(carbonOutputChange);
 			
-			if (d <= this.country.availableToSpend){
+			// If enough cash and carbon output, proceed with the investment
+			if (investmentAmount <= this.country.availableToSpend){
 				if (carbonOutputChange <= this.country.carbonOutput) {
-					this.country.availableToSpend -= d;
+					this.country.availableToSpend -= investmentAmount;
 					this.country.carbonOutput -= carbonOutputChange;
 				}
 				else {
@@ -120,49 +152,39 @@ public final class CarbonReductionHandler{
 				}
 			}
 			else {
-				throw new NotEnoughCashException();
+				throw new NotEnoughCashException(this.country.availableToSpend, investmentAmount);
 			}
 		}
-		catch (Exception e) {
-			throw new Exception("invest function error: " + e);
+		catch (NotEnoughCarbonOutputException e) {
+			throw e;
 		}
-		
+		catch (NotEnoughCashException e) {
+			throw e;
+		}
 	}
-	
-	//================================================================================
-    // Private methods for getting clean industry from carbon output and vice versa
-    //================================================================================
 	
 	/**
 	 * Calculates the clean industry rate for specified carbon output and energy output.
+	 * 
+	 * @param carbonOutput
+	 * Carbon output of the country.
+	 * 
+	 * @param energyOutput
+	 * Total energy output of the country.
+	 * 
+	 * @return
+	 * Measure of clean industry of the country.
 	 */
-	private double calculateCleanIndustryMeasure(double carbonOutput, double energyOutput) throws Exception {
+	private double calculateCleanIndustryMeasure(double carbonOutput, double energyOutput){
 		double cleanIndustry;
 		
-		try {
-			if (carbonOutput <= energyOutput)
-				cleanIndustry = 1 - carbonOutput / energyOutput;
-			else {
-				throw new Exception("carbonOutput is greater than energyOutput");
-			}
+		if (carbonOutput <= energyOutput) {
+			cleanIndustry = (1 - (carbonOutput / energyOutput));
 		}
-		catch (Exception e) {
-			throw new Exception("calculateCleanIndustryMeasure function error " + e);
+		else {
+			throw new RuntimeException("calculateCleanIndustryMeasure function error: carbonOutput is greater than energyOutput");
 		}
 		
 		return cleanIndustry;
-	}
-	
-	private double calculateCarbonOutput(double cleanIndustry, double energyOutput) throws Exception {
-		double carbonOutput;
-		
-		try {
-			carbonOutput = energyOutput * (1 - cleanIndustry);
-		}
-		catch (Exception e) {
-			throw new Exception("calculateCarbonOutput error: " + e);
-		}
-		
-		return carbonOutput;
 	}
 }

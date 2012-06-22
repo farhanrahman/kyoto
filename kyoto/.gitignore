@@ -2,3 +2,6 @@
 .project
 .settings
 target/
+bin/
+logs/
+run/TradeTest.launch

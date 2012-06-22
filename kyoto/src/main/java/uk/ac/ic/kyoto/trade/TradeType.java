@@ -1,4 +1,5 @@
 package uk.ac.ic.kyoto.trade;
+
 public enum TradeType{
-	BUY, SELL, CDM
+	BUY, SELL, INVEST, RECEIVE
 }
