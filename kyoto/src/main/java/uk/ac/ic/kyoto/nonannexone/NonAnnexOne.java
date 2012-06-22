@@ -258,7 +258,7 @@ public class NonAnnexOne extends AbstractCountry {
 		
 	}
 	
-/*****************************************************************************************************/	
+/************************************Invest in carbon industry but does not care about environment*****************************************************************/	
 	
 	private void energy_increase_without_care(double money)
 	{
@@ -274,7 +274,7 @@ public class NonAnnexOne extends AbstractCountry {
 		
 	
 	//Function that updates the energy goal each year.
-/*****************************************************************************************************/
+/*******************************************Update the energy aim every tick **********************************************************/
 		
 		private void update_energy_aim(double previous_aim,boolean success,int counter)
 		{
