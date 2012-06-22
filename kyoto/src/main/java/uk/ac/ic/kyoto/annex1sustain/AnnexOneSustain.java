@@ -1,6 +1,7 @@
 package uk.ac.ic.kyoto.annex1sustain;
 
 import java.util.UUID;
+import java.util.concurrent.Semaphore;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.Offer;
@@ -30,13 +31,12 @@ public class AnnexOneSustain extends AbstractCountry {
     //================================================================================
 	
 	protected double	surplusCarbonTarget;		// Number of credits we can and want to sell without carbon absorption/reduction
-	protected double	surplusCarbonSold;			// Number of credits that we sold this year
+	protected double	surplusCarbon;				// Number of credits we still have left
 	protected double	surplusCarbonPrice;			// Price of surplus carbon while within target
 	protected double	expectedSales;				// Specifies where our acceptable price will lie between two extreme profitability points
 	protected double	carbonToReduce;				// Carbon we have to reduce if sale was successful
 	protected double 	carbonToAbsorb;				// Carbon we have to absorb if sale was successful
-	protected boolean	tradeAllowed;				// States whether can engage in trades
-	protected boolean	tradeDone;					// Indicates if trade has been agreed upon in this turn
+	protected Semaphore tradeSemaphore;				// Semaphore making sure only one trade happens at any given time
 	
 	
 	//================================================================================
@@ -50,26 +50,48 @@ public class AnnexOneSustain extends AbstractCountry {
 		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput);
 		
 		this.surplusCarbonTarget = 0;
-		this.surplusCarbonSold = 0;
-		this.surplusCarbonPrice = 0;
-		this.expectedSales = 0;
+		this.surplusCarbon = 0;
+		this.surplusCarbonPrice = Constants.EXPECTED_SALES_INITIAL;
+		this.expectedSales = Constants.EXPECTED_SALES_INITIAL;
 		this.carbonToReduce = 0;
 		this.carbonToAbsorb = 0;
-		this.tradeAllowed = true;
-		this.tradeDone = false;
+		this.tradeSemaphore = new Semaphore(1);
 	}
 	
 	@Override
 	protected void initialiseCountry() {
 		setKyotoMemberLevel(KyotoMember.ANNEXONE);
-		surplusCarbonPrice = carbonReductionHandler.getInvestmentRequired(surplusCarbonTarget);
-		expectedSales = Constants.EXPECTED_SALES_INITIAL;
 	}
 	
 	
 	//================================================================================
-    // Behaviour
+    // Behaviour and Trading
     //================================================================================
+	
+	@Override
+	protected void behaviour() {
+		int ticksUntilEnd = getTicksUntilEnd();
+		
+		if (isKyotoMember() == KyotoMember.ANNEXONE) {
+			
+			// Normal behaviour during all but last 10 ticks of the year
+			if (ticksUntilEnd > 10) {
+				// Decrease price if semaphore set to 1 (no conversation or offer accepted at the start)
+				if (tradeSemaphore.availablePermits() == 1) {
+					surplusCarbonPrice /= Constants.PRICE_FAILURE_SCALER;
+					broadcastSellOffer(surplusCarbon, surplusCarbonPrice);
+				}
+			}
+			
+			// Final industry investment function
+			else if (ticksUntilEnd == 7) {
+				finalInvestments();
+			}
+		}
+		else {
+			// TODO: What to do when not in Kyoto?
+		}
+	}
 	
 	@Override
 	protected void processInput(Input input) {
@@ -83,44 +105,41 @@ public class AnnexOneSustain extends AbstractCountry {
 				
 				double quantityOffered = offer.getOfferQuantity();
 				double priceOffered = offer.getOfferUnitCost();
-				double surplusCarbon = surplusCarbonTarget - surplusCarbonSold;
 				
-				if (tradeAllowed) {
-					// If we have enough surplus carbon to cover the transaction
-					if (quantityOffered < surplusCarbon) {
-						double surplusSaleMargin = calculateSurplusSaleMargin(quantityOffered, priceOffered);
-						if (surplusSaleMargin > 0) {
+				// If we have enough surplus carbon to cover the transaction
+				if (quantityOffered < surplusCarbon) {
+					double surplusSaleMargin = calculateSurplusSaleMargin(quantityOffered, priceOffered);
+					if (surplusSaleMargin > 0) {
+						if (tradeSemaphore.tryAcquire()) {
 							this.tradeProtocol.respondToOffer(address, quantityOffered, offer);
-							tradeDone = true;
-							tradeAllowed = false;
 						}
 					}
-					// Else we need to invest to get required carbon
-					else {
-						double additionalCarbon = quantityOffered - surplusCarbon;
-						double additionalFunds = priceOffered * quantityOffered;
-						double surplusSaleMargin = calculateSurplusSaleMargin(surplusCarbon, priceOffered);
-						double reductionMargin = calculateReductionMargin(additionalCarbon, priceOffered);
-						double absorptionMargin = calculateAbsorptionMargin(additionalCarbon, priceOffered);
-						boolean reductionPossible = isReductionPossible(additionalCarbon, additionalFunds);
-						boolean absorptionPossible = isAbsorptionPossible(additionalCarbon, additionalFunds);
-						
-						// If reduction is possible and (more profitable than absorption or absorption impossible)
-						if ((reductionMargin > absorptionMargin || !absorptionPossible) && reductionPossible) {
-							if ((reductionMargin + surplusSaleMargin) > 0) {
+				}
+				// Else we need to invest to get required carbon
+				else {
+					double additionalCarbon = quantityOffered - surplusCarbon;
+					double additionalFunds = priceOffered * quantityOffered;
+					double surplusSaleMargin = calculateSurplusSaleMargin(surplusCarbon, priceOffered);
+					double reductionMargin = calculateReductionMargin(additionalCarbon, priceOffered);
+					double absorptionMargin = calculateAbsorptionMargin(additionalCarbon, priceOffered);
+					boolean reductionPossible = isReductionPossible(additionalCarbon, additionalFunds);
+					boolean absorptionPossible = isAbsorptionPossible(additionalCarbon, additionalFunds);
+					
+					// If reduction is possible and (more profitable than absorption or absorption impossible)
+					if ((reductionMargin > absorptionMargin || !absorptionPossible) && reductionPossible) {
+						if ((reductionMargin + surplusSaleMargin) > 0) {
+							if (tradeSemaphore.tryAcquire()) {
 								this.tradeProtocol.respondToOffer(address, quantityOffered, offer);
 								carbonToReduce = additionalCarbon;
-								tradeDone = true;
-								tradeAllowed = false;
 							}
 						}
-						// Else if absorption is profitable
-						else if (absorptionPossible) {
-							if ((absorptionMargin + surplusSaleMargin) > 0) {
+					}
+					// Else if absorption is possible
+					else if (absorptionPossible) {
+						if ((absorptionMargin + surplusSaleMargin) > 0) {
+							if (tradeSemaphore.tryAcquire()) {
 								this.tradeProtocol.respondToOffer(address, quantityOffered, offer);
 								carbonToAbsorb = additionalCarbon;
-								tradeDone = true;
-								tradeAllowed = false;
 							}
 						}
 					}
@@ -141,47 +160,47 @@ public class AnnexOneSustain extends AbstractCountry {
 	}		
 	
 	@Override
-	protected void behaviour() {
-		int ticksUntilEnd = getTicksUntilEnd();
-		
-		//System.out.println("/// Tick" + timeService.getCurrentTick());
-		
-		if (isKyotoMember() == KyotoMember.ANNEXONE) {
-			
-			// Scale price
-			if (surplusCarbonSold < surplusCarbonTarget) {
-				if (tradeDone) {
-					surplusCarbonPrice *= Constants.PRICE_SCALER;
-				}
-				else {
-					surplusCarbonPrice /= Constants.PRICE_SCALER;
-				}
-			}
-			
-			// Normal behaviour during all but last 10 ticks of the year
-			if (ticksUntilEnd > 10) {
-				double remainingCarbon = surplusCarbonTarget - surplusCarbonSold;
-				// If no trade happened in last tick, and still have surplus carbon, post own offer
-				if (!tradeDone && (remainingCarbon > 0)) {
-					broadcastSellOffer(remainingCarbon, surplusCarbonPrice);
-					tradeDone = false;
-				}
-			}
-			
-			// Final industry investment function
-			else if (ticksUntilEnd == 7) {
-				finalInvestments();
-			}
+	protected boolean acceptTrade(NetworkAddress address, Offer offer) {
+		if (tradeSemaphore.tryAcquire()) {
+			return true;
 		}
 		else {
-			// TODO: What to do when not in Kyoto?
+			return false;
 		}
 	}
 	
-	@Override
-	protected boolean acceptTrade(NetworkAddress address, Offer offer) {
-		return false;
+	protected void tradeWasSuccessful(NetworkAddress from, OfferMessage offerMessage) {
+		try {
+			if (Math.round(carbonToReduce) > 0) {
+				carbonReductionHandler.investInCarbonReduction(carbonToReduce);
+			}
+			else if (Math.round(carbonToAbsorb) > 0) {
+				carbonAbsorptionHandler.investInCarbonAbsorption(carbonToAbsorb);
+			}
+			carbonToReduce = 0;
+			carbonToAbsorb = 0;
+			if (Math.round(surplusCarbon) > 0) {
+				surplusCarbonPrice *= Constants.PRICE_SUCCESS_SCALER;;
+			}
+			tradeSemaphore.release();
+		}
+		catch (Exception e) {
+			logger.warn(this.getName() + ": Problem with investments after successful trade: " + e.getMessage());
+		}
 	}
+
+	protected void tradeHasFailed(NetworkAddress from, OfferMessage offerMessage) {
+		carbonToReduce = 0;
+		carbonToAbsorb = 0;
+		tradeSemaphore.release();
+	}
+
+	protected void tradeWasRejected(NetworkAddress from, OfferMessage offerMessage) {
+		carbonToReduce = 0;
+		carbonToAbsorb = 0;
+		tradeSemaphore.release();
+	}
+
 	
 	
 	//================================================================================
@@ -199,9 +218,16 @@ public class AnnexOneSustain extends AbstractCountry {
 	
 	@Override
 	public void sessionFunction() {
-		if ((surplusCarbonTarget < 0) && (isKyotoMember() == KyotoMember.ANNEXONE) && (timeService.getCurrentTick() != 0)) {
-			leaveKyoto();
-			logger.info("Leaving Kyoto, my target is below my emissions");
+		try {
+			double emissionIncrease = this.getEmissionsTarget() - (this.getCarbonOutput() - this.getCarbonAbsorption());
+			
+			if (Math.round(emissionIncrease) < 0) {
+				leaveKyoto();
+				logger.info("Leaving Kyoto, my target is below my emissions");
+			}
+		}
+		catch (Exception e) {
+			logger.warn("Problem with session function: " + e.getMessage());
 		}
 	}
 	
@@ -269,10 +295,10 @@ public class AnnexOneSustain extends AbstractCountry {
 	protected void finalInvestments() {
 		try {
 			// If credits are left, increase energy output if money available, as probably won't sell them next year either
-			double unsoldCarbon = surplusCarbonTarget - surplusCarbonSold;
-			if (unsoldCarbon > 0) {
-				double investmentCost = energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(unsoldCarbon);
+			if (surplusCarbon > 0) {
+				double investmentCost = energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(surplusCarbon);
 				double availableFunds = this.getAvailableToSpend();
+				
 				if (investmentCost < availableFunds) {
 					energyUsageHandler.investInCarbonIndustry(investmentCost);
 				}
@@ -287,44 +313,50 @@ public class AnnexOneSustain extends AbstractCountry {
 	}
 	
 	protected void updateExpectedSales() {
-		double percentageSold;
-		
 		try {
-			if (surplusCarbonTarget < 0.1) {
+			if (Math.round(surplusCarbonTarget) == 0) {
 				logger.info("AnnexOneSustain country " + this.getName() + ": There was no surplus carbon to sell, nothing to do");
 			}
+			else if (Math.round(surplusCarbon) == 0) {
+				expectedSales = 1;
+				logger.info("AnnexOneSustain country " + this.getName() + ": Setting expected sales to 100%");
+			}
 			else {
-				percentageSold = surplusCarbonSold / surplusCarbonTarget;
-				
-				if (percentageSold > 1) {
-					expectedSales = 1;
-					logger.info("AnnexOneSustain country " + this.getName() + ": Setting profitability treshold to 100%");
-				}
-				else {
-					expectedSales = percentageSold;
-					logger.info("AnnexOneSustain country " + this.getName() + ": Setting profitability treshold to " + String.valueOf(percentageSold * 100) + "%");
-				}
+				double percentageSold = (surplusCarbonTarget - surplusCarbon) / surplusCarbonTarget;
+				expectedSales = percentageSold;
+				logger.info("AnnexOneSustain country " + this.getName() + ": Setting expected sales to " + String.valueOf(percentageSold * 100) + "%");
 			}
 		}
 		catch (Exception e) {
-			logger.warn("Problem with setting: " + e.getMessage());
+			logger.warn("Problem with updating expected sales: " + e.getMessage());
 		}
 	}
 	
 	protected void resetYearlyTargets() {
-		surplusCarbonTarget = this.getEmissionsTarget() - (this.getCarbonOutput() - this.getCarbonAbsorption()) + this.getCarbonOffset();
+		updateSurplusCarbon();
+		surplusCarbonTarget = surplusCarbon;
+		
 		System.out.println("*** emissionsTarget: " + this.getEmissionsTarget());
 		System.out.println("*** carbonOutput: " + this.getCarbonOutput());
 		System.out.println("*** carbonAbsorption: " + this.getCarbonAbsorption());
 		System.out.println("*** carbonOffset: " + this.getCarbonOffset());
 		System.out.println("*** surplusCarbonTarget: " + surplusCarbonTarget);
-		surplusCarbonSold = 0;
 	}
 	
 	
 	//================================================================================
     // Trade decisions
     //================================================================================
+	
+	protected void updateSurplusCarbon() {
+		try{
+			surplusCarbon = this.getEmissionsTarget() - (this.getCarbonOutput() - this.getCarbonAbsorption()) + this.getCarbonOffset();
+		}
+		catch (Exception e) {
+			logger.warn("Problem with calculating surplus carbon: " + e.getMessage());
+			surplusCarbon = 0;
+		}
+	}
 	
 	protected double calculateSessionOffsetGain(double carbonDifference) {
 		double sessionOffsetGain;
