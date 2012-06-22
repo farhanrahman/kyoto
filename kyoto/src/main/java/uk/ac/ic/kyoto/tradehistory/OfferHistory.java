@@ -15,7 +15,7 @@ import uk.ac.imperial.presage2.core.Time;
  * @author farhanrahman
  *
  */
-public class OfferHistory implements TradeHistory {
+public class OfferHistory {
 	
 	private static Map<Integer, Map<UUID, OfferMessage>> history = new HashMap<Integer,Map<UUID,OfferMessage>>();
 	/**
@@ -29,17 +29,19 @@ public class OfferHistory implements TradeHistory {
 		
 	}
 	
-	@Override
+
 	public Map<Integer, Map<UUID, OfferMessage>> getHistory() {
 		return Collections.unmodifiableMap(new HashMap<Integer, Map<UUID,OfferMessage>>(history));
 	}
 
-	@Override
 	public Map<UUID, OfferMessage> getHistoryForTime(Time simTime) {
 		return Collections.unmodifiableMap(history.get(simTime.intValue()));
 	}
+	
+	public Map<UUID, OfferMessage> getHistoryForTime(Integer simTime) {
+		return Collections.unmodifiableMap(history.get(simTime));
+	}
 
-	@Override
 	public boolean tradeExists(UUID id) {
 		synchronized(history){
 			for(Integer time : history.keySet()){
@@ -52,7 +54,7 @@ public class OfferHistory implements TradeHistory {
 		return false;
 	}
 
-	@Override
+
 	public void addToHistory(Time simTime, UUID tradeID, OfferMessage trade) {
 		synchronized(history){
 			Map<UUID, OfferMessage> t = new HashMap<UUID,OfferMessage>();
@@ -61,15 +63,5 @@ public class OfferHistory implements TradeHistory {
 		}
 		
 	}
-
-	/*Unused methods - USED FOR TRADEHISTORY*/
-	@Override
-	public void removeTradeHistoryWithID(UUID id) {}
-
-	@Override
-	public void dumpData(){}
-
-	@Override
-	public void setSimID(Long simID) {}
 
 }
