@@ -15,7 +15,7 @@ class CountrySimulator {
 
 	// TODO, look ahead a minimum of 5 years or a maximum of 15 years. Always
 	// end at a session end.
-	final private int LOOK_AHEAD_YEARS = 11;
+	private int LOOK_AHEAD_YEARS;
 	private int SANCTION_YEAR;
 
 	public CountrySimulator(AnnexOneReduce country) {
@@ -24,22 +24,26 @@ class CountrySimulator {
 
 	final private AnnexOneReduce country;
 
-	private StateList[] stateList = new StateList[LOOK_AHEAD_YEARS];
+	private StateList[] stateList;
 
 	private CountryState startState;
 
-	public CountryState simulate(double carbonOutput, double energyOutput,
+	public ActionList simulate(double carbonOutput, double energyOutput,
 			double prevEnergyOutput, double carbonOffset,
 			double carbonAbsorption, double emissionsTarget,
 			double availableToSpend, double GDP, double GDPRate,
 			double arableLandArea, int yearsUntilSanctions) {
-		
+
 		this.SANCTION_YEAR = yearsUntilSanctions;
+		this.LOOK_AHEAD_YEARS = Math.max(SANCTION_YEAR + 12, 15);
 
 		// Initialise the starting point in the simulation
 		startState = new CountryState(carbonOutput, energyOutput,
 				prevEnergyOutput, carbonOffset, carbonAbsorption,
 				emissionsTarget, availableToSpend, GDP, GDPRate, arableLandArea);
+
+		// Init the array lists
+		stateList = new StateList[LOOK_AHEAD_YEARS];
 
 		// Reset old simulation data
 		for (int i = 0; i < LOOK_AHEAD_YEARS; i++) {
@@ -100,23 +104,28 @@ class CountrySimulator {
 			}
 		}
 
-		CountryState optimalState = getOptimalState(stateList[LOOK_AHEAD_YEARS - 1].sellStates);
+		ActionList megaAction = getOptimalState(stateList[LOOK_AHEAD_YEARS - 1].sellStates);
 
-		return optimalState;
+		return megaAction;
 
 	}
 
 	/**
-	 * Look at the given array of countryStates and return one of the optimal states
+	 * Look at the given array of countryStates and return one of the optimal
+	 * states
 	 * 
 	 * @return
 	 */
-	private CountryState getOptimalState(ArrayList<CountryState> states) {
+	private ActionList getOptimalState(ArrayList<CountryState> states) {
 
 		HashSet<CountryState> startSellStates = new HashSet<CountryState>();
 
+		ArrayList<CountryState> startSellList = new ArrayList<CountryState>();
+
 		for (int i = 0; i < states.size(); i++) {
-			startSellStates.add(states.get(i).getStartSellState());
+			CountryState state = states.get(i).getStartSellState();
+			startSellStates.add(state);
+			startSellList.add(state);
 		}
 
 		Iterator<CountryState> iterator = startSellStates.iterator();
@@ -131,10 +140,72 @@ class CountrySimulator {
 
 		System.out.println();
 		System.out.println("NumStates = " + startSellStates.size());
-		
-		iterator = startSellStates.iterator();
 
-		return iterator.next();
+		float s_investFrac = 0;
+		float s_sellFrac = 0;
+		float s_shutDownFrac = 0;
+
+		float m_buyCreditOffsetFrac = 0;
+		float m_industryFrac = 0;
+		float m_investOffsetFrac = 0;
+
+		float r_buyCreditFrac = 0;
+		float r_investFrac = 0;
+		float r_shutDownFrac = 0;
+
+		for (int i = 0; i < startSellList.size(); i++) {
+			CountryState optimalState = startSellList.get(i);
+
+			SellAction sellAction = (SellAction) optimalState.action;
+			MaintainAction maintainAction = (MaintainAction) optimalState.previousState.action;
+			ReduceAction reduceAction = (ReduceAction) optimalState.previousState.previousState.action;
+
+			s_investFrac += sellAction.investFrac;
+			s_sellFrac += sellAction.sellFrac;
+			s_shutDownFrac += sellAction.shutDownFrac;
+
+			m_buyCreditOffsetFrac += maintainAction.buyCreditOffsetFrac;
+			m_industryFrac += maintainAction.industryFrac;
+			m_investOffsetFrac += maintainAction.investOffsetFrac;
+
+			r_buyCreditFrac += reduceAction.buyCreditFrac;
+			r_investFrac += reduceAction.investFrac;
+			r_shutDownFrac += reduceAction.shutDownFrac;
+
+		}
+
+		int size = startSellList.size();
+
+		s_investFrac /= size;
+		s_sellFrac /= size;
+		s_shutDownFrac /= size;
+
+		m_buyCreditOffsetFrac /= size;
+		m_industryFrac /= size;
+		m_investOffsetFrac /= size;
+
+		r_buyCreditFrac /= size;
+		r_investFrac /= size;
+		r_shutDownFrac /= size;
+		
+		System.out.println("s_investFrac " + s_investFrac);
+		System.out.println("s_sellFrac " + s_sellFrac);
+		System.out.println("s_shutDownFrac " + s_shutDownFrac);
+		
+		System.out.println("m_buyCreditOffsetFrac " + m_buyCreditOffsetFrac);
+		System.out.println("m_industryFrac " + m_industryFrac);
+		System.out.println("m_investOffsetFrac " + m_investOffsetFrac);
+		
+		System.out.println("r_buyCreditFrac " + r_buyCreditFrac);
+		System.out.println("r_investFrac " + r_investFrac);
+		System.out.println("r_shutDownFrac " + r_shutDownFrac);
+
+		ActionList megaAction = new ActionList(new ReduceAction(r_shutDownFrac,
+				r_buyCreditFrac, r_investFrac), new MaintainAction(
+				m_industryFrac, m_investOffsetFrac, m_buyCreditOffsetFrac),
+				new SellAction(s_shutDownFrac, s_investFrac, s_sellFrac));
+
+		return megaAction;
 	}
 
 	/**
@@ -289,7 +360,7 @@ class CountrySimulator {
 			double carbonOffsetIncreased = oldCarbonDifference
 					* action.buyCreditFrac;
 			double marketCost = country.getMarketBuyPrice(
-					carbonOffsetIncreased, this.year);
+					carbonOffsetIncreased);
 			this.availableToSpend = previousState.availableToSpend
 					- investmentCost - marketCost;
 
@@ -349,7 +420,7 @@ class CountrySimulator {
 			double carbonCreditIncrease = action.buyCreditOffsetFrac
 					* energyIncrease;
 			double marketBuyPrice = country.getMarketBuyPrice(
-					carbonCreditIncrease, this.year);
+					carbonCreditIncrease);
 
 			// Amount of carbon we need to reduce by investing in offsets
 			double[] investments = new double[2];
@@ -369,6 +440,7 @@ class CountrySimulator {
 
 			if (this.year == SANCTION_YEAR) {
 				carbonOffset = 0;
+				SANCTION_YEAR += 10;
 			} else {
 				carbonOffset = previousState.carbonOffset
 						+ carbonCreditIncrease;
@@ -434,7 +506,7 @@ class CountrySimulator {
 			double totalCreditsSold = carbonBelowTarget * action.sellFrac;
 
 			double marketSellEarnings = country.getMarketSellPrice(
-					totalCreditsSold, this.year);
+					totalCreditsSold);
 
 			this.availableToSpend = previousState.availableToSpend
 					- investmentCost + marketSellEarnings;
@@ -451,6 +523,13 @@ class CountrySimulator {
 			carbonDiff = this.carbonOutput - carbonAbsorption;
 		}
 
+		private double getCarbonDifference() {
+			double netCarbonOutput = this.carbonOutput - this.carbonAbsorption
+					- this.carbonOffset;
+			double carbonDifference = netCarbonOutput - this.emissionsTarget;
+			return carbonDifference;
+		}
+
 		/**
 		 * Branch off for all reduce actions
 		 */
@@ -459,9 +538,9 @@ class CountrySimulator {
 			float buyCredit;
 			float invest;
 
-			int maxGrains = 5;
-			int minGrains = 3;
-			int yearModifier = Math.max(0, 1 * this.year);
+			int maxGrains = 10;
+			int minGrains = 2;
+			int yearModifier = Math.max(0, 3 * this.year);
 			int numGrains = Math.max(maxGrains - yearModifier, minGrains);
 			float grain = 100f / numGrains;
 
@@ -496,7 +575,7 @@ class CountrySimulator {
 			float buyCreditOffsetFrac;
 
 			// Do nothing
-			new CountryState(this, new MaintainAction(0, 0, 0));
+			new CountryState(this, new MaintainAction(0, 1, 0));
 
 			// If we shut down factories last phase, it's pointless to invest in
 			// factories this phase
@@ -507,11 +586,11 @@ class CountrySimulator {
 			// Invest some chunk of our available cash in industry, offset it by
 			// buying credits or absorbing
 
-			int maxGrains = 8;
-			int minGrains = 3;
-			int yearModifier = Math.max(0, 1 * this.year);
+			int maxGrains = 10;
+			int minGrains = 2;
+			int yearModifier = Math.max(0, 3 * this.year);
 			int numGrains = Math.max(maxGrains - yearModifier, minGrains);
-			float max = 70f;
+			float max = 90f;
 			float grain = max / numGrains;
 			float min = grain;
 
@@ -550,17 +629,17 @@ class CountrySimulator {
 			float investFrac;
 			float sellFrac;
 
-			int maxGrains = 5;
-			int minGrains = 3;
-			int yearModifier = Math.max(0, 1 * this.year);
+			int maxGrains = 10;
+			int minGrains = 2;
+			int yearModifier = Math.max(0, 3 * this.year);
 			int numGrains = Math.max(maxGrains - yearModifier, minGrains);
-			float max = 1f;
+			float max = 2f;
 			float grain = max / numGrains;
 			float min = grain;
 
 			// Sell any offset if we happen to have excess
 			new CountryState(this, new SellAction(0, 0, 1));
-			
+
 			// Do nothing
 			new CountryState(this, new SellAction(0, 0, 0));
 
@@ -631,17 +710,8 @@ class CountrySimulator {
 			}
 		}
 
-		/**
-		 * @return a slight overestimate of the carbon we need to offset.
-		 *         Positive means we need to reduce to meet our target
-		 */
-		private double getCarbonDifference() {
-			return 1.01 * (this.carbonOffset + this.carbonOutput
-					+ this.carbonAbsorption - this.emissionsTarget);
-		}
-
 	}
-	
+
 	private static double calculateGDPRate(double oldGDPRate,
 			double energyOutput, double prevEnergyOutput) {
 
@@ -741,17 +811,17 @@ class CountrySimulator {
 				isBetter = false;
 			}
 
-			// If we have less carbon output
-			if (state1.carbonDiff < state2.carbonDiff) {
-				isWorse = false;
-			} else if (state1.carbonDiff > state2.carbonDiff) {
-				isBetter = false;
-			}
-
 			// If we make more energy
 			if (state1.energyOutput > state2.energyOutput) {
 				isWorse = false;
 			} else if (state1.energyOutput < state2.energyOutput) {
+				isBetter = false;
+			}
+
+			// If we have less carbon output
+			if (state1.carbonDiff < state2.carbonDiff) {
+				isWorse = false;
+			} else if (state1.carbonDiff > state2.carbonDiff) {
 				isBetter = false;
 			}
 
@@ -922,12 +992,12 @@ class CountrySimulator {
 				isBetter = false;
 			}
 
-			// If we make more energy
-			if (state1.energyOutput > state2.energyOutput) {
-				isWorse = false;
-			} else if (state1.energyOutput < state2.energyOutput) {
-				isBetter = false;
-			}
+			// // If we make more energy
+			// if (state1.energyOutput > state2.energyOutput) {
+			// isWorse = false;
+			// } else if (state1.energyOutput < state2.energyOutput) {
+			// isBetter = false;
+			// }
 
 			// // If we have less carbon output
 			// if (state1.carbonDiff < state2.carbonDiff) {
@@ -966,6 +1036,18 @@ class CountrySimulator {
 				CountryState state2);
 
 		public abstract void printDetails();
+	}
+
+	static class ActionList {
+		final ReduceAction reduce;
+		final MaintainAction maintain;
+		final SellAction sell;
+
+		public ActionList(ReduceAction r, MaintainAction m, SellAction s) {
+			reduce = r;
+			maintain = m;
+			sell = s;
+		}
 	}
 
 }

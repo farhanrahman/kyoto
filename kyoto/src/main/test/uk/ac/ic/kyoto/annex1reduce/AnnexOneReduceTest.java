@@ -30,7 +30,7 @@ public class AnnexOneReduceTest {
 		double energyOutput = 703718793;
 		double carbonOutput = 409094000;
 		double availableToSpend = GDP * GameConst.getPercentageOfGdp();
-		double emissionsTarget = 0.99 * carbonOutput;
+		double emissionsTarget = 0.97 * carbonOutput;
 		
 		test = new AnnexOneReduce(UUID.randomUUID(), "JunitTest", "JUT",
 				landArea, arableLandArea, GDP, GDPRate, energyOutput,
@@ -48,7 +48,7 @@ public class AnnexOneReduceTest {
 	@Test
 	public void testbehaviour() {
 
-		test.behaviour();
+		test.yearlyFunction();
 
 	}
 

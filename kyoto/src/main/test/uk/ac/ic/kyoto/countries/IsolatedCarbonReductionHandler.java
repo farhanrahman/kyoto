@@ -78,7 +78,6 @@ public final class IsolatedCarbonReductionHandler{
 	 * @return
 	 * APPROXIMATE Change in carbon output from specified cost.
 	 */
-	@Deprecated 
 	public final double getCarbonOutputChange(double investmentAmount) {
 		return getCarbonOutputChange(investmentAmount, country.carbonOutput, country.energyOutput);
 	}
