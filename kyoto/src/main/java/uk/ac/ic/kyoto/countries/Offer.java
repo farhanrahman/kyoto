@@ -57,27 +57,46 @@ public class Offer{
 		return "Trade: "+quantity+" @ "+unitCost; 
 	}
 
-	public boolean equals(Offer t){
-		if(this == t) {
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		} else if (	this.quantity == t.getQuantity() && 
-					this.unitCost == t.getUnitCost() && 
-					this.type == t.getType() &&
-					this.itype == t.getInvestmentType()) {
-			return true;
-		} else if (	this.quantity == -t.getQuantity() &&
-					this.unitCost == t.getUnitCost() && 
-					this.type == t.reverse().getType() &&
-					this.itype == t.getInvestmentType()){
-			return true;
-		} else if ( this.quantity == t.getQuantity() &&
-					this.unitCost == -t.getUnitCost() &&
-					this.type == t.reverse().getType() &&
-					this.itype == t.getInvestmentType()){
-			return true;
-		} else {
+		if (obj == null)
 			return false;
-		}
+		if (!(obj instanceof Offer))
+			return false;
+		Offer other = (Offer) obj;
+		if (itype != other.itype)
+			return false;
+		if (Double.doubleToLongBits(quantity) != Double
+				.doubleToLongBits(other.quantity))
+			return false;
+		if (type != other.type)
+			return false;
+		if (Double.doubleToLongBits(unitCost) != Double
+				.doubleToLongBits(other.unitCost))
+			return false;
+		return true;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((itype == null) ? 0 : itype.hashCode());
+		long temp;
+		temp = Double.doubleToLongBits(quantity);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		temp = Double.doubleToLongBits(unitCost);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		return result;
 	}
 
 	public Offer reverse(){
