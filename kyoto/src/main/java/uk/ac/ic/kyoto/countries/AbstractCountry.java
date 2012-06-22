@@ -244,17 +244,20 @@ public abstract class AbstractCountry extends AbstractParticipant {
 					if (kyotoMemberLevel == KyotoMember.ANNEXONE) {
 						MonitorTax();
 					}
-					
-					yearlyFunction();
 				}
 				
 			if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
 				resetCarbonOffset();
 				sessionFunction();
 			}
+			
+			if (timeService.getCurrentTick() % timeService.getTicksInYear() == 2) {
+				yearlyFunction();
+			}
 	
 			//leave a 10-tick grace period to allow current trades to complete before performing end of year routine
-			if (timeService.getCurrentTick() % timeService.getTicksInYear() < timeService.getTicksInYear() - 5 ) {
+			if (timeService.getCurrentTick() % timeService.getTicksInYear() < timeService.getTicksInYear() - 5
+					&& timeService.getCurrentTick() % timeService.getTicksInYear() > 2) {
 				behaviour();
 			}
 			
@@ -441,7 +444,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			
 			if (energyOutput-prevEnergyOutput >= 0){	
 				sum = (((energyOutput-prevEnergyOutput)/prevEnergyOutput)*GameConst.getEnergyGrowthScaler() *marketStateFactor+GDPRate*100)/2;
-				GDPRate = GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler());
+				if (sum < 0)
+					GDPRate = -(GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(sum*GameConst.getGrowthScaler()));
+				else
+					GDPRate = GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler());
 			}
 			else{
 				sum = ((energyOutput-prevEnergyOutput)/prevEnergyOutput)*GameConst.getEnergyGrowthScaler();
@@ -567,7 +573,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.carbonOffset += amount;
 	}
 	
-	protected final OfferMessage broadcastSellOffer(int quantity, double unitCost){
+	protected final OfferMessage broadcastSellOffer(double quantity, double unitCost){
 		Offer trade = new Offer(quantity, unitCost, TradeType.SELL);
 		OfferMessage returnObject = new OfferMessage(
 				trade,
@@ -586,7 +592,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			return returnObject;
 	}
 
-	protected final OfferMessage broadcastBuyOffer(int quantity, double unitCost){
+	protected final OfferMessage broadcastBuyOffer(double quantity, double unitCost){
 		Offer trade = new Offer(quantity, unitCost, TradeType.BUY);
 		
 		/*DEBUG*/

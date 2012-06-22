@@ -1,10 +1,7 @@
 package uk.ac.ic.kyoto.annex1reduce;
 
-import java.awt.event.ActionListener;
 import java.util.UUID;
-
-import uk.ac.ic.kyoto.annex1reduce.CountrySimulator.*;
-import uk.ac.ic.kyoto.countries.IsolatedAbstractCountry;
+import uk.ac.ic.kyoto.annex1reduce.CountrySimulator.ActionList;
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.Offer;
 import uk.ac.ic.kyoto.exceptions.NotEnoughCarbonOutputException;

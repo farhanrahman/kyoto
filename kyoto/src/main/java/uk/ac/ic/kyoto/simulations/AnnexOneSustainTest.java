@@ -15,7 +15,7 @@ import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReportHandler;
 import uk.ac.ic.kyoto.countries.CarbonTarget;
 import uk.ac.ic.kyoto.countries.Monitor;
 import uk.ac.ic.kyoto.countries.testCountries.GDPTestCount;
-import uk.ac.ic.kyoto.nonannexone.BIC;
+import uk.ac.ic.kyoto.nonannexone.NonAnnexOne;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.Economy;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
@@ -82,7 +82,7 @@ public class AnnexOneSustainTest extends InjectedSimulation {
 			String ISO = "DE";
 			AbstractParticipant p = new AnnexOneSustain(Random.randomUUID(), name, ISO, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput);
 			s.addParticipant(p);
-			CarbonData1990.addCountry(ISO, 900000000);
+			CarbonData1990.addCountry(ISO, 1000000000);
 		
 	}
 }
