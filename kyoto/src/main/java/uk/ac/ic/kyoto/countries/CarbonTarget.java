@@ -273,9 +273,15 @@ public class CarbonTarget extends EnvironmentService {
 	private void generateSessionTarget(countryObject country, double kyotoTarget)
 	{	
 		country.lastSessionTarget = country.currentSessionTarget;
-		country.currentSessionTarget = country.proportion * kyotoTarget;
-		if ((country.lastSessionTarget - country.currentSessionTarget) / country.lastSessionTarget > 0.1 ) {
-			country.currentSessionTarget = country.lastSessionTarget*0.9;
+		double newTarget = country.proportion * kyotoTarget;
+		double diffTargets  = country.lastSessionTarget - newTarget;
+		
+		if (diffTargets < 0) {
+			newTarget = country.lastSessionTarget;
+		} else if (diffTargets / country.lastSessionTarget > 0.1) {
+			newTarget = country.lastSessionTarget * 0.9;
 		}
+		
+		country.currentSessionTarget = newTarget;
 	}
 }
