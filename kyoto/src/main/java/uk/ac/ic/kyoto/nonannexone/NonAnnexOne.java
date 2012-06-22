@@ -64,7 +64,7 @@ public class NonAnnexOne extends AbstractCountry {
 									o.getOfferQuantity(), 
 									o);
 						} catch (FSMException e) {
-							e.printStackTrace();
+							logger.warn(e);
 						}
 					}
 				}catch(ClassCastException e){
@@ -96,9 +96,9 @@ public class NonAnnexOne extends AbstractCountry {
 		try {
 			economy();
 		} catch (IllegalArgumentException e) {
-		e.printStackTrace();
+			logger.warn(e);
 		} catch (Exception e) {
-		e.printStackTrace();
+			logger.warn(e);
 		} 
 		
 		

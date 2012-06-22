@@ -13,6 +13,7 @@ import uk.ac.ic.kyoto.actions.ApplyMonitorTaxHandler;
 import uk.ac.ic.kyoto.actions.QueryEmissionsTargetHandler;
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReportHandler;
 import uk.ac.ic.kyoto.annex1reduce.AnnexOneReduce;
+import uk.ac.ic.kyoto.annex1sustain.AnnexOneSustain;
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.CarbonTarget;
 import uk.ac.ic.kyoto.countries.GameConst;
@@ -166,16 +167,16 @@ public class Simulation extends InjectedSimulation {
 //										Double.parseDouble(countryData.getEnergyOutput()), 
 //										Double.parseDouble(countryData.getCarbonOutput()));					
 					} else if(className.equals("AnnexOneSustain")){
-//						abstractCountry = new AnnexOneSustain(
-//										Random.randomUUID(), 
-//										countryData.getName(),
-//										countryData.getISO(), 
-//										Double.parseDouble(countryData.getLandArea()), 
-//										Double.parseDouble(countryData.getArableLandArea()), 
-//										Double.parseDouble(countryData.getGDP()),
-//										Double.parseDouble(countryData.getGDPRate()),
-//										Long.parseLong(countryData.getEnergyOutput()), 
-//										Long.parseLong(countryData.getCarbonOutput()));		
+						abstractCountry = new AnnexOneSustain(
+										Random.randomUUID(), 
+										countryData.getName(),
+										countryData.getISO(), 
+										Double.parseDouble(countryData.getLandArea()), 
+										Double.parseDouble(countryData.getArableLandArea()), 
+										Double.parseDouble(countryData.getGDP()),
+										Double.parseDouble(countryData.getGDPRate()),
+										Long.parseLong(countryData.getEnergyOutput()), 
+										Long.parseLong(countryData.getCarbonOutput()));		
 					} else if(className.equals("USAgent")){
 						
 					}
