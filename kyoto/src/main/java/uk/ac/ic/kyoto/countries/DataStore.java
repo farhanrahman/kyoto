@@ -24,6 +24,7 @@ public class DataStore {
 	private Map<Integer, String> carbonOutputHistory = new TreeMap<Integer,String>();
 	private Map<Integer, String> energyOutputHistory = new TreeMap<Integer,String>();
 	private Map<Integer, String> landAreaHistory = new TreeMap<Integer,String>();
+	private Map<Integer, String> arableLandAreaHistory = new TreeMap<Integer,String>();
 	private Map<Integer, String> isKyotoMemberHistory = new TreeMap<Integer,String>();
 
 	
@@ -35,6 +36,7 @@ public class DataStore {
 	public static final String carbonOutputKey = "carbon_output";
 	public static final String energyOutputKey = "energy_output";
 	public static final String landAreaKey = "land_area";
+	public static final String arableLandAreaKey = "arable_land_area";
 	public static final String isKyotoMemberKey = "is_kyoto_member";
 	public static final String cheated = "cheated";
 	
@@ -99,6 +101,10 @@ public class DataStore {
 	
 	public void addLandArea(double landArea){
 		this.landAreaHistory.put(SimTime.get().intValue(), Double.toString(landArea));
+	}
+	
+	public void addArableLandArea(double arableLandArea){
+		this.arableLandAreaHistory.put(SimTime.get().intValue(), Double.toString(arableLandArea));
 	}
 	/**
 	 * update whether the particpant is a member
@@ -172,6 +178,15 @@ public class DataStore {
 	
 	public Map<Integer, String> getLandAreaHistory() {
 		return ImmutableMap.copyOf(landAreaHistory);
+	}
+	
+	/**
+	 * @return a map of arable land area history
+	 * 
+	 */
+	
+	public Map<Integer, String> getArableLandAreaHistory() {
+		return ImmutableMap.copyOf(arableLandAreaHistory);
 	}
 	
 	/**
