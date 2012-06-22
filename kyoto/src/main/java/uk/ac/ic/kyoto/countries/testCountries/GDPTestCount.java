@@ -29,10 +29,10 @@ public class GDPTestCount extends AbstractCountry {
 		/*
 		 * Looking to find the difference between if there had been investment and if there hadn't
 		 */
-//		if (i == 0){
+		if (i == 0){
 			try {
-				System.out.println("Investment of 1000000: " + energyUsageHandler.calculateCarbonIndustryGrowth(1000000));
-				energyUsageHandler.reduceEnergyOutput(1000000);
+				System.out.println("Reducing energy output by 10%");
+				energyUsageHandler.reduceEnergyOutput(getEnergyOutput()*0.1);
 			} catch (IllegalArgumentException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -40,9 +40,8 @@ public class GDPTestCount extends AbstractCountry {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-//			i++;
-//			
-//		}
+			i++;
+		}
 //		
 //		double sum = (((getEnergyOutput()-getPrevEnergyOut())/getPrevEnergyOut())*GameConst.getEnergyGrowthScaler() +getGDPRate()*100)/2;
 //		GDPRate = GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler());
@@ -72,6 +71,7 @@ public class GDPTestCount extends AbstractCountry {
 		logger.debug("Availiable to Spend: " + getAvailableToSpend());
 		logger.debug("Current Energy Output: " + this.getEnergyOutput());
 		logger.debug("Current Previous Energy Output: " + this.getPrevEnergyOutput());
+		logger.debug("Energy Ratio: "+ (getEnergyOutput()-getPrevEnergyOutput())/getPrevEnergyOutput());
 		logger.debug("Current CO2 Output: " + this.getCarbonOutput());
 		logger.debug("Emissions Target: " + this.getEmissionsTarget());
 		
