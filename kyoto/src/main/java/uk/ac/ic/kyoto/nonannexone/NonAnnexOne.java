@@ -38,7 +38,7 @@ public class NonAnnexOne extends AbstractCountry {
 	public NonAnnexOne(UUID id, String name, String ISO, double landArea, double arableLandArea, double GDP,
 			double GDPRate, double energyOutput, double carbonOutput){
 		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput);
-		
+		setKyotoMemberLevel(KyotoMember.NONANNEXONE);
 	}
 	
 	//Inherited functions......................................................................
@@ -113,7 +113,7 @@ public class NonAnnexOne extends AbstractCountry {
 		// TODO Auto-generated method stub
 		energy_aim = getEnergyOutput() + CountryConstants.INITIAL_ENERGY_THRESHOLD ; //initialise energy aim.
 		environment_friendly_target = getCarbonOutput() + CountryConstants.INITIAL_CARBON_TARGET; //initialise a target 
-		setKyotoMemberLevel(KyotoMember.NONANNEXONE);
+		
 		
 	}
 	//.......................................................................................
@@ -231,7 +231,7 @@ public class NonAnnexOne extends AbstractCountry {
 			try{ //also since country exceeds its own carbon target, invests in carbon absorption or carbon reduction in order to get carbon offset.
 				carbon_difference = (getCarbonOutput() + energyUsageHandler.calculateCarbonIndustryGrowth(money_invest)) - environment_friendly_target;
 				
-				if (carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend() )
+				if ((carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend()) && ((carbonAbsorptionHandler.getForestAreaRequired(carbon_difference) < available_area)))
 					{
 					carbonAbsorptionHandler.investInCarbonAbsorption(carbon_difference);
 					logger.info("Country invests in carbon absorption to increase carbon absorption and thus reach environment target carbon output");
