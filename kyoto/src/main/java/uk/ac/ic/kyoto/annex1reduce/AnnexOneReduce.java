@@ -226,7 +226,7 @@ public class AnnexOneReduce extends AbstractCountry {
 			try {
 				energyUsageHandler.reduceEnergyOutput(r_shutDownCarbon);
 			} catch (NotEnoughCarbonOutputException e) {
-				e.printStackTrace();
+				logger.warn(e);
 			}
 		}
 
@@ -243,9 +243,9 @@ public class AnnexOneReduce extends AbstractCountry {
 			try {
 				carbonAbsorptionHandler.investInCarbonAbsorption(carbonChange);
 			} catch (NotEnoughLandException e) {
-				e.printStackTrace();
+				logger.warn(e);
 			} catch (NotEnoughCashException e) {
-				e.printStackTrace();
+				logger.warn(e);
 			}
 		}
 
@@ -256,9 +256,9 @@ public class AnnexOneReduce extends AbstractCountry {
 			try {
 				carbonReductionHandler.investInCarbonReduction(carbonChange);
 			} catch (NotEnoughCarbonOutputException e) {
-				e.printStackTrace();
+				logger.warn(e);
 			} catch (NotEnoughCashException e) {
-				e.printStackTrace();
+				logger.warn(e);
 			}
 		}
 
@@ -275,7 +275,7 @@ public class AnnexOneReduce extends AbstractCountry {
 			try {
 				energyUsageHandler.investInCarbonIndustry(industryPrice);
 			} catch (NotEnoughCashException e) {
-				e.printStackTrace();
+				logger.warn(e);
 			}
 		}
 
@@ -293,9 +293,9 @@ public class AnnexOneReduce extends AbstractCountry {
 			try {
 				carbonAbsorptionHandler.investInCarbonAbsorption(carbonChange);
 			} catch (NotEnoughLandException e) {
-				e.printStackTrace();
+				logger.warn(e);
 			} catch (NotEnoughCashException e) {
-				e.printStackTrace();
+				logger.warn(e);
 			}
 		}
 
@@ -306,9 +306,9 @@ public class AnnexOneReduce extends AbstractCountry {
 			try {
 				carbonReductionHandler.investInCarbonReduction(carbonChange);
 			} catch (NotEnoughCarbonOutputException e) {
-				e.printStackTrace();
+				logger.warn(e);
 			} catch (NotEnoughCashException e) {
-				e.printStackTrace();
+				logger.warn(e);
 			}
 		}
 
@@ -326,7 +326,7 @@ public class AnnexOneReduce extends AbstractCountry {
 			try {
 				energyUsageHandler.reduceEnergyOutput(shutDownCarbonReduction);
 			} catch (NotEnoughCarbonOutputException e) {
-				e.printStackTrace();
+				logger.warn(e);
 			}
 		}
 
@@ -344,9 +344,9 @@ public class AnnexOneReduce extends AbstractCountry {
 			try {
 				carbonAbsorptionHandler.investInCarbonAbsorption(carbonChange);
 			} catch (NotEnoughLandException e) {
-				e.printStackTrace();
+				logger.warn(e);
 			} catch (NotEnoughCashException e) {
-				e.printStackTrace();
+				logger.warn(e);
 			}
 		}
 
@@ -357,9 +357,9 @@ public class AnnexOneReduce extends AbstractCountry {
 			try {
 				carbonReductionHandler.investInCarbonReduction(carbonChange);
 			} catch (NotEnoughCarbonOutputException e) {
-				e.printStackTrace();
+				logger.warn(e);
 			} catch (NotEnoughCashException e) {
-				e.printStackTrace();
+				logger.warn(e);
 			}
 		}
 
@@ -432,7 +432,7 @@ public class AnnexOneReduce extends AbstractCountry {
 			prevCost = this.carbonAbsorptionHandler.getInvestmentRequired(
 					carbonReduction, arableLandArea);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warn(e);
 			investments[0] = 0;
 			investments[1] = 0;
 			return 0;
@@ -457,7 +457,7 @@ public class AnnexOneReduce extends AbstractCountry {
 						reduceFrac * carbonReduction, carbonOutput,
 						energyOutput);
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.warn(e);
 				investments[0] = 0;
 				investments[1] = 0;
 				return 0;
@@ -496,7 +496,7 @@ public class AnnexOneReduce extends AbstractCountry {
 								carbonOutput, energyOutput);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warn(e);
 			return 0;
 		}
 
@@ -520,7 +520,7 @@ public class AnnexOneReduce extends AbstractCountry {
 			cost = carbonAbsorptionHandler
 					.getForestAreaRequired(carbonAbsorptionChange);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warn(e);
 			return 0;
 		}
 
@@ -540,7 +540,7 @@ public class AnnexOneReduce extends AbstractCountry {
 			change = carbonAbsorptionHandler.getCarbonAbsorptionChange(
 					investmentAmount, arableLandArea);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warn(e);
 			return 0;
 		}
 
@@ -558,7 +558,7 @@ public class AnnexOneReduce extends AbstractCountry {
 			reduction = carbonReductionHandler.getCarbonOutputChange(
 					reductionCost, state.carbonOutput, state.energyOutput);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warn(e);
 			return 0;
 		}
 		return reduction;
@@ -632,7 +632,7 @@ public class AnnexOneReduce extends AbstractCountry {
 			increase = energyUsageHandler
 					.calculateCarbonIndustryGrowth(industryInvestment);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warn(e);
 			return 0;
 		}
 
