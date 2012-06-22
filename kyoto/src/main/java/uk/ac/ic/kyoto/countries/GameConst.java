@@ -82,7 +82,7 @@ public final class GameConst {
 	/**
 	 * Number of ticks in a year
 	 */
-	private static int TICKS_IN_YEAR = 100;
+	private static int TICKS_IN_YEAR = 20;
 	
 	/**
 	 * Number of years in a session
