@@ -7,9 +7,9 @@ import uk.ac.ic.kyoto.exceptions.NotEnoughCashException;
  * 
  * @author Piotr, Nikunj
  */
-public final class CarbonReductionHandler{
+public final class IsolatedCarbonReductionHandler{
 	
-	private final AbstractCountry country;
+	private final IsolatedAbstractCountry country;
 
 	/**
 	 * Create instance of CarbonReductionHandler.
@@ -17,7 +17,7 @@ public final class CarbonReductionHandler{
 	 * @param abstractCountry
 	 * Specify on which country will the handler operate.
 	 */
-	CarbonReductionHandler(AbstractCountry abstractCountry) {
+	IsolatedCarbonReductionHandler(IsolatedAbstractCountry abstractCountry) {
 		this.country = abstractCountry;
 	}
 	
@@ -78,7 +78,6 @@ public final class CarbonReductionHandler{
 	 * @return
 	 * APPROXIMATE Change in carbon output from specified cost.
 	 */
-	@Deprecated 
 	public final double getCarbonOutputChange(double investmentAmount) {
 		return getCarbonOutputChange(investmentAmount, country.carbonOutput, country.energyOutput);
 	}
