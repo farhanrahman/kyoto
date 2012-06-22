@@ -53,16 +53,16 @@ public class AnnexOneSustain extends AbstractCountry {
 		this.name = this.getName();
 		this.surplusCarbonTarget = 0;
 		this.surplusCarbon = 0;
-		this.surplusCarbonPrice = Constants.EXPECTED_SALES_INITIAL;
 		this.expectedSales = Constants.EXPECTED_SALES_INITIAL;
 		this.carbonToReduce = 0;
 		this.carbonToAbsorb = 0;
 		this.tradeSemaphore = new Semaphore(1);
+		setKyotoMemberLevel(KyotoMember.ANNEXONE);
 	}
 	
 	@Override
 	protected void initialiseCountry() {
-		setKyotoMemberLevel(KyotoMember.ANNEXONE);
+		this.surplusCarbonPrice = carbonReductionHandler.getInvestmentRequired(1);
 	}
 	
 	
@@ -72,24 +72,13 @@ public class AnnexOneSustain extends AbstractCountry {
 	
 	@Override
 	protected void behaviour() {
-		int ticksUntilEnd = getTicksUntilEnd();
-		
 		if (isKyotoMember() == KyotoMember.ANNEXONE) {
-			
-			// Normal behaviour during all but last 10 ticks of the year
-			if (ticksUntilEnd > 10) {
-				// Decrease price if semaphore set to 1 (no conversation or offer accepted at the start)
-				if (tradeSemaphore.availablePermits() == 1) {
-					surplusCarbonPrice /= Constants.PRICE_FAILURE_SCALER;
-					logger.info(name + ": Increased internal price to " + surplusCarbonPrice);
-					broadcastSellOffer(surplusCarbon, surplusCarbonPrice);
-					logger.info(name + ": Broadcasting offer of sale: " + surplusCarbon + " @ " + surplusCarbonPrice);
-				}
-			}
-			
-			// Final industry investment function
-			else if (ticksUntilEnd == 7) {
-				finalInvestments();
+			// Decrease price if semaphore set to 1 (no conversation or offer accepted at the start). Broadcast own offer.
+			if ((tradeSemaphore.availablePermits() == 1) && (Math.round(surplusCarbon) > 0)) {
+				surplusCarbonPrice /= Constants.PRICE_FAILURE_SCALER;
+				System.out.println(name + ": Decreased internal price to " + surplusCarbonPrice);
+				broadcastSellOffer(surplusCarbon, surplusCarbonPrice);
+				System.out.println(name + ": Broadcasting offer of sale: " + surplusCarbon + " @ " + surplusCarbonPrice);
 			}
 		}
 	}
@@ -108,16 +97,18 @@ public class AnnexOneSustain extends AbstractCountry {
 				
 				// Only respond to buy offers, we are not interested in anything else
 				if (offer.getOfferType() == TradeType.BUY) {
+					
 					// If we have enough surplus carbon to cover the transaction
 					if (quantityOffered < surplusCarbon) {
 						double surplusSaleMargin = calculateSurplusSaleMargin(quantityOffered, priceOffered);
 						if (surplusSaleMargin > 0) {
 							if (tradeSemaphore.tryAcquire()) {
 								this.tradeProtocol.respondToOffer(address, quantityOffered, offer);
-								logger.info(name + ": Responded to offer of " + quantityOffered + " @ " + priceOffered);
+								System.out.println(name + ": Responded to offer of " + quantityOffered + " @ " + priceOffered);
 							}
 						}
 					}
+					
 					// Else we need to invest to get required carbon
 					else {
 						double additionalCarbon = quantityOffered - surplusCarbon;
@@ -134,17 +125,18 @@ public class AnnexOneSustain extends AbstractCountry {
 								if (tradeSemaphore.tryAcquire()) {
 									this.tradeProtocol.respondToOffer(address, quantityOffered, offer);
 									carbonToReduce = additionalCarbon;
-									logger.info(name + ": Responded to offer of " + quantityOffered + " @ " + priceOffered);
+									System.out.println(name + ": Responded to offer of " + quantityOffered + " @ " + priceOffered);
 								}
 							}
 						}
+						
 						// Else if absorption is possible
 						else if (absorptionPossible) {
 							if ((absorptionMargin + surplusSaleMargin) > 0) {
 								if (tradeSemaphore.tryAcquire()) {
 									this.tradeProtocol.respondToOffer(address, quantityOffered, offer);
 									carbonToAbsorb = additionalCarbon;
-									logger.info(name + ": Responded to offer of " + quantityOffered + " @ " + priceOffered);
+									System.out.println(name + ": Responded to offer of " + quantityOffered + " @ " + priceOffered);
 								}
 							}
 						}
@@ -153,24 +145,30 @@ public class AnnexOneSustain extends AbstractCountry {
 					// Boost internal price if offer is higher
 					if (priceOffered > surplusCarbonPrice) {
 						surplusCarbonPrice = priceOffered;
-						logger.info(name + ": Boosted internal price to " + surplusCarbonPrice);
+						System.out.println(name + ": Boosted internal price to " + surplusCarbonPrice);
 					}
 				}
 			}
 		}
 		catch (Exception e) {
-			logger.warn(name + ": Problem with processing offer message: " + e.getMessage());
+			System.out.println("! " + name + ": Problem with processing offer message: " + e.getMessage());
 		}
 	}		
 	
 	@Override
 	protected boolean acceptTrade(NetworkAddress address, Offer offer) {
-		if (tradeSemaphore.tryAcquire()) {
-			logger.info(name + ": Accepting response from address " + address);
-			return true;
+		if (surplusCarbon >= offer.getQuantity()) {
+			if (tradeSemaphore.tryAcquire()) {
+				System.out.println(name + ": Accepting response from address " + address);
+				return true;
+			}
+			else {
+				System.out.println(name + ": Rejecting response from address " + address + ", already doing other trade");
+				return false;
+			}
 		}
 		else {
-			logger.info(name + ": Rejecting response from address " + address);
+			System.out.println(name + ": Rejecting response from address " + address + ", old offer");
 			return false;
 		}
 	}
@@ -180,25 +178,26 @@ public class AnnexOneSustain extends AbstractCountry {
 		try {
 			if (Math.round(carbonToReduce) > 0) {
 				carbonReductionHandler.investInCarbonReduction(carbonToReduce);
-				logger.info(name + ": Trade successful, reducing carbon by " + carbonToReduce);
+				System.out.println(name + ": Trade successful, reducing carbon by " + carbonToReduce);
 			}
 			else if (Math.round(carbonToAbsorb) > 0) {
 				carbonAbsorptionHandler.investInCarbonAbsorption(carbonToAbsorb);
-				logger.info(name + ": Trade successful, absorbing carbon by " + carbonToReduce);
+				System.out.println(name + ": Trade successful, absorbing carbon by " + carbonToReduce);
 			}
 			else {
-				logger.info(name + ": Trade successful");
+				System.out.println(name + ": Trade successful");
 			}
 			carbonToReduce = 0;
 			carbonToAbsorb = 0;
+			updateSurplusCarbon();
 			if (Math.round(surplusCarbon) > 0) {
 				surplusCarbonPrice *= Constants.PRICE_SUCCESS_SCALER;
-				logger.info(name + ": Scaled internal price to " + surplusCarbonPrice);
+				System.out.println(name + ": Scaled internal price to " + surplusCarbonPrice);
 			}
 			tradeSemaphore.release();
 		}
 		catch (Exception e) {
-			logger.warn(name + ": Problem with investments after successful trade: " + e.getMessage());
+			System.out.println("! " + name + ": Problem with investments after successful trade: " + e.getMessage());
 		}
 	}
 	
@@ -206,7 +205,7 @@ public class AnnexOneSustain extends AbstractCountry {
 	protected void tradeHasFailed(NetworkAddress from, OfferMessage offerMessage) {
 		carbonToReduce = 0;
 		carbonToAbsorb = 0;
-		logger.info(name + ": Trade has failed");
+		System.out.println(name + ": Trade has failed");
 		tradeSemaphore.release();
 	}
 	
@@ -214,7 +213,7 @@ public class AnnexOneSustain extends AbstractCountry {
 	protected void tradeWasRejected(NetworkAddress from, OfferMessage offerMessage) {
 		carbonToReduce = 0;
 		carbonToAbsorb = 0;
-		logger.info(name + ": Trade has been rejected");
+		System.out.println(name + ": Trade has been rejected");
 		tradeSemaphore.release();
 	}
 
@@ -240,16 +239,18 @@ public class AnnexOneSustain extends AbstractCountry {
 		try {
 			double emissionIncrease = this.getEmissionsTarget() - (this.getCarbonOutput() - this.getCarbonAbsorption());
 			
-			if (Math.round(emissionIncrease) < 0) {
-				leaveKyoto();
-				logger.info("Leaving Kyoto, my target is below my emissions");
-			}
-			else {
-				logger.info("Staying in Kyoto, my target is above my emissions");
+			if (timeService.getCurrentTick() != 0) {
+				if (Math.round(emissionIncrease) < 0) {
+					leaveKyoto();
+					System.out.println("Leaving Kyoto, my target is below my emissions");
+				}
+				else {
+					System.out.println("Staying in Kyoto, my target is above my emissions");
+				}
 			}
 		}
 		catch (Exception e) {
-			logger.warn(name + ": Problem with session function: " + e.getMessage());
+			System.out.println("! " + name + ": Problem with session function: " + e.getMessage());
 		}
 	}
 	
@@ -284,77 +285,77 @@ public class AnnexOneSustain extends AbstractCountry {
 				}
 			}
 			
-//			System.out.println("*** Money before investment: " + this.getAvailableToSpend());
-//			System.out.println("*** Of which for investment: " + totalInvestment);
-//			System.out.println("*** Carbon output before investment: " + this.getCarbonOutput());
-//			System.out.println("*** Which we will increase by: " + carbonGained);
-//			System.out.println("*** ArableLandArea before investment: " + this.getArableLandArea());
-//			System.out.println("*** Absorption before investment: " + this.getCarbonAbsorption());
+			System.out.println("*** Money before investment: " + this.getAvailableToSpend());
+			System.out.println("*** Of which for investment: " + totalInvestment);
+			System.out.println("*** Carbon output before investment: " + this.getCarbonOutput());
+			System.out.println("*** Which we will increase by: " + carbonGained);
+			System.out.println("*** ArableLandArea before investment: " + this.getArableLandArea());
+			System.out.println("*** Absorption before investment: " + this.getCarbonAbsorption());
 			
 			energyUsageHandler.investInCarbonIndustry(industryInvestment);
 			
-//			System.out.println("*** INVESTED");
+			System.out.println("*** INVESTED");
 			
 			if ((carbonAbsCost < carbonRedCost) && (carbonAbsTrees < this.getArableLandArea())) {
 				carbonAbsorptionHandler.investInCarbonAbsorption(carbonGained);
-				logger.info(name + ": Invested in industry and scaled back with reduction of " + carbonGained + " carbon, which cost " + totalInvestment);
+				System.out.println(name + ": Invested in industry and scaled back with reduction of " + carbonGained + " carbon, which cost " + totalInvestment);
 			}
 			else {
 				carbonReductionHandler.investInCarbonReduction(carbonGained);
-				logger.info(name + ": Invested in industry and scaled back with absorption of " + carbonGained + " carbon, which cost " + totalInvestment);
+				System.out.println(name + ": Invested in industry and scaled back with absorption of " + carbonGained + " carbon, which cost " + totalInvestment);
 			}
 			
-//			System.out.println("*** Moneyafter investment: " + this.getAvailableToSpend());
-//			System.out.println("*** Carbon output after investment: " + this.getCarbonOutput());
-//			System.out.println("*** ArableLandArea after investment: " + this.getArableLandArea());
-//			System.out.println("*** Absorption after investment: " + this.getCarbonAbsorption());
+			System.out.println("*** Moneyafter investment: " + this.getAvailableToSpend());
+			System.out.println("*** Carbon output after investment: " + this.getCarbonOutput());
+			System.out.println("*** ArableLandArea after investment: " + this.getArableLandArea());
+			System.out.println("*** Absorption after investment: " + this.getCarbonAbsorption());
 		}
 		catch (Exception e) {
-			logger.warn(name + ": Problem with investing in industry: " + e.getMessage());
+			System.out.println("! " + name + ": Problem with investing in industry: " + e.getMessage());
 		}
 	}
 	
 	protected void finalInvestments() {
 		try {
-			// If credits are left, increase energy output if money available, as probably won't sell them next year either
+			// If credits are left, increase energy output to session goal or as much as credits/money allow
 			if (surplusCarbon > 0) {
 				double investmentCost = energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(surplusCarbon);
 				double availableFunds = this.getAvailableToSpend();
-				
+						
 				if (investmentCost < availableFunds) {
 					energyUsageHandler.investInCarbonIndustry(investmentCost);
-					logger.info(name + ": invested " + investmentCost + " in industry as an end-year investment, output increased by " + 
+					System.out.println(name + ": invested " + investmentCost + " in industry as an end-year investment, output increased by " + 
 							energyUsageHandler.calculateCarbonIndustryGrowth(investmentCost));
 				}
 				else {
 					energyUsageHandler.investInCarbonIndustry(availableFunds);
-					logger.info(name + ": invested " + availableFunds + " in industry as an end-year investment for lack of more funds, output increased by " + 
+					System.out.println(name + ": invested " + availableFunds + " in industry as an end-year investment for lack of more funds, output increased by " + 
 							energyUsageHandler.calculateCarbonIndustryGrowth(availableFunds));
 				}
 			}
 		}
 		catch (Exception e) {
-			logger.warn(name + ": Problem with end of year investments: " + e.getMessage());
+			System.out.println("! " + name + ": Problem with end of year investments: " + e.getMessage());
 		}
 	}
 	
 	protected void updateExpectedSales() {
 		try {
 			if (Math.round(surplusCarbonTarget) == 0) {
-				logger.info(name + ": There was no surplus carbon to sell, nothing to do");
+				System.out.println(name + ": There was no surplus carbon to sell, nothing to do");
 			}
 			else if (Math.round(surplusCarbon) == 0) {
 				expectedSales = 1;
-				logger.info(name + ": Setting expected sales to 100%");
+				System.out.println(name + ": Setting expected sales to 100%");
 			}
 			else {
 				double percentageSold = (surplusCarbonTarget - surplusCarbon) / surplusCarbonTarget;
 				expectedSales = percentageSold;
-				logger.info(name + ": Setting expected sales to " + (percentageSold * 100) + "%");
+				System.out.println(name + ": Setting expected sales to " + (percentageSold * 100) + "%");
 			}
 		}
 		catch (Exception e) {
-			logger.warn(name + ": Problem with updating expected sales: " + e.getMessage());
+			System.out.println("! " + name + ": Problem with updating expected sales: " + e.getMessage());
 		}
 	}
 	
@@ -377,10 +378,10 @@ public class AnnexOneSustain extends AbstractCountry {
 	protected void updateSurplusCarbon() {
 		try{
 			surplusCarbon = this.getEmissionsTarget() - (this.getCarbonOutput() - this.getCarbonAbsorption()) + this.getCarbonOffset();
-			logger.info(name + ": Surplus carbon updated to " + surplusCarbon);
+			System.out.println(name + ": Surplus carbon updated to " + surplusCarbon);
 		}
 		catch (Exception e) {
-			logger.warn(name + ": Problem with calculating surplus carbon: " + e.getMessage());
+			System.out.println("! " + name + ": Problem with calculating surplus carbon: " + e.getMessage());
 			surplusCarbon = 0;
 		}
 	}
@@ -395,7 +396,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			sessionOffsetGain = carbonDifference * yearsUntilEnd;
 		}
 		catch (Exception e) {
-			logger.warn(name + ": Problem with calculating offset gain :" + e.getMessage());
+			System.out.println("! " + name + ": Problem with calculating offset gain :" + e.getMessage());
 			sessionOffsetGain = 0;
 		}
 		
@@ -420,7 +421,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			}
 		}
 		catch (Exception e) {
-			logger.warn(name + ": Problem with assessing possibility of carbon reduction: " + e.getMessage());
+			System.out.println("! " + name + ": Problem with assessing possibility of carbon reduction: " + e.getMessage());
 			possible = false;
 		}
 		
@@ -447,7 +448,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			}
 		}
 		catch (Exception e) {
-			logger.warn(name + ": Problem with assessing possibility of carbon absorption: " + e.getMessage());
+			System.out.println("! " + name + ": Problem with assessing possibility of carbon absorption: " + e.getMessage());
 			possible = false;
 		}
 		
@@ -464,7 +465,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			reductionMargin = profit - cost;
 		}
 		catch (Exception e) {
-			logger.warn(name + ": Problem with assessing margin of carbon reduction: " + e.getMessage());
+			System.out.println("! " + name + ": Problem with assessing margin of carbon reduction: " + e.getMessage());
 			reductionMargin = -10000000; // To make sure not profitable
 		}
 		
@@ -481,7 +482,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			absorptionMargin = profit - cost;
 		}
 		catch (Exception e) {
-			logger.warn(name + ": Problem with assessing margin of carbon absorption: " + e.getMessage());
+			System.out.println("! " + name + ": Problem with assessing margin of carbon absorption: " + e.getMessage());
 			absorptionMargin = -10000000; // To make sure not profitable
 		}
 		
@@ -495,7 +496,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			surplusSaleMargin = quantity * (surplusCarbonPrice - price);
 		}
 		catch (Exception e) {
-			logger.warn(name + ": Problem with assessing profitability of sale: " + e.getMessage());
+			System.out.println("! " + name + ": Problem with assessing profitability of sale: " + e.getMessage());
 			surplusSaleMargin = -10000000; // To make sure not profitable
 		}
 		
@@ -507,18 +508,18 @@ public class AnnexOneSustain extends AbstractCountry {
     // Time functions
     //================================================================================
 	
-	protected int getTicksUntilEnd() {
-		int ticksUntilEnd;
-		
-		try {
-			ticksUntilEnd = timeService.getTicksInYear() - (timeService.getCurrentTick() % timeService.getTicksInYear());
-		}
-		catch (Exception e) {
-			logger.warn(name + ": Problem with calculating time: " + e.getMessage());
-			ticksUntilEnd = 0;
-		}
-		
-		return ticksUntilEnd;
-	}
+//	protected int getTicksUntilEnd() {
+//		int ticksUntilEnd;
+//		
+//		try {
+//			ticksUntilEnd = timeService.getTicksInYear() - (timeService.getCurrentTick() % timeService.getTicksInYear());
+//		}
+//		catch (Exception e) {
+//			System.out.println("! " + name + ": Problem with calculating time: " + e.getMessage());
+//			ticksUntilEnd = 0;
+//		}
+//		
+//		return ticksUntilEnd;
+//	}
 	
 }
