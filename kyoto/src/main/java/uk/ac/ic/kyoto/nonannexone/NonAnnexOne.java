@@ -202,7 +202,9 @@ public class NonAnnexOne extends AbstractCountry {
 		}	
 		
 		else
-		{
+		{ 
+			//country does not meet its own target, therefore it has to invest in carbon absorption or carbon reduction
+			
 			logger.info("Country exceeded its environment friendly goal, invest in carbon industry but also invest in carbon absorption");
 			green_lands = false;
 			try{
@@ -212,7 +214,8 @@ public class NonAnnexOne extends AbstractCountry {
 				logger.warn("Invest in carbon industry not successful");
 			}
 			
-			try{ //also since country exceeds its own carbon target, invests in carbon absorption or carbon reduction.
+			try
+			{ 
 				carbon_difference = (getCarbonOutput() + energyUsageHandler.calculateCarbonIndustryGrowth(money_invest)) - environment_friendly_target;
 				
 				if ((carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend()) && ((carbonAbsorptionHandler.getForestAreaRequired(carbon_difference) < available_area)))
@@ -223,17 +226,21 @@ public class NonAnnexOne extends AbstractCountry {
 				
 				else if ((carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend() ) && (carbonAbsorptionHandler.getForestAreaRequired(carbon_difference) >= available_area))
 				
-					{
+					{ 
+					// when country does not have enough arable land area to invest in carbon absorption,
+					//invests in carbon reduction
+				
 					logger.info("Country reach limit of available pre-set land, not possible to invest in carbon absorption, try invest in carbon reduction");
 					if (carbonReductionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend())
 						{
 						carbonReductionHandler.investInCarbonReduction(carbon_difference);
-						logger.info("Country has enough cash to invest in carbon reduction, invests!");
+						logger.info("Country has enough cash to invest in carbon reduction, invests");
 						}
 					}
 				else 
+					//when the country does not have enough available to spend
+					//then it does not care anymore about the environment.
 					{
-						
 					logger.info("Country has insufficient funds to reach environment friendly target");
 					green_care = false;
 					
@@ -244,6 +251,7 @@ public class NonAnnexOne extends AbstractCountry {
 				logger.warn("Problem with investing in carbon absorption: " + e);
 			}
 		}
+		//every tick, it updates the "environment" carbon output target
 		
 		change_emission_target(environment_friendly_target,green_lands);
 		
