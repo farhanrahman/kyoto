@@ -184,20 +184,20 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				}
 
 				@Override
-				protected void tradeSuccessful(NetworkAddress from, Offer trade) {
-					tradeWasSuccessful(from, trade);
+				protected void tradeSuccessful(NetworkAddress from, OfferMessage offerMessage) {
+					tradeWasSuccessful(from, offerMessage);
 					
 				}
 
 				@Override
-				protected void tradeRejected(NetworkAddress from, Offer trade) {
-					tradeWasRejected(from,trade);
+				protected void tradeRejected(NetworkAddress from, OfferMessage offerMessage) {
+					tradeWasRejected(from, offerMessage);
 					
 				}
 
 				@Override
-				protected void tradeFailed(NetworkAddress from, Offer trade) {
-					tradeHasFailed(from,trade);
+				protected void tradeFailed(NetworkAddress from, OfferMessage offerMessage) {
+					tradeHasFailed(from, offerMessage);
 					
 				}
 				
@@ -373,30 +373,37 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	abstract protected void sessionFunction();
 	abstract protected void initialiseCountry();
 	abstract protected boolean acceptTrade(NetworkAddress from, Offer trade);
+	
 	/**
-	 * Override this method to get notified when trade was successful
+	 * Override this method to get notified when trade was successful.
+	 * This function is called for both initiator and responder when
+	 * the trade was succesful.
 	 * @param from
-	 * @param trade
+	 * @param offerMessage
 	 */
-	protected void tradeWasSuccessful(NetworkAddress from, Offer trade){
+	protected void tradeWasSuccessful(NetworkAddress from, OfferMessage offerMessage){
 		
 	}
 	
 	/**
-	 * Override this method to get notified when trade failed
+	 * Override this method to get notified when trade failed.
+	 * This function is called to notify both initiator and responder
+	 * if somehow the trade has failed
 	 * @param from
-	 * @param trade
+	 * @param offerMessage
 	 */
-	protected void tradeHasFailed(NetworkAddress from, Offer trade){
+	protected void tradeHasFailed(NetworkAddress from, OfferMessage offerMessage){
 		
 	}
 	
 	/**
 	 * Override this method to get notified when trade was rejected
+	 * This function is called to notify the initiator that the responder
+	 * has rejected the trade that the initiator has offered.
 	 * @param from
-	 * @param trade
+	 * @param offerMessage
 	 */
-	protected void tradeWasRejected(NetworkAddress from, Offer trade){
+	protected void tradeWasRejected(NetworkAddress from, OfferMessage offerMessage){
 		
 	}
 	
@@ -560,7 +567,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.carbonOffset += amount;
 	}
 	
-	protected final OfferMessage broadcastSellOffer(int quantity, double unitCost){
+	protected final OfferMessage broadcastSellOffer(double quantity, double unitCost){
 		Offer trade = new Offer(quantity, unitCost, TradeType.SELL);
 		OfferMessage returnObject = new OfferMessage(
 				trade,
@@ -579,7 +586,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			return returnObject;
 	}
 
-	protected final OfferMessage broadcastBuyOffer(int quantity, double unitCost){
+	protected final OfferMessage broadcastBuyOffer(double quantity, double unitCost){
 		Offer trade = new Offer(quantity, unitCost, TradeType.BUY);
 		
 		/*DEBUG*/
