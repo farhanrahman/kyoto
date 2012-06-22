@@ -151,11 +151,8 @@ public class AnnexOneSustain extends AbstractCountry {
 				}
 			}
 		}
-		catch (IllegalArgumentException e) {
-			logger.warn(e);
-		}
-		catch (FSMException e) {
-			logger.warn(e);
+		catch (Exception e) {
+			logger.warn(this.getName() + ": Problem with processing offer message: " + e.getMessage());
 		}
 	}		
 	
@@ -169,6 +166,7 @@ public class AnnexOneSustain extends AbstractCountry {
 		}
 	}
 	
+	@Override
 	protected void tradeWasSuccessful(NetworkAddress from, OfferMessage offerMessage) {
 		try {
 			if (Math.round(carbonToReduce) > 0) {
@@ -188,13 +186,15 @@ public class AnnexOneSustain extends AbstractCountry {
 			logger.warn(this.getName() + ": Problem with investments after successful trade: " + e.getMessage());
 		}
 	}
-
+	
+	@Override
 	protected void tradeHasFailed(NetworkAddress from, OfferMessage offerMessage) {
 		carbonToReduce = 0;
 		carbonToAbsorb = 0;
 		tradeSemaphore.release();
 	}
-
+	
+	@Override
 	protected void tradeWasRejected(NetworkAddress from, OfferMessage offerMessage) {
 		carbonToReduce = 0;
 		carbonToAbsorb = 0;
@@ -214,6 +214,7 @@ public class AnnexOneSustain extends AbstractCountry {
 		resetYearlyTargets();
 		System.out.println("+++ Tick " + timeService.getCurrentTick());
 		System.out.println("+++ Year " + timeService.getCurrentYear());
+		System.out.println("+++ Ticks until end: " + getTicksUntilEnd());
 	}
 	
 	@Override
@@ -301,9 +302,11 @@ public class AnnexOneSustain extends AbstractCountry {
 				
 				if (investmentCost < availableFunds) {
 					energyUsageHandler.investInCarbonIndustry(investmentCost);
+					logger.info(this.getName() + ": invested " + String.valueOf(investmentCost) + " in industry as an end-year investment");
 				}
 				else {
 					energyUsageHandler.investInCarbonIndustry(availableFunds);
+					logger.info(this.getName() + ": invested " + String.valueOf(availableFunds) + " in industry as an end-year investment");
 				}
 			}
 		}

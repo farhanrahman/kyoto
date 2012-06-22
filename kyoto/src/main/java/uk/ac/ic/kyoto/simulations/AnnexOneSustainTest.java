@@ -82,7 +82,7 @@ public class AnnexOneSustainTest extends InjectedSimulation {
 			String ISO = "DE";
 			AbstractParticipant p = new AnnexOneSustain(Random.randomUUID(), name, ISO, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput);
 			s.addParticipant(p);
-			CarbonData1990.addCountry(ISO, 900000000);
+			CarbonData1990.addCountry(ISO, 1000000000);
 		
 	}
 }
