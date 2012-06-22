@@ -231,7 +231,7 @@ public class NonAnnexOne extends AbstractCountry {
 			try{ //also since country exceeds its own carbon target, invests in carbon absorption or carbon reduction in order to get carbon offset.
 				carbon_difference = (getCarbonOutput() + energyUsageHandler.calculateCarbonIndustryGrowth(money_invest)) - environment_friendly_target;
 				
-				if (carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend() )
+				if ((carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend()) && ((carbonAbsorptionHandler.getForestAreaRequired(carbon_difference) < available_area)))
 					{
 					carbonAbsorptionHandler.investInCarbonAbsorption(carbon_difference);
 					logger.info("Country invests in carbon absorption to increase carbon absorption and thus reach environment target carbon output");
