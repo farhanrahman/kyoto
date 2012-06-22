@@ -49,6 +49,7 @@ public class CarbonTarget extends EnvironmentService {
 	
 	private ArrayList<countryObject> participantCountries= new ArrayList<countryObject>();
 	private ArrayList<UUID> cheatersList = new ArrayList<UUID>();
+	public ArrayList<UUID> queueToJoin = new ArrayList<UUID>();
 	
 	private double worldLastSessionTarget = 0;
 	private double worldCurrentSessionTarget = 0;
@@ -57,6 +58,7 @@ public class CarbonTarget extends EnvironmentService {
 	private EventBus eb;
 	private GlobalTimeService timeService;
 	private CarbonReportingService reportingService;
+	private Monitor monitor;
 	private Semaphore exclusiveAccess = new Semaphore(1);
 	
 	private EnvironmentServiceProvider provider;
@@ -81,6 +83,16 @@ public class CarbonTarget extends EnvironmentService {
 		countryObject memberState = new countryObject(state);
 		if (!participantCountries.contains(memberState))
 			participantCountries.add(memberState);
+	}
+	
+	private void addRejoiningCountries() {
+		for (UUID  countryID : queueToJoin) {
+			countryObject ref = findCountryObject(countryID);
+			ref.currentSessionTarget = getReportedCarbonOutput(countryID, (timeService.getCurrentYear() - 1));
+			ref.obj.kyotoMemberLevel = KyotoMember.ANNEXONE;
+			monitor.addMemberState(ref.obj);
+		}
+		queueToJoin.clear();
 	}
 	
 	public double querySessionTarget(UUID countryID) {
@@ -126,6 +138,13 @@ public class CarbonTarget extends EnvironmentService {
 			this.reportingService = provider.getEnvironmentService(CarbonReportingService.class);
 		} catch (UnavailableServiceException e) {
 			System.out.println("Unable to get environment service 'CarbonReportingService'.");
+			e.printStackTrace();
+		}
+		
+		try {
+			this.monitor = provider.getEnvironmentService(Monitor.class);
+		} catch (UnavailableServiceException e) {
+			System.out.println("Unable to get environment service 'Monitor'.");
 			e.printStackTrace();
 		}
 		
@@ -232,6 +251,8 @@ public class CarbonTarget extends EnvironmentService {
 	}	
 	
 	private void updateSessionTargets(){
+		addRejoiningCountries();
+		
 		this.worldLastSessionTarget = this.worldCurrentSessionTarget;
 		this.worldCurrentSessionTarget = worldLastSessionTarget * GameConst.getTargetReduction(); 
 		double worldOutput = 0;
