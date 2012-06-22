@@ -57,11 +57,11 @@ class CountrySimulator {
 		for (int i = 0; i < LOOK_AHEAD_YEARS; i++) {
 			// Cull the reduce states
 
-			System.out.println("unculledReduceSize " + i + " = "
-					+ stateList[i].reduceStates.size());
+//			System.out.println("unculledReduceSize " + i + " = "
+//					+ stateList[i].reduceStates.size());
 			stateList[i].reduceStates = cullStates(stateList[i].reduceStates);
-			System.out.println("reduceSize " + i + " = "
-					+ stateList[i].reduceStates.size());
+//			System.out.println("reduceSize " + i + " = "
+//					+ stateList[i].reduceStates.size());
 
 			// Branch off all unculled reduce states by performing a maintain
 			// action
@@ -71,11 +71,11 @@ class CountrySimulator {
 			}
 
 			// Cull the maintain states
-			System.out.println("unculledMaintainSize " + i + " = "
-					+ stateList[i].maintainStates.size());
+//			System.out.println("unculledMaintainSize " + i + " = "
+//					+ stateList[i].maintainStates.size());
 			stateList[i].maintainStates = cullStates(stateList[i].maintainStates);
-			System.out.println("maintainSize " + i + " = "
-					+ stateList[i].maintainStates.size());
+//			System.out.println("maintainSize " + i + " = "
+//					+ stateList[i].maintainStates.size());
 
 			// Branch off all unculled maintain states by performing a sell
 			// action
@@ -86,11 +86,11 @@ class CountrySimulator {
 			}
 
 			// Cull the sell states
-			System.out.println("unculledSellSize " + i + " = "
-					+ stateList[i].sellStates.size());
+//			System.out.println("unculledSellSize " + i + " = "
+//					+ stateList[i].sellStates.size());
 			stateList[i].sellStates = cullStates(stateList[i].sellStates);
-			System.out.println("sellSize " + i + " = "
-					+ stateList[i].sellStates.size());
+//			System.out.println("sellSize " + i + " = "
+//					+ stateList[i].sellStates.size());
 
 			// So long as we aren't in the final year
 			if (i != (LOOK_AHEAD_YEARS - 1)) {
@@ -128,18 +128,18 @@ class CountrySimulator {
 			startSellList.add(state);
 		}
 
-		Iterator<CountryState> iterator = startSellStates.iterator();
-
-		while (iterator.hasNext()) {
-			System.out.println();
-			CountryState state = iterator.next();
-			state.printPath();
-			System.out.println();
-			state.printActionPath();
-		}
-
-		System.out.println();
-		System.out.println("NumStates = " + startSellStates.size());
+//		Iterator<CountryState> iterator = startSellStates.iterator();
+//
+//		while (iterator.hasNext()) {
+//			System.out.println();
+//			CountryState state = iterator.next();
+//			state.printPath();
+//			System.out.println();
+//			state.printActionPath();
+//		}
+//
+//		System.out.println();
+//		System.out.println("NumStates = " + startSellStates.size());
 
 		float s_investFrac = 0;
 		float s_sellFrac = 0;

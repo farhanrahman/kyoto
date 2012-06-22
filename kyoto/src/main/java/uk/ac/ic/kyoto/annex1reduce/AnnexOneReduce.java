@@ -20,7 +20,6 @@ import uk.ac.imperial.presage2.core.network.NetworkAddress;
  * 
  */
 public class AnnexOneReduce extends AbstractCountry {
-	private EU eu;
 	final private CountrySimulator simulator;
 
 	public AnnexOneReduce(UUID id, String name, String ISO, double landArea,
@@ -33,14 +32,7 @@ public class AnnexOneReduce extends AbstractCountry {
 
 	@Override
 	public void initialiseCountry() {
-		/* Add the country to the EU service */
-		try {
-			this.eu = this.getEnvironmentService(EU.class);
-			this.eu.addMemberState(this);
-		} catch (UnavailableServiceException e) {
-			System.out.println("Unable to reach EU service.");
-			e.printStackTrace();
-		}
+
 	}
 
 	@Override
