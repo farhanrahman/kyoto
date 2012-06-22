@@ -129,7 +129,6 @@ class CountrySimulator {
 		}
 
 //		Iterator<CountryState> iterator = startSellStates.iterator();
-
 //		while (iterator.hasNext()) {
 //			System.out.println();
 //			CountryState state = iterator.next();
@@ -137,7 +136,6 @@ class CountrySimulator {
 //			System.out.println();
 //			state.printActionPath();
 //		}
-
 //		System.out.println();
 //		System.out.println("NumStates = " + startSellStates.size());
 
