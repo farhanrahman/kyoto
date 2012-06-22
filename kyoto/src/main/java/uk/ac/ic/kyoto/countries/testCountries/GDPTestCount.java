@@ -31,8 +31,8 @@ public class GDPTestCount extends AbstractCountry {
 		 */
 		if (i == 0){
 			try {
-				System.out.println("Reducing energy output by 10%");
-				energyUsageHandler.reduceEnergyOutput(getEnergyOutput()*0.1);
+				System.out.println("Increasing energy output by 10%");
+				energyUsageHandler.investInCarbonIndustry(energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(getEnergyOutput())*0.1);
 			} catch (IllegalArgumentException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

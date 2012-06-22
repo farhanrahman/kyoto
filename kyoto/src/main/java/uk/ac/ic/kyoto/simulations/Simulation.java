@@ -148,16 +148,16 @@ public class Simulation extends InjectedSimulation {
 										Double.parseDouble(countryData.getEnergyOutput()), 
 										Double.parseDouble(countryData.getCarbonOutput()));
 					} else if(className.equals("AnnexOneReduce")){
-//						abstractCountry = new AnnexOneReduce(
-//										Random.randomUUID(), 
-//										countryData.getName(),
-//										countryData.getISO(), 
-//										Double.parseDouble(countryData.getLandArea()), 
-//										Double.parseDouble(countryData.getArableLandArea()), 
-//										Double.parseDouble(countryData.getGDP()),
-//										Double.parseDouble(countryData.getGDPRate()), 
-//										Double.parseDouble(countryData.getEnergyOutput()), 
-//										Double.parseDouble(countryData.getCarbonOutput()));
+						abstractCountry = new AnnexOneReduce(
+										Random.randomUUID(), 
+										countryData.getName(),
+										countryData.getISO(), 
+										Double.parseDouble(countryData.getLandArea()), 
+										Double.parseDouble(countryData.getArableLandArea()), 
+										Double.parseDouble(countryData.getGDP()),
+										Double.parseDouble(countryData.getGDPRate()), 
+										Double.parseDouble(countryData.getEnergyOutput()), 
+										Double.parseDouble(countryData.getCarbonOutput()));
 					} else if(className.equals("CanadaAgent")){
 //						abstractCountry = new CanadaAgent(
 //										Random.randomUUID(), 
