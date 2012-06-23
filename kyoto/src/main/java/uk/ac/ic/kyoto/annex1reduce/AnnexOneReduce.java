@@ -72,7 +72,7 @@ public class AnnexOneReduce extends AbstractCountry {
 	protected void behaviour() {
 
 		// TODO fix this Update our market buy and sell price information
-		// marketData.update();
+//		 marketData.update();
 
 		// If the expected buy price has increased by more than 5%, we should
 		// resimulate
@@ -314,6 +314,7 @@ public class AnnexOneReduce extends AbstractCountry {
 
 	// TODO get years until sanctions (when carbon credits reset)
 	private int getYearsUntilSanctions() {
+//		return 10;
 		 int years = timeService.getCurrentYear()
 		 % GameConst.getYearsInSession();
 		 years = GameConst.getYearsInSession() - years;
@@ -324,7 +325,7 @@ public class AnnexOneReduce extends AbstractCountry {
 	 * Called at the end of the year, after all trades have been completed. Will
 	 * recalculate optimal path and perform it.
 	 */
-	private void performReduceMaintainActions() {
+	public void performReduceMaintainActions() {
 
 		// Assume all buys have been completed, work out new optimal path
 		disableBuying();
@@ -689,8 +690,8 @@ public class AnnexOneReduce extends AbstractCountry {
 		absorbFrac = ((double) Math.round(1000 * absorbFrac)) / 1000;
 		reduceFrac = ((double) Math.round(1000 * reduceFrac)) / 1000;
 
-		carbon[0] = absorbFrac;
-		carbon[1] = reduceFrac;
+		carbon[0] = absorbFrac * carbonReduction;
+		carbon[1] = reduceFrac * carbonReduction;
 
 		return carbon;
 	}
