@@ -4,7 +4,6 @@ import java.util.UUID;
 import uk.ac.ic.kyoto.annex1reduce.CountrySimulator.ActionList;
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.GameConst;
-import uk.ac.ic.kyoto.countries.IsolatedAbstractCountry;
 import uk.ac.ic.kyoto.countries.Offer;
 import uk.ac.ic.kyoto.countries.OfferMessage;
 import uk.ac.ic.kyoto.exceptions.NotEnoughCarbonOutputException;
@@ -95,6 +94,8 @@ public class AnnexOneReduce extends AbstractCountry {
 		if (currentTickInYear == timeService.getTicksInYear() - 6) {
 			performReduceMaintainActions();
 		} else if (needToSimulate) {
+			logger.info(getName() + " is simulating");
+			enableBuying();
 			runSimulation();
 		}
 
@@ -291,7 +292,7 @@ public class AnnexOneReduce extends AbstractCountry {
 		if (buyingEnabled == false) {
 			return Double.MAX_VALUE / 100000000000.0;
 		}
-
+//		return carbonOffset * 200;
 		return carbonOffset * marketData.getBuyingPrice();
 	}
 
@@ -321,6 +322,7 @@ public class AnnexOneReduce extends AbstractCountry {
 
 	// TODO get years until sanctions (when carbon credits reset)
 	private int getYearsUntilSanctions() {
+//		return 10;
 		int years = timeService.getCurrentYear()
 				% GameConst.getYearsInSession();
 		years = GameConst.getYearsInSession() - years;
