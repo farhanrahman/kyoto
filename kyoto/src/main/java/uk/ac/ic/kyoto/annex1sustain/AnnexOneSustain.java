@@ -7,6 +7,7 @@ import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.AbstractCountry.KyotoMember;
 import uk.ac.ic.kyoto.countries.Offer;
 import uk.ac.ic.kyoto.countries.OfferMessage;
+import uk.ac.ic.kyoto.exceptions.CannotLeaveKyotoException;
 import uk.ac.ic.kyoto.exceptions.NotEnoughCarbonOutputException;
 import uk.ac.ic.kyoto.exceptions.NotEnoughCashException;
 import uk.ac.ic.kyoto.exceptions.NotEnoughLandException;
@@ -362,6 +363,9 @@ public class AnnexOneSustain extends AbstractCountry {
 					logger.info(name + ": Staying in Kyoto, my target is above my emissions");
 				}
 			}
+		}
+		catch (CannotLeaveKyotoException e) {
+			logger.info(name + ": Want to leave Kyoto, but cannot");
 		}
 		catch (Exception e) {
 			logger.warn(name + ": Problem with deciding whether to stay in Kyoto");
