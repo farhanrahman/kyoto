@@ -9,6 +9,7 @@ import uk.ac.ic.kyoto.actions.AddRemoveFromMonitor;
 import uk.ac.ic.kyoto.actions.AddRemoveFromMonitor.addRemoveType;
 import uk.ac.ic.kyoto.actions.AddToCarbonTarget;
 import uk.ac.ic.kyoto.actions.ApplyMonitorTax;
+import uk.ac.ic.kyoto.actions.RejoinKyoto;
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
 import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
 import uk.ac.ic.kyoto.services.Economy;
@@ -27,8 +28,6 @@ import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.core.simulator.SimTime;
 import uk.ac.imperial.presage2.util.fsm.FSMException;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
-
-import com.google.common.collect.ImmutableMap;
 
 /**
  * Class from which all countries are derived
@@ -52,7 +51,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		ANNEXONE,
 		NONANNEXONE
 	}
-	private KyotoMember kyotoMemberLevel; 
+	KyotoMember kyotoMemberLevel; 
 	
 	/*
 	 * These variables are related to land area for
@@ -158,7 +157,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			try {
 				timeService = getEnvironmentService(ParticipantTimeService.class);
 			} catch (UnavailableServiceException e) {
-				System.out.println("Unable to reach time service service.");
+				logger.warn("Unable to reach time service service.");
 				throw e;
 			}
 			
@@ -171,7 +170,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			try {
 				this.reportingService = this.getEnvironmentService(ParticipantCarbonReportingService.class);
 			} catch (UnavailableServiceException e) {
-				System.out.println("Unable to reach emission reporting service.");
+				logger.warn("Unable to reach emission reporting service.");
 				throw e;
 			}
 			
@@ -206,16 +205,16 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			initialiseCountry();
 			
 		} catch (FSMException e) {
-			e.printStackTrace();
+			logger.warn(e);
 			throw new RuntimeException(e);
 		} catch (UnavailableServiceException e) {
-			e.printStackTrace();
+			logger.warn(e);
 			throw new RuntimeException(e);
 		} catch (ActionHandlingException e) {
-			e.printStackTrace();
+			logger.warn(e);
 			throw new RuntimeException(e);
 		} catch (IllegalAccessException e) {
-			e.printStackTrace();
+			logger.warn(e);
 		}
 		
 	}
@@ -236,7 +235,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				}
 				
 				if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
-					System.out.println(this.ISO + " first day of new year on tick " + timeService.getCurrentTick());
+					logger.warn(this.ISO + " first day of new year on tick " + timeService.getCurrentTick());
 					
 					updateGDPRate();
 					updateGDP();
@@ -297,9 +296,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	public final void reportCarbonOutput() throws ActionHandlingException {
 		logger.info("Reporting bullshit, I am " + getName());
-		double reportedValue = getReportedCarbonOutput();
+		double reportedValue = getReportedCarbonOutput() - getCarbonAbsorption();
 		addToReports(SimTime.get(), reportedValue);
-		dumpCheatingData(reportedValue,this.getCarbonOutput());
+		dumpCheatingData(reportedValue,this.getCarbonOutput()- getCarbonAbsorption());
 		environment.act(new SubmitCarbonEmissionReport(reportedValue), getID(), authkey);
 	}
 	
@@ -329,7 +328,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			availableToSpend -= GDP*GameConst.getMonitorCostPercentage();
 		} catch (ActionHandlingException e) {
 			logger.warn(e.getMessage(), e);
-			e.printStackTrace();
+			//e.printStackTrace();
 		} // Take % of GDP for monitoring
 	}
 
@@ -461,8 +460,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			prevEnergyOutput = energyOutput;
 				
 		} catch (UnavailableServiceException e) {
-			System.out.println("Unable to reach economy service.");
-			e.printStackTrace();
+			logger.warn("Unable to reach economy service.");
+			//e.printStackTrace();
 		}
 	}
 	
@@ -519,6 +518,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.dataStore.addEmissionsTarget(this.getEmissionsTarget());
 		this.dataStore.addCarbonOffset(this.getCarbonOffset());
 		this.dataStore.addCarbonOutput(this.getCarbonOutput());
+		this.dataStore.addEnergyOutput(this.getEnergyOutput());
+		this.dataStore.addLandArea(this.getLandArea());
+		this.dataStore.addArableLandArea(this.getArableLandArea());
+		this.dataStore.addCarbonAbsorption(this.getCarbonAbsorption());
 		this.dataStore.addIsKyotoMember(this.isKyotoMember());	
 			/* TODO
 			 * is cheating?
@@ -538,6 +541,10 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.emissionTargetKey, Double.toString(this.getEmissionsTarget()));
 		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.carbonOffsetKey, Double.toString(this.getCarbonOffset()));
 		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.carbonOutputKey, Double.toString(this.getCarbonOutput()));
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.energyOutputKey, Double.toString(this.getEnergyOutput()));
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.landAreaKey,Double.toString(this.landArea));
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.arableLandAreaKey,Double.toString(this.arableLandArea));
+		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.carbonAbsorptionKey,Double.toString(this.carbonAbsorption));
 		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.isKyotoMemberKey, this.isKyotoMember().name());
 		this.persist.getState(SimTime.get().intValue()).setProperty(DataStore.cheated, "n/a");
 	}
@@ -596,13 +603,6 @@ public abstract class AbstractCountry extends AbstractParticipant {
 
 	protected final OfferMessage broadcastBuyOffer(double quantity, double unitCost){
 		Offer trade = new Offer(quantity, unitCost, TradeType.BUY);
-		
-		/*DEBUG*/
-			System.out.println();
-			System.out.println(this.tradeProtocol.getActiveConversationMembers().toString());
-			System.out.println(this.network.getConnectedNodes());
-			System.out.println();
-		/*DEBUG*/
 		
 		OfferMessage returnObject = new OfferMessage(
 				trade, 
@@ -666,8 +666,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				kyotoMemberLevel = KyotoMember.ROGUE;
 				environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
 			} catch (ActionHandlingException e) {
-				System.out.println("Exception wilst removing from monitor: " + e);
-				e.printStackTrace();
+				logger.warn("Exception wilst removing from monitor: " + e);
+				//e.printStackTrace();
 			}
 		}
 		else if (timeService.getCurrentTick() - joinTime >= timeService.getTicksInYear()*GameConst.getMinimumKyotoMembershipDuration()) {
@@ -678,37 +678,25 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				kyotoMemberLevel = KyotoMember.ROGUE;
 				environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
 			} catch (ActionHandlingException e) {
-				System.out.println("Exception wilst removing from monitor: " + e);
-				e.printStackTrace();
+				logger.warn("Exception wilst removing from monitor: " + e);
+				//e.printStackTrace();
 			}
 		} else {
 			throw new IllegalStateException("Cannot leave Kyoto Protocol.");
 		}
 	}
 	
-	/**
-	 * Deprecated method, no longer permitted!
-	 * 
-	 * @throws IllegalStateException
-	 */
-	@Deprecated 
 	protected final void joinKyoto() throws IllegalStateException {
-		throw new IllegalStateException("Cannot join Kyoto Protocol");
-		
-//		if (timeService.getCurrentTick() - leaveTime >= timeService.getTicksInYear()*GameConst.getMinimumKyotoRejoinTime()) {
-//			joinTime = timeService.getCurrentTick();
-//			
-//			try {
-//				environment.act(new AddRemoveFromMonitor(this, addRemoveType.REMOVE), getID(), authkey);
-//				kyotoMemberLevel = KyotoMember.ANNEXONE;
-//				environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
-//			} catch (ActionHandlingException e) {
-//				System.out.println("Exception whilst adding to monitor: " + e);
-//				e.printStackTrace();
-//			}
-//		} else {
-//			throw new IllegalStateException("Cannot join Kyoto Protocol.");
-//		}
+		if (timeService.getCurrentTick() > 0) {
+			try {
+				environment.act(new RejoinKyoto(), getID(), authkey);
+			} catch (ActionHandlingException e) {
+				logger.warn("Exception whilst rejoining kyoto: " + e);
+				//e.printStackTrace();
+			}
+		} else {
+			throw new IllegalStateException("Cannot join Kyoto Protocol in first tick");
+		}
 	}
 	
 	//================================================================================
@@ -718,7 +706,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	public final String getISO() {
 		return ISO;
 	}
-		
+	
 	public final double getLandArea() {
 		return landArea;
 	}

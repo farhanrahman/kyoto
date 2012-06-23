@@ -20,6 +20,7 @@ import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
+import uk.ac.imperial.presage2.util.fsm.FSMException;
 
 
 public class CanadaAgent extends AbstractCountry {
@@ -45,11 +46,7 @@ public class CanadaAgent extends AbstractCountry {
 		return super.getSharedState();
 	}
 
-	@Override
-	protected void processInput(Input input) {
-		// TODO Auto-generated method stub
-
-	}
+	
 	
 	@Override
 	public void yearlyFunction() {
@@ -83,7 +80,7 @@ public class CanadaAgent extends AbstractCountry {
 			}
 		*/
 		
-	/*Emmisions target to be cheked against to gauge performance  */			
+	/*Emisions target to be checked against to gauge performance  */			
 	public double SetEmissionsTarget(){
 		return this.getEmissionsTarget();
 		
@@ -141,10 +138,15 @@ public class CanadaAgent extends AbstractCountry {
 	
 	
 	
-	
+	/*
 	boolean JoiningCriteriaMet()
+<<<<<<< HEAD
 	{
 		if(((this.getCarbonOutput() - this.getCarbonOffset()) >this.getEmissionsTarget())){
+=======
+	{ // TODO emissions target will only resolve if you are already a member of Kyoto
+		if(((this.getCarbonOutput()) > this.getEmissionsTarget()) && ()){
+>>>>>>> 3804685022313493de0f441c6beb2984c3fea077
 			return true;
 		}
 		//Only useful after 2011 when canada leaves
@@ -154,8 +156,54 @@ public class CanadaAgent extends AbstractCountry {
 		//If GDP growth achieved in the past 4 years
 		//
 	}
+*/
+	uk.ac.imperial.presage2.core.messaging.Input input;
+	@Override
+	protected void processInput() {
+		if(this.tradeProtocol.canHandle(input)){
+			this.tradeProtocol.handle(input);
+		}else{
+			OfferMessage offerMessage = this.tradeProtocol.decodeInput(input);
+			NetworkAddress from =this.tradeProtocol.extractNetworkAddress(input);
+			double quantity = offerMessage.getOfferQuantity();
+			if(analyse_offer(offerMessage)){
+				try{
+					this.tradeProtocol.respondToOffer(from, quantity,offerMessage);
+				} catch(IllegalArgumentException e1){
+					logger.warn(e1);
+				} catch(FSMException e1){
+					logger.warn(e1);
+				}
+			}
+			
+		}
+		
+		
+	};
+	
+	boolean analyse_offer(OfferMessage offerMessage){
+		//If the offer is feasible return true else false
+		double cost = offerMessage.getOfferUnitCost();
+		double quantity = offerMessage.getOfferQuantity();
+		double available = this.getAvailableToSpend();
+		double carb_red_cost=this.carbonReductionHandler.getInvestmentRequired(quantity);
+		double trade_cost = (cost*quantity);
+		if((trade_cost < carb_red_cost) && (trade_cost<available) &&(carb_red_cost<available)){
+			return true;
+		}
+		else return false;
+		
+	}
+	
 
-
+	
+	@Override
+	protected boolean acceptTrade(NetworkAddress from, Offer trade) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
+	
 	@Override
 	protected void behaviour() {
 		// TODO Auto-generated method stub
@@ -177,11 +225,7 @@ public class CanadaAgent extends AbstractCountry {
 	}
 
 
-	@Override
-	protected boolean acceptTrade(NetworkAddress from, Offer trade) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+
 	
 	
 	/******************************************************************************

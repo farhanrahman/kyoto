@@ -74,7 +74,7 @@ public class TradeTest extends InjectedSimulation {
 		Logger logger = Logger.getLogger(Simulation.class);
 		
 		for(int i = 1; i <= 2; i++){
-				AbstractParticipant p = new TradeProtocolTestAgent(Random.randomUUID(), "Test" + i, "CS" + i, 20000, 10000, 5000000, 0.03, 200000, 28000, 50000);
+				AbstractParticipant p = new TradeProtocolTestAgent(Random.randomUUID(), "Test" + i, "CS" + i, 20000, 10000, 5000000, 0.03, 200000, 28000);
 				s.addParticipant(p);
 				CarbonData1990.addCountry("CS"+i, 50000);
 		}

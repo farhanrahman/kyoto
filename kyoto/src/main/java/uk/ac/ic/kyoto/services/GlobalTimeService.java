@@ -1,5 +1,7 @@
 package uk.ac.ic.kyoto.services;
 
+import org.apache.log4j.Logger;
+
 import uk.ac.ic.kyoto.countries.GameConst;
 import uk.ac.imperial.presage2.core.environment.EnvironmentRegistrationRequest;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
@@ -18,6 +20,8 @@ import com.google.inject.Inject;
  */
 
 public class GlobalTimeService extends EnvironmentService {
+	
+	private Logger logger = Logger.getLogger(GlobalTimeService.class);
 	
 	public static String name = "GlobalTime";
 	
@@ -49,18 +53,18 @@ public class GlobalTimeService extends EnvironmentService {
 	
 	@EventListener
 	public void updateTickCounter (EndOfTimeCycle e) {
-		System.out.println("updateTickCounter called. SimTime: "+SimTime.get().intValue());
+		logger.info("updateTickCounter called. SimTime: "+SimTime.get().intValue());
 		if (SimTime.get().intValue() % getTicksInYear() == 0) {
-			System.out.println("END OF YEAR "+(getCurrentYear()-1));
+			logger.info("END OF YEAR "+(getCurrentYear()-1));
 			EndOfYearCycle y = new EndOfYearCycle(getCurrentYear()-1);
 			eb.publish(y);
 			sharedState.changeGlobal("YearCount", getCurrentYear());
 			if (getCurrentYear() - getCurrentSession() * yearsInSession == yearsInSession) {
-				System.out.println("end of the session");
+				logger.info("end of the session");
 				sharedState.changeGlobal("SessionCount", getCurrentSession());
 			}
 		}
-		System.out.println("updateTickCounter returning. SimTime: "+SimTime.get().intValue());
+		logger.info("updateTickCounter returning. SimTime: "+SimTime.get().intValue());
 	}
 	
 	//================================================================================

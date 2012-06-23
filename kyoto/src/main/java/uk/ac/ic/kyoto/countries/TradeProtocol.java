@@ -14,6 +14,7 @@ import uk.ac.ic.kyoto.singletonfactory.SingletonProvider;
 import uk.ac.ic.kyoto.tokengen.Token;
 import uk.ac.ic.kyoto.trade.InvestmentType;
 import uk.ac.ic.kyoto.trade.TradeType;
+import uk.ac.ic.kyoto.tradehistory.OfferHistory;
 import uk.ac.ic.kyoto.tradehistory.TradeHistory;
 import uk.ac.imperial.presage2.core.Time;
 import uk.ac.imperial.presage2.core.environment.EnvironmentConnector;
@@ -56,7 +57,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 	Token tradeToken;
 
 	private TradeHistory tradeHistory;
-
+	private OfferHistory offerHistory = new OfferHistory();
 	private AbstractCountry participant;
 
 	public enum ResponderReplies{
@@ -407,6 +408,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 
 		public TradeSpawnEvent(NetworkAddress with, double quantity, double unitCost, TradeType type, InvestmentType itype, OfferMessage offerMessage) {
 			super(with);
+			TradeProtocol.this.offerHistory.addToHistory(SimTime.get(), offerMessage.getTradeID(), offerMessage);
 			this.offerMessage = new OfferMessage(new Offer(quantity, unitCost, type, itype), offerMessage.getTradeID(), OfferMessageType.TRADE_PROTOCOL, offerMessage.getBroadCaster());
 			this.offerMessage.setInitiator(TradeProtocol.this.getId());/*Set the initiator id*/
 		}
@@ -511,7 +513,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 									participant.carbonAbsorptionHandler.investInCarbonAbsorption(trade.getQuantity());
 								} catch (NotEnoughCashException e) {
 									logger.warn(e);
-									System.err.println("Country: " + participant.ISO +
+									logger.warn("Country: " + participant.ISO +
 											"\nAvailable to spend: " + e.getAvailableToSpend() +
 											"\nInvestment required: "  + e.getInvestmentRequired());
 									return false; /*Trade must fail*/
@@ -541,7 +543,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 									return false; /*Trade must fail*/
 								} catch (NotEnoughCashException e) {
 									logger.warn(e);
-									System.err.println("Country: " + participant.ISO +
+									logger.warn("Country: " + participant.ISO +
 											"\nAvailable to spend: " + e.getAvailableToSpend() +
 											"\nInvestment required: "  + e.getInvestmentRequired());
 									return false; /*Trade must fail*/
@@ -564,7 +566,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 		}catch(NotEnoughCashException e){
 			/*Trade MUST FAIL*/
 			logger.warn(e);
-			System.err.println("Country: " + participant.ISO +
+			logger.warn("Country: " + participant.ISO +
 					"\nAvailable to spend: " + e.getAvailableToSpend() +
 					"\nInvestment required: "  + e.getInvestmentRequired());
 			return false;

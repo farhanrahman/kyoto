@@ -150,6 +150,7 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 		carbonReductionHandler = new IsolatedCarbonReductionHandler(this);
 		energyUsageHandler = new IsolatedEnergyUsageHandler(this);
 
+		initialiseCountry();
 	}
 
 	@Override
@@ -541,9 +542,9 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 		this.carbonOffset += amount;
 	}
 
-	protected final OfferMessage broadcastSellOffer(int quantity,
+	protected final OfferMessage broadcastSellOffer(double d,
 			double unitCost) {
-		Offer trade = new Offer(quantity, unitCost, TradeType.SELL);
+		Offer trade = new Offer(d, unitCost, TradeType.SELL);
 		OfferMessage returnObject = new OfferMessage(trade,
 				this.tradeProtocol.tradeToken.generate(),
 				OfferMessageType.BROADCAST_MESSAGE, this.getID());
@@ -554,8 +555,8 @@ public abstract class IsolatedAbstractCountry extends AbstractParticipant {
 		return returnObject;
 	}
 
-	protected final OfferMessage broadcastBuyOffer(int quantity, double unitCost) {
-		Offer trade = new Offer(quantity, unitCost, TradeType.BUY);
+	protected final OfferMessage broadcastBuyOffer(double d, double unitCost) {
+		Offer trade = new Offer(d, unitCost, TradeType.BUY);
 
 		/* DEBUG */
 		System.out.println();
