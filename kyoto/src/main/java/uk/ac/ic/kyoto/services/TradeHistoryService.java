@@ -15,9 +15,9 @@ import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 
 /**
  * Environment Service that invokes
- * method in TradeHistoryImplementation
- * that dumps current tick trade histories
- * onto the database
+ * method in TradeHistory that dumps 
+ * current tick trade histories onto 
+ * the database
  * @author farhanrahman
  *
  */
