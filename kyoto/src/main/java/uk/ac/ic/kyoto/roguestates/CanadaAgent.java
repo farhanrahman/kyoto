@@ -51,30 +51,6 @@ public class CanadaAgent extends AbstractCountry {
 
 	}
 	
-	/*
-	//A useful function but not 100% sure where it might help
-	private void CalculateAverageGDP() {
-		// Previous cumulative GDP changes divided by new total years elapsed. 
-			try {
-				ParticipantTimeService timeService = getEnvironmentService(ParticipantTimeService.class);			
-			} 
-			catch (UnavailableServiceException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			int YearsElapsed = timeService.getCurrentYear(); // returns years elapsed from year 0
-			
-			if(YearsElapsed==0) {
-				AverageGDPRate = GDPRate; // GDPRates are seeded from historical data. 
-			}
-			else {
-				AverageGDPRate = (AverageGDPRate + GDPRate) / YearsElapsed;
-			}
-		}
-	
-	*/
-	
 	@Override
 	public void yearlyFunction() {
 		// TODO Auto-generated method stub
@@ -85,42 +61,7 @@ public class CanadaAgent extends AbstractCountry {
 	/**
 	 * Increase carbon absorption as long as you have land area and money
 	 */
-	/*private void investMax() {
-		double carbonAbsorptionChange = 1000;
-		
-		try {
-			double investmentRequired = carbonAbsorptionHandler.getInvestmentRequired(carbonAbsorptionChange);
-			double areaRequired = carbonAbsorptionHandler.getForestAreaRequired(carbonAbsorptionChange);
-			double reverseCarbonAbsorption = carbonAbsorptionHandler.getCarbonAbsorptionChange(investmentRequired);
-			
-			System.out.println("****************************************");
-			
-			System.out.println("* " + this.getName() + ": Carbon Absorption before: " + carbonAbsorption);
-			System.out.println("* " + this.getName() + ": Money before: " + availableToSpend);
-			System.out.println("* " + this.getName() + ": Arable land before: " + arableLandArea);
-			
-			System.out.println("* " + this.getName() + ": I want to invest in " + carbonAbsorptionChange + " carbon absorption");
-			System.out.println("* " + this.getName() + ": It will cost me: " + investmentRequired);
-			System.out.println("* " + this.getName() + ": It will reduce my land by: " + areaRequired);
-			
-			System.out.println("* " + this.getName() + ": For that investment, I should get at least " + reverseCarbonAbsorption + " carbon absorption");
-
-			carbonAbsorptionHandler.investInCarbonAbsorption(carbonAbsorptionChange);
-			
-			System.out.println("* " + this.getName() + ": Success!");
-			
-			System.out.println("* " + this.getName() + ": Carbon Absorption after: " + carbonAbsorption);
-			System.out.println("* " + this.getName() + ": Money after: " + availableToSpend);
-			System.out.println("* " + this.getName() + ": Arable land after: " + arableLandArea);
-			
-			System.out.println("****************************************");
-
-			//investmentAmount = (long) (availableToSpend * 0.1);
-			//carbonAbsorptionHandler.invest(investmentAmount);
-		}
-				
-		*/
-//These are the functions that will help with determining the rejoining of Canada 
+	
 			
 	/******************************************************
 	@Override
@@ -241,97 +182,6 @@ public class CanadaAgent extends AbstractCountry {
 		// TODO Auto-generated method stub
 		return false;
 	}
-	
-	
-	
-	/*
-	private void energy_increase_with_care(double money_invest) throws IllegalArgumentException, Exception
-	{
-		double carbon_difference; 
-		double available_area;
-		available_area = getArableLandArea();
-		
-		
-		if (getCarbonOutput() + energyUsageHandler.calculateCarbonIndustryGrowth(money_invest) <= environment_friendly_target)
-		{ //invest but also check if we meet our environment friendly target.
-			try{
-				energyUsageHandler.investInCarbonIndustry(money_invest);
-				logger.info("Invest in carbon industry successful");
-				logger.info("Country meets its environment friendy target");
-				green_lands = true;
-			} 
-			catch (Exception e) {
-				logger.warn("Invest in carbon industry not successful");
-			}
-		}	
-		
-		else
-		{
-			logger.info("Country exceeded its environment friendly goal, invest in carbon industry but also invest in carbon absorption");
-			green_lands = false;
-			try{
-				energyUsageHandler.investInCarbonIndustry(money_invest);
-			} 
-			catch (Exception e){
-				logger.warn("Invest in carbon industry not successful");
-			}
-			
-			try{ //also since country exceeds its own carbon target, invests in carbon absorption or carbon reduction in order to get carbon offset.
-				carbon_difference = (getCarbonOutput() + energyUsageHandler.calculateCarbonIndustryGrowth(money_invest)) - environment_friendly_target;
-				
-				if (carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend() )
-					{
-					carbonAbsorptionHandler.investInCarbonAbsorption(carbonAbsorptionHandler.getInvestmentRequired(carbon_difference));
-					logger.info("Country invests in carbon absorption to increase carbon absorption and thus reach environment target carbon output");
-					}
-				
-				else if ((carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend() ) && (carbonAbsorptionHandler.getForestAreaRequired(carbon_difference) >= available_area))
-				
-					{
-					logger.info("Country reach limit of available pre-set land, not possible to invest in carbon absorption, try invest in carbon reduction");
-					if (carbonReductionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend())
-						{
-						carbonReductionHandler.investInCarbonReduction(carbon_difference);
-						logger.info("Country has enough cash to invest in carbon reduction, invests!");
-						}
-					}
-				else 
-					{
-					logger.info("Country has insufficient funds to reach environment friendly target");
-					green_care = false;
-					}
-					
-			}
-			catch (Exception e){
-				logger.warn("Problem with investing in carbon absorption: " + e);
-			}
-		}
-		
-		change_emission_target(environment_friendly_target,green_lands);
-		
-		
-	}
-	*/
-	
-	
-	/*Implement all the behaviours of canada */
-	/*public void behaviour(){
-		//If not in part of kyoto check the conditions which make it feasible to 
-		// join kyoto
-		
-    	//else if part of kyoto check for different conditons
-		if
-		
-		
-		
-		
-	}
-	
-	*/
-
-	// Add a function to check the gdp rte against emmsision
-	//Add a function for ratio of GDP against the emmision
-	
 	
 	
 	/******************************************************************************
