@@ -72,7 +72,7 @@ public class AnnexOneReduce extends AbstractCountry {
 	protected void behaviour() {
 
 		// TODO fix this Update our market buy and sell price information
-//		marketData.update();
+		// marketData.update();
 
 		// If the expected buy price has increased by more than 5%, we should
 		// resimulate
@@ -314,11 +314,10 @@ public class AnnexOneReduce extends AbstractCountry {
 
 	// TODO get years until sanctions (when carbon credits reset)
 	private int getYearsUntilSanctions() {
-
-		int years = timeService.getCurrentYear()
-				% GameConst.getYearsInSession();
-		years = GameConst.getYearsInSession() - years;
-		return years;
+		 int years = timeService.getCurrentYear()
+		 % GameConst.getYearsInSession();
+		 years = GameConst.getYearsInSession() - years;
+		 return years;
 	}
 
 	/**
@@ -340,6 +339,7 @@ public class AnnexOneReduce extends AbstractCountry {
 		double r_netCarbonOutput = this.getCarbonOutput()
 				- this.getCarbonAbsorption() - this.getCarbonOffset();
 
+		// Positive carbon difference means we need to reduce our carbon
 		double r_carbonDifference = r_netCarbonOutput
 				- this.getEmissionsTarget();
 
@@ -396,23 +396,19 @@ public class AnnexOneReduce extends AbstractCountry {
 		// Invest in industry if we need to
 		if (m_industryPrice > 0) {
 
+			double m_extraCarbon = energyUsageHandler
+					.calculateCarbonIndustryGrowth(m_industryPrice);
+
 			try {
 				energyUsageHandler.investInCarbonIndustry(m_industryPrice);
 			} catch (NotEnoughCashException e) {
 				logger.warn(e);
 			}
-
-			// Calculate amount of extra carbon we now need to offset
-			double m_netCarbonOutput = this.getCarbonOutput()
-					- this.getCarbonAbsorption() - this.getCarbonOffset();
-
-			double m_carbonDifference = m_netCarbonOutput
-					- this.getEmissionsTarget();
-
+			
 			// If we need to reduce our carbon further
-			if (m_carbonDifference > 0) {
+			if (m_extraCarbon > 0) {
 				// Calculate ratio of absorption to reduction
-				double[] m_carbon = getAbsorbReduceCarbon(m_carbonDifference);
+				double[] m_carbon = getAbsorbReduceCarbon(m_extraCarbon);
 
 				// Invest in carbon absorption
 				if (m_carbon[0] > 0) {
