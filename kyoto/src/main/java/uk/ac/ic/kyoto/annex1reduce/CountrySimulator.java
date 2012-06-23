@@ -38,7 +38,7 @@ class CountrySimulator {
 			double arableLandArea, int yearsUntilSanctions) {
 
 		this.SANCTION_YEAR = yearsUntilSanctions;
-		this.LOOK_AHEAD_YEARS = Math.max(SANCTION_YEAR + 12, 15);
+		this.LOOK_AHEAD_YEARS = 12;
 
 		// Initialise the starting point in the simulation
 		startState = new CountryState(carbonOutput, energyOutput,
