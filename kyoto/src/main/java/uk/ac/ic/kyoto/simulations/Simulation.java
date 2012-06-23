@@ -178,8 +178,8 @@ public class Simulation extends InjectedSimulation {
 										Double.parseDouble(countryData.getArableLandArea()), 
 										Double.parseDouble(countryData.getGDP()),
 										Double.parseDouble(countryData.getGDPRate()),
-										Long.parseLong(countryData.getEnergyOutput()), 
-										Long.parseLong(countryData.getCarbonOutput()));		
+										Double.parseDouble(countryData.getEnergyOutput()), 
+										Double.parseDouble(countryData.getCarbonOutput()));		
 					} else if(className.equals("USAgent")){
 						abstractCountry = new USAgent(
 											Random.randomUUID(), 
