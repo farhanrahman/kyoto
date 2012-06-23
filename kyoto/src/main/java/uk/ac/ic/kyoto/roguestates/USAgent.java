@@ -20,8 +20,7 @@ public class USAgent extends AbstractCountry {
 
 	private static final int 		Average1 = 4;
 	private static final double  DecreaseIntensityByPercent = 0.95;
-	private static final double  IncreaseGDPRateByPercent = 1.05;
-	private static final int 		ElectionRandomAdjust = 0;
+	private static final double  IncreaseGDPByPercent = 1.05;
 	private static final double 	EnergyIncreaseStep = 0.01; // increase by one percent until target reached
 	
 	private boolean DemocratElected; 			// chosen at random on class instantiation
@@ -46,7 +45,7 @@ public class USAgent extends AbstractCountry {
 	//private Map<Integer, Double> GDPRateTargetMap = new HashMap<Integer, Double>();
 	private Map<Integer, Double> GDPRateMap = new HashMap<Integer, Double>();
 	private Map<Integer, Double> GDPMap = new HashMap<Integer, Double>();
-	
+	private Map<Integer, Double> AverageGDPMap = new HashMap<Integer, Double>();
 	// Calculate the average over the past four years and save
 	private Map<Integer, Double> AverageIntensityRatioMap = new HashMap<Integer, Double>();	
 	private Map<Integer, Double> AverageGDPRateMap = new HashMap<Integer, Double>();
@@ -73,11 +72,12 @@ public class USAgent extends AbstractCountry {
 		double InvestAmount = 0;
 		boolean EnoughCash = true;
 					
-		if(IsElectionYear(timeService.getCurrentYear()+1)) { // if the following year is an election year. 
+		//if(IsElectionYear(timeService.getCurrentYear()+1)) { // if the following year is an election year. 
+			
 			if(IsLastTick()) { // if its the last tick of the year
 				// Up until this point only CDM or trading will have taken place. 
 
-				while( (this.CalculateProjectedGDP() < this.getGDPTarget()) // keep investing until target reached
+				while( this.CalculateProjectedGDP() < this.getGDPTarget()// keep investing until target reached
 						&& EnoughCash ) {	// will not enter if cost for next 
 					// step is more than we have available		
 					// TODO catch exceptions
@@ -107,10 +107,10 @@ public class USAgent extends AbstractCountry {
 				boolean EnoughCash2 = true;
 				boolean EnoughCarbon = true;
 
-				while(this.CalculateIntensityRatio() > this.getIntensityTarget() // while target not reached 
+				while((this.CalculateCurrentIntensityRatio() > this.CalculateProjectedIntensityRatio()) // while target not reached 
 				&& EnoughCash2 && EnoughLand && EnoughCarbon) { // booleans set to false if corresponding exception thrown
-					
-					RequiredCarbonOutputDecrease = -1*((this.getIntensityTarget()*CalculateProjectedGDP())-this.getCarbonOutput());
+										
+					RequiredCarbonOutputDecrease = this.CalculateProjectedCarbonOutput()-this.getCarbonOutput();
 					if(debug) logger.info("behaviour: RequiredCarbonOutputDecrease = " + RequiredCarbonOutputDecrease);
 					
 					AbsorptionInvestmentNeeded = carbonAbsorptionHandler.getInvestmentRequired(RequiredCarbonOutputDecrease);						
@@ -155,7 +155,7 @@ public class USAgent extends AbstractCountry {
 				}	
 				*/			
 			}
-		}
+		//}
 		logger.info("behaviour: Returning");
 	}
 	
@@ -174,7 +174,7 @@ public class USAgent extends AbstractCountry {
 
 	private boolean IsLastTick() {
 		logger.info("IsLastTick: Entering");
-		if(timeService.getCurrentTick()==timeService.getTicksInYear()-1) {
+		if((timeService.getCurrentTick() % timeService.getTicksInYear())==timeService.getTicksInYear()-6) {
 			logger.info("IsLastTick: Returning true");
 			return(true);
 		}
@@ -185,9 +185,9 @@ public class USAgent extends AbstractCountry {
 		
 	}
 
-	private double CalculateProjectedGDP() {
-		logger.info("CalculateProjectedGDP: Entering");
-		double ProjectedGDP;
+	private double CalculateProjectedGDPRate() {
+		logger.info("CalculateProjectedGDPRate: Entering");
+		double ProjectedGDPRate;
 		double marketStateFactor = GameConst.getStableMarketState();
 		double sum;
 		double EnergyOutput = getEnergyOutput();
@@ -197,24 +197,30 @@ public class USAgent extends AbstractCountry {
 		if (EnergyDifference >= 0){	
 			sum = (((EnergyDifference)/PreviousEnergyOutput)*GameConst.getEnergyGrowthScaler()*marketStateFactor+getGDPRate()*100)/2;
 			if (sum < 0) {
-				ProjectedGDP = -(GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(sum*GameConst.getGrowthScaler()));
+				ProjectedGDPRate = -(GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(sum*GameConst.getGrowthScaler()));
 			}
 			else {
-				ProjectedGDP = GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler());
+				ProjectedGDPRate = GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler());
 			}
 		}
 		else{
 			sum = ((EnergyDifference)/PreviousEnergyOutput)*GameConst.getEnergyGrowthScaler();
 			sum = Math.abs(sum);
-			ProjectedGDP = -(GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler()));
+			ProjectedGDPRate = -(GameConst.getMaxGDPGrowth()-GameConst.getMaxGDPGrowth()*Math.exp(-sum*GameConst.getGrowthScaler()));
 		}
 		
-		ProjectedGDP /= 100; // Needs to be a % for rate formula
-		logger.info("CalculateProjectedGDP: ProjectedGDP = " + ProjectedGDP);
-		logger.info("CalculateProjectedGDP: Returning");
-		return ProjectedGDP;
+		ProjectedGDPRate /= 100; // Needs to be a % for rate formula
+		
+		logger.info("CalculateProjectedGDPRate: ProjectedGDPRate = " + ProjectedGDPRate);
+		logger.info("CalculateProjectedGDPRate: Returning");
+		return ProjectedGDPRate;
 	}
-
+	
+	double CalculateProjectedGDPRate2() {		
+		double outputGDP = (CalculateProjectedGDPRate()/100) + 1;
+		logger.info("CalculateProjectedGDPRate2: outputGDP = " + outputGDP);
+		return(outputGDP);
+	}
 	@Override
 	/*
 	 * (non-Javadoc)
@@ -275,23 +281,38 @@ public class USAgent extends AbstractCountry {
 
 	private void HoldElection() {		
 		if(debug) logger.info("HoldElection: Entering");
-		if(CalculateIntensityScore(Random.randomInt(USAgent.ElectionRandomAdjust)) 
-		> CalculateGDPRateScore(Random.randomInt(USAgent.ElectionRandomAdjust))) {
-			setDemocratElected(true);
-			if(debug) logger.info("HoldElection: DemocratElected");
+		double IntensityScore = CalculateIntensityScore(Random.randomInt(5)/100);
+		double GDPRateScore = CalculateGDPRateScore(Random.randomInt(5)/100);
+		
+		if(isDemocratElected()) {
+			if(IntensityScore < GDPRateScore) { 
+				setDemocratElected(false);
+				if(debug) logger.info("HoldElection: RepublicanElected");
+			}
+			else {
+				setDemocratElected(true);
+				if(debug) logger.info("HoldElection: Democrat Re-Elected");			
+			}
 		}
 		else {
-			setDemocratElected(false);
-			if(debug) logger.info("HoldElection: RepublicanElected");
+			if(GDPRateScore < IntensityScore) { 
+				setDemocratElected(true);
+				if(debug) logger.info("HoldElection: Democrat Elected");
+			}
+			else {
+				setDemocratElected(false);
+				if(debug) logger.info("HoldElection: Republican Re-Elected");			
+			}
 		}
+		
 		if(debug) logger.info("HoldElection: Returning");
 	}
 	
 	private double CalculateGDPRateScore(double ElectionAdjust) {
-		double CurrentGDPRate = this.getAverageGDPRate(timeService.getCurrentYear());
+		double AverageGDPRate = this.getAverageGDPRate(timeService.getCurrentYear());
 		double CurrentGDPRateTarget = this.getGDPRateTarget();
-		
-		double GDPRateScore = (CurrentGDPRate/CurrentGDPRateTarget);
+		// TODO change to average RateTarget
+		double GDPRateScore = (AverageGDPRate/CurrentGDPRateTarget);
 		if(debug) logger.info("CalculateGDPRateScore: GDPRateScore = " + GDPRateScore);
 		
 		int 	CurrentAttitude = this.getPrevailingAttitude();
@@ -336,7 +357,7 @@ public class USAgent extends AbstractCountry {
 		
 		int 	CurrentAttitude = this.getPrevailingAttitude();
 		double AttitudeFactor = 1+((-1*CurrentAttitude)/10);
-		if(debug) logger.info("CalculateGDPRateScore: AttitudeFactor = " + AttitudeFactor);
+		if(debug) logger.info("CalculateIntensityScore: AttitudeFactor = " + AttitudeFactor);
 		/*
 		 * Current attitude ranges from -5 to + 5. -5 being very pro carbon reduction
 		 * +5 very ambivalent, and by extension, pro GDP growth.
@@ -349,7 +370,7 @@ public class USAgent extends AbstractCountry {
 		else {
 			PartyFactor = 1;
 		}
-		if(debug) logger.info("CalculateGDPRateScore: PartyFactor = " + PartyFactor);
+		if(debug) logger.info("CalculateIntensityScore: PartyFactor = " + PartyFactor);
 		
 		double AdjustedIntensityScore = IntensityScore*AttitudeFactor*PartyFactor*(1+ElectionAdjust);
 		if(debug) logger.info("CalculateIntensityScore: AdjustedIntensityScore = " + AdjustedIntensityScore);				
@@ -380,22 +401,26 @@ public class USAgent extends AbstractCountry {
 		
 		if(isDemocratElected()) {
 			if(debug) logger.info("SetTargets: Democrat Elected");
-			CalculateAndSetNewGDPRateTarget(1);
+			CalculateAndSetNewGDPTarget(1);
+			//CalculateAndSetNewGDPRateTarget(1);
 			CalculateAndSetNewIntensityTarget(USAgent.DecreaseIntensityByPercent);
 		}
 		else {
 			if(debug) logger.info("SetTargets: Republican Elected");
-			CalculateAndSetNewGDPRateTarget(USAgent.IncreaseGDPRateByPercent);
+			CalculateAndSetNewGDPTarget(USAgent.IncreaseGDPByPercent);
 			CalculateAndSetNewIntensityTarget(1);	
 		}
 		
-		setGDPTarget(CalculateGDPTarget()); // uses the just calculated GDPRateTargets
+		setGDPRateTarget(CalculateGDPRateTarget()); // uses the just calculated GDPRateTargets
 		
 		if(debug) logger.info("SetTargets: Returning");
 	}
-	
+
 	private void CalculateAndSetNewIntensityTarget(double Multiplier) {
-		double value = AverageIntensityRatioMap.get(timeService.getCurrentYear())*Multiplier;
+		double AverageIntensity = AverageIntensityRatioMap.get(timeService.getCurrentYear());
+		double value = AverageIntensity*Multiplier;
+		
+		
 		if(debug) logger.info("CalculateAndSetNewIntensityTarget: value = " + value);
 		setIntensityTarget(value);
 	}
@@ -404,6 +429,12 @@ public class USAgent extends AbstractCountry {
 		double value = AverageGDPRateMap.get(timeService.getCurrentYear())*Multiplier;
 		if(debug) logger.info("CalculateAndSetNewGDPRateTarget: value = " + value);
 		setGDPRateTarget(value);
+	}
+	
+	private void CalculateAndSetNewGDPTarget(double Multiplier) {
+		double value = AverageGDPMap.get(timeService.getCurrentYear())*Multiplier;
+		if(debug) logger.info("CalculateAndSetNewGDPTarget: value = " + value);
+		setGDPTarget(value);
 	}
 
 	
@@ -447,22 +478,34 @@ public class USAgent extends AbstractCountry {
 		if(offerMessage.getOfferType()==TradeType.RECEIVE) { // CDM type
 			// Democrats will opt for reduction if it is cost effective regardless of whether target has already been met.
 			if(debug) logger.info("AnalyzeOffer: TradeType==RECEIVE");
-			if(getIntensityRatio() > getIntensityTarget()) {
+			
+			
+			if(CalculateCurrentIntensityRatio() > CalculateProjectedIntensityRatio()) {
 				if(debug) logger.info("AnalyzeOffer: getIntensityRatio() > getIntensityTarget()");
 				double OfferUnitCost = offerMessage.getOfferUnitCost();				
 				double OfferQuantity = offerMessage.getOfferQuantity();
 				double TradeCost = OfferUnitCost*OfferQuantity;
 				double EquivalentAbsorptionCost = carbonAbsorptionHandler.getInvestmentRequired(OfferQuantity);
 				double EquivalentReductionCost = carbonReductionHandler.getInvestmentRequired(OfferQuantity);
+				
+				if(debug) logger.info("AnalyzeOffer: OfferUnitCost = " + OfferUnitCost);
+				if(debug) logger.info("AnalyzeOffer: OfferQuantity = " + OfferQuantity);
+				if(debug) logger.info("AnalyzeOffer: TradeCost = " + TradeCost);
+				if(debug) logger.info("AnalyzeOffer: EquivalentAbsorptionCost = " + EquivalentAbsorptionCost);
+				if(debug) logger.info("AnalyzeOffer: EquivalentReductionCost = " + EquivalentReductionCost);
+				
 				if(TradeCost < Math.min(EquivalentReductionCost, EquivalentAbsorptionCost)) {					
 					if(debug) logger.info("AnalyzeOffer: Returning true");
 					return(true);
 				}
 			}						
 		}
+		
 		if(debug) logger.info("AnalyzeOffer: Returning false");
 		return(false);
 	}
+
+
 
 	@Override
 	protected boolean acceptTrade(NetworkAddress from, Offer trade) {
@@ -542,12 +585,14 @@ public class USAgent extends AbstractCountry {
 		return(value);
 	}
 	
+	/*
 	private double CalculateGDPTarget() {
-		double value = getGDP()*(1+getGDPRateTarget());
+		// TODO check
+		double value = getGDP()*(getGDPRateTarget());
 		if(debug) logger.info("CalculateGDPTarget: value = " + value);
 		return value; 
 	}
-
+	*/
 	/*
 	private void StoreTargetData() {
 		if(debug) logger.info("StoreTargetData: Entered");
@@ -591,6 +636,7 @@ public class USAgent extends AbstractCountry {
 	private void ProcessHistoricalData() {
 		double dGDPRate = 0;
 		double dIntensityRatio = 0;		
+		double dGDP = 0;
 		int 	Limit;
 		int 	Divider = 0;
 		if(debug) logger.info("ProcessHistoricalData: Entered");
@@ -607,12 +653,17 @@ public class USAgent extends AbstractCountry {
 		}
 		
 		for(int i=timeService.getCurrentYear(); i >= timeService.getCurrentYear() - Limit; i--) {
+			dGDP += (GDPMap.get(i));
 			dGDPRate += (GDPRateMap.get(i));
 			dIntensityRatio += IntensityRatioMap.get(i);
 			Divider++;
 		}
 		
 		if(debug) logger.info("ProcessHistoricalData: Divider = " + Divider);
+		
+		AverageGDPMap.put(timeService.getCurrentYear(), dGDP/Divider);
+		if(debug) logger.info("ProcessHistoricalData: AverageGDPMap.get(timeService.getCurrentYear()) = " 
+		+ AverageGDPMap.get(timeService.getCurrentYear()));
 		
 		AverageGDPRateMap.put(timeService.getCurrentYear(), dGDPRate/Divider);
 		if(debug) logger.info("ProcessHistoricalData: AverageGDPRateMap.get(timeService.getCurrentYear()) = " 
@@ -730,6 +781,36 @@ public class USAgent extends AbstractCountry {
 		return value;
 	}
 
+	private double CalculateProjectedIntensityRatio() {
+		double result = this.getGDPTarget() / CalculateProjectedCarbonOutput();
+		if(debug) logger.info("CalculateProjectedIntensityRatio: result = " + result);
+		return(result);
+	}
+	
+	private double CalculateProjectedCarbonOutput() {
+		double result = getGDPTarget() / getIntensityTarget();
+		if(debug) logger.info("CalculateProjectedCarbonOutput: result = " + result);
+		return result;		
+	}
+	
+	private double CalculateCurrentIntensityRatio() {
+		double result = CalculateProjectedGDP() / getCarbonOutput();
+		if(debug) logger.info("CalculateCurrentIntensityRatio: result = " + result);
+		return(result);
+	}
+	
+	private double CalculateProjectedGDP() {
+		double result = this.CalculateProjectedGDPRate2()*this.getGDP();
+		if(debug) logger.info("CalculateProjectedGDP: result = " + result);
+		return(result);
+	}
+	
+	private double CalculateGDPRateTarget() {
+		double result = this.getGDPTarget()/this.getGDP();
+		if(debug) logger.info("CalculateGDPRateTarget: result = " + result);
+		return result;
+	}
+	
 	public double getGDPRateTarget() {
 		if(debug) logger.info("getGDPRateTarget: GDPRateTarget = " + GDPRateTarget);
 		return GDPRateTarget;
