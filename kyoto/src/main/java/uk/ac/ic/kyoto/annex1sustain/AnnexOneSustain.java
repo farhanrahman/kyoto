@@ -18,7 +18,6 @@ import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.imperial.presage2.core.network.Message;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
-import uk.ac.imperial.presage2.util.fsm.FSMException;
 
 
 /**
@@ -50,20 +49,18 @@ public class AnnexOneSustain extends AbstractCountry {
 			double energyOutput, double carbonOutput)
 	{
 		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput);
-		
-		this.name = this.getName();
-		this.surplusCarbonTarget = 0;
-		this.surplusCarbonPrice = 0;
-		this.surplusCarbon = 0;
-		this.expectedSales = Constants.EXPECTED_SALES_INITIAL;
-		this.carbonToReduce = 0;
-		this.carbonToAbsorb = 0;
-		setKyotoMemberLevel(KyotoMember.ANNEXONE);
 	}
 	
 	@Override
 	protected void initialiseCountry() {
+		this.name = this.getName();
+		this.surplusCarbonTarget = 0;
+		this.surplusCarbon = 0;
 		this.surplusCarbonPrice = carbonReductionHandler.getInvestmentRequired(1);
+		this.expectedSales = Constants.EXPECTED_SALES_INITIAL;
+		this.carbonToReduce = 0;
+		this.carbonToAbsorb = 0;
+		setKyotoMemberLevel(KyotoMember.ANNEXONE);
 		this.tradeSemaphore = new Semaphore(1);
 	}
 	
@@ -229,29 +226,24 @@ public class AnnexOneSustain extends AbstractCountry {
     //================================================================================
 	
 	@Override
+	public void sessionFunction() {
+	}
+	
+	@Override
 	public void yearlyFunction() {
 		initialInvestments();
 		updateExpectedSales();
 		resetYearlyTargets();
 		
-		if (Math.round(surplusCarbon) < 0) {
-			leaveKyoto();
-			logger.info(name + ": Leaving Kyoto, my target is below my emissions");
+		if (isKyotoMember() == KyotoMember.ANNEXONE) {
+			if (Math.round(surplusCarbon) < 0) {
+				leaveKyoto();
+				logger.info(name + ": Leaving Kyoto, my target is below my emissions");
+			}
+			else {
+				logger.info(name + ": Staying in Kyoto, my target is above my emissions");
+			}
 		}
-		else {
-			logger.info(name + ": Staying in Kyoto, my target is above my emissions");
-		}
-		
-		logger.info(name + ": Emission target: " + this.getEmissionsTarget());
-		logger.info(name + ": Energy Output: " + this.getEnergyOutput());
-		logger.info(name + ": Carbon Output: " + this.getCarbonOutput());
-		logger.info(name + ": Carbon Absorption: " + this.getCarbonAbsorption());
-		logger.info(name + ": Carbon Offset: " + this.getCarbonOffset());
-		logger.info(name + ": Surplus Carbon: " + surplusCarbon);
-	}
-	
-	@Override
-	public void sessionFunction() {
 	}
 	
 	protected void initialInvestments() {
@@ -422,7 +414,7 @@ public class AnnexOneSustain extends AbstractCountry {
 		}
 		catch (Exception e) {
 			logger.warn(name + ": Problem with assessing margin of carbon reduction: " + e.getMessage());
-			reductionMargin = -10000000; // To make sure not profitable
+			reductionMargin = -Double.MAX_VALUE; // To make sure not profitable
 		}
 		
 		return reductionMargin;
@@ -439,7 +431,7 @@ public class AnnexOneSustain extends AbstractCountry {
 		}
 		catch (Exception e) {
 			logger.warn(name + ": Problem with assessing margin of carbon absorption: " + e.getMessage());
-			absorptionMargin = -10000000; // To make sure not profitable
+			absorptionMargin = -Double.MAX_VALUE; // To make sure not profitable
 		}
 		
 		return absorptionMargin;
@@ -453,7 +445,7 @@ public class AnnexOneSustain extends AbstractCountry {
 		}
 		catch (Exception e) {
 			logger.warn(name + ": Problem with assessing profitability of sale: " + e.getMessage());
-			surplusSaleMargin = -10000000; // To make sure not profitable
+			surplusSaleMargin = -Double.MAX_VALUE; // To make sure not profitable
 		}
 		
 		return surplusSaleMargin;
