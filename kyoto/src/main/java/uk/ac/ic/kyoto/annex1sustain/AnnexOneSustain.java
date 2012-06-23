@@ -250,7 +250,7 @@ public class AnnexOneSustain extends AbstractCountry {
 		double carbonAbsTrees = 0;
 		
 		try {
-			totalInvestment = this.getAvailableToSpend() * Constants.INDUSTRY_GROWTH_MONEY_PERCENTAGE / 2;
+			totalInvestment = this.getAvailableToSpend() * Constants.INDUSTRY_GROWTH_MONEY_PERCENTAGE;
 			industryInvestment = totalInvestment / 2;
 			investmentDiff = industryInvestment;
 			
