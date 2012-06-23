@@ -73,7 +73,7 @@ public class NonAnnexOneTest extends InjectedSimulation {
 		//Something new
 		Logger logger = Logger.getLogger(Simulation.class);
 		
-		AbstractParticipant p1 = new TradeProtocolTestAgent(Random.randomUUID(), "George", "CS1", 20000, 10000000, 5000000, 3, 200000, 28000, 50000);
+		AbstractParticipant p1 = new TradeProtocolTestAgent(Random.randomUUID(), "George", "CS1", 20000, 10000000, 5000000, 3, 200000, 28000);
 		AbstractParticipant p2 = new NonAnnexOne(Random.randomUUID(), "Albania", "CS2", 27398, 5507, 2550868201.0, 0.0527, 2291559, 1753000);
 		
 		//NonAnnexOne,Albania,ALB,27398,5507,2550868201,0.0527,2291559,1753000,7488000
