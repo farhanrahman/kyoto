@@ -355,6 +355,16 @@ Following successful negotiation and signing of the Protocol, concern was raised
 
 \subsubsection{Time Service}
 
+The time service is an environment service, extending Presage2’s existing environment interaction classes and development framework. It allows for coordination of time-based events and synchronises various features within our Kyoto Protocol simulation. Although Presage2 does have existing objects (SimTime) which can be used to attain simulation time, this is an absolute value in discrete logical time since the beginning of the simulation. It therefore does not take into consideration the variety of chronological distinctions the Kyoto Protocol requires, such as subdivisions into years and sessions.
+
+It was initially decided to use a global service. It would perform most of the logic integral to coordinating time-driven activities, and would be layered on top of Presage2’s integrated SimTime object. However, it is necessary for agents to be able to query for information regarding the current year and session in order to make important strategic and behavioral decisions. Presage2 enforces that agents (participants) are unable to communicate directly with global services. While agents can act on the environment and affect services, performing the reverse is somewhat more complex.
+
+At this stage, it would seem a participant time service would be more appropriate, since participant services can communicate directly with agents. However, another key functionality of the time service is the publishing of new events, both for the end of years and sessions, which trigger key monitoring, sanctioning, reporting, and architectural actions essential to the managed nature of the Kyoto Protocol. Unfortunately, implementation is not in place within Presage2 for participant services to generate (or interact with) the EventBus class, the object essential to publishing or receiving events.
+
+With these restrictions in mind, the time service was subdivided into two separate services.   The participant service communicates with agents and relays information regarding the current year and session, among other minor time-related information gathering tasks. The global service is the backbone of the time service, generating new year and session events for the monitoring and targeting services to hook onto. It also carries out calculations to derive the current year and session from the discrete simulation time and communicates this information to the participant service.
+
+Both classes extend from Presage2’s predefined EnvironmentService class, and use Google’s Guice injection systems for initialization and, in the global service’s case, to register with the EventBus.
+
 \subsubsection{Monitor}
 
 The monitor’s purpose is to regularly check whether countries are meeting their targets and randomly check for false carbon emission reports. If either case is true, a scaling sanction is applied to the country.
