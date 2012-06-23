@@ -679,6 +679,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				environment.act(new AddRemoveFromMonitor(this, addRemoveType.REMOVE), getID(), authkey);
 				kyotoMemberLevel = KyotoMember.ROGUE;
 				environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
+				leaveTime = timeService.getCurrentTick();
 			} catch (ActionHandlingException e) {
 				logger.warn("Exception whilst removing from monitor: " + e);
 				//e.printStackTrace();
@@ -692,6 +693,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		if (timeService.getCurrentTick() > 0) {
 			try {
 				environment.act(new RejoinKyoto(), getID(), authkey);
+				joinTime = timeService.getCurrentTick();
 			} catch (ActionHandlingException e) {
 				logger.warn("Exception whilst rejoining kyoto: " + e);
 				//e.printStackTrace();
