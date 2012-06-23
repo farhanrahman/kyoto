@@ -135,13 +135,13 @@ public class MarketData {
 	 * The price WE can sell at. Calculated depending on what others want to buy
 	 * at. The higher the better.
 	 */
-	private double sellingPrice = 0;
+	private double sellingPrice = Double.MAX_VALUE / 1000000000000.0;
 
 	/**
 	 * The price WE can buy at. Calculated depending on what other want to sell
 	 * at. The lower the better.
 	 */
-	private double buyingPrice = Double.MAX_VALUE / 1000000000000.0;
+	private double buyingPrice = 0;
 
 	/**
 	 * Calculate price WE can sell at, according to what others want to buy at.

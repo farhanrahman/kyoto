@@ -184,20 +184,24 @@ public class AnnexOneReduce extends AbstractCountry {
 
 				// If the offer is to buy credits from us
 				if (type == TradeType.BUY) {
-					if (averagePrice >= 0.975 * sellCarbonUnitPrice) {
-						double amountToSell = Math.min(sellCarbonQuantity,
-								quantity);
-						this.tradeProtocol.respondToOffer(address,
-								amountToSell, offer);
+					if (sellCarbonQuantity > 0) {
+						if (averagePrice >= 0.975 * sellCarbonUnitPrice) {
+							double amountToSell = Math.min(sellCarbonQuantity,
+									quantity);
+							this.tradeProtocol.respondToOffer(address,
+									amountToSell, offer);
+						}
 					}
 				}
 				// If the offer is to sell credits or CDM to us
 				else if (type == TradeType.SELL || type == TradeType.INVEST) {
-					if (averagePrice <= 1.025 * buyCarbonUnitPrice) {
-						double amountToBuy = Math.min(buyCarbonQuantity,
-								quantity);
-						this.tradeProtocol.respondToOffer(address, amountToBuy,
-								offer);
+					if (buyCarbonQuantity > 0) {
+						if (averagePrice <= 1.025 * buyCarbonUnitPrice) {
+							double amountToBuy = Math.min(buyCarbonQuantity,
+									quantity);
+							this.tradeProtocol.respondToOffer(address,
+									amountToBuy, offer);
+						}
 					}
 				}
 			}
@@ -315,10 +319,10 @@ public class AnnexOneReduce extends AbstractCountry {
 
 	// TODO get years until sanctions (when carbon credits reset)
 	private int getYearsUntilSanctions() {
-		 int years = timeService.getCurrentYear()
-		 % GameConst.getYearsInSession();
-		 years = GameConst.getYearsInSession() - years;
-		 return years;
+		int years = timeService.getCurrentYear()
+				% GameConst.getYearsInSession();
+		years = GameConst.getYearsInSession() - years;
+		return years;
 	}
 
 	/**
