@@ -48,7 +48,7 @@ public class AnnexOneReduceTest {
 	@Test
 	public void testbehaviour() {
 
-//		test.performReduceMaintainActions();
+		test.performReduceMaintainActions();
 		test.runSimulation();
 
 	}
