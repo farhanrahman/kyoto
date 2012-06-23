@@ -5,6 +5,7 @@ import uk.ac.ic.kyoto.countries.GameConst;
 import uk.ac.ic.kyoto.countries.Offer;
 import uk.ac.ic.kyoto.countries.OfferMessage;
 import uk.ac.ic.kyoto.trade.InvestmentType;
+import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.network.Message;
@@ -59,14 +60,18 @@ public class NonAnnexOne extends AbstractCountry {
 							.getActiveConversationMembers()
 								.contains(m.getFrom())){
 						try {
+							if (o.getOfferType().equals(TradeType.INVEST))
+							{
 							this.tradeProtocol.offer(
 									m.getFrom(), 
 									o.getOfferQuantity(), 
 									o);
-						} catch (FSMException e) {
+							}
+							} catch (FSMException e) {
 							logger.warn(e);
 						}
 					}
+					
 				}catch(ClassCastException e){
 					logger.warn("Class cast exception");
 					logger.warn(e);
@@ -93,11 +98,14 @@ public class NonAnnexOne extends AbstractCountry {
 	
 	protected void behaviour() {
 			
-		try {
+		try 
+		{
 			economy();
-		} catch (IllegalArgumentException e) {
+		} catch (IllegalArgumentException e)
+		{
 			logger.warn(e);
-		} catch (Exception e) {
+		} catch (Exception e) 
+		{
 			logger.warn(e);
 		} 
 		
@@ -114,7 +122,8 @@ public class NonAnnexOne extends AbstractCountry {
 		
 /***********************************************Accept CDM offers********************************************************************/
 	@Override
-	protected boolean acceptTrade(NetworkAddress from, Offer trade) {
+	protected boolean acceptTrade(NetworkAddress from, Offer trade) 
+	{
 		
 		if (trade.getInvestmentType() == InvestmentType.ABSORB)
 		{
@@ -190,13 +199,15 @@ public class NonAnnexOne extends AbstractCountry {
 		
 		if (getCarbonOutput() + energyUsageHandler.calculateCarbonIndustryGrowth(money_invest) <= environment_friendly_target)
 		{ //invest but also check if the environment friendly target is met.
-			try{
+			try
+			{
 				energyUsageHandler.investInCarbonIndustry(money_invest);
 				logger.info("Invest in carbon industry successful");
 				logger.info("Country meets its environment friendy target");
 				green_lands = true; //set the variable to true, to be used when updating the environment friendly target
 			} 
-			catch (Exception e) {
+			catch (Exception e) 
+			{
 				logger.warn("Invest in carbon industry not successful");
 			}
 		}	
@@ -207,10 +218,12 @@ public class NonAnnexOne extends AbstractCountry {
 			
 			logger.info("Country exceeded its environment friendly goal, invest in carbon industry but also invest in carbon absorption");
 			green_lands = false;
-			try{
+			try
+			{
 				energyUsageHandler.investInCarbonIndustry(money_invest);
 			} 
-			catch (Exception e){
+			catch (Exception e)
+			{
 				logger.warn("Invest in carbon industry not successful");
 			}
 			
@@ -247,27 +260,29 @@ public class NonAnnexOne extends AbstractCountry {
 					}
 					
 			}
-			catch (Exception e){
+			catch (Exception e)
+			{
 				logger.warn("Problem with investing in carbon absorption: " + e);
 			}
 		}
 		//every tick, it updates the "environment" carbon output target
 		
 		change_emission_target(environment_friendly_target,green_lands);
-		
-		
 	}
 	
 /************************************Invest in carbon industry but does not care about environment*****************************************************************/	
 	//function that invests in carbon industry without caring about meeting any environmental target
 	
 	private void energy_increase_without_care(double money)
+	
 	{
-		try{
+		try
+		{
 			energyUsageHandler.investInCarbonIndustry(money);
 			logger.info("Invest in carbon industry successful");
 		} 
-		catch (Exception e) {
+		catch (Exception e) 
+		{
 			logger.warn("Invest in carbon industry not successful");
 		}
 	}
@@ -299,7 +314,7 @@ public class NonAnnexOne extends AbstractCountry {
 				if (imaginary_tick > ticks_in_a_year_threshold )
 				{
 					
-					switch (counter)
+					switch (counter) //check how many times the energy aim was met
 					{
 					case 0:
 					{
@@ -339,18 +354,20 @@ public class NonAnnexOne extends AbstractCountry {
 			
 		}
 /**
- * @throws Exception *****************************************************************************************************/
+ * @throws Exception *****************************Clean Development Mechanism************************************************************************/
 	//Clean Development Mechanism 
 	private void clean_development_mechanism(double money_to_invest) throws Exception
+	
 	{
 		CDM_absorption(money_to_invest);
 		CDM_reduction(money_to_invest);
 		
 	}
 
-/*******************************************************************************************************/
+/********************************************Change environmentally friendly target***********************************************************/
 	//change the target for carbon output(environmentally friendly) every tick.
 	private void change_emission_target(double previous_target,boolean succeed)
+	
 	{
 		if (succeed) //country met environment target goal, decrease goal.
 			
@@ -364,9 +381,10 @@ public class NonAnnexOne extends AbstractCountry {
 	
 		
 /**
- * @throws Exception *****************************************************************************************************/
+ * @throws Exception ***************************Clean Development Mechanism Absorption section**************************************************************************/
 
 private void CDM_absorption(double acquire_cash) throws Exception
+
 {
 
 double change_required; // change in carbon absorption in order to acquire the amount of money specified.
@@ -380,8 +398,9 @@ broadcastInvesteeOffer(change_required,InvestmentType.ABSORB);
 		
 		
 /**
- * @throws Exception *****************************************************************************************************/
+ * @throws Exception *************************************Clean Development Mechanism Reduction****************************************************************/
 private void CDM_reduction(double acquire_cash) throws Exception
+
 {
 	double change_required; // change in carbon absorption in order to acquire the amount of money specified.
 
@@ -393,10 +412,11 @@ broadcastInvesteeOffer(change_required,InvestmentType.REDUCE);
 
 }		
 		
-/****************************************************************************************************************/
+/**************************************************Current Available area status**************************************************************/
 
 //Check available area  in order to choose decision accordingly for accepting to sell credits or plant trees for own sake.
-		private String currentAvailableArea(){
+		private String currentAvailableArea()
+		{
 			
 			if (getArableLandArea() > getLandArea()*(CountryConstants.AREA_LIMIT))
 				return "Safe";

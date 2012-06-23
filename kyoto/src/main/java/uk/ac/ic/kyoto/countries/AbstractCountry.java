@@ -12,6 +12,8 @@ import uk.ac.ic.kyoto.actions.ApplyMonitorTax;
 import uk.ac.ic.kyoto.actions.RejoinKyoto;
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
 import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
+import uk.ac.ic.kyoto.exceptions.CannotJoinKyotoException;
+import uk.ac.ic.kyoto.exceptions.CannotLeaveKyotoException;
 import uk.ac.ic.kyoto.services.Economy;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
@@ -658,7 +660,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	private int leaveTime=0, joinTime=0;
 	
-	protected final void leaveKyoto() throws IllegalStateException {
+	protected final void leaveKyoto() throws CannotLeaveKyotoException {
 		if (timeService.getCurrentTick() == 0) {
 			
 			try {
@@ -678,15 +680,15 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				kyotoMemberLevel = KyotoMember.ROGUE;
 				environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
 			} catch (ActionHandlingException e) {
-				logger.warn("Exception wilst removing from monitor: " + e);
+				logger.warn("Exception whilst removing from monitor: " + e);
 				//e.printStackTrace();
 			}
 		} else {
-			throw new IllegalStateException("Cannot leave Kyoto Protocol.");
+			throw new CannotLeaveKyotoException("Cannot leave Kyoto Protocol.");
 		}
 	}
 	
-	protected final void joinKyoto() throws IllegalStateException {
+	protected final void joinKyoto() throws CannotJoinKyotoException {
 		if (timeService.getCurrentTick() > 0) {
 			try {
 				environment.act(new RejoinKyoto(), getID(), authkey);
@@ -695,7 +697,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				//e.printStackTrace();
 			}
 		} else {
-			throw new IllegalStateException("Cannot join Kyoto Protocol in first tick");
+			throw new CannotJoinKyotoException("Cannot join Kyoto Protocol in first tick");
 		}
 	}
 	
