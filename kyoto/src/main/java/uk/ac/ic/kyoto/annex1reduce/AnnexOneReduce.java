@@ -73,7 +73,7 @@ public class AnnexOneReduce extends AbstractCountry {
 	protected void behaviour() {
 
 		// TODO fix this Update our market buy and sell price information
-		// marketData.update();
+		 marketData.update();
 
 		// If the expected buy price has increased by more than 5%, we should
 		// resimulate
