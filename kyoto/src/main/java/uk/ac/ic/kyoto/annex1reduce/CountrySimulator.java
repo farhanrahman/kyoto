@@ -232,6 +232,8 @@ class CountrySimulator {
 				iterator.remove();
 			} else if (state.arableLandArea < 0) {
 				iterator.remove();
+			} else if (state.toBeCulled == true) {
+				iterator.remove();
 			}
 		}
 
@@ -306,6 +308,8 @@ class CountrySimulator {
 		final public Action action;
 
 		final public double carbonDiff;
+		
+		boolean toBeCulled = false;
 
 		private CountryState(final double carbonOutput,
 				final double energyOutput, final double previousEnergyOutput,
@@ -462,9 +466,14 @@ class CountrySimulator {
 
 			GDP = previousState.GDP + previousState.GDP * GDPRate;
 
-			availableToSpend = previousState.availableToSpend - investmentPrice
-					- marketBuyPrice - energyIncreasePrice
-					+ (GDP * GameConst.getPercentageOfGdp());
+			double tempAvailableToSpend = previousState.availableToSpend - investmentPrice
+					- marketBuyPrice - energyIncreasePrice;
+			
+			if (tempAvailableToSpend < 0) {
+				toBeCulled = true;
+			}
+			
+			availableToSpend = tempAvailableToSpend + (GDP * GameConst.getPercentageOfGdp());
 
 			carbonDiff = carbonOutput - carbonAbsorption;
 		}
