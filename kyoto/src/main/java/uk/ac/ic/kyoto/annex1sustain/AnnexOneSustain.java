@@ -275,8 +275,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			
 			if ((carbonAbsCost < carbonRedCost) && (carbonAbsTrees < this.getArableLandArea())) {
 				carbonAbsorptionHandler.investInCarbonAbsorption(carbonGained);
-				logger.info(name + ": Invested in industry " +
-						"and scaled back with reduction of " + carbonGained + " carbon, which cost " + totalInvestment);
+				logger.info(name + ": Invested in industry and scaled back with reduction of " + carbonGained + " carbon, which cost " + totalInvestment);
 			}
 			else {
 				carbonReductionHandler.investInCarbonReduction(carbonGained);
