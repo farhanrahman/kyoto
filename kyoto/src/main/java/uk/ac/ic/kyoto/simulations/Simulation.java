@@ -11,6 +11,7 @@ import uk.ac.ic.kyoto.actions.AddRemoveFromMonitorHandler;
 import uk.ac.ic.kyoto.actions.AddToCarbonTargetHandler;
 import uk.ac.ic.kyoto.actions.ApplyMonitorTaxHandler;
 import uk.ac.ic.kyoto.actions.QueryEmissionsTargetHandler;
+import uk.ac.ic.kyoto.actions.RejoinKyotoHandler;
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReportHandler;
 import uk.ac.ic.kyoto.annex1reduce.AnnexOneReduce;
 import uk.ac.ic.kyoto.annex1sustain.AnnexOneSustain;
@@ -89,6 +90,7 @@ public class Simulation extends InjectedSimulation {
 			.addActionHandler(QueryEmissionsTargetHandler.class)
 			.addActionHandler(AddRemoveFromMonitorHandler.class)
 			.addActionHandler(ApplyMonitorTaxHandler.class)
+			.addActionHandler(RejoinKyotoHandler.class)
 			.addGlobalEnvironmentService(CarbonReportingService.class)
 			.addGlobalEnvironmentService(Monitor.class)
 			.addParticipantEnvironmentService(ParticipantCarbonReportingService.class)
