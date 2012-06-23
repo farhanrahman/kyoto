@@ -1,5 +1,6 @@
 package uk.ac.ic.kyoto.roguestates;
 
+
 import java.util.Random; 
 import java.util.Set;
 import java.util.UUID;
@@ -9,10 +10,16 @@ import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.ic.kyoto.trade.InvestmentType;
 import uk.ac.ic.kyoto.services.FossilPrices;
 import uk.ac.ic.kyoto.roguestates.USAgent;
+import uk.ac.ic.kyoto.countries.AbstractCountry.KyotoMember;
+import uk.ac.ic.kyoto.trade.TradeType;
+import uk.ac.ic.kyoto.countries.OfferMessage;
+import uk.ac.ic.kyoto.countries.Offer;
+
 
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.messaging.Input;
+import uk.ac.imperial.presage2.core.network.NetworkAddress;
 
 
 public class CanadaAgent extends AbstractCountry {
@@ -20,7 +27,7 @@ public class CanadaAgent extends AbstractCountry {
 	private double	AverageGDPRate; // to be stored in an array or DB for furhter analysis.
 	long Currentyear;				//The present year global	
 	long Prevyear=Currentyear-1;	//Previous year
-	int n=8,m=3;
+	int n=8,m=3;					//Number of players and projects initially
 	int industry_players=0;
 	int industry_projects=0;
 	double ratio;
@@ -28,7 +35,7 @@ public class CanadaAgent extends AbstractCountry {
 			double GDPRate, double emissionsTarget, double energyOutput, double carbonOutput) {
 		super(id, name, ISO, landArea, arableLandArea, GDP,
 				GDPRate, energyOutput, carbonOutput);
-		leaveKyoto();
+		//
 		// TODO Auto-generated constructor stub
 	}
 	
@@ -43,6 +50,8 @@ public class CanadaAgent extends AbstractCountry {
 		// TODO Auto-generated method stub
 
 	}
+	
+	/*
 	//A useful function but not 100% sure where it might help
 	private void CalculateAverageGDP() {
 		// Previous cumulative GDP changes divided by new total years elapsed. 
@@ -64,16 +73,19 @@ public class CanadaAgent extends AbstractCountry {
 			}
 		}
 	
+	*/
 	
 	@Override
 	public void yearlyFunction() {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	
 	/**
 	 * Increase carbon absorption as long as you have land area and money
 	 */
-	private void investMax() {
+	/*private void investMax() {
 		double carbonAbsorptionChange = 1000;
 		
 		try {
@@ -107,7 +119,7 @@ public class CanadaAgent extends AbstractCountry {
 			//carbonAbsorptionHandler.invest(investmentAmount);
 		}
 				
-		
+		*/
 //These are the functions that will help with determining the rejoining of Canada 
 			
 	/******************************************************
@@ -116,19 +128,19 @@ public class CanadaAgent extends AbstractCountry {
 	//as we are intially part of kyoto 
 	 * @return
 	 *********************************************************/
-
-		FossilPrices price = new FossilPrices();
+ 
+		//FossilPrices price = new FossilPrices();
 		
 	
 		/*Function to check oil prices to ramp or reduce production  */
-		boolean check_oil_prices(long year){
+		/*boolean check_oil_prices(long year){
 			if(((price.getOilPrice(year)) > 100)){
 				System.out.print("We can reduce production");
 				return true;
 			}
 			else return false;
 			}
-		
+		*/
 		
 	/*Emmisions target to be cheked against to gauge performance  */			
 	public double SetEmissionsTarget(){
@@ -185,18 +197,54 @@ public class CanadaAgent extends AbstractCountry {
 		
 	}*/
 	
+	
+	
+	
+	
 	boolean JoiningCriteriaMet()
 	{
-		if(((this.getCarbonOutput() - this.getCarbonOffset()) >this.getEmissionsTarget()) && (Aver)){
+		if(((this.getCarbonOutput() - this.getCarbonOffset()) >this.getEmissionsTarget())){
 			return true;
 		}
 		//Only useful after 2011 when canada leaves
 		else leaveKyoto();
+		return false;
 		
 		//If GDP growth achieved in the past 4 years
 		//
 	}
+
+
+	@Override
+	protected void behaviour() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	protected void sessionFunction() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	protected void initialiseCountry() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	protected boolean acceptTrade(NetworkAddress from, Offer trade) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 	
+	
+	
+	/*
 	private void energy_increase_with_care(double money_invest) throws IllegalArgumentException, Exception
 	{
 		double carbon_difference; 
@@ -263,9 +311,11 @@ public class CanadaAgent extends AbstractCountry {
 		
 		
 	}
+	*/
+	
 	
 	/*Implement all the behaviours of canada */
-	public void behaviour(){
+	/*public void behaviour(){
 		//If not in part of kyoto check the conditions which make it feasible to 
 		// join kyoto
 		
@@ -277,7 +327,7 @@ public class CanadaAgent extends AbstractCountry {
 		
 	}
 	
-	
+	*/
 
 	// Add a function to check the gdp rte against emmsision
 	//Add a function for ratio of GDP against the emmision
