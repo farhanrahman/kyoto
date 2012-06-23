@@ -186,8 +186,8 @@ public class CanadaAgent extends AbstractCountry {
 	}*/
 	
 	boolean JoiningCriteriaMet()
-	{
-		if(((this.getCarbonOutput() - this.getCarbonOffset()) >this.getEmissionsTarget()) && (Aver)){
+	{ // TODO emissions target will only resolve if you are already a member of Kyoto
+		if(((this.getCarbonOutput()) > this.getEmissionsTarget()) && ()){
 			return true;
 		}
 		//Only useful after 2011 when canada leaves

@@ -4,14 +4,12 @@ import java.util.UUID;
 import uk.ac.ic.kyoto.annex1reduce.CountrySimulator.ActionList;
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.GameConst;
-import uk.ac.ic.kyoto.countries.IsolatedAbstractCountry;
 import uk.ac.ic.kyoto.countries.Offer;
 import uk.ac.ic.kyoto.countries.OfferMessage;
 import uk.ac.ic.kyoto.exceptions.NotEnoughCarbonOutputException;
 import uk.ac.ic.kyoto.exceptions.NotEnoughCashException;
 import uk.ac.ic.kyoto.exceptions.NotEnoughLandException;
 import uk.ac.ic.kyoto.trade.TradeType;
-import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
 
@@ -32,8 +30,11 @@ public class AnnexOneReduce extends AbstractCountry {
 		simulator = new CountrySimulator(this);
 	}
 
+	MarketData marketData;
+
 	@Override
 	public void initialiseCountry() {
+		marketData = new MarketData();
 	}
 
 	@Override
@@ -43,75 +44,47 @@ public class AnnexOneReduce extends AbstractCountry {
 
 	@Override
 	protected void sessionFunction() {
-		// TODO
 	}
 
-	/**
-	 * Take an input and process the data.
-	 */
-	@Override
-	protected void processInput(Input input) {
-		/*
-		 * Process all given market offers. If we're given an offer to buy
-		 * credits within 5% (or anything lower) of the average carbon credit
-		 * price then we should accept it immediately. Else ignore.
-		 * 
-		 * Also, update the expected market price for buys and sells
-		 */
-		
-		try {
-			if (this.tradeProtocol.canHandle(input)) {
-				this.tradeProtocol.handle(input);
-			}
-			else {
-				OfferMessage offer = this.tradeProtocol.decodeInput(input);
-				NetworkAddress address = this.tradeProtocol.extractNetworkAddress(input);
-				
-				TradeType type = offer.getOfferType();
-				
-				double quantity = offer.getOfferQuantity();
-				double averagePrice = offer.getOfferUnitCost();
-				
-				if (type == TradeType.BUY || type == TradeType.INVEST) {
-					if (quantity <= buyCarbonQuantity) {
-						if (averagePrice <= 1.05 * buyCarbonAveragePrice) {
-							/*
-							 * Accept the buy or invest offer
-							 */
-						}
-					}
-				}
-			}
-		}
-		catch (Exception e) {
-			logger.warn(getName() + ": Problem with investments after successful trade: " + e.getMessage());
-		}
-	}
-
-	boolean needToSimulate = true;
+	private boolean needToSimulate = true;
 
 	/**
 	 * The amount of carbon we want to buy at the current (or lower) price
 	 */
-	double buyCarbonQuantity = 0;
+	private double buyCarbonQuantity = 0;
 
 	/**
 	 * Average cost of each carbon credit we want to buy
 	 */
-	double buyCarbonAveragePrice = 0;
+	private double buyCarbonUnitPrice = 0;
 
 	/**
 	 * Amount of carbon we want to sell
 	 */
-	double sellCarbon = 0;
+	private double sellCarbonQuantity = 0;
 
 	/**
 	 * Average cost of the carbon we want to sell
 	 */
-	double sellCarbonAveragePrice = 1000000000;
+	private double sellCarbonUnitPrice = 1000000000;
 
 	@Override
 	protected void behaviour() {
+
+		// Update our market buy and sell price information
+		marketData.update();
+
+		// If the expected buy price has increased by more than 5%, we should
+		// resimulate
+		if (1.05 * buyCarbonUnitPrice < marketData.getBuyingPrice()) {
+			needToSimulate = true;
+		}
+
+		// If our expected sell price has decreased by more than 5%, we should
+		// resimulate
+		if (0.95 * sellCarbonUnitPrice > marketData.getSellingPrice()) {
+			needToSimulate = true;
+		}
 
 		int currentTickInYear = timeService.getCurrentTick()
 				% timeService.getTicksInYear();
@@ -123,35 +96,20 @@ public class AnnexOneReduce extends AbstractCountry {
 		} else if (needToSimulate) {
 			runSimulation();
 		}
-		
-		/*
-		 * Now, send out buy and sell offers
-		 */
-		
-	}
-
-	@Override
-	protected boolean acceptTrade(NetworkAddress from, Offer trade) {
 
 		/*
-		 * Accept trades from all people only if: The amount of carbon we want
-		 * to sell is greater than or equal to the offer we get sent back to us
-		 * AND the price is greater than or equal to the average sell price
-		 * 
-		 * If we accept the offer, we should decrease buyCarbon by the amount of
-		 * carbon we sold.
-		 * 
-		 * If we accept the offer, we should set needToSimulate as true so we
-		 * can resimulate and recalculate buy and sell amounts
-		 * 
-		 * If we reject the offer, don't do anything.
+		 * Now, send out buy and sell offers for the tick
 		 */
-		return false;
+		if (buyCarbonQuantity > 0) {
+			broadcastSellOffer(buyCarbonQuantity / 2, buyCarbonUnitPrice);
+		} else if (sellCarbonQuantity > 0) {
+			broadcastBuyOffer(sellCarbonQuantity / 2, sellCarbonUnitPrice);
+		}
 	}
 
 	/**
 	 * Runs the simulation with current country information Returns the amount
-	 * of carbon we want to buy and sell and the average buy and sell price
+	 * of carbon we want to buy and sell, and sets the new buy and sell price
 	 */
 	public ActionList runSimulation() {
 
@@ -171,37 +129,201 @@ public class AnnexOneReduce extends AbstractCountry {
 
 		double r_investCarbon = carbonDifference * optimal.reduce.investFrac;
 		double[] r_investments = new double[2];
-		double totalCost = getAbsorbReduceInvestment(r_investCarbon,
+		double absorbReduceCost = getAbsorbReduceInvestment(r_investCarbon,
 				r_investments);
 		double creditCost = getMarketBuyPrice(buyCarbonQuantity);
 
-		double estimatedMoney = getAvailableToSpend() - totalCost - creditCost;
+		double estimatedMoney = getAvailableToSpend() - absorbReduceCost
+				- creditCost;
 
-		// The estimated money remaining after
-		double industryInvest = estimatedMoney *= optimal.maintain.industryFrac;
+		// The cost of investing in industry
+		double industryInvest = estimatedMoney * optimal.maintain.industryFrac;
 
 		double carbonIncrease = energyUsageHandler
 				.calculateCarbonIndustryGrowth(industryInvest);
 
-		buyCarbonQuantity += carbonIncrease * optimal.maintain.buyCreditOffsetFrac;
+		buyCarbonQuantity += carbonIncrease
+				* optimal.maintain.buyCreditOffsetFrac;
 
-		buyCarbonAveragePrice = getMarketBuyPrice(buyCarbonQuantity) / buyCarbonQuantity;
+		buyCarbonUnitPrice = marketData.getBuyingPrice();
+
+		if (optimal.sell.sellFrac > 0) {
+			double nextEmissionsTarget = getNextEmissionTarget(getEmissionsTarget());
+			double carbonBelowTarget = nextEmissionsTarget
+					* (optimal.sell.investFrac + optimal.sell.shutDownFrac);
+
+			sellCarbonQuantity = optimal.sell.sellFrac * carbonBelowTarget;
+		} else {
+			sellCarbonQuantity = 0;
+		}
+
+		sellCarbonUnitPrice = marketData.getSellingPrice();
 
 		return optimal;
 	}
 
-	// TODO get years until sanctions
+	/**
+	 * Respond to any broadcasted trades
+	 */
+	@Override
+	protected void processInput(Input input) {
+
+		try {
+			if (this.tradeProtocol.canHandle(input)) {
+				this.tradeProtocol.handle(input);
+			} else {
+				OfferMessage offer = this.tradeProtocol.decodeInput(input);
+				NetworkAddress address = this.tradeProtocol
+						.extractNetworkAddress(input);
+
+				TradeType type = offer.getOfferType();
+
+				double quantity = offer.getOfferQuantity();
+				double averagePrice = offer.getOfferUnitCost();
+
+				// If the offer is to buy credits from us
+				if (type == TradeType.BUY) {
+					if (averagePrice >= 0.975 * sellCarbonUnitPrice) {
+						double amountToSell = Math.min(sellCarbonQuantity,
+								quantity);
+						this.tradeProtocol.respondToOffer(address,
+								amountToSell, offer);
+					}
+				}
+				// If the offer is to sell credits or CDM to us
+				else if (type == TradeType.SELL || type == TradeType.INVEST) {
+					if (averagePrice <= 1.025 * buyCarbonUnitPrice) {
+						double amountToBuy = Math.min(buyCarbonQuantity,
+								quantity);
+						this.tradeProtocol.respondToOffer(address, amountToBuy,
+								offer);
+					}
+				}
+			}
+		} catch (Exception e) {
+			logger.warn(getName()
+					+ ": Problem with investments after successful trade: "
+					+ e.getMessage());
+		}
+	}
+
+	@Override
+	protected boolean acceptTrade(NetworkAddress from, Offer offer) {
+		/*
+		 * Accept trades from all people only if: The amount of carbon we want
+		 * to sell is greater than or equal to the offer we get sent back to us
+		 * AND the price is greater than or equal to the average sell price
+		 * 
+		 * If we accept the offer, we should decrease buyCarbon by the amount of
+		 * carbon we sold.
+		 * 
+		 * If we accept the offer, we should set needToSimulate as true so we
+		 * can resimulate and recalculate buy and sell amounts
+		 * 
+		 * If we reject the offer, don't do anything.
+		 */
+
+		TradeType type = offer.getType();
+
+		double quantity = offer.getQuantity();
+
+		double averagePrice = offer.getUnitCost();
+
+		if (type == TradeType.BUY || type == TradeType.INVEST) {
+			if (averagePrice <= buyCarbonUnitPrice) {
+				if (quantity <= buyCarbonQuantity) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+		} else if (type == TradeType.SELL) {
+			if (averagePrice >= sellCarbonUnitPrice) {
+				if (quantity <= sellCarbonQuantity) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+		}
+		return false;
+	}
+
+	@Override
+	protected void tradeWasSuccessful(NetworkAddress from, OfferMessage offer) {
+
+		TradeType type = offer.getOfferType();
+
+		double quantity = offer.getOfferQuantity();
+
+		if (type == TradeType.BUY || type == TradeType.INVEST) {
+			buyCarbonQuantity -= quantity;
+		} else if (type == TradeType.SELL) {
+			sellCarbonQuantity -= quantity;
+		}
+
+		// Recalculate everything
+		needToSimulate = true;
+	}
+
+	private boolean buyingEnabled = true;
+
+	/**
+	 * 
+	 * @param carbonOffset
+	 *            The amount of carbon we want to offset by buying credits
+	 * @return Estimated cost of purchasing credits
+	 */
+	public double getMarketBuyPrice(double carbonOffset) {
+
+		if (carbonOffset == 0) {
+			return 0;
+		}
+
+		// Return an obscenely high buying price
+		if (buyingEnabled == false) {
+			return Double.MAX_VALUE / 100000000000.0;
+		}
+
+		return carbonOffset * marketData.getBuyingPrice();
+	}
+
+	private void disableBuying() {
+		buyingEnabled = false;
+	}
+
+	private void enableBuying() {
+		buyingEnabled = true;
+	}
+
+	/**
+	 * Returns 0 if selling <=0 amounts of carbon offset
+	 * 
+	 * @param carbonOffset
+	 * @param year
+	 * @return
+	 */
+	public double getMarketSellPrice(double carbonOffset) {
+
+		if (carbonOffset <= 0) {
+			return 0;
+		}
+
+		return carbonOffset * marketData.getSellingPrice();
+	}
+
+	// TODO get years until sanctions (when carbon credits reset)
 	private int getYearsUntilSanctions() {
-		int years = timeService.getCurrentYear() % GameConst.getYearsInSession();
+
+		int years = timeService.getCurrentYear()
+				% GameConst.getYearsInSession();
 		years = GameConst.getYearsInSession() - years;
 		return years;
 	}
 
 	/**
 	 * Called at the end of the year, after all trades have been completed. Will
-	 * recalculate optimal path and perform it, and will update sellCarbon and
-	 * sellCarbonAveragePrice to the values they need to be to sell in the next
-	 * session
+	 * recalculate optimal path and perform it.
 	 */
 	private void performReduceMaintainActions() {
 
@@ -215,165 +337,149 @@ public class AnnexOneReduce extends AbstractCountry {
 
 		// REDUCE PHASE ACTIONS
 
-		double carbonDifference = this.getCarbonOffset()
-				+ this.getCarbonAbsorption() - this.getCarbonOffset();
+		double r_netCarbonOutput = this.getCarbonOutput()
+				- this.getCarbonAbsorption() - this.getCarbonOffset();
 
-		// Shut down factories
-		double r_shutDownCarbon = carbonDifference
-				* optimal.reduce.shutDownFrac;
+		double r_carbonDifference = this.getEmissionsTarget()
+				- r_netCarbonOutput;
 
-		if (r_shutDownCarbon != 0) {
-			try {
-				energyUsageHandler.reduceEnergyOutput(r_shutDownCarbon);
-			} catch (NotEnoughCarbonOutputException e) {
-				e.printStackTrace();
+		// If we have carbon to offset
+		if (r_carbonDifference > 0) {
+
+			// Shut down factories
+			double r_shutDownCarbon = r_carbonDifference
+					* optimal.reduce.shutDownFrac;
+
+			if (r_shutDownCarbon > 0) {
+				try {
+					energyUsageHandler.reduceEnergyOutput(r_shutDownCarbon);
+				} catch (NotEnoughCarbonOutputException e) {
+					logger.warn(e);
+				}
 			}
-		}
 
-		double r_investCarbon = carbonDifference * optimal.reduce.investFrac;
+			// Calculate ratio of absorption to reduction
+			double r_investCarbon = r_carbonDifference
+					* optimal.reduce.investFrac;
+			double[] r_carbon = getAbsorbReduceCarbon(r_investCarbon);
 
-		// Invest in carbon reduction and absorption
-		double[] r_investments = new double[2];
-		getAbsorbReduceInvestment(r_investCarbon, r_investments);
-
-		// Invest in carbon absorption
-		if (r_investments[0] > 0) {
-			double carbonChange = carbonAbsorptionHandler
-					.getCarbonAbsorptionChange(r_investments[0]);
-			try {
-				carbonAbsorptionHandler.investInCarbonAbsorption(carbonChange);
-			} catch (NotEnoughLandException e) {
-				e.printStackTrace();
-			} catch (NotEnoughCashException e) {
-				e.printStackTrace();
+			// Invest in carbon absorption
+			if (r_carbon[0] > 0) {
+				try {
+					carbonAbsorptionHandler
+							.investInCarbonAbsorption(r_carbon[0]);
+				} catch (NotEnoughLandException e) {
+					logger.warn(e);
+				} catch (NotEnoughCashException e) {
+					logger.warn(e);
+				}
 			}
-		}
 
-		// Invest in carbon reduction
-		if (r_investments[1] > 0) {
-			double carbonChange = carbonReductionHandler
-					.getCarbonOutputChange(r_investments[1]);
-			try {
-				carbonReductionHandler.investInCarbonReduction(carbonChange);
-			} catch (NotEnoughCarbonOutputException e) {
-				e.printStackTrace();
-			} catch (NotEnoughCashException e) {
-				e.printStackTrace();
+			// Invest in carbon reduction
+			if (r_carbon[1] > 0) {
+				try {
+					carbonReductionHandler.investInCarbonReduction(r_carbon[1]);
+				} catch (NotEnoughCarbonOutputException e) {
+					logger.warn(e);
+				} catch (NotEnoughCashException e) {
+					logger.warn(e);
+				}
 			}
 		}
 
 		// MAINTAIN PHASE ACTIONS
 
-		// Invest in industry
-		double industryPrice = getAvailableToSpend()
+		// Calculate amount we want to invest in industry
+		double m_industryPrice = getAvailableToSpend()
 				* optimal.maintain.industryFrac;
 
-		double carbonToOffset = energyUsageHandler
-				.calculateCarbonIndustryGrowth(industryPrice);
+		// Invest in industry if we need to
+		if (m_industryPrice > 0) {
 
-		if (industryPrice > 0) {
 			try {
-				energyUsageHandler.investInCarbonIndustry(industryPrice);
+				energyUsageHandler.investInCarbonIndustry(m_industryPrice);
 			} catch (NotEnoughCashException e) {
-				e.printStackTrace();
+				logger.warn(e);
 			}
-		}
 
-		double m_investCarbon = carbonToOffset
-				* optimal.maintain.investOffsetFrac;
+			// Calculate amount of extra carbon we now need to offset
+			double m_netCarbonOutput = this.getCarbonOutput()
+					- this.getCarbonAbsorption() - this.getCarbonOffset();
 
-		// Invest in carbon reduction and absorption
-		double[] m_investments = new double[2];
-		getAbsorbReduceInvestment(m_investCarbon, m_investments);
+			double m_carbonDifference = this.getEmissionsTarget()
+					- m_netCarbonOutput;
 
-		// Invest in carbon absorption
-		if (m_investments[0] > 0) {
-			double carbonChange = carbonAbsorptionHandler
-					.getCarbonAbsorptionChange(m_investments[0]);
-			try {
-				carbonAbsorptionHandler.investInCarbonAbsorption(carbonChange);
-			} catch (NotEnoughLandException e) {
-				e.printStackTrace();
-			} catch (NotEnoughCashException e) {
-				e.printStackTrace();
+			// Calculate ratio of absorption to reduction
+			double[] m_carbon = getAbsorbReduceCarbon(m_carbonDifference);
+
+			// Invest in carbon absorption
+			if (m_carbon[0] > 0) {
+				try {
+					carbonAbsorptionHandler
+							.investInCarbonAbsorption(m_carbon[0]);
+				} catch (NotEnoughLandException e) {
+					logger.warn(e);
+				} catch (NotEnoughCashException e) {
+					logger.warn(e);
+				}
 			}
-		}
 
-		// Invest in carbon reduction
-		if (m_investments[1] > 0) {
-			double carbonChange = carbonReductionHandler
-					.getCarbonOutputChange(m_investments[1]);
-			try {
-				carbonReductionHandler.investInCarbonReduction(carbonChange);
-			} catch (NotEnoughCarbonOutputException e) {
-				e.printStackTrace();
-			} catch (NotEnoughCashException e) {
-				e.printStackTrace();
+			// Invest in carbon reduction
+			if (m_carbon[1] > 0) {
+				try {
+					carbonReductionHandler.investInCarbonReduction(m_carbon[1]);
+				} catch (NotEnoughCarbonOutputException e) {
+					logger.warn(e);
+				} catch (NotEnoughCashException e) {
+					logger.warn(e);
+				}
 			}
 		}
 
 		// SELL PHASE ACTIONS
 
-		// Our current total carbon output, including any offsets
-		double totalCarbonOutput = getCarbonOutput() - getCarbonOffset()
-				- getCarbonAbsorption();
+		// Our current net carbon output
+		double s_netCarbonOutput = this.getCarbonOutput()
+				- this.getCarbonAbsorption() - this.getCarbonOffset();
 
 		// Shut down factories
-		double shutDownCarbonReduction = totalCarbonOutput
-				* optimal.sell.shutDownFrac;
+		double s_shutDownCarbon = s_netCarbonOutput * optimal.sell.shutDownFrac;
 
-		if (shutDownCarbonReduction > 0) {
+		if (s_shutDownCarbon > 0) {
 			try {
-				energyUsageHandler.reduceEnergyOutput(shutDownCarbonReduction);
+				energyUsageHandler.reduceEnergyOutput(s_shutDownCarbon);
 			} catch (NotEnoughCarbonOutputException e) {
-				e.printStackTrace();
+				logger.warn(e);
 			}
 		}
 
 		// Invest in being clean
-		double s_investCarbon = totalCarbonOutput * optimal.sell.investFrac;
+		double s_investCarbon = s_netCarbonOutput * optimal.sell.investFrac;
 
-		// Invest in carbon reduction and absorption
-		double[] s_investments = new double[2];
-		getAbsorbReduceInvestment(s_investCarbon, s_investments);
+		// Calculate ratio of absorption to reduction
+		double[] s_carbon = getAbsorbReduceCarbon(s_investCarbon);
 
 		// Invest in carbon absorption
-		if (s_investments[0] > 0) {
-			double carbonChange = carbonAbsorptionHandler
-					.getCarbonAbsorptionChange(s_investments[0]);
+		if (s_carbon[0] > 0) {
 			try {
-				carbonAbsorptionHandler.investInCarbonAbsorption(carbonChange);
+				carbonAbsorptionHandler.investInCarbonAbsorption(s_carbon[0]);
 			} catch (NotEnoughLandException e) {
-				e.printStackTrace();
+				logger.warn(e);
 			} catch (NotEnoughCashException e) {
-				e.printStackTrace();
+				logger.warn(e);
 			}
 		}
 
 		// Invest in carbon reduction
-		if (s_investments[1] > 0) {
-			double carbonChange = carbonReductionHandler
-					.getCarbonOutputChange(s_investments[1]);
+		if (s_carbon[1] > 0) {
 			try {
-				carbonReductionHandler.investInCarbonReduction(carbonChange);
+				carbonReductionHandler.investInCarbonReduction(s_carbon[1]);
 			} catch (NotEnoughCarbonOutputException e) {
-				e.printStackTrace();
+				logger.warn(e);
 			} catch (NotEnoughCashException e) {
-				e.printStackTrace();
+				logger.warn(e);
 			}
 		}
-
-		// Calculate new sell price and next years expected emissions targets
-
-		// Sell additional offset over next years target
-		double newCarbonOutput = totalCarbonOutput - shutDownCarbonReduction
-				- s_investCarbon;
-		double carbonBelowTarget = getNextEmissionTarget(getEmissionsTarget())
-				- newCarbonOutput;
-
-		sellCarbon = carbonBelowTarget * optimal.sell.shutDownFrac;
-
-		sellCarbonAveragePrice = getMarketSellPrice(sellCarbon) / sellCarbon;
 	}
 
 	/**
@@ -432,7 +538,7 @@ public class AnnexOneReduce extends AbstractCountry {
 			prevCost = this.carbonAbsorptionHandler.getInvestmentRequired(
 					carbonReduction, arableLandArea);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warn(e);
 			investments[0] = 0;
 			investments[1] = 0;
 			return 0;
@@ -457,7 +563,7 @@ public class AnnexOneReduce extends AbstractCountry {
 						reduceFrac * carbonReduction, carbonOutput,
 						energyOutput);
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.warn(e);
 				investments[0] = 0;
 				investments[1] = 0;
 				return 0;
@@ -496,13 +602,103 @@ public class AnnexOneReduce extends AbstractCountry {
 								carbonOutput, energyOutput);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warn(e);
 			return 0;
 		}
 
 		return (investments[0] + investments[1]);
 	}
 
+	/**
+	 * Returns the amount of carbon we should put into absorption and reduction
+	 * 
+	 * @param carbonReduction
+	 *            The amount of carbon we want to reduce
+	 * @return double[0] = absorb carbon, double[1] = reduce carbon
+	 */
+	private double[] getAbsorbReduceCarbon(double carbonReduction) {
+
+		double[] carbon = new double[2];
+
+		double arableLandArea = getArableLandArea();
+		double carbonOutput = getCarbonOutput();
+		double energyOutput = getEnergyOutput();
+
+		if (carbonReduction <= 0) {
+			carbon[0] = 0;
+			carbon[1] = 0;
+			return carbon;
+		}
+
+		// Overestimate a bit
+		carbonReduction *= 1.01;
+
+		double prevCost;
+		try {
+			prevCost = this.carbonAbsorptionHandler.getInvestmentRequired(
+					carbonReduction, arableLandArea);
+		} catch (Exception e) {
+			logger.warn(e);
+			carbon[0] = 0;
+			carbon[1] = 0;
+			return carbon;
+		}
+
+		double absorbFrac = 0.5;
+		double reduceFrac = 0.5;
+
+		double fracDiff = 0.25;
+
+		// Attempt to minimise cost for a given amount of carbon
+		for (int i = 0; i < 10; i++) {
+
+			double absorbCost;
+			double reduceCost;
+
+			try {
+				absorbCost = this.carbonAbsorptionHandler
+						.getInvestmentRequired(absorbFrac * carbonReduction,
+								arableLandArea);
+				reduceCost = this.carbonReductionHandler.getInvestmentRequired(
+						reduceFrac * carbonReduction, carbonOutput,
+						energyOutput);
+			} catch (Exception e) {
+				logger.warn(e);
+				carbon[0] = 0;
+				carbon[1] = 0;
+				return carbon;
+			}
+
+			double totalCost = absorbCost + reduceCost;
+
+			if (totalCost < prevCost) {
+				reduceFrac += fracDiff;
+				absorbFrac -= fracDiff;
+			} else {
+				reduceFrac -= fracDiff;
+				absorbFrac += fracDiff;
+			}
+			prevCost = totalCost;
+			fracDiff /= 2;
+		}
+
+		absorbFrac = ((double) Math.round(1000 * absorbFrac)) / 1000;
+		reduceFrac = ((double) Math.round(1000 * reduceFrac)) / 1000;
+
+		carbon[0] = absorbFrac;
+		carbon[1] = reduceFrac;
+
+		return carbon;
+	}
+
+	/**
+	 * Returns the amount of arable land taken up by invest a certain amount of
+	 * money into absorption
+	 * 
+	 * @param absorbInvestment
+	 * @param arableLandArea
+	 * @return
+	 */
 	public double getArableLandCost(double absorbInvestment,
 			double arableLandArea) {
 
@@ -520,13 +716,21 @@ public class AnnexOneReduce extends AbstractCountry {
 			cost = carbonAbsorptionHandler
 					.getForestAreaRequired(carbonAbsorptionChange);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warn(e);
 			return 0;
 		}
 
 		return cost;
 	}
 
+	/**
+	 * Returns the increase in carbon absorption by investing a certain amount
+	 * of money into absorption
+	 * 
+	 * @param investmentAmount
+	 * @param arableLandArea
+	 * @return
+	 */
 	public double getCarbonAbsorptionChange(double investmentAmount,
 			double arableLandArea) {
 
@@ -540,13 +744,21 @@ public class AnnexOneReduce extends AbstractCountry {
 			change = carbonAbsorptionHandler.getCarbonAbsorptionChange(
 					investmentAmount, arableLandArea);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warn(e);
 			return 0;
 		}
 
 		return change;
 	}
 
+	/**
+	 * Returns the reduction in carbon output caused by investing in carbon
+	 * reduction
+	 * 
+	 * @param reductionCost
+	 * @param state
+	 * @return
+	 */
 	public double getCarbonReduction(double reductionCost,
 			CountrySimulator.CountryState state) {
 
@@ -558,66 +770,10 @@ public class AnnexOneReduce extends AbstractCountry {
 			reduction = carbonReductionHandler.getCarbonOutputChange(
 					reductionCost, state.carbonOutput, state.energyOutput);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warn(e);
 			return 0;
 		}
 		return reduction;
-	}
-
-	private boolean buyingEnabled = true;
-
-	/**
-	 * Disables buying
-	 */
-	private void disableBuying() {
-		buyingEnabled = false;
-	}
-
-	/**
-	 * Reenables buying
-	 */
-	private void enableBuying() {
-		buyingEnabled = true;
-	}
-
-	/**
-	 * 
-	 * @param carbonOffset
-	 *            The amount of carbon we want to offset by buying credits
-	 * @param year
-	 *            The year we want to get the estimated price for. Year = 1 is
-	 *            current year, Year = 2 is next year etc.
-	 * @return Cost of purchasing credits. Returns a very, very large number if
-	 *         not enough credits available.
-	 */
-	public double getMarketBuyPrice(double carbonOffset) {
-
-		if (carbonOffset == 0) {
-			return 0;
-		}
-
-		if (buyingEnabled == false) {
-			return Double.MAX_VALUE / 1000000;
-		}
-
-		return carbonOffset * 99999999;
-	}
-
-	/**
-	 * Returns 0 if selling <=0 amounts of carbon offset
-	 * 
-	 * @param carbonOffset
-	 * @param year
-	 * @return
-	 */
-	public double getMarketSellPrice(double carbonOffset) {
-
-		if (carbonOffset <= 0) {
-			return 0;
-		}
-
-		// TODO calculate a selling price
-		return carbonOffset * 0;
 	}
 
 	public double getCarbonEnergyIncrease(double industryInvestment) {
@@ -632,7 +788,7 @@ public class AnnexOneReduce extends AbstractCountry {
 			increase = energyUsageHandler
 					.calculateCarbonIndustryGrowth(industryInvestment);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warn(e);
 			return 0;
 		}
 
@@ -640,6 +796,7 @@ public class AnnexOneReduce extends AbstractCountry {
 	}
 
 	public double getNextEmissionTarget(double emissionsTarget) {
+
 		// TODO currently returns old emissions target times the 10th root of
 		// 0.95
 		return emissionsTarget * 0.99488;

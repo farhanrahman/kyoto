@@ -18,9 +18,9 @@ import uk.ac.ic.kyoto.services.Economy;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
+import uk.ac.ic.kyoto.services.TradeHistoryService;
 import uk.ac.ic.kyoto.singletonfactory.SingletonProvider;
 import uk.ac.ic.kyoto.trade.TradeProtocolTestAgent;
-import uk.ac.ic.kyoto.tradehistory.TradeHistoryService;
 import uk.ac.imperial.presage2.core.simulator.InjectedSimulation;
 import uk.ac.imperial.presage2.core.simulator.Scenario;
 import uk.ac.imperial.presage2.core.util.random.Random;
@@ -74,7 +74,7 @@ public class TradeTest extends InjectedSimulation {
 		Logger logger = Logger.getLogger(Simulation.class);
 		
 		for(int i = 1; i <= 2; i++){
-				AbstractParticipant p = new TradeProtocolTestAgent(Random.randomUUID(), "Test" + i, "CS" + i, 20000, 10000, 5000000, 0.03, 200000, 28000, 50000);
+				AbstractParticipant p = new TradeProtocolTestAgent(Random.randomUUID(), "Test" + i, "CS" + i, 20000, 10000, 5000000, 0.03, 200000, 28000);
 				s.addParticipant(p);
 				CarbonData1990.addCountry("CS"+i, 50000);
 		}

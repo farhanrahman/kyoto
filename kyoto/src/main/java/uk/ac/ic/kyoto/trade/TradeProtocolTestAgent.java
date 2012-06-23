@@ -75,12 +75,6 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 				//int quantity = 10;
 				//double unitCost = 2;
 				this.broadcastBuyOffer(1000, 100);
-				//counter++;
-			
-			  	//InvestmentType i = InvestmentType.ABSORB;
-			  	//InvestmentType i = InvestmentType.REDUCE;
-		  
-			  	//this.broadcastInvesteeOffer(quantity, i);
 			
 			//}
 		//}

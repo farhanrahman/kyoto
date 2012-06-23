@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.log4j.Logger;
+
 import uk.ac.ic.kyoto.CarbonData1990;
 import uk.ac.ic.kyoto.countries.AbstractCountry.KyotoMember;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
@@ -29,7 +31,7 @@ import com.google.inject.Inject;
  */
 
 public class CarbonTarget extends EnvironmentService {
-
+	private Logger logger = Logger.getLogger(CarbonTarget.class);
 	private class countryObject  {
 		final public AbstractCountry obj;
 		
@@ -124,21 +126,21 @@ public class CarbonTarget extends EnvironmentService {
 		try {
 			this.timeService = provider.getEnvironmentService(GlobalTimeService.class);
 		} catch (UnavailableServiceException e) {
-			System.out.println("Unable to get environment service 'TimeService'.");
-			e.printStackTrace();
+			logger.warn("Unable to get environment service 'TimeService'.");
+			//e.printStackTrace();
 		}
 		try {
 			this.reportingService = provider.getEnvironmentService(CarbonReportingService.class);
 		} catch (UnavailableServiceException e) {
-			System.out.println("Unable to get environment service 'CarbonReportingService'.");
-			e.printStackTrace();
+			logger.warn("Unable to get environment service 'CarbonReportingService'.");
+			//e.printStackTrace();
 		}
 		
 		try {
 			this.monitor = provider.getEnvironmentService(Monitor.class);
 		} catch (UnavailableServiceException e) {
-			System.out.println("Unable to get environment service 'Monitor'.");
-			e.printStackTrace();
+			logger.warn("Unable to get environment service 'Monitor'.");
+			//e.printStackTrace();
 		}
 		
 		this.worldCurrentSessionTarget = 0;
@@ -148,8 +150,8 @@ public class CarbonTarget extends EnvironmentService {
 			try {
 				data = CarbonData1990.get(country.obj.getISO());
 			} catch (Exception e) {
-				System.out.println("1990 Data not Loaded for country: " + country.obj.getName());
-				e.printStackTrace();
+				logger.warn("1990 Data not Loaded for country: " + country.obj.getName());
+				//e.printStackTrace();
 			}
 			
 			country.currentSessionTarget = data;
@@ -228,10 +230,10 @@ public class CarbonTarget extends EnvironmentService {
 		if (newTarget < 0)
 			newTarget = 0.0;
 		
-		System.out.println("About to update target for year " + (year));
+		logger.info("About to update target for year " + (year));
 		country.yearTargets.put(year, newTarget);
-		System.out.println("Just updated target for year " + (year));
-		System.out.println("Target = " + country.yearTargets.get(year));
+		logger.info("Just updated target for year " + (year));
+		logger.info("Target = " + country.yearTargets.get(year));
 		country.obj.emissionsTarget = newTarget;
 	}	
 	
@@ -260,10 +262,10 @@ public class CarbonTarget extends EnvironmentService {
 			if (country.obj.isKyotoMember() == KyotoMember.ANNEXONE){
 				double output = getReportedCarbonOutput(country.obj.getID(), lastYear);
 				country.proportion = output / (worldOutput - rogueCarbonOutput);
-				System.out.println("About to update target for session " + session);
+				logger.info("About to update target for session " + session);
 				generateSessionTarget(country, kyotoTarget);
-				System.out.println("Just updated target for session " + session);
-				System.out.println("Target = " + country.currentSessionTarget);
+				logger.info("Just updated target for session " + session);
+				logger.info("Target = " + country.currentSessionTarget);
 			}
 		}
 	}

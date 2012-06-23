@@ -13,6 +13,7 @@ import uk.ac.ic.kyoto.actions.ApplyMonitorTaxHandler;
 import uk.ac.ic.kyoto.actions.QueryEmissionsTargetHandler;
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReportHandler;
 import uk.ac.ic.kyoto.annex1reduce.AnnexOneReduce;
+import uk.ac.ic.kyoto.annex1sustain.AnnexOneSustain;
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.CarbonTarget;
 import uk.ac.ic.kyoto.countries.GameConst;
@@ -25,8 +26,8 @@ import uk.ac.ic.kyoto.services.Economy;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
+import uk.ac.ic.kyoto.services.TradeHistoryService;
 import uk.ac.ic.kyoto.singletonfactory.SingletonProvider;
-import uk.ac.ic.kyoto.tradehistory.TradeHistoryService;
 import uk.ac.ic.kyoto.util.sim.jsonobjects.DataProvider;
 import uk.ac.ic.kyoto.util.sim.jsonobjects.JSONObjectContainer;
 import uk.ac.ic.kyoto.util.sim.jsonobjects.simulations.CountryData;
@@ -166,16 +167,16 @@ public class Simulation extends InjectedSimulation {
 //										Double.parseDouble(countryData.getEnergyOutput()), 
 //										Double.parseDouble(countryData.getCarbonOutput()));					
 					} else if(className.equals("AnnexOneSustain")){
-//						abstractCountry = new AnnexOneSustain(
-//										Random.randomUUID(), 
-//										countryData.getName(),
-//										countryData.getISO(), 
-//										Double.parseDouble(countryData.getLandArea()), 
-//										Double.parseDouble(countryData.getArableLandArea()), 
-//										Double.parseDouble(countryData.getGDP()),
-//										Double.parseDouble(countryData.getGDPRate()),
-//										Long.parseLong(countryData.getEnergyOutput()), 
-//										Long.parseLong(countryData.getCarbonOutput()));		
+						abstractCountry = new AnnexOneSustain(
+										Random.randomUUID(), 
+										countryData.getName(),
+										countryData.getISO(), 
+										Double.parseDouble(countryData.getLandArea()), 
+										Double.parseDouble(countryData.getArableLandArea()), 
+										Double.parseDouble(countryData.getGDP()),
+										Double.parseDouble(countryData.getGDPRate()),
+										Long.parseLong(countryData.getEnergyOutput()), 
+										Long.parseLong(countryData.getCarbonOutput()));		
 					} else if(className.equals("USAgent")){
 						
 					}

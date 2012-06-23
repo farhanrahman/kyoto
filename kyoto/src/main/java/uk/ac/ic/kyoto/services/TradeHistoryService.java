@@ -1,11 +1,12 @@
 /**
  * 
  */
-package uk.ac.ic.kyoto.tradehistory;
+package uk.ac.ic.kyoto.services;
 
 import com.google.inject.Inject;
 
 import uk.ac.ic.kyoto.singletonfactory.SingletonProvider;
+import uk.ac.ic.kyoto.tradehistory.TradeHistory;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
 import uk.ac.imperial.presage2.core.event.EventBus;
@@ -14,9 +15,9 @@ import uk.ac.imperial.presage2.core.simulator.EndOfTimeCycle;
 
 /**
  * Environment Service that invokes
- * method in TradeHistoryImplementation
- * that dumps current tick trade histories
- * onto the database
+ * method in TradeHistory that dumps 
+ * current tick trade histories onto 
+ * the database
  * @author farhanrahman
  *
  */
