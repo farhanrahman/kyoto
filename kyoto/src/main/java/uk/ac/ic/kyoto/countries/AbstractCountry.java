@@ -411,6 +411,15 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		
 	}
 	
+	//================================================================================
+    // Detecting Cheating Section
+    //================================================================================
+	
+	private int timesCaughtCheating=0;
+	
+	void caughtCheating() {
+		timesCaughtCheating++;
+	}
 	
 	//================================================================================
     // Private methods
@@ -773,5 +782,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		}else{
 			throw new IllegalStateException("Attempted to set kyotoMemberLevel in tick " + SimTime.get().intValue());
 		}
+	}
+	
+	public final int getTimesCaughtCheating() {
+		return timesCaughtCheating;
 	}
 }

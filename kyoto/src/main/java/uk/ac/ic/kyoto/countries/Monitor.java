@@ -251,6 +251,8 @@ public class Monitor extends EnvironmentService {
 		
 		logger.info("SANCTIONING: " + sanctionee.getName());
 		
+		sanctionee.caughtCheating();
+		
 		// Update the list of countries that have cheated
 		if (sinBin.containsKey(sanctionee)) {
 			sinCount = sinBin.get(sanctionee) + 1;
