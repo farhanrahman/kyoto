@@ -249,6 +249,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				
 			if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
 				resetCarbonOffset();
+			}
+			if (timeService.getCurrentYear() % timeService.getYearsInSession() == timeService.getYearsInSession()-1 && timeService.getCurrentTick() % timeService.getTicksInYear() == timeService.getTicksInYear()-1) {
 				sessionFunction();
 			}
 			
