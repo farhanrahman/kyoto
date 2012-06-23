@@ -1,12 +1,13 @@
 /**
  * 
  */
-package uk.ac.ic.kyoto.tokengen;
+package uk.ac.ic.kyoto.singletonfactory;
 
 import java.util.UUID;
 
 import com.google.inject.Singleton;
 
+import uk.ac.ic.kyoto.tokengen.Token;
 import uk.ac.imperial.presage2.core.util.random.Random;
 
 /**
