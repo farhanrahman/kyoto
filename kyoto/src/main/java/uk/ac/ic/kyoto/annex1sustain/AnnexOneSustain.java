@@ -73,7 +73,7 @@ public class AnnexOneSustain extends AbstractCountry {
 	protected void behaviour() {
 		if (isKyotoMember() == KyotoMember.ANNEXONE) {
 			
-			// If semaphore is not taken (not in conversations) decrease price and broadcast own offer
+			// If semaphore is not taken (not in conversations) decrease price and broadcast own offer if carbon left
 			if ((tradeSemaphore.availablePermits() == 1) && (Math.round(surplusCarbon) > 0)) {
 				
 				surplusCarbonPrice /= Constants.PRICE_FAILURE_SCALER;
@@ -342,7 +342,7 @@ public class AnnexOneSustain extends AbstractCountry {
 						logger.info(name + ": Absorbed carbon by " + (necessaryReduction) + " to remain in Kyoto");
 					}
 					else {
-						//leaveKyoto();
+						leaveKyoto();
 						logger.info(name + ": Leaving Kyoto, my target is below my emissions and can't do anything about it");
 					}
 				}
@@ -356,12 +356,6 @@ public class AnnexOneSustain extends AbstractCountry {
 		}
 	}
 	
-//	@Override
-//	protected double getReportedCarbonOutput() {
-//		// If lest year of the session, and not enough emissions, try to cheat
-//		
-//		return carbonOutput;
-//	}
 	
 	//================================================================================
     // Trade decisions
