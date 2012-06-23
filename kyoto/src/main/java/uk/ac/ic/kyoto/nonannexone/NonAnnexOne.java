@@ -23,7 +23,7 @@ public class NonAnnexOne extends AbstractCountry {
 	/**************************************Variable Declaration***************************************************/
 	
 	protected double environment_friendly_target; //country environmentally friendly target
-	protected double energy_aim ; // the energy output aim of a country each year.
+	protected double energy_aim ; // the energy output aim of a country each tick
 	protected boolean green_care = true ; // does the country care about the environment?
 	protected boolean green_lands = false; // variable to check if country met environment target or not. 
 	int times_aim_met = 0; //the consecutive times the energy aim is met.
@@ -32,7 +32,7 @@ public class NonAnnexOne extends AbstractCountry {
 	int current_tick; //tick currently operating
 	int current_year; //year currently operating
 	int imaginary_tick; //current tick modulo imaginary tick
-	int ticks_in_a_year_threshold; //the number of ticks in every year
+	int ticks_in_a_year_threshold; //the number of ticks that change the behaviour in how the energy aim is updated
 
 	/********************************************Constructor*******************************************************/
 	
@@ -259,6 +259,7 @@ public class NonAnnexOne extends AbstractCountry {
 	}
 	
 /************************************Invest in carbon industry but does not care about environment*****************************************************************/	
+	//function that invests in carbon industry without caring about meeting any environmental target
 	
 	private void energy_increase_without_care(double money)
 	{
@@ -273,7 +274,7 @@ public class NonAnnexOne extends AbstractCountry {
 	
 		
 	
-	//Function that updates the energy goal each year.
+	//Function that updates the energy goal every tick
 /*******************************************Update the energy aim every tick **********************************************************/
 		
 		private void update_energy_aim(double previous_aim,boolean success,int counter)
@@ -292,7 +293,7 @@ public class NonAnnexOne extends AbstractCountry {
 				if (imaginary_tick == ticks_in_a_year_threshold)
 				{
 				
-				times_aim_met = 0; //reset counter, wait a tick to operate
+				times_aim_met = 0; //reset counter, wait a tick to operate and boost investment.
 				energy_aim= previous_aim + 1;
 				}
 				if (imaginary_tick > ticks_in_a_year_threshold )
@@ -302,31 +303,31 @@ public class NonAnnexOne extends AbstractCountry {
 					{
 					case 0:
 					{
-						energy_aim = previous_aim + previous_aim * CountryConstants.NORMAL_ENERGY_AIM_GROWTH; //change aim every year	
+						energy_aim = previous_aim + previous_aim * CountryConstants.NORMAL_ENERGY_AIM_GROWTH;	
 						logger.info("Country in NORMAL state, normal energy growth");
 						break;
 					}
 					case 1:
 					{
-						energy_aim = previous_aim + previous_aim * CountryConstants.GROW_ENERGY_AIM_GROWTH; //change aim every year	
+						energy_aim = previous_aim + previous_aim * CountryConstants.GROW_ENERGY_AIM_GROWTH;	
 						logger.info("Country in GROW state, grow energy growth");	
 						break;
 					}
 					case 2:
 					{
-						energy_aim = previous_aim + previous_aim * CountryConstants.BIG_ENERGY_AIM_GROWTH; //change aim every year	
+						energy_aim = previous_aim + previous_aim * CountryConstants.BIG_ENERGY_AIM_GROWTH; 	
 						logger.info("Country in BIG state, big energy growth");	
 						break;
 					}
 					case 3:
 					{
-						energy_aim = previous_aim + previous_aim * CountryConstants.HUGE_ENERGY_AIM_GROWTH; //change aim every year	
+						energy_aim = previous_aim + previous_aim * CountryConstants.HUGE_ENERGY_AIM_GROWTH; 
 						logger.info("Country in HUGE state, huge energy growth");	
 						break;
 					}
 					default:
 					{
-						energy_aim = previous_aim + previous_aim * CountryConstants.FREE_ENERGY_AIM_GROWTH; //change aim every year	
+						energy_aim = previous_aim + previous_aim * CountryConstants.FREE_ENERGY_AIM_GROWTH;	
 						logger.info("Country in FREE state, energy growth");	
 						break;
 					}	
@@ -339,8 +340,7 @@ public class NonAnnexOne extends AbstractCountry {
 		}
 /**
  * @throws Exception *****************************************************************************************************/
-	//uses the Clean Development Mechanism in order to sell carbon credits
-		
+	//Clean Development Mechanism 
 	private void clean_development_mechanism(double money_to_invest) throws Exception
 	{
 		CDM_absorption(money_to_invest);
@@ -349,7 +349,7 @@ public class NonAnnexOne extends AbstractCountry {
 	}
 
 /*******************************************************************************************************/
-	//change the emission target every year
+	//change the target for carbon output(environmentally friendly) every tick.
 	private void change_emission_target(double previous_target,boolean succeed)
 	{
 		if (succeed) //country met environment target goal, decrease goal.
@@ -393,7 +393,7 @@ broadcastInvesteeOffer(change_required,InvestmentType.REDUCE);
 
 }		
 		
-/*******************************************************************************************************/
+/****************************************************************************************************************/
 
 //Check available area  in order to choose decision accordingly for accepting to sell credits or plant trees for own sake.
 		private String currentAvailableArea(){
@@ -405,17 +405,7 @@ broadcastInvesteeOffer(change_required,InvestmentType.REDUCE);
 		
 		}
 
-/*******************************************************************************************************/
+/***************************************************************************************************************/
 
 		
 }		
-		
-	
-	
-	
-
-		
-	
-
-
-
