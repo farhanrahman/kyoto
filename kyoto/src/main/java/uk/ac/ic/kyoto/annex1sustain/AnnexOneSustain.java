@@ -31,9 +31,9 @@ public class AnnexOneSustain extends AbstractCountry {
     //================================================================================
 	
 	protected String	name;						// Name of the country
-	protected double	surplusCarbonTarget;		// Number of credits we can and want to sell without carbon absorption/reduction
+	protected double	surplusCarbonTarget;		// Number of credits we still have left at the beginning of the year
 	protected double	surplusCarbon;				// Number of credits we still have left
-	protected double	surplusCarbonPrice;			// Price of surplus carbon while within target
+	protected double	surplusCarbonPrice;			// Price of surplus carbon at which we are ready to sell
 	protected double	expectedSales;				// Specifies where our acceptable price will lie between two extreme profitability points
 	protected double	carbonToReduce;				// Carbon we have to reduce if sale was successful
 	protected double 	carbonToAbsorb;				// Carbon we have to absorb if sale was successful
@@ -72,10 +72,13 @@ public class AnnexOneSustain extends AbstractCountry {
 	@Override
 	protected void behaviour() {
 		if (isKyotoMember() == KyotoMember.ANNEXONE) {
-			// Decrease price if semaphore set to 1 (no conversation or offer accepted at the start). Broadcast own offer.
+			
+			// If semaphore is not taken (not in conversations) decrease price and broadcast own offer
 			if ((tradeSemaphore.availablePermits() == 1) && (Math.round(surplusCarbon) > 0)) {
+				
 				surplusCarbonPrice /= Constants.PRICE_FAILURE_SCALER;
 				logger.info(name + ": Decreased internal price to " + surplusCarbonPrice);
+				
 				broadcastSellOffer(surplusCarbon, surplusCarbonPrice);
 				logger.info(name + ": Broadcasting offer of sale: " + surplusCarbon + " @ " + surplusCarbonPrice);
 			}
@@ -110,7 +113,7 @@ public class AnnexOneSustain extends AbstractCountry {
 						}
 					}
 					
-					// If not, need to invest to get required carbon
+					// If not enough surplus carbon, need to invest to get required carbon
 					else {
 						double additionalCarbon = quantityOffered - surplusCarbon;
 						double additionalFunds = priceOffered * quantityOffered;
@@ -272,7 +275,8 @@ public class AnnexOneSustain extends AbstractCountry {
 			
 			if ((carbonAbsCost < carbonRedCost) && (carbonAbsTrees < this.getArableLandArea())) {
 				carbonAbsorptionHandler.investInCarbonAbsorption(carbonGained);
-				logger.info(name + ": Invested in industry and scaled back with reduction of " + carbonGained + " carbon, which cost " + totalInvestment);
+				logger.info(name + ": Invested in industry " +
+						"and scaled back with reduction of " + carbonGained + " carbon, which cost " + totalInvestment);
 			}
 			else {
 				carbonReductionHandler.investInCarbonReduction(carbonGained);
