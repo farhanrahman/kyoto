@@ -73,7 +73,7 @@ public class AnnexOneSustain extends AbstractCountry {
 	protected void behaviour() {
 		if (isKyotoMember() == KyotoMember.ANNEXONE) {
 			
-			// If semaphore is not taken (not in conversations) decrease price and broadcast own offer
+			// If semaphore is not taken (not in conversations) decrease price and broadcast own offer if carbon left
 			if ((tradeSemaphore.availablePermits() == 1) && (Math.round(surplusCarbon) > 0)) {
 				
 				surplusCarbonPrice /= Constants.PRICE_FAILURE_SCALER;
@@ -355,6 +355,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			logger.warn(name + ": Problem with deciding whether to stay in Kyoto");
 		}
 	}
+	
 	
 	//================================================================================
     // Trade decisions
