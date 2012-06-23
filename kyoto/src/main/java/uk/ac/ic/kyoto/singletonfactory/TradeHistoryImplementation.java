@@ -1,4 +1,4 @@
-package uk.ac.ic.kyoto.tradehistory;
+package uk.ac.ic.kyoto.singletonfactory;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,6 +8,7 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 
 import uk.ac.ic.kyoto.countries.OfferMessage;
+import uk.ac.ic.kyoto.tradehistory.TradeHistory;
 import uk.ac.ic.kyoto.util.sim.jsonobjects.DataStorer;
 import uk.ac.ic.kyoto.util.sim.jsonobjects.tradedata.TradeData;
 import uk.ac.imperial.presage2.core.Time;

@@ -334,7 +334,7 @@ class CountrySimulator {
 		}
 
 		/**
-		 * 
+		 * Constructor for a reduce state
 		 * @param previousState
 		 *            The state that performs the action
 		 * @param action
@@ -466,6 +466,11 @@ class CountrySimulator {
 			carbonDiff = carbonOutput - carbonAbsorption;
 		}
 
+		/**
+		 * Create a new sellState
+		 * @param previousState
+		 * @param action
+		 */
 		private CountryState(CountryState previousState, SellAction action) {
 
 			this.previousEnergyOutput = previousState.energyOutput;

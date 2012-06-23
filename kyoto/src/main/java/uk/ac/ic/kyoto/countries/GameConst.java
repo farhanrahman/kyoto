@@ -46,11 +46,11 @@ public final class GameConst {
 	/**
 	 * The price of increasing carbon absorption by one unit when we have 100% arable area
 	 */
-	private static double CARBON_ABSORPTION_PRICE_MIN = 15;
+	private static double CARBON_ABSORPTION_PRICE_MIN = 10;
 	/**
 	 * The price of increasing carbon absorption by one unit when we have 0% arable area
 	 */
-	private static double CARBON_ABSORPTION_PRICE_MAX = 300;
+	private static double CARBON_ABSORPTION_PRICE_MAX = 750;
 	/**
 	 * Forest area that absorbs single ton of carbon
 	 */
