@@ -249,6 +249,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				
 			if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
 				resetCarbonOffset();
+			}
+			if (timeService.getCurrentYear() % timeService.getYearsInSession() == timeService.getYearsInSession()-1 && timeService.getCurrentTick() % timeService.getTicksInYear() == timeService.getTicksInYear()-1) {
 				sessionFunction();
 			}
 			
@@ -411,6 +413,15 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		
 	}
 	
+	//================================================================================
+    // Detecting Cheating Section
+    //================================================================================
+	
+	private int timesCaughtCheating=0;
+	
+	void caughtCheating() {
+		timesCaughtCheating++;
+	}
 	
 	//================================================================================
     // Private methods
@@ -679,6 +690,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				environment.act(new AddRemoveFromMonitor(this, addRemoveType.REMOVE), getID(), authkey);
 				kyotoMemberLevel = KyotoMember.ROGUE;
 				environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
+				leaveTime = timeService.getCurrentTick();
 			} catch (ActionHandlingException e) {
 				logger.warn("Exception whilst removing from monitor: " + e);
 				//e.printStackTrace();
@@ -692,6 +704,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		if (timeService.getCurrentTick() > 0) {
 			try {
 				environment.act(new RejoinKyoto(), getID(), authkey);
+				joinTime = timeService.getCurrentTick();
 			} catch (ActionHandlingException e) {
 				logger.warn("Exception whilst rejoining kyoto: " + e);
 				//e.printStackTrace();
@@ -771,5 +784,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		}else{
 			throw new IllegalStateException("Attempted to set kyotoMemberLevel in tick " + SimTime.get().intValue());
 		}
+	}
+	
+	public final int getTimesCaughtCheating() {
+		return timesCaughtCheating;
 	}
 }

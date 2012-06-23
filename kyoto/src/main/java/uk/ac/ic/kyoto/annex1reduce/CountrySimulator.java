@@ -1,6 +1,7 @@
 package uk.ac.ic.kyoto.annex1reduce;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 
 import org.apache.log4j.Logger;
@@ -121,13 +122,13 @@ class CountrySimulator {
 	 */
 	private ActionList getOptimalState(ArrayList<CountryState> states) {
 
-//		HashSet<CountryState> startSellStates = new HashSet<CountryState>();
+		HashSet<CountryState> startSellStates = new HashSet<CountryState>();
 
 		ArrayList<CountryState> startSellList = new ArrayList<CountryState>();
 
 		for (int i = 0; i < states.size(); i++) {
 			CountryState state = states.get(i).getStartSellState();
-//			startSellStates.add(state);
+			startSellStates.add(state);
 			startSellList.add(state);
 		}
 
@@ -139,8 +140,8 @@ class CountrySimulator {
 //			logger.info();
 //			state.printActionPath();
 //		}
-//		logger.info();
-//		logger.info("NumStates = " + startSellStates.size());
+		logger.info("");
+		logger.info("NumStates = " + startSellStates.size());
 
 		float s_investFrac = 0;
 		float s_sellFrac = 0;
@@ -228,6 +229,8 @@ class CountrySimulator {
 			if (state.availableToSpend < 0) {
 				iterator.remove();
 			} else if (state.carbonOutput < 0) {
+				iterator.remove();
+			} else if (state.arableLandArea < 0) {
 				iterator.remove();
 			}
 		}
