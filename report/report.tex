@@ -470,11 +470,52 @@ When a country has no credits to sell anymore, but there is still demand for car
 
 \paragraph{Annex I (Reduce)}
 
+In our project, we define Annex I Reduce countries as participants whose current emissions are higher than their 1990 base targets, requiring them to prioritise the reduction of their carbon emissions. Good examples of such countries are the fifteen European countries.
 
+For their behaviour, it was decided that the best approach was to design a mini simulation that would perform exhaustive testing on every possible country action, extrapolating emissions and industry growth into the future. It then decides which action results in the best outcome, with regard to maximizing economic growth while still meeting Kyoto Protocol targets and then performs the optimal actions in the simulation.
+
+While simple in theory, in practice there are some major hurdles. The most troublesome of these is that there are an enormous number of possible actions a given Annex I Reduce country can take, all of which operate on a continuous scale. Every action has an almost infinite number of options that can be taken. For example, a country could choose to reduce their carbon emissions through absorption by spending 1\% of their available cash, or by spending 100\% of their available cash, or any number in between. They could then decide to buy vast amounts of carbon offset from the market, at any price, or put up sell offers. All of these actions can be performed in a single tick.
 
 \subparagraph{Strategy}
 
+Some heuristics had to be implemented to keep the simulation from spiralling out of control. It also ensured that as few \textsc{cpu} cycles as possible are wasted on actions that were simply irrational and could never lead to any useful results. To do this, it was decided to split each turn into three phases: the 'reduce' phase, the 'maintain' phase and the 'sell' phase.
+
+The reduce phase happens first. It checks whether our current carbon output is below our carbon target. If we are at or below our target, then nothing is done. However, if we are above our current target, the testing will branch off into combinations of three distinct actions. The carbon target will be met by either buying carbon offset from the market, by reducing the carbon output through investing in absorption and reduction or, if in particularly dire financial situation, by reducing the economic output of the country. Every time a branch occurs, a new 'state' is created.
+
+Before the maintain phase occurs, we compare every branched state with one another and check whether one state is objectively superior for every possible pair of states. For example, let a state have two attributes 'Money' and 'Carbon', where a higher 'Money' and a lower 'Carbon' is better. If state 1 has a 'Money' value of 100 and a 'Carbon' value of 50, and state 2 has a 'Money' value of 90 and a 'Carbon' value of 60, then state 1 is objectively better than state 2. Therefore we can immediately eliminate state 2 as a possible action. Alternatively, if a state 3 has a 'Money' value of 110 and a 'Carbon' value of 60, we cannot objectively say that it is any better than state 1 and thus cannot remove this from the simulation. By performing this culling, we can prevent our search space from getting too large and avoid going down paths where we can already tell there will be better alternatives.
+
+Next is the maintain phase. As we are now guaranteed to be at least at or below our carbon target, the country can focus on improving its industry, which will eventually result in an increase in the available cash to spend. The simulation will branch off from each unculled state created in the reduce phase by first investing in industry (i.e.: increasing our energy output, which in turn increases our \textsc{gdp}) by some amount and then by offsetting the extra carbon created by investing in absorption and reduction, or by buying the offset from the market. Once again, a cull is performed after all branches have been taken.
+
+Finally there is the sell stage. Here, we reduce our carbon output (by investing in carbon absorption and reduction, or by shutting down factories) by a  certain amount and then sell our newly created carbon offset at the highest possible price. Once again, all unrealistic states are culled.
+
+The combination of these three phases makes up a list of possible actions for one year of the game. However, since a session lasts a number of years (at which point any accumulated carbon offsets are abandoned when new emissions targets are calculated), simulating the possible behaviour for a single year simply does not provide us with enough information to choose an ideal action path. We need to continue the internal projections up until the end of the current session.
+
+Once this is over and we have a large number of end states, we can analyse our them to find the ones which can be objectively considered the best. This will be the one with the best economy and the lowest carbon output. When identified, we simply traverse our path back to the initial state and perform the action path in the actual game.
+
+Overall, this method takes full advantage of all possible options available to a country, including utilising the market as much as possible. No possible rational action is ruled out until it is clear that there are objectively superior alternatives. As a result, we achieve a behaviour that is very close to the optimal action for the country, resulting in maximum monetary gains while still reaching all set carbon targets.
+
+As the annex I reduce countries were deemed to be paragons of justice, some actions such as cheating and ignoring carbon targets weren't coded in. However if a country finds itself constantly shutting down factories (due to a lack of money to perform any other actions) in order to meet carbon targets, it will choose to leave the Kyoto Protocol until it can get back on its feet again financially.
+
 \paragraph{Non-Annex I}
+
+The Non Annex I group is mainly composed of developing countries whose primary aim is economic growth. Since \textsc{gdp} growth is directly proportional to energy output in this project, the aim of Non Annex I countries is to increase its industry as much as possible. 
+
+Investing in industry, and therefore growing a country’s economy increases its carbon output at the same time. However, the Kyoto Protocol dictates that sanctions are not enforced on Non Annex I countries since they are not set targets to fulfill. They are therefore free to emit as much \CO as their industry requires.
+
+Nevertheless, the Non Annex I behaviour was implemented such that they do care about the environment as well as their growth when cash is available in abundance.
+
+The following keywords will be used to describe the general behaviour of Non Annex 1 countries:
+
+\begin{description}
+\item[1. energy_aim:] the energy output the country wants to reach by the end of the year.
+\item[2. times_aim_met:] how many consecutive times the energy output aim was met.
+\item[3. aim_success:] variable that represents whether the country met its energy target or not.
+\item[4. green_care:] variable that controls if the country cares or not about the environment.
+\item[5. green_lands:] variable that controls whether the country has actually met its environmental commitments.
+\item[6. environment_friendly_targe:] if it exists, variable that stores the country’s carbon emission target. 
+\end{description}
+
+The country starts by having a policy of increasing its energy output as shown in Figure X whilst trying to meet an internally set carbon emission target.
 
 \subparagraph{United States}
 
