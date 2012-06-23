@@ -71,8 +71,7 @@ public class AnnexOneReduce extends AbstractCountry {
 	@Override
 	protected void behaviour() {
 
-		// TODO fix this Update our market buy and sell price information
-		 marketData.update();
+		marketData.update();
 
 		// If the expected buy price has increased by more than 5%, we should
 		// resimulate
@@ -80,7 +79,7 @@ public class AnnexOneReduce extends AbstractCountry {
 			needToSimulate = true;
 		}
 
-		// If our expected sell price has decreed by more than 5%, we should
+		// If our expected sell price has decreased by more than 5%, we should
 		// resimulate
 		if (0.95 * sellCarbonUnitPrice > marketData.getSellingPrice()) {
 			needToSimulate = true;
@@ -96,17 +95,21 @@ public class AnnexOneReduce extends AbstractCountry {
 		} else if (needToSimulate) {
 			logger.info(getName() + " is simulating");
 			enableBuying();
-			runSimulation();
+			getMarketPrices(runSimulation());
 		}
 
 		/*
 		 * Now, send out buy and sell offers for the tick
 		 */
 		if (buyCarbonQuantity > 100) {
-			logger.info(getName() + " is sending out a buy offer. Quantity = " + buyCarbonQuantity/2 + ", Unit Price = " + buyCarbonUnitPrice);
+			logger.info(getName() + " is sending out a buy offer. Quantity = "
+					+ buyCarbonQuantity / 2 + ", Unit Price = "
+					+ buyCarbonUnitPrice);
 			broadcastBuyOffer(buyCarbonQuantity / 2, buyCarbonUnitPrice);
 		} else if (sellCarbonQuantity > 100) {
-			logger.info(getName() + " is sending out a sell offer. Quantity = " + sellCarbonQuantity/2 + ", Unit Price = " + sellCarbonUnitPrice);
+			logger.info(getName() + " is sending out a sell offer. Quantity = "
+					+ sellCarbonQuantity / 2 + ", Unit Price = "
+					+ sellCarbonUnitPrice);
 			broadcastSellOffer(sellCarbonQuantity / 2, sellCarbonUnitPrice);
 		}
 	}
@@ -124,6 +127,16 @@ public class AnnexOneReduce extends AbstractCountry {
 				getCarbonAbsorption(), getEmissionsTarget(),
 				getAvailableToSpend(), getGDP(), getGDPRate(),
 				getArableLandArea(), getYearsUntilSanctions());
+
+		return optimal;
+	}
+
+	/**
+	 * Updates the market with new prices
+	 * 
+	 * @param optimal
+	 */
+	public void getMarketPrices(ActionList optimal) {
 
 		double carbonDifference = this.getCarbonOffset()
 				+ this.getCarbonAbsorption() - this.getCarbonOffset();
@@ -162,8 +175,6 @@ public class AnnexOneReduce extends AbstractCountry {
 		}
 
 		sellCarbonUnitPrice = marketData.getSellingPrice();
-
-		return optimal;
 	}
 
 	/**
@@ -293,7 +304,7 @@ public class AnnexOneReduce extends AbstractCountry {
 			return Double.MAX_VALUE / 100000000000.0;
 		}
 //		return carbonOffset * 200;
-		return carbonOffset * marketData.getBuyingPrice();
+		 return carbonOffset * marketData.getBuyingPrice();
 	}
 
 	private void disableBuying() {
@@ -322,7 +333,7 @@ public class AnnexOneReduce extends AbstractCountry {
 
 	// TODO get years until sanctions (when carbon credits reset)
 	private int getYearsUntilSanctions() {
-//		return 10;
+		// return 10;
 		int years = timeService.getCurrentYear()
 				% GameConst.getYearsInSession();
 		years = GameConst.getYearsInSession() - years;
@@ -415,7 +426,7 @@ public class AnnexOneReduce extends AbstractCountry {
 					- this.getCarbonAbsorption() - this.getCarbonOffset();
 
 			// Positive carbon difference means we need to reduce our carbon
-			double m_carbonDifference = 1.03 * (m_netCarbonOutput - this
+			double m_carbonDifference = 1.01 * (m_netCarbonOutput - this
 					.getEmissionsTarget());
 
 			// If we need to reduce our carbon further
