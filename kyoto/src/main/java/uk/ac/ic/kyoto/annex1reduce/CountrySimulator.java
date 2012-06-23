@@ -659,6 +659,11 @@ class CountrySimulator {
 
 			// Do nothing
 			new CountryState(this, new SellAction(0, 0, 0));
+			
+			//Ensure we don't try to sell if the sell price is 0
+			if (country.getMarketSellPrice(1) < 1) {
+				return;
+			}
 
 			for (float i = min; i <= max; i = i + grain) {
 				shutDownFrac = 0;
@@ -1008,20 +1013,6 @@ class CountrySimulator {
 			} else if (state1.GDPRate < state2.GDPRate) {
 				isBetter = false;
 			}
-
-			// // If we make more energy
-			// if (state1.energyOutput > state2.energyOutput) {
-			// isWorse = false;
-			// } else if (state1.energyOutput < state2.energyOutput) {
-			// isBetter = false;
-			// }
-
-			// // If we have less carbon output
-			// if (state1.carbonDiff < state2.carbonDiff) {
-			// isWorse = false;
-			// } else if (state1.carbonDiff > state2.carbonDiff) {
-			// isBetter = false;
-			// }
 
 			if (isBetter) {
 				return Compare.BETTER;
