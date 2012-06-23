@@ -258,8 +258,13 @@ public class AnnexOneSustain extends AbstractCountry {
 				investmentDiff /= 2;
 				carbonGained = energyUsageHandler.calculateCarbonIndustryGrowth(industryInvestment);
 				carbonRedCost = carbonReductionHandler.getInvestmentRequired(carbonGained, (this.getCarbonOutput() + carbonGained), (this.getEnergyOutput() + carbonGained));
-				carbonAbsCost = carbonAbsorptionHandler.getInvestmentRequired(carbonGained);
 				carbonAbsTrees = carbonAbsorptionHandler.getForestAreaRequired(carbonGained);
+				if (carbonAbsTrees < this.getArableLandArea()) {
+					carbonAbsCost = carbonAbsorptionHandler.getInvestmentRequired(carbonGained);
+				}
+				else {
+					carbonAbsCost = Double.MAX_VALUE;
+				}
 				
 				if ((carbonRedCost + industryInvestment < totalInvestment) ||
 					((carbonAbsCost + industryInvestment < totalInvestment) && (carbonAbsTrees < this.getArableLandArea())))
@@ -330,8 +335,15 @@ public class AnnexOneSustain extends AbstractCountry {
 					double necessaryReduction = (-surplusCarbon);
 					double reductionCost = carbonReductionHandler.getInvestmentRequired(necessaryReduction);
 					boolean reductionPossible = isReductionPossible(necessaryReduction, 0);
-					double absorptionCost = carbonAbsorptionHandler.getInvestmentRequired(necessaryReduction);
 					boolean absorptionPossible = isAbsorptionPossible(necessaryReduction, 0);
+					double absorptionCost;
+					
+					try {
+						absorptionCost = carbonAbsorptionHandler.getInvestmentRequired(necessaryReduction);
+					}
+					catch (NotEnoughLandException e) {
+						absorptionCost = Double.MAX_VALUE;
+					}
 					
 					if ((reductionCost < absorptionCost || !absorptionPossible) && reductionPossible) {
 						carbonReductionHandler.investInCarbonReduction(necessaryReduction);
