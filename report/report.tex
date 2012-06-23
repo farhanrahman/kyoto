@@ -69,17 +69,40 @@
 
 \newcommand{\CO}{\textsc{co}$_2$~}
 
-%%% END Article customizations
+%%% A couple of commands for the title page
+\usepackage{hyperref}
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+
+%%% END Article customisations
 
 %%% The "real" document content comes below...
 
 \title{Brief Article}
 \author{The Author}
 %\date{} % Activate to display a given date or no date (if empty),
- % otherwise the current date is printed 
+% otherwise the current date is printed 
 
 \begin{document}
-\maketitle
+
+% BEGIN TITLE AND MESSAGE PAGE
+\input{./title.tex}
+\setcounter{page}{2}
+
+\newpage{}
+\thispagestyle{empty}
+
+\vspace*{100pt}
+\begin{flushright}
+	\textit{Some message that we'd like to write?}
+\end{flushright}
+
+\newpage{}
+
+% END TITLE AND MESSAGE PAGE
+
+\tableofcontents
+
+% \maketitle
 
 \section{Introduction}
 
