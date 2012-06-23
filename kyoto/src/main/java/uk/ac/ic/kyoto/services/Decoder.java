@@ -43,7 +43,7 @@ public class Decoder {
 		
 		/*Add to maps decoding id-ISO : ISO-id*/
 		Decoder.id2ISO.put(id, ISO);
-		Decoder.ISO2id.put(name, id);
+		Decoder.ISO2id.put(ISO, id);
 	}
 	
 	/**
