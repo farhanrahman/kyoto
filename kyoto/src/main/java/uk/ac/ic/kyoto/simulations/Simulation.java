@@ -20,14 +20,15 @@ import uk.ac.ic.kyoto.countries.GameConst;
 import uk.ac.ic.kyoto.countries.Monitor;
 import uk.ac.ic.kyoto.exceptions.NoCountryDataException;
 import uk.ac.ic.kyoto.nonannexone.NonAnnexOne;
+import uk.ac.ic.kyoto.roguestates.USAgent;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.Decoder;
 import uk.ac.ic.kyoto.services.Economy;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
+import uk.ac.ic.kyoto.services.TradeHistoryService;
 import uk.ac.ic.kyoto.singletonfactory.SingletonProvider;
-import uk.ac.ic.kyoto.tradehistory.TradeHistoryService;
 import uk.ac.ic.kyoto.util.sim.jsonobjects.DataProvider;
 import uk.ac.ic.kyoto.util.sim.jsonobjects.JSONObjectContainer;
 import uk.ac.ic.kyoto.util.sim.jsonobjects.simulations.CountryData;
@@ -178,7 +179,16 @@ public class Simulation extends InjectedSimulation {
 										Long.parseLong(countryData.getEnergyOutput()), 
 										Long.parseLong(countryData.getCarbonOutput()));		
 					} else if(className.equals("USAgent")){
-						
+						abstractCountry = new USAgent(
+											Random.randomUUID(), 
+											countryData.getName(),
+											countryData.getISO(), 
+											Double.parseDouble(countryData.getLandArea()), 
+											Double.parseDouble(countryData.getArableLandArea()), 
+											Double.parseDouble(countryData.getGDP()),
+											Double.parseDouble(countryData.getGDPRate()),
+											Long.parseLong(countryData.getEnergyOutput()), 
+											Long.parseLong(countryData.getCarbonOutput()));	
 					}
 					
 					CarbonData1990.addCountry(countries.get(countryKey).getISO(), Double.parseDouble(countries.get(countryKey).getCarbonOutput1990()));
