@@ -107,13 +107,13 @@ public class MarketData {
 		if (numBuys != 0) {
 			averageBuy /= numBuys;
 			addBuyStruct(new BuyStruct(minimumBuy, averageBuy, maximumBuy));
-			calculateBuyingPrice();
+			calculateSellingPrice();
 		}
 
 		if (numSells != 0) {
 			averageSell /= numSells;
 			addSellStruct(new SellStruct(minimumSell, averageSell, maximumSell));
-			calculateSellingPrice();
+			calculateBuyingPrice();
 		}
 
 		/*

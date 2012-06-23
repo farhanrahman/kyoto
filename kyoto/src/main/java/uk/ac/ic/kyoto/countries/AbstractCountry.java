@@ -603,6 +603,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				this.tradeProtocol.tradeToken.generate(),
 				OfferMessageType.BROADCAST_MESSAGE,
 				this.getID());
+		tradeProtocol.offerHistory.addToHistory(SimTime.get(), returnObject.getTradeID(), returnObject);
 		this.network.sendMessage(
 					new MulticastMessage<OfferMessage>(
 							Performative.PROPOSE, 
@@ -623,7 +624,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				this.tradeProtocol.tradeToken.generate(), 
 				OfferMessageType.BROADCAST_MESSAGE,
 				this.getID());
-		
+		tradeProtocol.offerHistory.addToHistory(SimTime.get(), returnObject.getTradeID(), returnObject);
 		this.network.sendMessage(
 					new MulticastMessage<OfferMessage>(
 							Performative.PROPOSE, 
@@ -658,6 +659,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				this.tradeProtocol.tradeToken.generate(),
 				OfferMessageType.BROADCAST_MESSAGE,
 				this.getID());
+		tradeProtocol.offerHistory.addToHistory(SimTime.get(), returnObject.getTradeID(), returnObject);
 		this.network.sendMessage(
 					new MulticastMessage<OfferMessage>(
 							Performative.PROPOSE, 
