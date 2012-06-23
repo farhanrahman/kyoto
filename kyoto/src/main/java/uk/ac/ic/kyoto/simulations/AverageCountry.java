@@ -75,7 +75,7 @@ public class AverageCountry extends InjectedSimulation {
 		
 		// Average Stats
 		final double landArea = 714392;
-		final double arableLandArea = 74918;
+		final double arableLandArea = 300918;
 		
 		// For annexOne only
 		final double energyOutput = 263593238;
