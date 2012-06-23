@@ -257,9 +257,30 @@ With Russia having an abundance of \textsc{aau}s, there was concern that it woul
 
 \paragraph{The effect of Non-Annex countries}
 
-Following successful negotiation and signing of the Protocol, concern was raised regarding the lack of limitations on the \textsc{ghg} emissions of developing countries. Indeed the \textsc{USA} did not ratify the Protocol, stating that "it exempts 80\% of the world, including major population centers such as China and India, from compliance, and would cause serious harm to the US economy".~\cite{Hague-to-marrakech} Statistics from the International Energy Agency (\textsc{iea}) show by 2011, emissions from Non-Annex I countries had exceeded those from Annex I countries.~\cite{CO2-fuel-highlights} Only 3 countries from the top 10 table of carbon emitters are currently an Annex I participants.
+Following successful negotiation and signing of the Protocol, concern was raised regarding the lack of limitations on the \textsc{ghg} emissions of developing countries. Indeed the \textsc{USA} did not ratify the Protocol, stating that "it exempts 80\% of the world, including major population centers such as China and India, from compliance, and would cause serious harm to the US economy".~\cite{Hague-to-Marrakesh} Statistics from the International Energy Agency (\textsc{iea}) show by 2011, emissions from Non-Annex I countries had exceeded those from Annex I countries.~\cite{IEA-highlights} Only 3 countries from the top 10 table of carbon emitters are currently an Annex I participants.
 
 \subsection{Modeling the Kyoto Protocol as a Common Pool Resource}
+
+A Common Pool Resource (\textsc{cpr}) is a natural or man-made resource in which:~\cite{Ostrom-90}
+
+\begin{itemize}
+	\item The resource is deductible
+	\item The size and characteristic of the resource make it difficult to exclude other from its use
+\end{itemize}
+
+\textsc{cpr}s are defined by their core resource (\emph{stock variable}) and the limited quantity of extractable units (\emph{flow variable}). The stock variable is to be conserved such that consumers may continue to exploit/consume excess resources (\emph{fringe variable}), which are produced at a rate defined by the flow variable.
+
+Due to the resource’s deductible, non exclusive characteristics, \textsc{cpr} may have problems of congestion or overuse. Many \textsc{cpr} systems form a positive feedback loop, and so with careful resource management (ensuring the stock variable is not compromised), fringe units will be continually produced, allowing for efficient resource usage. Excessive consumption (consumption exceeding the flow variable) will reduce the stock variable, which in turn will reduce the flow variable. Unless the stock variable is allowed to regenerate, excessive use will result in resource depletion; even if the stock is allowed to regenerate, the damage may be irreparable. The key to efficient \textsc{cpr} is to ensure the resource is not abused.
+
+An example of \textsc{cpr} is commercial fishing; by overfishing certain species of fish, the stock variable (number of fish) is reduced, which in turn reduces the flow variable (birth rate), which decreases the fringe units which can be sustainably caught by fishers. Unless the stock variable is allowed to regenerate, certain species of fish may be driven to depletion (extinction). This is an example of inefficient use of a \textsc{cpr}, the only viable solution to which is drastically reducing the rate of fishing. This, and further example cases, are discussed in more detail later.
+
+While some \textsc{cpr}s are owned by governments or private parties, making these public or private goods, many have no ownership, and so are an open access resource. We should note the difference between “Common Pool Resources”, as described above, and “The Commons”, which
+
+\begin{quote}
+	“refer to systems, such as knowledge and the digital world, in which it is difficult to limit access, but one person’s use does not subtract a finite quantity from another’s use.”~\cite{Ostrom-challenge-90}
+\end{quote}
+
+With the understanding that uncontrolled access to a \textsc{cpr} will lead to inefficiencies and overuse, some resource consumers form an institution, often called a “Common Property Regime”, to reduce the threat to the common resource by independent actions, and increase the efficiency of resource harvesting.
 
 \subsubsection{Common Pool Resource}
 
@@ -409,7 +430,7 @@ It was initially decided to use a global service. It would perform most of the l
 
 At this stage, it would seem a participant time service would be more appropriate, since participant services can communicate directly with agents. However, another key functionality of the time service is the publishing of new events, both for the end of years and sessions, which trigger key monitoring, sanctioning, reporting, and architectural actions essential to the managed nature of the Kyoto Protocol. Unfortunately, implementation is not in place within Presage2 for participant services to generate (or interact with) the EventBus class, the object essential to publishing or receiving events.
 
-With these restrictions in mind, the time service was subdivided into two separate services.   The participant service communicates with agents and relays information regarding the current year and session, among other minor time-related information gathering tasks. The global service is the backbone of the time service, generating new year and session events for the monitoring and targeting services to hook onto. It also carries out calculations to derive the current year and session from the discrete simulation time and communicates this information to the participant service.
+With these restrictions in mind, the time service was subdivided into two separate services.   The participant service communicates with agents and relays information regarding the current year and session, among other minor time-related information gathering tasks. The global service is the backbone of the time service, generating new year and session events for the monitoring and targeting services to hook onto. It also carries out calculations to derive the current year and session from the discrete simulation time and communicates this information to the participant service.
 
 Both classes extend from Presage2’s predefined EnvironmentService class, and use Google’s Guice injection systems for initialization and, in the global service’s case, to register with the EventBus.
 
