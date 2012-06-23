@@ -352,13 +352,47 @@ With the understanding that uncontrolled access to a CPR will lead to inefficien
 
 \subparagraph{Carbon Absorption}
 
+The implementation of carbon absorption is very similar to that of carbon reduction investment. Here, the cost of forestation is inversely proportional to the percentage of area that is unoccupied with respect to entire land area of a country:
+
+\begin{center}
+Occupied Area = 1 - Arable Land Area / Land Area
+\end{center}
+
+The cost of this action is calculated in the same way as for carbon reduction, with the only difference being the constant values for a and b. Additionally we also now need to calculate the area occupied by newly planted trees. This is done by using a constant specifying how much forest area is needed to absorb single unit of carbon, which is then multiplied by the amount of carbon absorption done.
+
 \subparagraph{Absorption cost estimation}
 
+Again, the implementation is the same as in the case of carbon reduction. There is only one difference, which causes a slight problem. Binary search requires lower and upper bound, and, potentially, carbon absorption can be as high as possible (providing a country has sufficient land and funds). Hence, we needed to use some upper bound to allow using binary search algorithm.
+
+Even though a country can invest in carbon absorption as much as it wants, it does not make much sense for it to exceed carbon output, and shouldn’t be realistically possible providing reasonable constants for prices. Hence, the upper bound which is used here is a difference between carbon output and carbon absorption of a country, so that, for maximum investment, the function will return absorption change which forces actual emissions to atmosphere to 0.
+
+Still, this will produce false results where investment is high enough to potentially increase carbon absorption beyond carbon output. Again, this is just an additional function for countries to make writing strategies easier and make them more interesting. Since there is no way around it, it was decided to allow this potential inaccuracy.
+
 \paragraph{Energy handlers}
+
+Each country in our simulation has the ability to influence its economy by investing or reducing its carbon industry. This functionality is provided to each participant through an instance of the energy handler. Unlike the carbon handlers, the price of a unit of investment in your carbon industry is a constant defined at the start of the simulation. In addition, there is no cap on the amount a country is allowed to develop its industry. 
+
+The cost of an investment for a given desired growth can be modelled by the following linear function:
+
+\begin{center}
+Cost = Growth * Price of Carbon Investment
+\end{center}
+
+Similarly, each participant can also use the handler to query how much economic growth can be achieved for a given cost:
+
+\begin{center}
+Growth = Cost / Price of Carbon Investment
+\end{center}
+
+Using these two functions, participants can make an informed decision on whether to invest in their industries or decide to reduce it. A country can increase its \textsc{gdp} by building factories which in turn will give them more money to spend in the following year. However, its carbon emissions will also increase as a result.
+
+On the other hand, a country can decide to close down factories. This is a cost free method of reducing carbon emissions, though it also leads to a contraction of its economy and \textsc{gdp}. 
 
 \paragraph{Carbon reporting}
 
 \paragraph{Joining \& Leaving Kyoto}
+
+In our simulation platform, we allow countries to leave and join the Protocol. In order to replicate the Kyoto country categories, it was decided to offer participants three distinct levels of subscription to the simulation using Java enumerated states. Each of these give access to a different set of possible actions as described previously. Using this functionality, we can emulate real world scenarios such as Canada leaving the Protocol.
 
 \subsection{Protocols}
 
@@ -376,7 +410,25 @@ With the understanding that uncontrolled access to a CPR will lead to inefficien
 
 \subsubsection{Time Service}
 
+The time service is an environment service, extending Presage2’s existing environment interaction classes and development framework. It allows for coordination of time-based events and synchronises various features within our Kyoto Protocol simulation. Although Presage2 does have existing objects (SimTime) which can be used to attain simulation time, this is an absolute value in discrete logical time since the beginning of the simulation. It therefore does not take into consideration the variety of chronological distinctions the Kyoto Protocol requires, such as subdivisions into years and sessions.
+
+It was initially decided to use a global service. It would perform most of the logic integral to coordinating time-driven activities, and would be layered on top of Presage2’s integrated SimTime object. However, it is necessary for agents to be able to query for information regarding the current year and session in order to make important strategic and behavioral decisions. Presage2 enforces that agents (participants) are unable to communicate directly with global services. While agents can act on the environment and affect services, performing the reverse is somewhat more complex.
+
+At this stage, it would seem a participant time service would be more appropriate, since participant services can communicate directly with agents. However, another key functionality of the time service is the publishing of new events, both for the end of years and sessions, which trigger key monitoring, sanctioning, reporting, and architectural actions essential to the managed nature of the Kyoto Protocol. Unfortunately, implementation is not in place within Presage2 for participant services to generate (or interact with) the EventBus class, the object essential to publishing or receiving events.
+
+With these restrictions in mind, the time service was subdivided into two separate services.   The participant service communicates with agents and relays information regarding the current year and session, among other minor time-related information gathering tasks. The global service is the backbone of the time service, generating new year and session events for the monitoring and targeting services to hook onto. It also carries out calculations to derive the current year and session from the discrete simulation time and communicates this information to the participant service.
+
+Both classes extend from Presage2’s predefined EnvironmentService class, and use Google’s Guice injection systems for initialization and, in the global service’s case, to register with the EventBus.
+
 \subsubsection{Monitor}
+
+The monitor’s purpose is to regularly check whether countries are meeting their targets and randomly check for false carbon emission reports. If either case is true, a scaling sanction is applied to the country.
+
+We were initially unsure whether the monitor should be an independent agent or an environment service. We settled on making it a service, so that it could listen to an event that would trigger the monitoring as agent are unable to do so.
+
+When countries are initialised they subscribe to the monitor either as Annex I or Non Annex I. Although only Annex I countries are monitored, the Non-Annex I countries list was required to fix an issue with events at the end of a year happening in the right order. Indeed, countries were calling for their targets for the next year to be updated before the monitor could compare the results for the previous year against its previous targets. This was fixed by updating targets after the monitoring function in the Monitor service.
+
+Every year the monitor charges the Annex I countries a tax, which is used to perform the monitoring action on randomly selected countries. If the monitor runs out of money, it cannot monitor and countries are free to behave without fear of sanction (although this information is hidden).
 
 \subsubsection{Carbon Target}
 
@@ -387,6 +439,37 @@ With the understanding that uncontrolled access to a CPR will lead to inefficien
 % Got bored writing section titles here, just follow the standard set above%
 
 \subsection{Kyoto \textsc{ui}}
+
+\subsubsection{Overview}
+
+The Kyoto \textsc{ui} is a web interface designed for instantiating and editing Presage 2 simulations. Web technologies used include an Apache web server, \textsc{php}, \textsc{html} and Javascript. Combined with a few additional libraries, these technologies provide the functionality required to display rich pages which allow for good visual representation and easy editing of data.
+
+\subsubsection{Database Implementation}
+
+The mongo database is interfaced using an \textsc{odm} (Object Document Mapper) library called mongorecord. This wraps interfaces for querying and writing the collections in the database with \textsc{php} classes which can be instantiated and used throughout the project.
+
+\subsubsection{Simulation Initialisation Data Import and Export}
+
+In order for any simulation to have a starting point, data must be imported containing information such as how long the simulation should run for and the data is required to set up each of the agents. Presage 2 has a command line interface which can be used to create simulations in the database and add parameters to them. The structure of these simulations in the database was used as a framework to import \textsc{csv} files of data to create simulations in the same format as generated by the Presage 2 \textsc{cli}.
+
+\subsubsection{\textsc{csv} Import and Export Functionality}
+
+To get data in and out of the system \textsc{csv} (Comma Separated Value) files are used. This is a convenient method of transferring data as the \textsc{csv} file can be opened and edited in spreadsheet software such as Microsoft Excel. Data collected on countries of the world is inserted into the simulations, as are parameters from ‘default’ \textsc{csv} files. Once these are in the database, the \textsc{ui} can copy and edit them. Simulations can then be exported as a backup or to transfer them to another database. This functionality underpins the whole simulation by providing an easy way to get a huge amount of data in and out of the system quickly, easily and reliably.
+
+\subsubsection{Simulation Editor \textsc{ui}}
+
+Once data has been imported from the \textsc{csv} file it may be necessary to make new simulations by changing parameters etc. This is one of the main tasks of the web \textsc{ui}, to make this editing visually comprehensive and easier than manually editing the \textsc{csv} file or the database entry.
+
+\subsubsection{Agent (Country) Data}
+
+Most agents in the simulation are countries and in order for the simulation to be as realistic as possible these are modelled on real countries with parameters describing land mass etc. stored in the database. It is useful to edit some of these parameters such as the percentage of land mass available for green development to investigate what happens in a simulation given agents with different parameters. In the \textsc{ui} there is a page specifically for editing countries which displays a clickable map of the world with a dropdown menu for country selection. This way all countries within a single simulation can be displayed as a bunch of editable parameters.
+
+% UI IMAGE
+
+The simulation overview page displays a world map using colour to indicate the values of a selected parameter for each country (default is arable land area percentage). There is a drop down menu (called Map View) which allows changing of the parameters displayed on the map. Below this is a table displaying a detailed output of all the simulation data from the database. This page also links to the \textsc{csv} export feature, copy feature, edit simulation page and a dropdown is present to allow editing of all the countries within the simulation.
+
+\subsubsection{Simulation Results}
+
 \bibliography{references}{}
 \bibliographystyle{unsrt}
 
