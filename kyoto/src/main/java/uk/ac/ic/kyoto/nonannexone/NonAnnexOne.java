@@ -5,6 +5,7 @@ import uk.ac.ic.kyoto.countries.GameConst;
 import uk.ac.ic.kyoto.countries.Offer;
 import uk.ac.ic.kyoto.countries.OfferMessage;
 import uk.ac.ic.kyoto.trade.InvestmentType;
+import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.imperial.presage2.core.event.EventListener;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.network.Message;
@@ -59,14 +60,18 @@ public class NonAnnexOne extends AbstractCountry {
 							.getActiveConversationMembers()
 								.contains(m.getFrom())){
 						try {
+							if (o.getOfferType().equals(TradeType.INVEST))
+							{
 							this.tradeProtocol.offer(
 									m.getFrom(), 
 									o.getOfferQuantity(), 
 									o);
-						} catch (FSMException e) {
+							}
+							} catch (FSMException e) {
 							logger.warn(e);
 						}
 					}
+					
 				}catch(ClassCastException e){
 					logger.warn("Class cast exception");
 					logger.warn(e);
