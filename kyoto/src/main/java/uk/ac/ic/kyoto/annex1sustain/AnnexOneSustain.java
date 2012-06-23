@@ -234,16 +234,7 @@ public class AnnexOneSustain extends AbstractCountry {
 		initialInvestments();
 		updateExpectedSales();
 		resetYearlyTargets();
-		
-		if (isKyotoMember() == KyotoMember.ANNEXONE) {
-			if (Math.round(surplusCarbon) < 0) {
-				leaveKyoto();
-				logger.info(name + ": Leaving Kyoto, my target is below my emissions");
-			}
-			else {
-				logger.info(name + ": Staying in Kyoto, my target is above my emissions");
-			}
-		}
+		decideOnKyoto();
 	}
 	
 	protected void initialInvestments() {
@@ -329,6 +320,38 @@ public class AnnexOneSustain extends AbstractCountry {
 		surplusCarbonTarget = surplusCarbon;
 	}
 	
+	protected void decideOnKyoto() {
+		try {
+			if (isKyotoMember() == KyotoMember.ANNEXONE) {
+				if (Math.round(surplusCarbon) < 0) {
+					double necessaryReduction = (-surplusCarbon);
+					double reductionCost = carbonReductionHandler.getInvestmentRequired(necessaryReduction);
+					boolean reductionPossible = isReductionPossible(necessaryReduction, 0);
+					double absorptionCost = carbonAbsorptionHandler.getInvestmentRequired(necessaryReduction);
+					boolean absorptionPossible = isAbsorptionPossible(necessaryReduction, 0);
+					
+					if ((reductionCost < absorptionCost || !absorptionPossible) && reductionPossible) {
+						carbonReductionHandler.investInCarbonReduction(necessaryReduction);
+						logger.info(name + ": Reduced carbon by " + (necessaryReduction) + " to remain in Kyoto");
+					}
+					else if (absorptionPossible) {
+						carbonAbsorptionHandler.investInCarbonAbsorption(necessaryReduction);
+						logger.info(name + ": Absorbed carbon by " + (necessaryReduction) + " to remain in Kyoto");
+					}
+					else {
+						leaveKyoto();
+						logger.info(name + ": Leaving Kyoto, my target is below my emissions and can't do anything about it");
+					}
+				}
+				else {
+					logger.info(name + ": Staying in Kyoto, my target is above my emissions");
+				}
+			}
+		}
+		catch (Exception e) {
+			logger.warn(name + ": Problem with deciding whether to stay in Kyoto");
+		}
+	}
 	
 	//================================================================================
     // Trade decisions
