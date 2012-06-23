@@ -29,7 +29,7 @@ public class MarketData {
 
 		for (int i = 0; i < TRADE_DATA_TICKS; i++) {
 			buyArray[i] = new BuyStruct(0, 0, 0);
-			sellArray[i] = new SellStruct(9999999, 9999999, 9999999);
+			sellArray[i] = new SellStruct(999999999, 999999999, 999999999);
 		}
 	}
 
@@ -135,13 +135,13 @@ public class MarketData {
 	 * The price WE can sell at. Calculated depending on what others want to buy
 	 * at. The higher the better.
 	 */
-	private double sellingPrice = Double.MAX_VALUE / 1000000000000.0;
+	private double sellingPrice = 0;
 
 	/**
 	 * The price WE can buy at. Calculated depending on what other want to sell
 	 * at. The lower the better.
 	 */
-	private double buyingPrice = 0;
+	private double buyingPrice = 10000000000000.0;
 
 	/**
 	 * Calculate price WE can sell at, according to what others want to buy at.

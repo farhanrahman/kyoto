@@ -55,9 +55,9 @@ public class AnnexOneReduce extends AbstractCountry {
 	private double buyCarbonQuantity = 0;
 
 	/**
-	 * Average cost of each carbon credit we want to buy
+	 * Average cost of each carbon credit we CAN buy at
 	 */
-	private double buyCarbonUnitPrice = 0;
+	private double buyCarbonUnitPrice = 1000000000000.0;
 
 	/**
 	 * Amount of carbon we want to sell
@@ -65,9 +65,9 @@ public class AnnexOneReduce extends AbstractCountry {
 	private double sellCarbonQuantity = 0;
 
 	/**
-	 * Average cost of the carbon we want to sell
+	 * Average cost of the carbon we CAN sell at
 	 */
-	private double sellCarbonUnitPrice = 1000000000;
+	private double sellCarbonUnitPrice = 0;
 
 	@Override
 	protected void behaviour() {
@@ -102,9 +102,11 @@ public class AnnexOneReduce extends AbstractCountry {
 		 * Now, send out buy and sell offers for the tick
 		 */
 		if (buyCarbonQuantity > 100) {
-			broadcastSellOffer(buyCarbonQuantity / 2, buyCarbonUnitPrice);
+			logger.info(getName() + " is sending out a buy offer. Quantity = " + buyCarbonQuantity/2 + ", Unit Price = " + buyCarbonUnitPrice);
+			broadcastBuyOffer(buyCarbonQuantity / 2, buyCarbonUnitPrice);
 		} else if (sellCarbonQuantity > 100) {
-			broadcastBuyOffer(sellCarbonQuantity / 2, sellCarbonUnitPrice);
+			logger.info(getName() + " is sending out a sell offer. Quantity = " + sellCarbonQuantity/2 + ", Unit Price = " + sellCarbonUnitPrice);
+			broadcastSellOffer(sellCarbonQuantity / 2, sellCarbonUnitPrice);
 		}
 	}
 
