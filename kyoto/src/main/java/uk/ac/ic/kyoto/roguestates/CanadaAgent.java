@@ -66,18 +66,18 @@ public class CanadaAgent extends AbstractCountry {
 	 * @return
 	 *********************************************************/
  
-		//FossilPrices price = new FossilPrices();
+		FossilPrices price = new FossilPrices(null);
 		
-	
 		/*Function to check oil prices to ramp or reduce production  */
-		/*boolean check_oil_prices(long year){
+		
+		boolean check_oil_prices(long year){
 			if(((price.getOilPrice(year)) > 100)){
 				System.out.print("We can reduce production");
 				return true;
 			}
 			else return false;
 			}
-		*/
+		
 		
 	/*Emisions target to be checked against to gauge performance  */			
 	public double SetEmissionsTarget(){
@@ -220,6 +220,9 @@ public class CanadaAgent extends AbstractCountry {
 	@Override
 	protected void initialiseCountry() {
 		// TODO Auto-generated method stub
+		if(this.isKyotoMember()){
+			this.check_industry();
+		}
 		
 	}
 
