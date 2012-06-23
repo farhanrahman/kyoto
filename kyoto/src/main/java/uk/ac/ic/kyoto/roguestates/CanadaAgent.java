@@ -9,7 +9,6 @@ import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
 import uk.ac.ic.kyoto.trade.InvestmentType;
 import uk.ac.ic.kyoto.services.FossilPrices;
-import uk.ac.ic.kyoto.roguestates.USAgent;
 import uk.ac.ic.kyoto.countries.AbstractCountry.KyotoMember;
 import uk.ac.ic.kyoto.trade.TradeType;
 import uk.ac.ic.kyoto.countries.OfferMessage;
@@ -158,8 +157,8 @@ public class CanadaAgent extends AbstractCountry {
 	}
 */
 	uk.ac.imperial.presage2.core.messaging.Input input;
-	@Override
-	protected void processInput() {
+	
+	protected void processInput(uk.ac.imperial.presage2.core.messaging.Input input) {
 		if(this.tradeProtocol.canHandle(input)){
 			this.tradeProtocol.handle(input);
 		}else{
@@ -179,7 +178,7 @@ public class CanadaAgent extends AbstractCountry {
 		}
 		
 		
-	};
+	}
 	
 	boolean analyse_offer(OfferMessage offerMessage){
 		//If the offer is feasible return true else false
