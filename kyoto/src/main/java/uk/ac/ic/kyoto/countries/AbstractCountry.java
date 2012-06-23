@@ -14,6 +14,7 @@ import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
 import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
 import uk.ac.ic.kyoto.exceptions.CannotJoinKyotoException;
 import uk.ac.ic.kyoto.exceptions.CannotLeaveKyotoException;
+import uk.ac.ic.kyoto.exceptions.NotEnoughLandException;
 import uk.ac.ic.kyoto.services.Economy;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
@@ -637,10 +638,15 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	protected final OfferMessage broadcastInvesteeOffer(double quantity, InvestmentType itype){
-		double unitCost;
+		double unitCost = Double.MAX_VALUE;
 		
 		if (itype.equals(InvestmentType.ABSORB)) {
-			unitCost = this.carbonAbsorptionHandler.getInvestmentRequired(quantity)/quantity;
+			try {
+				unitCost = this.carbonAbsorptionHandler.getInvestmentRequired(quantity)/quantity;
+			} catch (NotEnoughLandException e) {
+				// TODO Auto-generated catch block
+				logger.warn(e);//e.printStackTrace();
+			}
 		}else {
 			unitCost = this.carbonReductionHandler.getInvestmentRequired(quantity)/quantity;
 		}
