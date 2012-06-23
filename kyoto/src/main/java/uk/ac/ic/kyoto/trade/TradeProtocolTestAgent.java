@@ -31,21 +31,21 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 		if (this.tradeProtocol.canHandle(in)) {
 			this.tradeProtocol.handle(in);
 		}
-//		else{
-//			OfferMessage offerMessage = this.tradeProtocol.decodeInput(in);
-//			/*analyse the offer*/
-//			try {
-//				System.out.println("+++ got an offer at price " + offerMessage.getOfferUnitCost());
-//				this.tradeProtocol.respondToOffer(
-//						this.tradeProtocol.extractNetworkAddress(in), 
-//						offerMessage.getOfferQuantity() * 0.66,
-//						offerMessage);
-//			} catch (IllegalArgumentException e1) {
-//				logger.warn(e1);
-//			} catch (FSMException e1) {
-//				logger.warn(e1);
-//			}
-//		}
+		else{
+			OfferMessage offerMessage = this.tradeProtocol.decodeInput(in);
+			/*analyse the offer*/
+			try {
+				System.out.println("+++ got an offer at price " + offerMessage.getOfferUnitCost());
+				this.tradeProtocol.respondToOffer(
+						this.tradeProtocol.extractNetworkAddress(in), 
+						offerMessage.getOfferQuantity() * 0.66,
+						offerMessage);
+			} catch (IllegalArgumentException e1) {
+				logger.warn(e1);
+			} catch (FSMException e1) {
+				logger.warn(e1);
+			}
+		}
 	}
 	
 
