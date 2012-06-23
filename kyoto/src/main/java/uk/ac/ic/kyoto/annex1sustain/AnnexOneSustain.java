@@ -342,7 +342,7 @@ public class AnnexOneSustain extends AbstractCountry {
 						logger.info(name + ": Absorbed carbon by " + (necessaryReduction) + " to remain in Kyoto");
 					}
 					else {
-						leaveKyoto();
+						//leaveKyoto();
 						logger.info(name + ": Leaving Kyoto, my target is below my emissions and can't do anything about it");
 					}
 				}
@@ -355,6 +355,13 @@ public class AnnexOneSustain extends AbstractCountry {
 			logger.warn(name + ": Problem with deciding whether to stay in Kyoto");
 		}
 	}
+	
+//	@Override
+//	protected double getReportedCarbonOutput() {
+//		// If lest year of the session, and not enough emissions, try to cheat
+//		
+//		return carbonOutput;
+//	}
 	
 	//================================================================================
     // Trade decisions
