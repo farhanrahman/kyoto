@@ -58,13 +58,13 @@ public class AnnexOneSustain extends AbstractCountry {
 		this.expectedSales = Constants.EXPECTED_SALES_INITIAL;
 		this.carbonToReduce = 0;
 		this.carbonToAbsorb = 0;
-		this.tradeSemaphore = new Semaphore(1);
 		setKyotoMemberLevel(KyotoMember.ANNEXONE);
 	}
 	
 	@Override
 	protected void initialiseCountry() {
 		this.surplusCarbonPrice = carbonReductionHandler.getInvestmentRequired(1);
+		this.tradeSemaphore = new Semaphore(1);
 	}
 	
 	
@@ -103,8 +103,9 @@ public class AnnexOneSustain extends AbstractCountry {
 					// Check if we have enough surplus carbon to cover the transaction
 					if (quantityOffered < surplusCarbon) {
 						double surplusSaleMargin = calculateSurplusSaleMargin(quantityOffered, priceOffered);
+						
 						// Invest if profitable
-						if (surplusSaleMargin > 0) {
+						if (surplusSaleMargin >= 0) {
 							if (tradeSemaphore.tryAcquire()) {
 								this.tradeProtocol.respondToOffer(address, quantityOffered, offer);
 								logger.info(name + ": Responded to offer of " + quantityOffered + " @ " + priceOffered);
@@ -187,7 +188,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			}
 			else if (Math.round(carbonToAbsorb) > 0) {
 				carbonAbsorptionHandler.investInCarbonAbsorption(carbonToAbsorb);
-				logger.info(name + ": Trade successful, absorbing carbon by " + carbonToReduce);
+				logger.info(name + ": Trade successful, absorbing carbon by " + carbonToAbsorb);
 			}
 			else {
 				logger.info(name + ": Trade successful");
@@ -232,26 +233,25 @@ public class AnnexOneSustain extends AbstractCountry {
 		initialInvestments();
 		updateExpectedSales();
 		resetYearlyTargets();
+		
+		if (Math.round(surplusCarbon) < 0) {
+			leaveKyoto();
+			logger.info(name + ": Leaving Kyoto, my target is below my emissions");
+		}
+		else {
+			logger.info(name + ": Staying in Kyoto, my target is above my emissions");
+		}
+		
+		logger.info(name + ": Emission target: " + this.getEmissionsTarget());
+		logger.info(name + ": Energy Output: " + this.getEnergyOutput());
+		logger.info(name + ": Carbon Output: " + this.getCarbonOutput());
+		logger.info(name + ": Carbon Absorption: " + this.getCarbonAbsorption());
+		logger.info(name + ": Carbon Offset: " + this.getCarbonOffset());
+		logger.info(name + ": Surplus Carbon: " + surplusCarbon);
 	}
 	
 	@Override
 	public void sessionFunction() {
-		try {
-			double emissionIncrease = this.getEmissionsTarget() - (this.getCarbonOutput() - this.getCarbonAbsorption());
-			
-			if (timeService.getCurrentTick() != 0) {
-				if (Math.round(emissionIncrease) < 0) {
-					leaveKyoto();
-					logger.info(name + ": Leaving Kyoto, my target is below my emissions");
-				}
-				else {
-					logger.info(name + ": Staying in Kyoto, my target is above my emissions");
-				}
-			}
-		}
-		catch (Exception e) {
-			logger.warn(name + ": Problem with session function: " + e.getMessage());
-		}
 	}
 	
 	protected void initialInvestments() {
@@ -449,7 +449,7 @@ public class AnnexOneSustain extends AbstractCountry {
 		double surplusSaleMargin;
 		
 		try {
-			surplusSaleMargin = quantity * (surplusCarbonPrice - price);
+			surplusSaleMargin = quantity * (price - surplusCarbonPrice);
 		}
 		catch (Exception e) {
 			logger.warn(name + ": Problem with assessing profitability of sale: " + e.getMessage());
