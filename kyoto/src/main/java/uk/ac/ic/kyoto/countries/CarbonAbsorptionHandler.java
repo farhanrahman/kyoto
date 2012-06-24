@@ -205,5 +205,11 @@ public final class CarbonAbsorptionHandler {
 		
 		return occupiedAreaMeasure;
 	}
+
+	public double getCarbonOutputChange(double absorptionInvestmentNeeded,
+			double carbonOutput, double energyOutput) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 	
 }
