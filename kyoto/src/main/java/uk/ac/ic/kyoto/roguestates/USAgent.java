@@ -23,7 +23,6 @@ public class USAgent extends AbstractCountry {
 	private static final int 		Average1 = 4;
 	private static final double  DecreaseIntensityByPercent = 0.99;
 	private static final double  IncreaseGDPByPercent = 1.01;
-	private static final double 	EnergyIncreaseStep = 0.001; // increase by one percent until target reached
 	
 	private boolean DemocratElected; 			// chosen at random on class instantiation
 												// Can be positive or negative
@@ -59,9 +58,7 @@ public class USAgent extends AbstractCountry {
 	private boolean debug = true;
 	private static boolean DecrementAttitude = true;
 	
-	private boolean EnoughCash = true;
-	private boolean EnoughLand = true;
-	private boolean EnoughCarbon = true;
+
 	
 	@Override
 	/*
@@ -72,134 +69,30 @@ public class USAgent extends AbstractCountry {
 	public void behaviour() {
 		logger.info("behaviour: Entering");
 
-		double IncreaseEnergyByAmount = 0;
-		double InvestmentNeeded = 0;
-		double InvestAmount = 0;
-
 		//if(IsElectionYear(timeService.getCurrentYear()+1)) { // if the following year is an election year. 
 			
-			if(IsLastTick()) { // if its the last tick of the year
-				// Up until this point only CDM or trading will have taken place. 
+		if(IsLastTick()) { // if its the last tick of the year
+			
+			// Up until this point only CDM or trading will have taken place. 
 
-				while( this.CalculateProjectedGDP() < this.getGDPTarget()// keep investing until target reached
-						&& EnoughCash ) {	// will not enter if cost for next 
-					// step is more than we have available		
-					// TODO catch exceptions
-					IncreaseEnergyByAmount = this.getEnergyOutput()*USAgent.EnergyIncreaseStep;	// will change after each step is completed			
-					if(debug) logger.info("behaviour: IncreaseEnergyByAmount = " + IncreaseEnergyByAmount);
-					
-					InvestmentNeeded = energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(IncreaseEnergyByAmount);				
-					if(debug) logger.info("behaviour: InvestmentNeeded = " + InvestmentNeeded);
-					
-					InvestAmount = CheckInvestmentAmount(InvestmentNeeded); 
-					
-					if(debug) logger.info("behaviour: InvestAmount = " + InvestAmount);
-					
-					try {
-						energyUsageHandler.investInCarbonIndustry(InvestAmount);
-					} catch (NotEnoughCashException e) {
-						EnoughCash = false;
-						// TODO Make EnoughCash etc global fields so that once set agent won't keep re-attempting
-						e.printStackTrace();
-					}
-					// 
-				}
-				
-				double RequiredCarbonOutputDecrease = 0;
-				double AbsorptionInvestmentNeeded = 0;
-				double ReductionInvestmentNeeded = 0;
-				double ReduceBy = 0;				
-				
-				while((this.CalculateCurrentIntensityRatio() > this.CalculateProjectedIntensityRatio()) // while target not reached 
-				&& EnoughCash && EnoughLand && EnoughCarbon) { // booleans set to false if corresponding exception thrown
-					
-					// HOW MUCH CASH DO WE HAVE
-					double AvailableCash = this.getAvailableToSpend();
-					if(debug) logger.info("behaviour: AvailableCash = " + AvailableCash);
-					
-					// WHAT REDUCTION DO WE NEED TO MEET TARGET
-					double CarbonOutput = this.getCarbonOutput();
-					if(debug) logger.info("behaviour: CarbonOutput = " + CarbonOutput);
-					double TargetCarbonOutput = this.CalculateTargetCarbonOutput();
-					if(debug) logger.info("behaviour: TargetCarbonOutput = " + TargetCarbonOutput);					
-					RequiredCarbonOutputDecrease = TargetCarbonOutput-CarbonOutput;
-					if(debug) logger.info("behaviour: RequiredCarbonOutputDecrease = " + RequiredCarbonOutputDecrease);
-					
-					// IF WE SPENT ALL MONEY, WHAT ABSORPTION WOULD BE POSSIBLE
-					double MaxAbsorptionPossible = 0;
-					try {
-						MaxAbsorptionPossible = carbonAbsorptionHandler.getCarbonAbsorptionChange(AvailableCash);
-					} catch (NotEnoughLandException e3) {
-						// TODO Auto-generated catch block
-						e3.printStackTrace();
-					}
-					if(debug) logger.info("behaviour: MaxAbsorptionPossible = " + MaxAbsorptionPossible);					
-					
-					// IF WE SPENT ALL MONEY, WHAT REDUCTION WOULD BE POSSIBLE
-					double MaxReductionPossible = 0;
-					MaxReductionPossible = carbonReductionHandler.getCarbonOutputChange(AvailableCash, this.getCarbonOutput(), this.getEnergyOutput());
-					if(debug) logger.info("behaviour: MaxReductionPossible = " + MaxAbsorptionPossible);
-					
-					// SELECT THE MINIMUM
-					double TryDecreaseAmount = Math.min(RequiredCarbonOutputDecrease, Math.max(MaxAbsorptionPossible, MaxReductionPossible));
-
-					// COST OF ABSORPTION FOR THE BEST OF THE TWO ABOVE
-					try {
-						AbsorptionInvestmentNeeded = carbonAbsorptionHandler.getInvestmentRequired(TryDecreaseAmount);
-					} catch (NotEnoughLandException e2) {
-						// TODO Auto-generated catch block
-						//EnoughLand = false;
-						e2.printStackTrace();
-					}											
-					if(debug) logger.info("behaviour: AbsorptionInvestmentNeeded = " + AbsorptionInvestmentNeeded);
-					
-					/*
-					 * END OF ABSORPTION CALCULATIONS
-					 */
-										
-					// 
-					
-					// TO MEET TARGETS CARBON REDUCTION INVESTMENT NEEDED
-					ReductionInvestmentNeeded = carbonReductionHandler.getInvestmentRequired(RequiredCarbonOutputDecrease);
-					if(debug) logger.info("behaviour: ReductionInvestmentNeeded = " + ReductionInvestmentNeeded);
-					
-					// 
-					if(AbsorptionInvestmentNeeded < ReductionInvestmentNeeded) {
-						InvestAmount = CheckInvestmentAmount(AbsorptionInvestmentNeeded);
-						ReduceBy = carbonReductionHandler.getCarbonOutputChange(InvestAmount, this.getCarbonOutput(), this.getEnergyOutput());
-						try {
-							carbonAbsorptionHandler.investInCarbonAbsorption(ReduceBy);
-						} catch (NotEnoughLandException e) {
-							EnoughLand = false;
-							e.printStackTrace();
-						} catch (NotEnoughCashException e) {
-							EnoughCash = false;
-							e.printStackTrace();
-						}
-					}
-					else {
-						InvestAmount = CheckInvestmentAmount(ReductionInvestmentNeeded);
-						ReduceBy = carbonReductionHandler.getCarbonOutputChange(InvestAmount, this.getCarbonOutput(), this.getEnergyOutput());
-						try {
-							carbonReductionHandler.investInCarbonReduction(ReduceBy);
-						} catch (NotEnoughCarbonOutputException e) {
-							EnoughCarbon = false;
-							e.printStackTrace();
-						} catch (NotEnoughCashException e) {
-							EnoughCash = false;
-							e.printStackTrace();
-						}
-					}
-				}
-				/*
-				// if the party might lose even after meeting targets
-				if(CalculateGDPRateScore(USAgent.ElectionRandomAdjust/2) < CalculateIntensityScore(USAgent.ElectionRandomAdjust/2)) {
-					// if under the current situation the republicans would lose.
-					// invest whatever the public want
-				}	
-				*/			
+			if(isDemocratElected()) {
+				DoCarbonReduction();
+				DoEnergyInvestments();					
 			}
-		//}
+			else {
+				DoEnergyInvestments();
+				DoCarbonReduction();					
+			}
+		}
+			
+			/*
+			// if the party might lose even after meeting targets
+			if(CalculateGDPRateScore(USAgent.ElectionRandomAdjust/2) < CalculateIntensityScore(USAgent.ElectionRandomAdjust/2)) {
+				// if under the current situation the republicans would lose.
+				// invest whatever the public want
+			}	
+			*/			
+			
 			
 		if (isKyotoMember() == KyotoMember.ANNEXONE) {
 			if (getCarbonOutput() - getCarbonOffset() - getCarbonAbsorption() > getEmissionsTarget()) {
@@ -246,6 +139,131 @@ public class USAgent extends AbstractCountry {
 		logger.info("behaviour: Returning");
 	}
 	
+	private void DoEnergyInvestments() {
+		
+		double InvestmentNeeded = 0;
+		double InvestAmount = 0;
+		double RequiredCarbonOutputIncrease = 0;
+		
+		boolean EnergyEnoughCash = true;
+		
+		while( this.getCarbonOutput() < this.CalculateTargetCarbonOutput() && EnergyEnoughCash ) {
+		
+			// HOW MUCH CASH DO WE HAVE
+			double AvailableCash = this.getAvailableToSpend();
+			if(debug) logger.info("behaviour: AvailableCash = " + AvailableCash);
+			
+			// WHAT INCREASE DO WE NEED TO MEET TARGET
+			double CarbonOutput = this.getCarbonOutput();
+			if(debug) logger.info("behaviour: CarbonOutput = " + CarbonOutput);
+			
+			double TargetCarbonOutput = this.CalculateTargetCarbonOutput();
+			if(debug) logger.info("behaviour: TargetCarbonOutput = " + TargetCarbonOutput);					
+			
+			RequiredCarbonOutputIncrease = TargetCarbonOutput-CarbonOutput;
+			if(debug) logger.info("behaviour: RequiredCarbonOutputDecrease = " + RequiredCarbonOutputIncrease);
+			
+			double MaximumIncreasePossible = energyUsageHandler.calculateCarbonIndustryGrowth(AvailableCash);
+			
+			InvestmentNeeded = energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(Math.min(RequiredCarbonOutputIncrease, MaximumIncreasePossible));				
+			if(debug) logger.info("behaviour: InvestmentNeeded = " + InvestmentNeeded);
+			
+			if(debug) logger.info("behaviour: InvestmentNeeded = " + InvestmentNeeded);
+			
+			try {
+				energyUsageHandler.investInCarbonIndustry(InvestAmount);
+			} catch (NotEnoughCashException e) {
+				EnergyEnoughCash = false;
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private void DoCarbonReduction() {
+		double RequiredCarbonOutputDecrease = 0;
+		double AbsorptionInvestmentNeeded = 0;
+		double ReductionInvestmentNeeded = 0;
+		double ReduceBy = 0;	
+		boolean CarbonEnoughCash = true;
+		boolean EnoughLand = true;
+		boolean EnoughCarbon = true;
+		
+		while((this.CalculateCurrentIntensityRatio() > this.CalculateProjectedIntensityRatio()) // while target not reached 
+		&& CarbonEnoughCash && EnoughLand && EnoughCarbon) { // booleans set to false if corresponding exception thrown
+			
+			// HOW MUCH CASH DO WE HAVE
+			double AvailableCash = this.getAvailableToSpend();
+			if(debug) logger.info("behaviour: AvailableCash = " + AvailableCash);
+			
+			// WHAT REDUCTION DO WE NEED TO MEET TARGET
+			double CarbonOutput = this.getCarbonOutput();
+			if(debug) logger.info("behaviour: CarbonOutput = " + CarbonOutput);
+			double TargetCarbonOutput = this.CalculateTargetCarbonOutput();
+			if(debug) logger.info("behaviour: TargetCarbonOutput = " + TargetCarbonOutput);					
+			RequiredCarbonOutputDecrease = TargetCarbonOutput-CarbonOutput;
+			if(debug) logger.info("behaviour: RequiredCarbonOutputDecrease = " + RequiredCarbonOutputDecrease);
+			
+			// IF WE SPENT ALL MONEY, WHAT ABSORPTION WOULD BE POSSIBLE
+			double MaxAbsorptionPossible = 0;
+			try {
+				MaxAbsorptionPossible = carbonAbsorptionHandler.getCarbonAbsorptionChange(AvailableCash);
+			} catch (NotEnoughLandException e3) {
+				//EnoughLand = false;
+				e3.printStackTrace();
+			}
+			if(debug) logger.info("behaviour: MaxAbsorptionPossible = " + MaxAbsorptionPossible);					
+			
+			// IF WE SPENT ALL MONEY, WHAT REDUCTION WOULD BE POSSIBLE
+			double MaxReductionPossible = 0;
+			MaxReductionPossible = carbonReductionHandler.getCarbonOutputChange(AvailableCash, this.getCarbonOutput(), this.getEnergyOutput());
+			if(debug) logger.info("behaviour: MaxReductionPossible = " + MaxReductionPossible);
+			
+			// COST OF ABSORPTION OF THE REQUIRED AMOUNT, OR THE MAX POSSIBLE
+			try {
+				AbsorptionInvestmentNeeded = carbonAbsorptionHandler.getInvestmentRequired(Math.min(MaxAbsorptionPossible, RequiredCarbonOutputDecrease));
+			} catch (NotEnoughLandException e2) {
+				//EnoughLand = false;
+				e2.printStackTrace();
+			}											
+			if(debug) logger.info("behaviour: AbsorptionInvestmentNeeded = " + AbsorptionInvestmentNeeded);
+			
+			// COST OF ABSORPTION OF THE REQUIRED AMOUNT, OR THE MAX POSSIBLE
+			ReductionInvestmentNeeded = carbonReductionHandler.getInvestmentRequired(Math.min(MaxReductionPossible, RequiredCarbonOutputDecrease));
+			if(debug) logger.info("behaviour: ReductionInvestmentNeeded = " + ReductionInvestmentNeeded);
+			
+			// 
+			if(AbsorptionInvestmentNeeded < ReductionInvestmentNeeded) {
+				
+				//InvestAmount = CheckInvestmentAmount(AbsorptionInvestmentNeeded) -> Should no longer need this, sorted out above.
+				ReduceBy = carbonAbsorptionHandler.getCarbonOutputChange(AbsorptionInvestmentNeeded, this.getCarbonOutput(), this.getEnergyOutput());
+				
+				try {
+					carbonAbsorptionHandler.investInCarbonAbsorption(ReduceBy);
+				} catch (NotEnoughLandException e) {
+					EnoughLand = false;
+					e.printStackTrace();
+				} catch (NotEnoughCashException e) {
+					CarbonEnoughCash = false;
+					e.printStackTrace();
+				}
+			}
+			else {
+				//InvestAmount = CheckInvestmentAmount(ReductionInvestmentNeeded)  -> Should no longer need this, sorted out above.;
+				ReduceBy = carbonReductionHandler.getCarbonOutputChange(ReductionInvestmentNeeded, this.getCarbonOutput(), this.getEnergyOutput());
+				
+				try {
+					carbonReductionHandler.investInCarbonReduction(ReduceBy);
+				} catch (NotEnoughCarbonOutputException e) {
+					EnoughCarbon = false;
+					e.printStackTrace();
+				} catch (NotEnoughCashException e) {
+					CarbonEnoughCash = false;
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
 	private double getTradeFactorDifference() {
 		int quarterLength = timeService.getTicksInYear() / 4;
 		int quarter=1;
@@ -271,6 +289,8 @@ public class USAgent extends AbstractCountry {
 		return 1;
 	}
 	
+	/*
+>>>>>>> ee451a1d79db28b380ecbc899fca92703b01e91d
 	private double CheckInvestmentAmount(double investmentNeeded) {
 		double InvestAmount;
 		if(investmentNeeded > this.getAvailableToSpend()) { // check we have enough money
@@ -283,6 +303,7 @@ public class USAgent extends AbstractCountry {
 		if(debug) logger.info("CheckInvestmentAmount: InvestAmount = " + InvestAmount);
 		return(InvestAmount);
 	}
+	*/
 
 	private boolean IsLastTick() {
 		logger.info("IsLastTick: Entering");
@@ -303,7 +324,7 @@ public class USAgent extends AbstractCountry {
 		double marketStateFactor = GameConst.getStableMarketState();
 		double sum;
 		double EnergyOutput = getEnergyOutput();
-		double PreviousEnergyOutput = getPrevEnergyOutput(); // TODO what value needed to ensure working?
+		double PreviousEnergyOutput = getPrevEnergyOutput();
 		double EnergyDifference = EnergyOutput-PreviousEnergyOutput;
 		
 		if (EnergyDifference >= 0){	
@@ -343,12 +364,7 @@ public class USAgent extends AbstractCountry {
 		updateAvailableToSpend(); 
 	 */
 	public void yearlyFunction() {
-		if(debug) logger.info("yearlyFunction: Entering");
-		
-		// reset these variables each year, avoids behaviour trying to execute code that we know from previous ticks will fail.
-		EnoughCash = true;
-		EnoughLand = true;
-		EnoughCarbon = true;
+		if(debug) logger.info("yearlyFunction: Entering");		
 		
 		setPrevailingAttitude(ChangeAttitude());		
 		StoreHistoricalData();			
@@ -410,6 +426,7 @@ public class USAgent extends AbstractCountry {
 	//
 	
 	public void sessionFunction() {
+
 		int currentYear = timeService.getCurrentYear();
 		int yearsInSession = timeService.getYearsInSession();
 		if (currentYear >= yearsInSession && isKyotoMember() == KyotoMember.ROGUE) {
@@ -481,9 +498,9 @@ public class USAgent extends AbstractCountry {
 	
 	private double CalculateGDPRateScore(double ElectionAdjust) {
 		double AverageGDPRate = this.getAverageGDPRate(timeService.getCurrentYear());
-		double CurrentGDPRateTarget = this.getGDPRateTarget();
-		// TODO change to average RateTarget
-		double GDPRateScore = (AverageGDPRate/CurrentGDPRateTarget);
+		double CurrentGDPRate = this.getGDPRate();
+
+		double GDPRateScore = (AverageGDPRate/CurrentGDPRate);
 		if(debug) logger.info("CalculateGDPRateScore: GDPRateScore = " + GDPRateScore);
 		
 		int 	CurrentAttitude = this.getPrevailingAttitude();
@@ -598,11 +615,13 @@ public class USAgent extends AbstractCountry {
 		setIntensityTarget(value);
 	}
 	
+	/*
 	private void CalculateAndSetNewGDPRateTarget(double Multiplier) {
 		double value = AverageGDPRateMap.get(timeService.getCurrentYear())*Multiplier;
 		if(debug) logger.info("CalculateAndSetNewGDPRateTarget: value = " + value);
 		setGDPRateTarget(value);
 	}
+	*/
 	
 	private void CalculateAndSetNewGDPTarget(double Multiplier) {
 		double value = AverageGDPMap.get(timeService.getCurrentYear())*Multiplier;

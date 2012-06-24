@@ -14,6 +14,6 @@ public final class Constants {
 	
 	// To cheat or not to cheat?
 	public static final boolean	CHEATER = false;
-	public static final int		MAX_TIMES_CAUGHT = 3;
+	public static final int		ALLOWED_TIMES_CAUGHT = 3;
 	
 }
