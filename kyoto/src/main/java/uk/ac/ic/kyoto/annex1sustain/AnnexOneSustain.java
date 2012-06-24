@@ -364,7 +364,7 @@ public class AnnexOneSustain extends AbstractCountry {
 					// If a cheater, leave Kyoto if have been caught too many times
 					else {
 						int timesCaughtCheating = this.getTimesCaughtCheating();
-						logger.info(name + "I have been caught cheating " + timesCaughtCheating + " times");
+						logger.info(name + ": I have been caught cheating " + timesCaughtCheating + " times");
 						if (timesCaughtCheating > Constants.ALLOWED_TIMES_CAUGHT) {
 							leaveKyoto();
 							logger.info(name + ": Leaving Kyoto, I have been caught cheating too many times");
@@ -388,8 +388,8 @@ public class AnnexOneSustain extends AbstractCountry {
 	protected double getReportedCarbonOutput() {
 		double realCarbonOutput = this.getCarbonOutput();
 		double requiredCarbonOutput = this.getEmissionsTarget() - this.getCarbonAbsorption() - this.getCarbonOffset();
-		// If not a cheater or within target, report true value
-		if (Constants.CHEATER == false || realCarbonOutput < requiredCarbonOutput) {
+		// If not a cheater, not in Kyoto or within target, report true value
+		if (Constants.CHEATER == false || isKyotoMember() != KyotoMember.ANNEXONE || realCarbonOutput < requiredCarbonOutput) {
 			return realCarbonOutput;
 		}
 		// Else, return value that matches the target exactly
