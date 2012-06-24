@@ -46,8 +46,8 @@ public class AnnexOneReduceTest {
 	public void testbehaviour() {
 
 		test.runSimulation();
-		test.performReduceMaintainActions();
-		test.runSimulation();
+//		test.performReduceMaintainActions();
+//		test.runSimulation();
 
 
 	}

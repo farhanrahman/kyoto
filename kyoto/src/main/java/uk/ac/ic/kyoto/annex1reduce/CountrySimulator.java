@@ -62,16 +62,17 @@ class CountrySimulator {
 		for (int i = 0; i < LOOK_AHEAD_YEARS; i++) {
 			// Cull the reduce states
 
-			// logger.info("unculledReduceSize " + i + " = "
-			// + stateList[i].reduceStates.size());
+//			logger.info("unculledReduceSize " + i + " = "
+//					+ stateList[i].reduceStates.size());
 			try {
 				stateList[i].reduceStates = cullStates(stateList[i].reduceStates);
 			} catch (Exception e) {
-				logger.warn(country.getName() + " has no possible states! Returning a default behaviour.");
+				logger.warn(country.getName()
+						+ " has either no or too many possible states! Returning a default behaviour.");
 				return DEFAULT_ACTION;
 			}
-			// logger.info("reduceSize " + i + " = "
-			// + stateList[i].reduceStates.size());
+//			logger.info("reduceSize " + i + " = "
+//					+ stateList[i].reduceStates.size());
 
 			// Branch off all unculled reduce states by performing a maintain
 			// action
@@ -81,16 +82,17 @@ class CountrySimulator {
 			}
 
 			// Cull the maintain states
-			// logger.info("unculledMaintainSize " + i + " = "
-			// + stateList[i].maintainStates.size());
+//			logger.info("unculledMaintainSize " + i + " = "
+//					+ stateList[i].maintainStates.size());
 			try {
 				stateList[i].maintainStates = cullStates(stateList[i].maintainStates);
 			} catch (Exception e) {
-				logger.warn(country.getName() + " has no possible states! Returning a default behaviour.");
+				logger.warn(country.getName()
+						+ " has either no or too many possible states! Returning a default behaviour.");
 				return DEFAULT_ACTION;
 			}
-			// logger.info("maintainSize " + i + " = "
-			// + stateList[i].maintainStates.size());
+//			logger.info("maintainSize " + i + " = "
+//					+ stateList[i].maintainStates.size());
 
 			// Branch off all unculled maintain states by performing a sell
 			// action
@@ -101,16 +103,17 @@ class CountrySimulator {
 			}
 
 			// Cull the sell states
-			// logger.info("unculledSellSize " + i + " = "
-			// + stateList[i].sellStates.size());
+//			logger.info("unculledSellSize " + i + " = "
+//					+ stateList[i].sellStates.size());
 			try {
 				stateList[i].sellStates = cullStates(stateList[i].sellStates);
 			} catch (Exception e) {
-				logger.warn(country.getName() + " has no possible states! Returning a default behaviour.");
+				logger.warn(country.getName()
+						+ " has either no or too many possible states! Returning a default behaviour.");
 				return DEFAULT_ACTION;
 			}
-			// logger.info("sellSize " + i + " = "
-			// + stateList[i].sellStates.size());
+//			logger.info("sellSize " + i + " = "
+//					+ stateList[i].sellStates.size());
 
 			// So long as we aren't in the final year
 			if (i != (LOOK_AHEAD_YEARS - 1)) {
@@ -258,8 +261,7 @@ class CountrySimulator {
 
 		if (states.size() == 0) {
 			throw new Exception("All states are invalid");
-		}
-		else if (states.size() > 2000) {
+		} else if (states.size() > 10000) {
 			throw new Exception("Too many states! Returning default behaviour");
 		}
 
@@ -612,6 +614,9 @@ class CountrySimulator {
 			int numGrains = Math.max(maxGrains - yearModifier, minGrains);
 			float grain = 100f / numGrains;
 
+			// Default state
+			new CountryState(this, new ReduceAction(1, 0, 0));
+
 			// If we actually need to reduce our carbon
 			if (this.getCarbonDifference() > 0) {
 
@@ -642,7 +647,7 @@ class CountrySimulator {
 			float investOffsetFrac;
 			float buyCreditOffsetFrac;
 
-			// Do nothing
+			// Default state
 			new CountryState(this, new MaintainAction(0, 0, 0));
 
 			// If we shut down factories last phase, it's pointless to invest in
@@ -705,7 +710,7 @@ class CountrySimulator {
 			float grain = max / numGrains;
 			float min = grain;
 
-			// Do nothing
+			// Default state
 			new CountryState(this, new SellAction(0, 0, 0));
 
 			// Ensure we don't try to sell if the sell price is 0

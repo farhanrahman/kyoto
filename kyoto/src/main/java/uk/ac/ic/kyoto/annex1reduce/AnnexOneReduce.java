@@ -322,12 +322,12 @@ public class AnnexOneReduce extends AbstractCountry {
 	public double getMarketBuyUnitPrice(int yearOffset) {
 
 		if (yearOffset != 0) {
-			return Double.MAX_VALUE / 100000000000.0;
+			return Double.MAX_VALUE / 1000000000000000000000.0;
 		}
 
 		// Return an obscenely high buying price
 		if (marketEnabled == false) {
-			return Double.MAX_VALUE / 100000000000.0;
+			return Double.MAX_VALUE / 1000000000000000000000.0;
 		}
 		return marketData.getBuyingPrice();
 	}
@@ -579,7 +579,7 @@ public class AnnexOneReduce extends AbstractCountry {
 			investments[1] = 0;
 			return 0;
 		}
-
+		
 		// Overestimate a bit
 		carbonReduction *= 1.01;
 

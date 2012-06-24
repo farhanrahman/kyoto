@@ -117,19 +117,9 @@ public class MarketData {
 			calculateBuyingPrice();
 		}
 
-		/*
-		 * If the price we can buy at is lower than the price we can sell at,
-		 * something has gone horribly wrong (as it means people are buying at a
-		 * price higher than the price things are being sold at).
-		 * 
-		 * Lets exploit these poor souls. Raise the price we can sell at to the
-		 * price we can buy at
-		 */
-
 		if (sellingPrice > buyingPrice) {
-			sellingPrice = buyingPrice;
+			buyingPrice = 1.05 * sellingPrice;
 		}
-
 	}
 
 	/**
