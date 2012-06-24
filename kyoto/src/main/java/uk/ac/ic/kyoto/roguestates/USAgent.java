@@ -83,11 +83,7 @@ public class USAgent extends AbstractCountry {
 				DoEnergyInvestments();
 				DoCarbonReduction();					
 			}
-<<<<<<< HEAD
-=======
 		}
->>>>>>> 93faa91c1781407245616f044e5df31f69b3cdd3
-			
 			/*
 			// if the party might lose even after meeting targets
 			if(CalculateGDPRateScore(USAgent.ElectionRandomAdjust/2) < CalculateIntensityScore(USAgent.ElectionRandomAdjust/2)) {
@@ -95,10 +91,7 @@ public class USAgent extends AbstractCountry {
 				// invest whatever the public want
 			}	
 			*/			
-<<<<<<< HEAD
-=======
-			
-			
+
 		if (isKyotoMember() == KyotoMember.ANNEXONE) {
 			if (getCarbonOutput() - getCarbonOffset() - getCarbonAbsorption() > getEmissionsTarget()) {
 				double totalDifferenceNeeded = getCarbonOutput() - (getCarbonOffset() + getCarbonAbsorption() + getEmissionsTarget());
@@ -140,7 +133,6 @@ public class USAgent extends AbstractCountry {
 				}
 				broadcastSellOffer(totalFreeOffset, actualInvestment / totalFreeOffset);
 			}
->>>>>>> 93faa91c1781407245616f044e5df31f69b3cdd3
 		}
 		logger.info("behaviour: Returning");
 	}
@@ -275,7 +267,6 @@ public class USAgent extends AbstractCountry {
 		}
 	}
 	
-<<<<<<< HEAD
 	/*
 =======
 	private double getTradeFactorDifference() {
