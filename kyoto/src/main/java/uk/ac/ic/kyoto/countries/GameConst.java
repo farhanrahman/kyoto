@@ -105,7 +105,7 @@ public final class GameConst {
 	private static int MINIMUM_KYOTO_MEMBERSHIP_DURATION = 10;
 	
 	public GameConst(double growths, double stables, double recs, double growthc,
-			double stablec, double recc, double monitorpercent, double sancrate, 
+			double stablec, double recc, /*double maxgdp,*/ double monitorpercent, double sancrate, 
 			double monitorprice, int yearsInSession, double targred,
 			int minJoinTime, int minKyotoMembership) {
 		GROWTH_MARKET_STATE = growths;
@@ -114,6 +114,7 @@ public final class GameConst {
 		GROWTH_MARKET_CHANCE = growthc;
 		STABLE_MARKET_CHANCE = stablec;
 		RECESSION_MARKET_CHANCE = recc;
+		//MAX_GDP_GROWTH = maxgdp;
 		MONITOR_COST_PERCENTAGE = monitorpercent;
 		SANCTION_RATE = sancrate;
 		MONITORING_PRICE = monitorprice;
