@@ -9,7 +9,7 @@
 %
 %		- \textsc{...} formats text to use small caps. This must be used for acronyms. (eg. EU ETS should be marked up as \textsc{eu ets})
 %
-%		- \texttt{...} formats text to use monospaced (ie. console like) font. This can be used to any inline references to code
+%		- \texttt{...} formats text to use monospaced (ie. console like) font. This can be used to any inline references to code�
 %
 %		- For ease of use i have added the \CO command, which can be used to correctly typeset CO2
 %
@@ -33,7 +33,7 @@
 \geometry{a4paper} % or letterpaper (US) or a5paper or....
 % \geometry{margin=2in} % for example, change the margins to 2 inches all round
 % \geometry{landscape} % set up the page for landscape
-%   read geometry.pdf for detailed page layout information
+% read geometry.pdf for detailed page layout information
 
 \usepackage{graphicx} % support the \includegraphics command and options
 
@@ -57,8 +57,8 @@
 \lfoot{}\cfoot{\thepage}\rfoot{}
 
 %%% SECTION TITLE APPEARANCE
-\usepackage{sectsty}
-\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
+%\usepackage{sectsty}
+%\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
 % (This matches ConTeXt defaults)
 
 %%% ToC (table of contents) APPEARANCE
@@ -69,17 +69,40 @@
 
 \newcommand{\CO}{\textsc{co}$_2$~}
 
-%%% END Article customizations
+%%% A couple of commands for the title page
+\usepackage{hyperref}
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+
+%%% END Article customisations
 
 %%% The "real" document content comes below...
 
 \title{Brief Article}
 \author{The Author}
 %\date{} % Activate to display a given date or no date (if empty),
-         % otherwise the current date is printed 
+% otherwise the current date is printed 
 
 \begin{document}
-\maketitle
+
+% BEGIN TITLE AND MESSAGE PAGE
+\input{./title.tex}
+\setcounter{page}{2}
+
+\newpage{}
+\thispagestyle{empty}
+
+\vspace*{100pt}
+\begin{flushright}
+	\textit{It's nice to meet you ladies. Cause we're looking for pussy!}
+\end{flushright}
+
+\newpage{}
+
+% END TITLE AND MESSAGE PAGE
+
+\tableofcontents
+
+% \maketitle
 
 \section{Introduction}
 
@@ -97,12 +120,12 @@ We found that participants did not follow the rules regarding appropriation, and
 \begin{enumerate}
 	\item Each participant is given a number of resources
 	\item Each participant must put at least half of their resources into a common pool
-	\item The resources in the pool are multiplied by a factor N (where  $N > 1$)
+	\item The resources in the pool are multiplied by a factor N (where $N > 1$)
 	\item Each participant may appropriate a given amount
-	\item  Participants may choose to monitor others, at the cost of 1 resource being taken from the common pool.
+	\item Participants may choose to monitor others, at the cost of 1 resource being taken from the common pool.
 \end{enumerate}
 
-As predicted, this new rule set lead to a more effective prevention of ‘cheating’, and thus to a more efficient distribution of the resource. Indeed, this is a good example of the efficacy of common pool resource utilisation when participants act as individuals, and participants agree on rules and monitoring as a collective.
+As predicted, this new rule set lead to a more effective prevention of 'cheating', and thus to a more efficient distribution of the resource. Indeed, this is a good example of the efficacy of common pool resource utilisation when participants act as individuals, and participants agree on rules and monitoring as a collective.
 
 This report details the research, design and implementation of a multi agent simulation of the Kyoto common pool resource system, which in many ways is very similar to the simple game described above.
 
@@ -126,7 +149,7 @@ There are many different responses to climate change, most focusing on either mi
 
 The United Nations Framework Convention on Climate Change (\textsc{unfccc}) is an international environmental treaty which covers most of the countries in the world. It was signed in in 1992 with the aim to stabilise the concentration of greenhouse gases (\textsc{ghg}) in the atmosphere ``at a level that would prevent dangerous anthropogenic (ie. human) interference with the climate system.''~\cite{IPCC-synthesis-01-question1}
 
-The definition of ‘dangerous’ is up to interpretation, although the \textsc{ipcc} concluded that the definition would vary between different regions of the world, primarily dependent on the local consequences of global warming, the regions ability to adapt to climate change and the ability to reduce \textsc{ghg}. Figure~\ref{fig:burning_embers} shows the commonly named ‘burning embers’ diagram (adapted from the \textsc{ipcc}’s Third Assessment Report), which represents conceptual impact across five ``reasons for concern''.
+The definition of 'dangerous' is up to interpretation, although the \textsc{ipcc} concluded that the definition would vary between different regions of the world, primarily dependent on the local consequences of global warming, the regions ability to adapt to climate change and the ability to reduce \textsc{ghg}. Figure~\ref{fig:burning_embers} shows the commonly named 'burning embers' diagram (adapted from the \textsc{ipcc}'s Third Assessment Report), which represents conceptual impact across five ``reasons for concern''.
 
 \begin{figure}[h!]
 	\centering
@@ -139,7 +162,7 @@ The definition of ‘dangerous’ is up to interpretation, although the \textsc{
 
 Having recognised that developed countries are primarily responsible for the high levels of greenhouse gases in the atmosphere (due to the last 150 years of industrial development), the \textsc{unfccc} formed the Kyoto Protocol to not only encourage countries to reduce emissions, but to commit to it.~\cite{UNFCCC-kyoto-summary}
 
-The initial agreement was signed on the 11th December 1997 during the 3rd annual \textsc{unfccc} conference and then came into force on the 16th February 2005. The Protocol sets mandatory targets on greenhouse-gas emissions for the world’s leading economies ``with a view to reducing their overall emissions of such gases by at least 5 percent below existing 1990 level in the commitment period 2008 to 2012.''~\cite{UNFCCC-98-p1}. Future targets are expected to be drawn up for ``commitment periods'' after 2012.~\cite{UNFCCC-98-p4}
+The initial agreement was signed on the 11th December 1997 during the 3rd annual \textsc{unfccc} conference and then came into force on the 16th February 2005. The Protocol sets mandatory targets on greenhouse-gas emissions for the world's leading economies ``with a view to reducing their overall emissions of such gases by at least 5 percent below existing 1990 level in the commitment period 2008 to 2012.''~\cite{UNFCCC-98-p1}. Future targets are expected to be drawn up for ``commitment periods'' after 2012.~\cite{UNFCCC-98-p4}
 
 As of September 2011, 191 countries have ratified the treaty with the United States remaining as the only signatory not to have ratified the protocol. However, certain United Nation member states such as Afghanistan, Andorra and South Sudan never signed the agreement and Canada left in December 2011.
 
@@ -157,7 +180,7 @@ Participants in the Kyoto Protocol were classified into three groups, according 
 	\item[Non-Annex I] \hfill \\
 	Developing countries which are not required to reduce emission levels unless developed countries have supplied funding and technology through outsourcing. This serves three purposes
 	\begin{itemize}
-		\item There are no restrictions on the country’s development (as emissions are strongly linked to industrial capacity)
+		\item There are no restrictions on the country's development (as emissions are strongly linked to industrial capacity)
 		\item Ability to sell emissions credits to those nations having difficulty meeting theirs.
 		\item Encourages investment from Annex I countries for low-carbon technology.
 	\end{itemize}
@@ -167,9 +190,9 @@ The Protocol structures rolling emission reduction commitment periods, with the 
 
 \subsubsection{2012 Targets}
 
-Parties partaking in the Kyoto Protocol commit themselves to reducing four \textsc{ghg}s (carbon dioxide, methane, nitrous oxide, sulphur hexafluoride) and two other groups of gases (hydrofluorocarbons, perfluorocarbons). These are considered \CO equivalents when  calculating emission reduction.
+Parties partaking in the Kyoto Protocol commit themselves to reducing four \textsc{ghg}s (carbon dioxide, methane, nitrous oxide, sulphur hexafluoride) and two other groups of gases (hydrofluorocarbons, perfluorocarbons). These are considered \CO equivalents when calculating emission reduction.
 
-With the understanding that only Annex I countries have targets that they must commit to, the aim is to reduce global \CO emissions to at least 5\% below the base year by the end of the first commitment period. Through negotiation, the base year decided on was 1990, due to the lack of accurate data for years prior to this. Participants would need to agree to their individual targets in line with the global target, the results of which can be seen in Table X. It should be noted that the \textsc{eu}-15 opted for a ‘burden-sharing agreement’ whereby the \textsc{eu} set a target of -8\%, and assigned individual targets to its member states.
+With the understanding that only Annex I countries have targets that they must commit to, the aim is to reduce global \CO emissions to at least 5\% below the base year by the end of the first commitment period. Through negotiation, the base year decided on was 1990, due to the lack of accurate data for years prior to this. Participants would need to agree to their individual targets in line with the global target, the results of which can be seen in Table X. It should be noted that the \textsc{eu}-15 opted for a 'burden-sharing agreement' whereby the \textsc{eu} set a target of -8\%, and assigned individual targets to its member states.
 
 [TABLE]
 
@@ -194,7 +217,7 @@ While participant countries must meet their emission targets primarily through d
 
 With international markets already trading in commodities, Article 17 of the Protocol allows for countries to sell their excess “Assigned Amount Units” (\textsc{aau}s) to countries struggling to meet their target. This ability for countries to sell their excess capacity saw the birth of the “carbon market”.
 
-Some Annex I countries, categorised as Economies In Transition (\textsc{eit}), have a large surplus of \textsc{aau}s, which can be sold on the carbon market. One example is Russia: having closed many cold-war-era industries since its 1990 base year, Russia was given more ‘headroom’ for growth when its carbon target was set. Despite the abundance of \textsc{aau}s in the market, to stop countries “overselling” units and becoming unable to meet their own targets, participants must keep a reserve of \textsc{aau}s (known as a “commitment period reserve”) which cannot fall below 90\% of its assigned amount.
+Some Annex I countries, categorised as Economies In Transition (\textsc{eit}), have a large surplus of \textsc{aau}s, which can be sold on the carbon market. One example is Russia: having closed many cold-war-era industries since its 1990 base year, Russia was given more 'headroom' for growth when its carbon target was set. Despite the abundance of \textsc{aau}s in the market, to stop countries “overselling” units and becoming unable to meet their own targets, participants must keep a reserve of \textsc{aau}s (known as a “commitment period reserve”) which cannot fall below 90\% of its assigned amount.
 European Union Emission Trading System
 
 The European Union Emission Trading System (\textsc{eu ets}) allows for trading between participants in the EU and between industry operators in the \textsc{eu}. Governments of \textsc{eu} states agree on national emissions caps, and then allocate allowances to their industrial operators. Operators may privately move allowances between themselves, privately match buyers and sellers, or trade on the carbon exchange. It was found that other than trading has occurred in the global context of the Kyoto Protocol.~\cite{Grubb-09}
@@ -217,11 +240,11 @@ Figure~\ref{fig:cdm_map} shows a map of CDM projects worldwide.
 	\label{fig:cdm_map}
 \end{figure}
 
-Industrialised countries wishing to take part in \textsc{cdm} need to get assurance from the project host that it will contribute to sustainable development. The applicant must also prove that the project would not have happened regardless of their support, and must project future emissions had the project not gone forward (which are validated). This ensured there are no ‘free riders’, and that the applicant is awarded the correct amount of units for their contribution to the project.
+Industrialised countries wishing to take part in \textsc{cdm} need to get assurance from the project host that it will contribute to sustainable development. The applicant must also prove that the project would not have happened regardless of their support, and must project future emissions had the project not gone forward (which are validated). This ensured there are no 'free riders', and that the applicant is awarded the correct amount of units for their contribution to the project.
 
 \paragraph{Joint Implementation}
 
-Article 6 defines the Joint Implementation (\textsc{ji}) mechanism, which allows countries to invest in carbon-reduction projects in other Annex I countries as an alternative to national emission reduction. In exchange for the investment, the investor will be awarded an Emission Reduction Unit (\textsc{eru}), which is to be taken from the investee’s \textsc{aau} pool. This requirement ensures that the total amount of units shared between Annex I countries does not change during a commitment period.
+Article 6 defines the Joint Implementation (\textsc{ji}) mechanism, which allows countries to invest in carbon-reduction projects in other Annex I countries as an alternative to national emission reduction. In exchange for the investment, the investor will be awarded an Emission Reduction Unit (\textsc{eru}), which is to be taken from the investee's \textsc{aau} pool. This requirement ensures that the total amount of units shared between Annex I countries does not change during a commitment period.
 
 JI may be advantageous where carbon reduction is cheaper to implement in another Annex I country rather than nationally (an example might involve replacing dirty power plants with cleaner energy producers). To date, \textsc{ji} has not been very popular, with only 22 projects having been registered prior to 2008.
 
@@ -237,9 +260,9 @@ Kyoto requires that:~\cite{UNFCCC-Kyoto-guidelines}
 	\item Expert review teams periodically review greenhouse inventories and any national communications (This must be conducted at least once every 5 years)
 \end{itemize}
 
-It is understood that the effectiveness of the Kyoto Protocol depends on the participants following the Protocol’s rules and regulations with respect to their commitments the accuracy and reliability of the reports. Keeping in line with the core aim of the Kyoto Protocol (that is, an alternative to a carbon tax) financial sanctions were avoided, instead opting for the setting of harsher emissions targets.
+It is understood that the effectiveness of the Kyoto Protocol depends on the participants following the Protocol's rules and regulations with respect to their commitments the accuracy and reliability of the reports. Keeping in line with the core aim of the Kyoto Protocol (that is, an alternative to a carbon tax) financial sanctions were avoided, instead opting for the setting of harsher emissions targets.
 
-Part of monitoring involves an expert review of reports submitted by participants. Reviewers may mark reports as “question of implementation” where there is an unresolved problem regarding implementation, may suggest “adjustment” where inventory is incomplete, and may suggest “correction” where there are clear inconsistencies (suggesting ‘cheating’). “Correction” is analogous to an inventory adjustment.~\cite{UNFCCC-reporting-review}
+Part of monitoring involves an expert review of reports submitted by participants. Reviewers may mark reports as “question of implementation” where there is an unresolved problem regarding implementation, may suggest “adjustment” where inventory is incomplete, and may suggest “correction” where there are clear inconsistencies (suggesting 'cheating'). “Correction” is analogous to an inventory adjustment.~\cite{UNFCCC-reporting-review}
 
 There are also sanctions for parties not meeting the emissions target they committed to. If the enforcement branch determines that Annex I countries do not comply with their emissions limitations, that country is required to make up the difference in future commitment periods plus an additional 30\%. That country will also be suspended from emissions trading.~\cite{UNFCCC-compliance}
 
@@ -247,7 +270,7 @@ There are also sanctions for parties not meeting the emissions target they commi
 
 Opinions on the effectiveness of the Kyoto Protocol vary significantly; while some consider it a move in the right direction for the stabilisation of \textsc{ghg}s, others believe the Protocol is inherently unfair, and ineffective.
 
-Indeed some problems of fairness were raised early in the negotiation stages of the Protocol. During the negotiations for the setting of the base year, 1990 was chosen as reliable data prior to this date was unavailable. This base year was also highly favoured by the \textsc{uk}, Germany and Russia as their respective \CO levels were high in 1990. Following 1990, \textsc{uk} emissions dropped as the energy sector moved away from coal power, toward cleaner gas power stations. Germany’s \CO emissions also decreased following 1990 when East Germany and West Germany were reunited, resulting in a decrease in dirty industry in East German territories. There was much disagreement as Japan wished to use 1995 as the base year, while former Soviet block countries wanted to use emission rates from before their industrial collapse at the end of the cold war.
+Indeed some problems of fairness were raised early in the negotiation stages of the Protocol. During the negotiations for the setting of the base year, 1990 was chosen as reliable data prior to this date was unavailable. This base year was also highly favoured by the \textsc{uk}, Germany and Russia as their respective \CO levels were high in 1990. Following 1990, \textsc{uk} emissions dropped as the energy sector moved away from coal power, toward cleaner gas power stations. Germany's \CO emissions also decreased following 1990 when East Germany and West Germany were reunited, resulting in a decrease in dirty industry in East German territories. There was much disagreement as Japan wished to use 1995 as the base year, while former Soviet block countries wanted to use emission rates from before their industrial collapse at the end of the cold war.
 
 There were also disagreements over the size of the emission cuts, with the \textsc{eu} supporting cuts in the range of 10-15\%, while the US wanted a more conservative cut of between 0-5\%. The level of cutbacks wanted varied from country to country, with the only common theme being that the proposals suited the interests of the country making the proposal.~\cite{Grubb-economics}
 
@@ -270,14 +293,14 @@ A Common Pool Resource (\textsc{cpr}) is a natural or man-made resource in which
 
 \textsc{cpr}s are defined by their core resource (\emph{stock variable}) and the limited quantity of extractable units (\emph{flow variable}). The stock variable is to be conserved such that consumers may continue to exploit/consume excess resources (\emph{fringe variable}), which are produced at a rate defined by the flow variable.
 
-Due to the resource’s deductible, non exclusive characteristics, \textsc{cpr} may have problems of congestion or overuse. Many \textsc{cpr} systems form a positive feedback loop, and so with careful resource management (ensuring the stock variable is not compromised), fringe units will be continually produced, allowing for efficient resource usage. Excessive consumption (consumption exceeding the flow variable) will reduce the stock variable, which in turn will reduce the flow variable. Unless the stock variable is allowed to regenerate, excessive use will result in resource depletion; even if the stock is allowed to regenerate, the damage may be irreparable. The key to efficient \textsc{cpr} is to ensure the resource is not abused.
+Due to the resource's deductible, non exclusive characteristics, \textsc{cpr} may have problems of congestion or overuse. Many \textsc{cpr} systems form a positive feedback loop, and so with careful resource management (ensuring the stock variable is not compromised), fringe units will be continually produced, allowing for efficient resource usage. Excessive consumption (consumption exceeding the flow variable) will reduce the stock variable, which in turn will reduce the flow variable. Unless the stock variable is allowed to regenerate, excessive use will result in resource depletion; even if the stock is allowed to regenerate, the damage may be irreparable. The key to efficient \textsc{cpr} is to ensure the resource is not abused.
 
 An example of \textsc{cpr} is commercial fishing; by overfishing certain species of fish, the stock variable (number of fish) is reduced, which in turn reduces the flow variable (birth rate), which decreases the fringe units which can be sustainably caught by fishers. Unless the stock variable is allowed to regenerate, certain species of fish may be driven to depletion (extinction). This is an example of inefficient use of a \textsc{cpr}, the only viable solution to which is drastically reducing the rate of fishing. This, and further example cases, are discussed in more detail later.
 
 While some \textsc{cpr}s are owned by governments or private parties, making these public or private goods, many have no ownership, and so are an open access resource. We should note the difference between “Common Pool Resources”, as described above, and “The Commons”, which
 
 \begin{quote}
-	“refer to systems, such as knowledge and the digital world, in which it is difficult to limit access, but one person’s use does not subtract a finite quantity from another’s use.”~\cite{Ostrom-challenge-90}
+	“refer to systems, such as knowledge and the digital world, in which it is difficult to limit access, but one person's use does not subtract a finite quantity from another's use.”~\cite{Ostrom-challenge-90}
 \end{quote}
 
 With the understanding that uncontrolled access to a \textsc{cpr} will lead to inefficiencies and overuse, some resource consumers form an institution, often called a “Common Property Regime”, to reduce the threat to the common resource by independent actions, and increase the efficiency of resource harvesting.
@@ -366,23 +389,110 @@ The success of schemes to protect \textsc{cpr}s worldwide varies substantially. 
 
 \subsection{Presage 2}
 
+%% Sam Macbeth's transfer report is cited 3 times in this part, use \cite{Sam-Transfer-Report} to cite it. (It is already in references.bib)
+
 \section{Defining our model}
+
+This section details the design decisions made regarding the modelling of the Kyoto Protocol \textsc{cpr} system and its implementation as a multi agent system. We describe the simplifications made to the Protocol, and any assumptions about the real world and economy.
 
 \subsection{Time}
 
+With the understanding that Presage2 uses discrete time to run its simulations, we divided time into sessions, years, and ticks. Ticks map directly to Presage2's discrete units of time. Years last for a number of ticks defined at simulation time (defaulting to 365, which maps a single tick to a day in the real world). Sessions are composed of multiple years, with a default of 10. In the Kyoto Protocol, the length of a session is mutable depending on global economic and political climate. However, we felt it was a suitable abstraction from reality to use a consistent length for sessions throughout any individual simulation.
+
 \subsection{Energy Output}
+
+Energy output is the simplification of a participant's productivity. The calculation of a country's energy output depends on many economic factors, which would be too complex to accurately calculate for our model. We have simplified it such that it can be calculated using only two figures: the country's carbon output, and its fossil fuel percentage, that is, the percentage of the country's total energy that comes from fossil fuels. Using these two values, we can calculate the energy output, which is the amount of carbon the country would use if all of its energy was fossil-based:
+
+\begin{center}
+energy output = carbon output / fossil fuel \%
+\end{center}
 
 \subsection{Money}
 
+Our model requires that participants have money to be able to spend on any of the actions available to them. Cash is thus calculated as a percentage of the participant's Gross Domestic Product (\textsc{gap}). Whilst in real life, countries may wish to vary their carbon reduction budgets, we decided that the percentage dedicated to green initiatives would remain constant.
+
+\textsc{gdp} is initially set from real world country data, and it is understood that countries need to be able to affect their \textsc{gdp} rate (growth or contraction). In real life, \textsc{gdp} rates are controlled by a large number of factors; this has been simplified in our model such that \textsc{gdp} rate is only affected by energy output.
+
 \subsection{The Kyoto Protocol}
+The Kyoto Protocol can be summarised into the following flow of actions:
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.3\textwidth]{img/Kyoto_4_states.png}
+	\label{fig:kyoto_4_states}
+\end{figure}
+
+While we were eager to try and have our simulation model the Kyoto Protocol accurately, some changes needed to be made to discourage agents from abusing the game mechanics. For example, in a 10 year session, a participant could maximise their industry and \textsc{gdp} for the first 9 years and hence generate a large amount of fund. This could then be followed by a drastic reduction in industry to meet its target in the last year.
+
+\begin{description}
+	\item [Target Setting] \hfill \\ In the real world, targets are calculated per session for each participant. However, our model calculates the session targets for each participant, and then sets incremental, yearly targets which, if an individual country meets these targets, will ensure it meets its session target as well. This removes the potential abuse of the \textsc{gdp} functionality, since our simulated \textsc{gdp} is not externally sensitive to non-Kyoto Protocol events like \textsc{gdp} is in the real world.
+	\item [Reporting] \hfill \\ Our model follows the Kyoto Protocol and reporting is done yearly.
+	\item [Monitoring] \hfill \\ As per the \textsc{cpr} model, monitoring of participants should incur a cost. Every year all participants are 'taxed' a certain percentage of their \textsc{gdp} in our model, which is used to cover the cost of monitoring participants. The Kyoto Protocol does not specifically call for a tax to cover its monitoring, although the \textsc{unfccc} is funded by its members, so our model represents a suitable abstraction to reality.
+
+In the real world, monitoring is done every 5 years by a team of experts. We decided to monitor more frequently in order to discourage unrealistic participant behaviour. A number of random participants are checked yearly using the funds gained from the 'monitor tax'. Repeat offenders, who have been found cheating before, have an increased probability of being monitored in the future.
+	\item [Sanctioning] \hfill \\ Sanctions are applied immediately when participants are found to have missed targets or have reported fraudulent emissions. The sanction for missing a target is a proportional increase in that participant's target in the following year, which is in line with the Kyoto Protocol regulations.
+
+The sanction for fraudulent reporting in real life are rather 'light weight', only suggesting a recalculation of the reported figures. In the real world, this kind of fraudulent activity would also result in political pressure from other Kyoto participants, but this would be hard to model in our simulation. We wanted to look at the effect of a more 'harsh' form of sanctioning, and thus it was decided to impose financial sanctions for fraudulent reporting.
+\end{description}
 
 \subsection{Participants \& Actions}
+Countries which form part of the Kyoto Protocol have been split into 4 groups:
+
+\begin{itemize}
+	\item{Annex I (Must reduce emissions -- e.g. \textsc{eu})}
+	\item{Annex I (Must sustain emissions -- e.g. Russia)}
+	\item{Non-Annex I (Developing countries)}
+	\item{Rogue Countries (Not part of Kyoto)}
+\end{itemize}
+
+While Annex I and Non-Annex I countries have been implemented as per the Protocol specification, it was decided that we would remove the Annex II class (which is just a subset of Annex I), and allow all Annex I classes to invest in \textsc{cdm}.
+
+Table X defined the actions which participants can use:
+
+%TABLE
+\begin{center}
+ADD TABLE HERE
+\end{center}
+%TABLE
 
 \subsubsection{Domestic carbon reduction measures}
+\begin{description}
+	\item [Carbon Absorption] \hfill \\ Carbon absorption is the process of building carbon sinks, projects which offset carbon emissions, for example planting large sections of forest. As in real life, our carbon absorption model allows for diminishing returns, so as more carbon absorption actions are taken, the return received for a given investment decreases. This models the changes in land price after extensive forestation, and the increased difficulty of building further carbon sinks as more projects are constructed. In theory, the cheaper, more efficient projects are prioritized, so once they have been completed, greater investment is required for further improvement.
+
+Our model only allows for forestation on arable land; this differs from real life where trees can be planted on various types of land. This simplification allows us to use freely accessible country data. Another simplification is the immediate building/growing of trees; in real life, a participant would only get gradual carbon reduction gains from planting trees. However, there are mechanisms in place within the Kyoto Protocol to immediately reward member states for sustainable development projects which reduce long term emissions. Our carbon absorption system models an abstraction of these two factors combined. 
+	\item [Carbon Reduction] \hfill \\ Carbon reduction is the process of reducing carbon output of dirty industry. As in real life, our carbon reduction model allows for diminishing returns. Hence as more dirty industry is upgraded to clean one, the cost of further reduction increases. This maps to the ease of upgrading from coal power to existing, but cleaner natural gas technology, when compared to the investment required to pioneer nuclear fusion research.
+
+Our model is only affected by the percentage of total dirty industry. In real life, there are various ways in which carbon reduction can be implemented, although the simplification used is suitable for the complexity of our model.
+	\item [Energy Usage] \hfill \\ As previously described, participants need to be able to have some influence over their GDP rate. In our model, energy output is a driving factor behind the GDP rate calculations, and so participants have the option of either growing or constricting their industry. This has the effect of changing the energy output and carbon output accordingly.
+
+Investments in carbon industry will result in GDP growth, capped at sensible levels, but increases in carbon emissions. Countries who must reduce their overall emissions but wish to still maximize their economic growth must first invest in carbon industry and then in carbon reduction or absorption.
+\end{description}
 
 \subsubsection{Flexibility Mechanisms}
+\begin{description}
+	\item [Emissions Trading] \hfill \\ In the real world, while being a viable carbon offsetting measure, carbon emission trading has proved less popular than domestic carbon reduction. Our model places more emphasis on emissions trading than in the real world, as we were interested in the simulation of an active commodities market.
 
+It is understood that the world has several emission trading schemes and markets, the \textsc{eu ets} being one of the largest. While we did plan to incorporate the \textsc{eu ets} into our game, this was eventually scrapped as the time available did not warrant the extra complexity this would add to the simulation.
+	\item [Clean Development Mechanisms] \hfill \\ \textsc{cdm} is a significant action available to participants of the Kyoto Protocol, and similar to our interest in an active carbon market, we were keen to see the effects of an active market for clean investment. This mechanism is broadly unchanged from the real world specification, with the exception that we are not differentiating between \textsc{aau}s and \textsc{car}s.
+	\item [Joint Implementation] \hfill \\ The \textsc{ji} flexibility mechanism did not prove to be very popular in the real world, and with so few examples of this mechanism being carried out, it was left out of our simulation, and its inclusion would add unnecessary complexity.
+\end{description}	
+	
 \subsection{Flowcharts}
+Before moving to the coding phase of the project, some initial flow charts were drafted to help us visualise the different states and actions that would have to be implemented. The high level architecture of the simulation can be seen in Figure \ref{fig:kyoto_simulation_flowchart} with a more detailed composition of the country behaviour sub-process in Figure \ref{fig:country_behaviour_flowchart}:
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.8\textwidth]{img/kyoto_simulation_flowchart.png}
+	\caption{Kyoto Simulation Flowchart}
+	\label{fig:kyoto_simulation_flowchart}
+\end{figure}
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.8\textwidth]{img/country_behaviour_flowchart.png}
+	\caption{Country Behaviour Flowchart}
+	\label{fig:country_behaviour_flowchart}
+\end{figure}
 
 \section{Implementation}
 
@@ -398,49 +508,90 @@ The usual reason for this is that normally, while the first session started in 1
 
 \subparagraph{Strategy}
 
-In order to make strategies distinct between annex I sustain and annex I reduce, Annex I sustain countries will only remain a part of the Kyoto Protocol as long as they meet their targets. In the event that emission targets are lower than the acceptable output level of an annex I sustain country, the country will depart from the Protocol and become a rogue state. 
+In order to make strategies distinct between annex I sustain and annex I reduce, annex I sustain countries will only remain a part of the Kyoto Protocol as long as they meet their targets. In the event that emission targets are lower than the acceptable output level of an annex I sustain country, the country will depart from the Protocol and become a rogue state. 
 
-However, it is important to recognise that annex I sustain countries did ratify the Kyoto Protocol when it was originally proposed and finalised.   These countries’ governments have expressed a desire to minimise their impact on the environment to some extent.   It is with this in mind, that annex I sustain countries make sure that their overall emissions never rise above their starting levels.   Any investment in industry to promote economic growth is offset by corresponding investments in cleaning industry or constructing carbon sinks.
+However, it is important to recognise that annex I sustain countries did ratify the Kyoto Protocol when it was originally proposed and finalised. These countries' governments have expressed a desire to minimise their impact on the environment to some extent. It is with this in mind, that annex I sustain countries make sure that their overall emissions never rise above their starting levels. Any investment in industry to promote economic growth is offset by corresponding investments in cleaning industry or constructing carbon sinks.
 
-On the other hand, annex I sustain countries are reluctant to reduce their carbon emissions if it adversely affects their economic growth.   Any reductions in emissions are because the country has judged that investment will be profitable when the resulting offset is sold on the carbon commodity market.   This may seem like a bleak attitude for a set of countries to adopt, painting them as opportunistic and self-interested.   However, this diversified the strategies our countries employ over the course of an entire varied simulation and more properly models Common Pool Resources, where individual interests are weighed against that of the collective.
+On the other hand, annex I sustain countries are reluctant to reduce their carbon emissions if it adversely affects their economic growth. Any reductions in emissions are because the country has judged that investment will be profitable when the resulting offset is sold on the carbon commodity market. This may seem like a bleak attitude for a set of countries to adopt, painting them as opportunistic and self-interested. However, this diversified the strategies our countries employ over the course of an entire varied simulation and more properly models Common Pool Resources, where individual interests are weighed against that of the collective.
 
 The strategy contains three steps, taken every year in order:
 
 \begin{description}
 \item[1. Invest in industry] \hfill \\
-Part of a year’s budget is reserved for increasing the economy. Since this group represents mostly newly-developed countries, this is prioritized to promote long term growth.
+Part of a year's budget is reserved for increasing the economy. Since this group represents mostly newly-developed countries, this is prioritised to promote long term growth.
 
 As outlined earlier, the investment must be accompanied with carbon reduction or absorption, so that overall carbon emissions do not increase. To achieve that, a specific point is found for which total price of investments in industry and matching emission decrease is equal to the reserved budget.
 
 \item[2. Sell carbon credits] \hfill \\
-If the emissions of the country are lower than the target for a given year, the country will accumulate carbon offset, representing the “unused” emissions. The agents will attempt to sell all of these credits. Since carbon trading is essentially an open market, setting an average price can be challenging. To maximize profits from sales, the agents will start with a high asking price, reducing it gradually as the year progresses if no one is interested in buying, and increasing it when the sales go well.
+If the emissions of the country are lower than the target for a given year, the country will accumulate carbon offset, representing the “unused” emissions. The agents will attempt to sell all of these credits. Since carbon trading is essentially an open market, setting an average price can be challenging. To maximise profits from sales, the agents will start with a high asking price, reducing it gradually as the year progresses if no one is interested in buying, and increasing it when the sales go well.
 
 \item[3. Invest in emissions reduction] \hfill \\
-When a country has no credits to sell anymore, but there is still demand for carbon offset on the market, it may decide to invest in carbon reduction or absorption to generate additional carbon offset First, it estimates how many of the generated units can possibly be sold during the current session, assuming the market  price persists. If the estimated profit is higher than cost of the investment, the country will proceed with it. Should this occur, the country will reduce its emissions by the end of the session (reducing global output as an incidental benefit), and hence will end up with a target higher than actual emissions in the next session, just as in the previous one. If this is the case, it will stay in Kyoto for the next session.
+When a country has no credits to sell anymore, but there is still demand for carbon offset on the market, it may decide to invest in carbon reduction or absorption to generate additional carbon offset First, it estimates how many of the generated units can possibly be sold during the current session, assuming the market price persists. If the estimated profit is higher than cost of the investment, the country will proceed with it. Should this occur, the country will reduce its emissions by the end of the session (reducing global output as an incidental benefit), and hence will end up with a target higher than actual emissions in the next session, just as in the previous one. If this is the case, it will stay in Kyoto for the next session.
 
 \end{description}
 
 \paragraph{Annex I (Reduce)}
 
+In our project, we define Annex I Reduce countries as participants whose current emissions are higher than their 1990 base targets, requiring them to prioritise the reduction of their carbon emissions. Good examples of such countries are the fifteen European countries.
 
+For their behaviour, it was decided that the best approach was to design a mini simulation that would perform exhaustive testing on every possible country action, extrapolating emissions and industry growth into the future. It then decides which action results in the best outcome, with regard to maximizing economic growth while still meeting Kyoto Protocol targets and then performs the optimal actions in the simulation.
+
+While simple in theory, in practice there are some major hurdles. The most troublesome of these is that there are an enormous number of possible actions a given Annex I Reduce country can take, all of which operate on a continuous scale. Every action has an almost infinite number of options that can be taken. For example, a country could choose to reduce their carbon emissions through absorption by spending 1\% of their available cash, or by spending 100\% of their available cash, or any number in between. They could then decide to buy vast amounts of carbon offset from the market, at any price, or put up sell offers. All of these actions can be performed in a single tick.
 
 \subparagraph{Strategy}
 
+Some heuristics had to be implemented to keep the simulation from spiralling out of control. It also ensured that as few \textsc{cpu} cycles as possible are wasted on actions that were simply irrational and could never lead to any useful results. To do this, it was decided to split each turn into three phases: the 'reduce' phase, the 'maintain' phase and the 'sell' phase.
+
+The reduce phase happens first. It checks whether our current carbon output is below our carbon target. If we are at or below our target, then nothing is done. However, if we are above our current target, the testing will branch off into combinations of three distinct actions. The carbon target will be met by either buying carbon offset from the market, by reducing the carbon output through investing in absorption and reduction or, if in particularly dire financial situation, by reducing the economic output of the country. Every time a branch occurs, a new 'state' is created.
+
+Before the maintain phase occurs, we compare every branched state with one another and check whether one state is objectively superior for every possible pair of states. For example, let a state have two attributes 'Money' and 'Carbon', where a higher 'Money' and a lower 'Carbon' is better. If state 1 has a 'Money' value of 100 and a 'Carbon' value of 50, and state 2 has a 'Money' value of 90 and a 'Carbon' value of 60, then state 1 is objectively better than state 2. Therefore we can immediately eliminate state 2 as a possible action. Alternatively, if a state 3 has a 'Money' value of 110 and a 'Carbon' value of 60, we cannot objectively say that it is any better than state 1 and thus cannot remove this from the simulation. By performing this culling, we can prevent our search space from getting too large and avoid going down paths where we can already tell there will be better alternatives.
+
+Next is the maintain phase. As we are now guaranteed to be at least at or below our carbon target, the country can focus on improving its industry, which will eventually result in an increase in the available cash to spend. The simulation will branch off from each unculled state created in the reduce phase by first investing in industry (i.e.: increasing our energy output, which in turn increases our \textsc{gdp}) by some amount and then by offsetting the extra carbon created by investing in absorption and reduction, or by buying the offset from the market. Once again, a cull is performed after all branches have been taken.
+
+Finally there is the sell stage. Here, we reduce our carbon output (by investing in carbon absorption and reduction, or by shutting down factories) by a certain amount and then sell our newly created carbon offset at the highest possible price. Once again, all unrealistic states are culled.
+
+The combination of these three phases makes up a list of possible actions for one year of the game. However, since a session lasts a number of years (at which point any accumulated carbon offsets are abandoned when new emissions targets are calculated), simulating the possible behaviour for a single year simply does not provide us with enough information to choose an ideal action path. We need to continue the internal projections up until the end of the current session.
+
+Once this is over and we have a large number of end states, we can analyse our them to find the ones which can be objectively considered the best. This will be the one with the best economy and the lowest carbon output. When identified, we simply traverse our path back to the initial state and perform the action path in the actual game.
+
+Overall, this method takes full advantage of all possible options available to a country, including utilising the market as much as possible. No possible rational action is ruled out until it is clear that there are objectively superior alternatives. As a result, we achieve a behaviour that is very close to the optimal action for the country, resulting in maximum monetary gains while still reaching all set carbon targets.
+
+As the annex I reduce countries were deemed to be paragons of justice, some actions such as cheating and ignoring carbon targets weren't coded in. However if a country finds itself constantly shutting down factories (due to a lack of money to perform any other actions) in order to meet carbon targets, it will choose to leave the Kyoto Protocol until it can get back on its feet again financially.
+
 \paragraph{Non-Annex I}
+
+The Non Annex I group is mainly composed of developing countries whose primary aim is economic growth. Since \textsc{gdp} growth is directly proportional to energy output in this project, the aim of Non Annex I countries is to increase its industry as much as possible. 
+
+Investing in industry, and therefore growing a country's economy increases its carbon output at the same time. However, the Kyoto Protocol dictates that sanctions are not enforced on Non Annex I countries since they are not set targets to fulfill. They are therefore free to emit as much \CO as their industry requires.
+
+Nevertheless, the Non Annex I behaviour was implemented such that they do care about the environment as well as their growth when cash is available in abundance.
+
+The following keywords will be used to describe the general behaviour of Non Annex 1 countries:
+
+\begin{description}
+\item[1. energy\_aim:] the energy output the country wants to reach by the end of the year.
+\item[2. times\_aim\_met:] how many consecutive times the energy output aim was met.
+\item[3. aim\_success:] variable that represents whether the country met its energy target or not.
+\item[4. green\_care:] variable that controls if the country cares or not about the environment.
+\item[5. green\_lands:] variable that controls whether the country has actually met its environmental commitments.
+\item[6. environment\_friendly\_target:] if it exists, variable that stores the country's carbon emission target. 
+\end{description}
+
+The country starts by having a policy of increasing its energy output as shown in Figure X whilst trying to meet an internally set carbon emission target.
 
 \subparagraph{United States}
 
 The United States agent uses a metric of "greenhouse gas intensity”, defined as the ratio of emissions to economic output, measured in units of tonnes of \CO per million dollars of \textsc{gdp} to monitor its emissions. For example, using the 1990 data values the simulation is seeded with the intensity evaluates to 4,879,376/5,722,300 = 0.853 (3dp). To put in historical perspective, the Bush administration committed to reduce the intensity of greenhouse gas emissions by 18\% over the period 2002-2012.
 
-In the real world it is the governing political party that makes any decisions regarding climate change mitigation, whose actions are in theory in response to the prevailing attitudes of the electorate, and so it is the case for the agent in our simulation. Every four years an election is held, with the initial party in power chosen at random. For simplicity’s sake only the two major parties of the republicans and the democrats are represented. Broadly speaking, the democrats seek to increase the intensity value being targeted (which will have a greater impact on carbon reduction), whilst the republicans will target higher growth rates. The ultimate goal of the governing party is to gain re-election, which, as will be detailed below, is determined by the reductions implemented and economic growth over the period. The degree to which each of these effects the re-election chances of the incumbent party varies according to the prevailing attitude of the electorate, and the party in question. The republicans are more strongly punished and rewarded for economic growth, whereas the democrats are more strongly influenced by their carbon reduction efforts (reflecting the concerns of their core supporters). 
+In the real world it is the governing political party that makes any decisions regarding climate change mitigation, whose actions are in theory in response to the prevailing attitudes of the electorate, and so it is the case for the agent in our simulation. Every four years an election is held, with the initial party in power chosen at random. For simplicity's sake only the two major parties of the republicans and the democrats are represented. Broadly speaking, the democrats seek to increase the intensity value being targeted (which will have a greater impact on carbon reduction), whilst the republicans will target higher growth rates. The ultimate goal of the governing party is to gain re-election, which, as will be detailed below, is determined by the reductions implemented and economic growth over the period. The degree to which each of these effects the re-election chances of the incumbent party varies according to the prevailing attitude of the electorate, and the party in question. The republicans are more strongly punished and rewarded for economic growth, whereas the democrats are more strongly influenced by their carbon reduction efforts (reflecting the concerns of their core supporters). 
 
-The agent has three overarching behaviour patterns controlling its attitude toward carbon reduction, represented by a integer variable between 1 and 10, where 10 is highly positive, and 1  is ambivalent. The real world representation of this being the prevailing attitude of the electorate, to which, in theory, the governing party responds and chooses actions in accordance with. This attitude variable is specifiable at the beginning of the simulation, and can change year by year. A more positive attitude results in more ambitious targets for the desired intensity level improvement chosen for the election cycle. Additionally, the more positive the attitude, the more influenced by success or failure in reaching or exceeding reduction targets the populace are, and the less they are influenced by lower economic growth. The opposite is true for more ambivalent attitudes.
+The agent has three overarching behaviour patterns controlling its attitude toward carbon reduction, represented by a integer variable between 1 and 10, where 10 is highly positive, and 1 is ambivalent. The real world representation of this being the prevailing attitude of the electorate, to which, in theory, the governing party responds and chooses actions in accordance with. This attitude variable is specifiable at the beginning of the simulation, and can change year by year. A more positive attitude results in more ambitious targets for the desired intensity level improvement chosen for the election cycle. Additionally, the more positive the attitude, the more influenced by success or failure in reaching or exceeding reduction targets the populace are, and the less they are influenced by lower economic growth. The opposite is true for more ambivalent attitudes.
 
 The agent, as in reality, is not a member of the Kyoto protocol at the start of the simulation, and thus is not subject to either monitoring or sanctioning. Despite its non-member status however, it is not entirely ambivalent toward carbon reduction. The agent has been designed so that through the natural oscillation of the party in power intensity levels will steadily decrease, and ultimately result in a decrease in absolute levels, which will result in the agent eventually joining the Kyoto protocol. Each year the agent checks to see if, were it part of Kyoto, would it have met its emission target. If for three years in a row the target is met then the agent joins Kyoto, conversely, if targets are not met for three years in a row after joining Kyoto, the agent will once again leave.
 
-The winner of an election is decided by a function of the economic performance over the election cycle and the election year (the justification for the latter  being the relatively short term memory of the typical voter), the carbon reduction measures undertaken, and the attitudes of the electorate and the party’s core supporters toward these. After these factors have been taken into account, some level of randomness is introduced (perhaps one party has a particularly compelling candidate).
+The winner of an election is decided by a function of the economic performance over the election cycle and the election year (the justification for the latter being the relatively short term memory of the typical voter), the carbon reduction measures undertaken, and the attitudes of the electorate and the party's core supporters toward these. After these factors have been taken into account, some level of randomness is introduced (perhaps one party has a particularly compelling candidate).
 
-As the political party’s re-election chances are determined by the levels of carbon reduction and economic growth achieved during the election cycle, it chooses targets for these (in the case of economic growth, assuming stable market conditions) in order to maximise this chance. The targets are initially based on the long term percentages reductions/growth rates achieved before being adjusted up or down. In order for an absolute decrease in emissions it is necessary for the emissions intensity to improve faster than economic growth. So, for an absolute decrease the targeted improvement in intensity must be higher than this. The desired improvement in the intensity level is thus taken at base to be the long term economic growth rate over the four year election period plus a value determined by the overall attitude of the electorate. E.g. If the year on year growth rate was 5\%, this would result in a 21.5\% compounded rate from the start to the end of the period. Targets are valid and acted upon over the four year election period in order to allow behaviors to adapt to the prevailing global economic conditions, in times where growth is strong, giving rise to more available cash, more investments toward carbon reduction are made, contrarily, during periods of poor economic growth more investments into the economy are made. 
+As the political party's re-election chances are determined by the levels of carbon reduction and economic growth achieved during the election cycle, it chooses targets for these (in the case of economic growth, assuming stable market conditions) in order to maximise this chance. The targets are initially based on the long term percentages reductions/growth rates achieved before being adjusted up or down. In order for an absolute decrease in emissions it is necessary for the emissions intensity to improve faster than economic growth. So, for an absolute decrease the targeted improvement in intensity must be higher than this. The desired improvement in the intensity level is thus taken at base to be the long term economic growth rate over the four year election period plus a value determined by the overall attitude of the electorate. E.g. If the year on year growth rate was 5\%, this would result in a 21.5\% compounded rate from the start to the end of the period. Targets are valid and acted upon over the four year election period in order to allow behaviors to adapt to the prevailing global economic conditions, in times where growth is strong, giving rise to more available cash, more investments toward carbon reduction are made, contrarily, during periods of poor economic growth more investments into the economy are made. 
 
 Once the target is set, the agent sets about choosing actions. The agent aims to implement any actions over three years within the four year election cycle, allowing no action to be taken in one of the years if conditions are not favourable. If conditions are amenable, all available cash will be used. At the beginning of the election cycle the absolute carbon reduction required over the four year period (taking into account the expected \textsc{gdp} growth) is calculated. The goal in absolute terms for each of the three years is then set. The agent will attempt to fulfil its commitments during the first 99 ticks of the year (assuming a year is 100) through the clean development mechanism (\textsc{cdm}), or subsequent to Kyoto membership, through trading carbon offset with other agents. Before implementing any action, the agent evaluates whether the benefit to their election chances will be increased more by taking the action in question or an alternative. On the last tick of the year, if the targets for carbon reduction or \textsc{gdp} growth have not been met, then the agent will take appropriate action through the carbon reduction and absorption mechanisms, or through investing in industry. The party will take measures to meet either its reduction or growth targets first depending on, once again, the projected effect the meeting/not meeting one will have on their reelection chances. Then use any remaining cash available to meet (if possible) the remaining target. If both targets have been met, they will spend the remainder on their preferred action.
 
@@ -468,7 +619,7 @@ The cost of this action is calculated in the same way as for carbon reduction, w
 
 Again, the implementation is the same as in the case of carbon reduction. There is only one difference, which causes a slight problem. Binary search requires lower and upper bound, and, potentially, carbon absorption can be as high as possible (providing a country has sufficient land and funds). Hence, we needed to use some upper bound to allow using binary search algorithm.
 
-Even though a country can invest in carbon absorption as much as it wants, it does not make much sense for it to exceed carbon output, and shouldn’t be realistically possible providing reasonable constants for prices. Hence, the upper bound which is used here is a difference between carbon output and carbon absorption of a country, so that, for maximum investment, the function will return absorption change which forces actual emissions to atmosphere to 0.
+Even though a country can invest in carbon absorption as much as it wants, it does not make much sense for it to exceed carbon output, and shouldn't be realistically possible providing reasonable constants for prices. Hence, the upper bound which is used here is a difference between carbon output and carbon absorption of a country, so that, for maximum investment, the function will return absorption change which forces actual emissions to atmosphere to 0.
 
 Still, this will produce false results where investment is high enough to potentially increase carbon absorption beyond carbon output. Again, this is just an additional function for countries to make writing strategies easier and make them more interesting. Since there is no way around it, it was decided to allow this potential inaccuracy.
 
@@ -514,19 +665,19 @@ In our simulation platform, we allow countries to leave and join the Protocol. I
 
 \subsubsection{Time Service}
 
-The time service is an environment service, extending Presage2’s existing environment interaction classes and development framework. It allows for coordination of time-based events and synchronises various features within our Kyoto Protocol simulation. Although Presage2 does have existing objects (SimTime) which can be used to attain simulation time, this is an absolute value in discrete logical time since the beginning of the simulation. It therefore does not take into consideration the variety of chronological distinctions the Kyoto Protocol requires, such as subdivisions into years and sessions.
+The time service is an environment service, extending Presage2's existing environment interaction classes and development framework. It allows for coordination of time-based events and synchronises various features within our Kyoto Protocol simulation. Although Presage2 does have existing objects (SimTime) which can be used to attain simulation time, this is an absolute value in discrete logical time since the beginning of the simulation. It therefore does not take into consideration the variety of chronological distinctions the Kyoto Protocol requires, such as subdivisions into years and sessions.
 
-It was initially decided to use a global service. It would perform most of the logic integral to coordinating time-driven activities, and would be layered on top of Presage2’s integrated SimTime object. However, it is necessary for agents to be able to query for information regarding the current year and session in order to make important strategic and behavioral decisions. Presage2 enforces that agents (participants) are unable to communicate directly with global services. While agents can act on the environment and affect services, performing the reverse is somewhat more complex.
+It was initially decided to use a global service. It would perform most of the logic integral to coordinating time-driven activities, and would be layered on top of Presage2's integrated SimTime object. However, it is necessary for agents to be able to query for information regarding the current year and session in order to make important strategic and behavioural decisions. Presage2 enforces that agents (participants) are unable to communicate directly with global services. While agents can act on the environment and affect services, performing the reverse is somewhat more complex.
 
 At this stage, it would seem a participant time service would be more appropriate, since participant services can communicate directly with agents. However, another key functionality of the time service is the publishing of new events, both for the end of years and sessions, which trigger key monitoring, sanctioning, reporting, and architectural actions essential to the managed nature of the Kyoto Protocol. Unfortunately, implementation is not in place within Presage2 for participant services to generate (or interact with) the EventBus class, the object essential to publishing or receiving events.
 
-With these restrictions in mind, the time service was subdivided into two separate services.   The participant service communicates with agents and relays information regarding the current year and session, among other minor time-related information gathering tasks. The global service is the backbone of the time service, generating new year and session events for the monitoring and targeting services to hook onto. It also carries out calculations to derive the current year and session from the discrete simulation time and communicates this information to the participant service.
+With these restrictions in mind, the time service was subdivided into two separate services. The participant service communicates with agents and relays information regarding the current year and session, among other minor time-related information gathering tasks. The global service is the backbone of the time service, generating new year and session events for the monitoring and targeting services to hook onto. It also carries out calculations to derive the current year and session from the discrete simulation time and communicates this information to the participant service.
 
-Both classes extend from Presage2’s predefined EnvironmentService class, and use Google’s Guice injection systems for initialization and, in the global service’s case, to register with the EventBus.
+Both classes extend from Presage2's predefined EnvironmentService class, and use Google's Guice injection systems for initialisation and, in the global service's case, to register with the EventBus.
 
 \subsubsection{Monitor}
 
-The monitor’s purpose is to regularly check whether countries are meeting their targets and randomly check for false carbon emission reports. If either case is true, a scaling sanction is applied to the country.
+The monitor's purpose is to regularly check whether countries are meeting their targets and randomly check for false carbon emission reports. If either case is true, a scaling sanction is applied to the country.
 
 We were initially unsure whether the monitor should be an independent agent or an environment service. We settled on making it a service, so that it could listen to an event that would trigger the monitoring as agent are unable to do so.
 
@@ -558,7 +709,7 @@ In order for any simulation to have a starting point, data must be imported cont
 
 \subsubsection{\textsc{csv} Import and Export Functionality}
 
-To get data in and out of the system \textsc{csv} (Comma Separated Value) files are used. This is a convenient method of transferring data as the \textsc{csv} file can be opened and edited in spreadsheet software such as Microsoft Excel. Data collected on countries of the world is inserted into the simulations, as are parameters from ‘default’ \textsc{csv} files. Once these are in the database, the \textsc{ui} can copy and edit them. Simulations can then be exported as a backup or to transfer them to another database. This functionality underpins the whole simulation by providing an easy way to get a huge amount of data in and out of the system quickly, easily and reliably.
+To get data in and out of the system \textsc{csv} (Comma Separated Value) files are used. This is a convenient method of transferring data as the \textsc{csv} file can be opened and edited in spreadsheet software such as Microsoft Excel. Data collected on countries of the world is inserted into the simulations, as are parameters from 'default' \textsc{csv} files. Once these are in the database, the \textsc{ui} can copy and edit them. Simulations can then be exported as a backup or to transfer them to another database. This functionality underpins the whole simulation by providing an easy way to get a huge amount of data in and out of the system quickly, easily and reliably.
 
 \subsubsection{Simulation Editor \textsc{ui}}
 
