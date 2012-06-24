@@ -55,7 +55,7 @@ public class USAgent extends AbstractCountry {
 	
 	//private ParticipantTimeService timeService;
 
-	private boolean debug = true;
+	private boolean debug = false;
 	private static boolean DecrementAttitude = true;
 	
 
