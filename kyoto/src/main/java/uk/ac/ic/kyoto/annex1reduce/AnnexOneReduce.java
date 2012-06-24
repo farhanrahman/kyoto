@@ -274,6 +274,7 @@ public class AnnexOneReduce extends AbstractCountry {
 		TradeType type = offer.getOfferType();
 
 		double quantity = offer.getOfferQuantity();
+		double unitCost = offer.getOfferUnitCost();
 
 		if (type == TradeType.BUY || type == TradeType.INVEST) {
 			buyCarbonQuantity -= quantity;
@@ -281,12 +282,23 @@ public class AnnexOneReduce extends AbstractCountry {
 			sellCarbonQuantity -= quantity;
 		}
 
+		if (type == TradeType.BUY) {
+			logger.info(getName() + " just bought " + Double.toString(quantity)
+					+ " @ " + Double.toString(unitCost) + " per unit");
+		} else if (type == TradeType.INVEST) {
+			logger.info(getName() + " just invested into CDM " + Double.toString(quantity)
+					+ " @ " + Double.toString(unitCost) + " per unit");
+		} else if (type == TradeType.SELL) {
+			logger.info(getName() + " just sold " + Double.toString(quantity)
+					+ " @ " + Double.toString(unitCost) + " per unit");
+		}
+
 		// Recalculate everything
 		needToSimulate = true;
 	}
 
 	private boolean marketEnabled = true;
-	
+
 	private void disableMarket() {
 		marketEnabled = false;
 	}
@@ -311,7 +323,7 @@ public class AnnexOneReduce extends AbstractCountry {
 		if (marketEnabled == false) {
 			return Double.MAX_VALUE / 100000000000.0;
 		}
-//		return 100;
+		// return 100;
 		return marketData.getBuyingPrice();
 	}
 
@@ -331,7 +343,7 @@ public class AnnexOneReduce extends AbstractCountry {
 		if (marketEnabled == false) {
 			return 0.0;
 		}
-//		return 2000;
+		// return 2000;
 		return marketData.getSellingPrice();
 	}
 
@@ -424,9 +436,10 @@ public class AnnexOneReduce extends AbstractCountry {
 		if (m_industryPrice > 0) {
 
 			double m_carbonIncrease = 0;
-			
+
 			try {
-				m_carbonIncrease = energyUsageHandler.calculateCarbonIndustryGrowth(m_industryPrice);
+				m_carbonIncrease = energyUsageHandler
+						.calculateCarbonIndustryGrowth(m_industryPrice);
 				energyUsageHandler.investInCarbonIndustry(m_industryPrice);
 			} catch (NotEnoughCashException e) {
 				logger.warn(e);
