@@ -13,7 +13,7 @@ public final class Constants {
 	public static final double	EXPECTED_SALES_INITIAL = 0.5;
 	
 	// To cheat or not to cheat?
-	public static final boolean	CHEATER = true;
-	public static final int		ALLOWED_TIMES_CAUGHT = 3;
+	public static final double	CHEATERS_PERCENTAGE = 0.1;
+	public static final int		MAX_ALLOWED_TIMES_CAUGHT = 5;
 	
 }
