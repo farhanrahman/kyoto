@@ -442,6 +442,9 @@ public class USAgent extends AbstractCountry {
 				
 		}
 		*/
+		if(isKyotoMember() == KyotoMember.ANNEXONE) {
+			if(debug) logger.info("yearlyFunction: Current KyotoMember");
+		}
 		
 		if (shouldLeave) {
 			try {
