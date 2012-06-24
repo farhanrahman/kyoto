@@ -130,18 +130,13 @@ public class NonAnnexOne extends AbstractCountry {
 			if (currentAvailableArea()=="Safe")
 			{
 				logger.info("CDM Absorb transaction");
-				return true;
-				
-				
+				return true;				
 			}
 			else
-			{
-				logger.info("CDM Reduce transaction");
 				return false;
-				
-			}
 		}
 		else
+			logger.info("CDM Reduce transaction");
 			return true;
 	}
 	
