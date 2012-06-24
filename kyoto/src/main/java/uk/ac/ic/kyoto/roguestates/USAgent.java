@@ -83,7 +83,10 @@ public class USAgent extends AbstractCountry {
 				DoEnergyInvestments();
 				DoCarbonReduction();					
 			}
+<<<<<<< HEAD
+=======
 		}
+>>>>>>> 93faa91c1781407245616f044e5df31f69b3cdd3
 			
 			/*
 			// if the party might lose even after meeting targets
@@ -92,6 +95,8 @@ public class USAgent extends AbstractCountry {
 				// invest whatever the public want
 			}	
 			*/			
+<<<<<<< HEAD
+=======
 			
 			
 		if (isKyotoMember() == KyotoMember.ANNEXONE) {
@@ -135,6 +140,7 @@ public class USAgent extends AbstractCountry {
 				}
 				broadcastSellOffer(totalFreeOffset, actualInvestment / totalFreeOffset);
 			}
+>>>>>>> 93faa91c1781407245616f044e5df31f69b3cdd3
 		}
 		logger.info("behaviour: Returning");
 	}
@@ -264,6 +270,9 @@ public class USAgent extends AbstractCountry {
 		}
 	}
 	
+<<<<<<< HEAD
+	/*
+=======
 	private double getTradeFactorDifference() {
 		int quarterLength = timeService.getTicksInYear() / 4;
 		int quarter=1;
@@ -291,6 +300,7 @@ public class USAgent extends AbstractCountry {
 	
 	/*
 >>>>>>> ee451a1d79db28b380ecbc899fca92703b01e91d
+>>>>>>> 93faa91c1781407245616f044e5df31f69b3cdd3
 	private double CheckInvestmentAmount(double investmentNeeded) {
 		double InvestAmount;
 		if(investmentNeeded > this.getAvailableToSpend()) { // check we have enough money
