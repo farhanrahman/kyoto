@@ -267,8 +267,6 @@ public class USAgent extends AbstractCountry {
 		}
 	}
 	
-	/*
-=======
 	private double getTradeFactorDifference() {
 		int quarterLength = timeService.getTicksInYear() / 4;
 		int quarter=1;
@@ -295,8 +293,6 @@ public class USAgent extends AbstractCountry {
 	}
 	
 	/*
->>>>>>> ee451a1d79db28b380ecbc899fca92703b01e91d
->>>>>>> 93faa91c1781407245616f044e5df31f69b3cdd3
 	private double CheckInvestmentAmount(double investmentNeeded) {
 		double InvestAmount;
 		if(investmentNeeded > this.getAvailableToSpend()) { // check we have enough money
