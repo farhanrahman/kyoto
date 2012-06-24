@@ -74,25 +74,39 @@ public class RogueStateTest extends InjectedSimulation {
 	@Override
 	protected void addToScenario(Scenario s) {
 		
-		// Germany Stats
-		final double landArea = 348672;
-		final double arableLandArea = 115698;
-		final double GDP = 1976272728895.0;
-		final double energyOutput = 1054601548;
-		final double carbonOutput = 895533000;
-		final double GDPRate = -0.0606;
+		// Russia Stats
+		final double landArea = 16377742;
+		final double arableLandArea = 1218599;
+		final double GDP = 2.41602E+11;
+		final double energyOutput = 1571812255.0;
+		final double carbonOutput = 1511270000.0;
+		final double GDPRate = -0.0481;
+
+		//className,name,ISO,landArea,arableLandArea,GDP,GDPRate,energyOutput,carbonOutput,carbonOutput1990
+		//AnnexOneSustain,Russia,RUS,16377742,1218599,2.41602E+11,-0.0481,1571812255,1511270000,2220721000	
+		String name1 = "Russia";
+		String ISO1 = "RUS";
 		
-			String name1 = "Russia";
-			String ISO1 = "RU";
-			AbstractParticipant p1 = new NonAnnexOne(Random.randomUUID(), name1, ISO1, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput);
-			s.addParticipant(p1);
-			CarbonData1990.addCountry(ISO1, 928327000);
+		AbstractParticipant p1 = new NonAnnexOne(Random.randomUUID(), name1, ISO1, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput);
+		s.addParticipant(p1);
+		CarbonData1990.addCountry(ISO1, 2220721000.0);
+		
+		// US Stats
+		final double landArea2 = 9161966;
+		final double arableLandArea2 = 1650062;
+		final double GDP2 = 8.741E+12;
+		final double energyOutput2 = 6304070667.0;
+		final double carbonOutput2 = 5449078000.0;
+		final double GDPRate2 = 0.0492;		
 			
-			String name2 = "US";
-			String ISO2 = "US";
-			AbstractParticipant p2 = new USAgent(Random.randomUUID(), name2, ISO2, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput);
-			s.addParticipant(p2);
-			CarbonData1990.addCountry(ISO2, 131245789);
+		//className,name,ISO,landArea,arableLandArea,GDP,GDPRate,energyOutput,carbonOutput,carbonOutput1990			
+		//USAgent,United States,USA,9161966,1650062,8.741E+12,0.0492,6304070667,5449078000,4879376000		
+		String name2 = "United States";
+		String ISO2 = "USA";
+		
+		AbstractParticipant p2 = new USAgent(Random.randomUUID(), name2, ISO2, landArea2, arableLandArea2, GDP2, GDPRate2, energyOutput2, carbonOutput2);
+		s.addParticipant(p2);
+		CarbonData1990.addCountry(ISO2, 4879376000.0);
 		
 	}
 }
