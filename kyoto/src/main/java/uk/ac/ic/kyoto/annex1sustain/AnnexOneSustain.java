@@ -39,8 +39,6 @@ public class AnnexOneSustain extends AbstractCountry {
 	protected double	carbonToReduce;				// Carbon we have to reduce if sale was successful
 	protected double 	carbonToAbsorb;				// Carbon we have to absorb if sale was successful
 	protected Semaphore tradeSemaphore;				// Semaphore making sure only one trade happens at any given time
-	protected double	reportedCarbonOutput;		// Carbon Output reported, might be true or not if cheating
-	
 	
 	//================================================================================
     // Constructor / Initialisation
@@ -363,10 +361,10 @@ public class AnnexOneSustain extends AbstractCountry {
 							logger.info(name + ": Leaving Kyoto, my target is below my emissions and can't do anything about it");
 						}
 					}
-					// If a cheater, leave Kyoto if have been caught constant number of times
+					// If a cheater, leave Kyoto if have been caught too many times
 					else {
 						int timesCaughtCheating = this.getTimesCaughtCheating();
-						logger.info(name + "I have benn caught cheating " + timesCaughtCheating + " times");
+						logger.info(name + "I have been caught cheating " + timesCaughtCheating + " times");
 						if (timesCaughtCheating > Constants.ALLOWED_TIMES_CAUGHT) {
 							leaveKyoto();
 							logger.info(name + ": Leaving Kyoto, I have been caught cheating too many times");
@@ -388,13 +386,16 @@ public class AnnexOneSustain extends AbstractCountry {
 	
 	@Override
 	protected double getReportedCarbonOutput() {
-		// If not a cheater, report true
-		if (Constants.CHEATER == false) {
-			return this.getCarbonOutput();
+		double realCarbonOutput = this.getCarbonOutput();
+		double requiredCarbonOutput = this.getEmissionsTarget() - this.getCarbonAbsorption() - this.getCarbonOffset();
+		// If not a cheater or within target, report true value
+		if (Constants.CHEATER == false || realCarbonOutput < requiredCarbonOutput) {
+			return realCarbonOutput;
 		}
-		// If cheater, report that will meet target exactly
+		// Else, return value that matches the target exactly
 		else {
-			return (this.getEmissionsTarget() - this.getCarbonAbsorption() - this.getCarbonOffset());
+			logger.info(name + ": I am cheating, reporting " + requiredCarbonOutput + " instead of the real value of " + realCarbonOutput);
+			return requiredCarbonOutput;
 		}
 	}
 	
