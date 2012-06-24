@@ -29,17 +29,16 @@ On the other hand, annex I sustain countries are reluctant to reduce their carbo
 The strategy contains three steps, taken every year in order:
 
 \begin{description}
-\item[1. Invest in industry] \hfill \\
-Part of a year's budget is reserved for increasing the economy. Since this group represents mostly newly-developed countries, this is prioritised to promote long term growth.
+	\item[1. Invest in industry] \hfill \\
+	Part of a year's budget is reserved for increasing the economy. Since this group represents mostly newly-developed countries, this is prioritised to promote long term growth.
 
-As outlined earlier, the investment must be accompanied with carbon reduction or absorption, so that overall carbon emissions do not increase. To achieve that, a specific point is found for which total price of investments in industry and matching emission decrease is equal to the reserved budget.
+	As outlined earlier, the investment must be accompanied with carbon reduction or absorption, so that overall carbon emissions do not increase. To achieve that, a specific point is found for which total price of investments in industry and matching emission decrease is equal to the reserved budget.
 
-\item[2. Sell carbon credits] \hfill \\
-If the emissions of the country are lower than the target for a given year, the country will accumulate carbon offset, representing the "unused" emissions. The agents will attempt to sell all of these credits. Since carbon trading is essentially an open market, setting an average price can be challenging. To maximise profits from sales, the agents will start with a high asking price, reducing it gradually as the year progresses if no one is interested in buying, and increasing it when the sales go well.
+	\item[2. Sell carbon credits] \hfill \\
+	If the emissions of the country are lower than the target for a given year, the country will accumulate carbon offset, representing the `unused' emissions. The agents will attempt to sell all of these credits. Since carbon trading is essentially an open market, setting an average price can be challenging. To maximise profits from sales, the agents will start with a high asking price, reducing it gradually as the year progresses if no one is interested in buying, and increasing it when the sales go well.
 
-\item[3. Invest in emissions reduction] \hfill \\
-When a country has no credits to sell anymore, but there is still demand for carbon offset on the market, it may decide to invest in carbon reduction or absorption to generate additional carbon offset First, it estimates how many of the generated units can possibly be sold during the current session, assuming the market price persists. If the estimated profit is higher than cost of the investment, the country will proceed with it. Should this occur, the country will reduce its emissions by the end of the session (reducing global output as an incidental benefit), and hence will end up with a target higher than actual emissions in the next session, just as in the previous one. If this is the case, it will stay in Kyoto for the next session.
-
+	\item[3. Invest in emissions reduction] \hfill \\
+	When a country has no credits to sell anymore, but there is still demand for carbon offset on the market, it may decide to invest in carbon reduction or absorption to generate additional carbon offset First, it estimates how many of the generated units can possibly be sold during the current session, assuming the market price persists. If the estimated profit is higher than cost of the investment, the country will proceed with it. Should this occur, the country will reduce its emissions by the end of the session (reducing global output as an incidental benefit), and hence will end up with a target higher than actual emissions in the next session, just as in the previous one. If this is the case, it will stay in Kyoto for the next session.
 \end{description}
 
 \paragraph{Annex I (Reduce)}
@@ -81,12 +80,12 @@ Nevertheless, the Non Annex I behaviour was implemented such that they do care a
 The following keywords will be used to describe the general behaviour of Non Annex 1 countries:
 
 \begin{description}
-\item[1. energy\_aim:] the energy output the country wants to reach by the end of the year.
-\item[2. times\_aim\_met:] how many consecutive times the energy output aim was met.
-\item[3. aim\_success:] variable that represents whether the country met its energy target or not.
-\item[4. green\_care:] variable that controls if the country cares or not about the environment.
-\item[5. green\_lands:] variable that controls whether the country has actually met its environmental commitments.
-\item[6. environment\_friendly\_target:] if it exists, variable that stores the country's carbon emission target. 
+	\item[1. energy\_aim:] the energy output the country wants to reach by the end of the year.
+	\item[2. times\_aim\_met:] how many consecutive times the energy output aim was met.
+	\item[3. aim\_success:] variable that represents whether the country met its energy target or not.
+	\item[4. green\_care:] variable that controls if the country cares or not about the environment.
+	\item[5. green\_lands:] variable that controls whether the country has actually met its environmental commitments.
+	\item[6. environment\_friendly\_target:] if it exists, variable that stores the country's carbon emission target. 
 \end{description}
 
 The country starts by having a policy of increasing its energy output as shown in Figure X whilst trying to meet an internally set carbon emission target.
@@ -101,8 +100,8 @@ The country starts by having a policy of increasing its energy output as shown i
 Each year, the country calculates the difference between its achieved energy output and the target aim that was set the previous year. The difference is then used to estimate the amount of money to invest in carbon industry each tick in order to reach the required energy output. Before the country proceeds with the investment, certain conditions have to be met:
 
 \begin{itemize}
-\item It has the available cash to spend.
-\item If the country has decided to care about the environment, the increase in carbon output due to the investment should not lead to its emission exceeding the set target.
+	\item It has the available cash to spend.
+	\item If the country has decided to care about the environment, the increase in carbon output due to the investment should not lead to its emission exceeding the set target.
 \end{itemize}
 
 If the latter condition is not met, then the country tries to invest in carbon absorption or carbon reduction in order to decrease its carbon emissions. However, the country will switch to non environmental friendly policies if it does not have enough money.
@@ -112,8 +111,8 @@ Non Annex I countries take part in Clean Development Mechanisms. This allows Ann
 In other words, Annex I countries use Non Annex I land area and carbon output to reduce their own emissions in order to meet their targets in the Kyoto Protocol. There are two ways in which countries can invest:
  
 \begin{description}
-\item[Carbon Absorption] Decrease available land area, increase carbon absorption
-\item[Carbon Reduction] Carbon output decreases
+	\item[Carbon Absorption] Decrease available land area, increase carbon absorption
+	\item[Carbon Reduction] Carbon output decreases
 \end{description}
  
 The amount of carbon output to be changed/given to the Annex I country depends on whether the Non Annex I countries meets its energy output aim.
@@ -154,54 +153,57 @@ Once the target is set, the agent sets about choosing actions. The agent aims to
 
 The cost of carbon reduction for a country depends on its ratio of carbon output to energy output, which can be described as a dirty industry percentage:
 
-\begin{center}
-Dirty Industry = Carbon Output / Energy Output
-\end{center}
+\begin{align*}
+Dirty~Industry = Carbon Output~/~Energy Output
+\end{align*}
 
 The less dirty our industry is, the more expensive it gets to clean it further. Therefore, it is reasonable to use a measure of clean industry:
 
-\begin{center}
-Clean Industry = 1 - (Carbon Output / Energy Output)
-\end{center}
+\begin{align*}
+Clean~Industry = 1 - (Carbon Output~/~Energy~Output)
+\end{align*}
  
 The relationship between the cost of reducing carbon output by one unit and the percentage of 
-clean industry at a given moment is given in Figure X:
+clean industry at a given moment is given in Figure~\ref{fig:carbon_reduction}:
 
-%
-% TODO: Insert figure here
-%
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.6\textwidth]{img/carbon-reduction.png}
+	\caption{Price of carbon reduction}
+	\label{fig:carbon_reduction}
+\end{figure}
 
 Where:
 \begin{itemize}
-\item a: cost of reducing carbon output by 1 with 0\% clean industry (min cost, constant)
-\item b: cost of reducing carbon output by 1 with 100\% clean industry (max cost, constant)
-\item x0: clean industry percentage before investment
-\item x1: clean industry percentage after investment
+	\item a: cost of reducing carbon output by 1 with 0\% clean industry (min cost, constant)
+	\item b: cost of reducing carbon output by 1 with 100\% clean industry (max cost, constant)
+	\item x0: clean industry percentage before investment
+	\item x1: clean industry percentage after investment
 \end{itemize}
 
  
 Hence, we can calculate cost of single unit investment at specific clean industry percentage using the following formula:
 
-\begin{center}
-Unit Cost = a + ((b - a) * x)
-\end{center}
+\begin{align*}
+Unit~Cost = a + ((b - a) * x)
+\end{align*}
 
 %
 % TODO: Fix reference
 %
 
-Since the cost will increase linearly with every unit invested, we can find the average cost for the whole investment as the average of the initial and final cost (based on the x0 and x1 values). This is represented by the red line on Figure X (above).
+Since the cost will increase linearly with every unit invested, we can find the average cost for the whole investment as the average of the initial and final cost (based on the x0 and x1 values). This is represented by the red line on Figure~\ref{fig:carbon_reduction}.
  
-\begin{center}
-Average Cost = ((a + ((b - a) * x1) - (a + ((b-a) * x0))) / 2
-ARROW THING Average  Cost = (a + ((b - a) * (x1 - x0))) / 2
-\end{center}
+\begin{align*}
+Average Cost &= ((a + ((b - a) * x1) - (a + ((b-a) * x0))) / 2 \\
+&\Leftrightarrow Average  Cost = (a + ((b - a) * (x1 - x0))) / 2
+\end{align*}
 
 We can now calculate the total cost of a carbon reduction action by multiplying the average unit cost by the amount required by the country.
 
 \subparagraph{Reduction cost estimate}
 
-This "inverse" operation is mathematically solved with a quadratic equation. However, this is difficult to implement and is error-prone due to double arithmetic in Java. Instead, a binary search bounded between 0 and the current carbon output was used. In each iteration, the function calls the \texttt{getInvestmentRequired()} function with a hypothetical carbon reduction as parameter. It then adjusts the amount of reduction the country will receive depending on whether the returned value is higher or lower than the actual investment. Since there are 30 iterations, it will produce a an accurate result providing the current carbon output is less than 2$^{30}$.
+This `inverse' operation is mathematically solved with a quadratic equation. However, this is difficult to implement and is error-prone due to double arithmetic in Java. Instead, a binary search bounded between 0 and the current carbon output was used. In each iteration, the function calls the \texttt{getInvestmentRequired()} function with a hypothetical carbon reduction as parameter. It then adjusts the amount of reduction the country will receive depending on whether the returned value is higher or lower than the actual investment. Since there are 30 iterations, it will produce a an accurate result providing the current carbon output is less than 2$^{30}$.
   
 This function allows participants to estimate and compare the profitability of a carbon reduction investment. As it is not used by the investment function itself, the lack of absolute accuracy is not crucial.
 
@@ -265,23 +267,23 @@ When a participant broadcasts a carbon trading offer then the type of the Offer 
 object that \texttt{OfferMessage} encapsulates) is set to either:
  
 \begin{itemize}
-\item BUY: If participant wants to buy carbon offset.
-\item SELL: If participant wants to sell carbon offset.
+	\item \texttt{BUY}: If participant wants to buy carbon offset.
+	\item \texttt{SELL}: If participant wants to sell carbon offset.
 \end{itemize}
 
 For Clean Development Mechanisms, the trade protocol allows the participant to advertise whether they want other countries to invest in their industry to reduce carbon emissions. When a participant wants to advertise about CDM then the following types need to be assigned to the \texttt{OfferMessage} Offer type:
 
 \begin{itemize}
-\item INVEST: participant wants to invest in another country.
-\item RECEIVE: participant is asking for other countries to invest in their industry/country.
+	\item \texttt{INVEST}: participant wants to invest in another country.
+	\item \texttt{RECEIVE}: participant is asking for other countries to invest in their industry/country.
 \end{itemize}
 
 It is also further specified whether the form of \textsc{cdm} is for carbon reduction or carbon absorption, which restricts the participant to choose the following investment types:
 
 \begin{itemize}
-\item ABSORB: Whether the investment will be used to reduce carbon emissions by investing in absorption techniques.
-\item REDUCE: Whether the investment will be used to reducing carbon emissions via investing in carbon reduction techniques.
-\item INVALID: If investment type does not exists as it is a buy or sell carbon offer.
+	\item \texttt{ABSORB}: Whether the investment will be used to reduce carbon emissions by investing in absorption techniques.
+	\item \texttt{REDUCE}: Whether the investment will be used to reducing carbon emissions via investing in carbon reduction techniques.
+	\item \texttt{INVALID}: If investment type does not exists as it is a buy or sell carbon offer.
 \end{itemize}
 
 \paragraph{Functionality}
@@ -289,28 +291,37 @@ It is also further specified whether the form of \textsc{cdm} is for carbon redu
 Trade Protocol works in the following ways:
 
 \begin{enumerate}
-\item A participant who is willing to engage in a trade sends a broadcast message using the \texttt{network} object provided to every agent. This message contains information about the trade as they wish it be carried out.
-\item Another participant who is interested in the offer broadcasted can start a protocol conversation with the broadcaster. They can reply with slightly altered offers, to simulate a minor form of negotiation.
-\item The broadcaster can then accept or reject the offer that is proposed by the initiator.
+	\item A participant who is willing to engage in a trade sends a broadcast message using the \texttt{network} object provided to every agent. This message contains information about the trade as they wish it be carried out.
+	\item Another participant who is interested in the offer broadcasted can start a protocol conversation with the broadcaster. They can reply with slightly altered offers, to simulate a minor form of negotiation.
+	\item The broadcaster can then accept or reject the offer that is proposed by the initiator.
 \end{enumerate}
 
 The process is better illustrated with the following diagrams:
 
-%
-% TODO: Figure 1 Broadcaster multicasts a message to other agents
-%
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.4\textwidth]{img/protocol1.png}
+	\caption{Broadcaster multicasts a message to other agents}
+	\label{fig:protocol1}
+\end{figure}
 
 Other agents will receive the offer message and can choose to start a \texttt{TradeProtocolFSM} conversation with the broadcaster.
 
-%
-% TODO: Figure 2 Tom and Yiannis wishes to respond to the broadcast message
-%
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.4\textwidth]{img/protocol2.png}
+	\caption{Tom and Yiannis wishes to respond to the broadcast message}
+	\label{fig:protocol2}
+\end{figure}
 
 In this example, only Tom and Yiannis decided to respond to the broadcast message sent by Peter.
 
-%
-% TODO: Figure 3 Peter decides to respond
-%
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.4\textwidth]{img/protocol3.png}
+	\caption{Peter decides to respond}
+	\label{fig:protocol3}
+\end{figure}
 
 Agent Peter can then decide whom to finish the trade with. In this case he decides to accept the offer initiated by Yiannis.
 
@@ -322,13 +333,19 @@ In the event that a trade is unable to be carried through to the end, possibly c
 
 The protocol has two different state machines that are used by the initiator and the broadcaster. The state machines are as follows: 
 
-%
-% TODO: Figure 4 Initiator Finite State Machine
-%
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.6\textwidth]{img/protocol-fsm-1.png}
+	\caption{Initiator \textsc{fsm}}
+	\label{fig:protocol-fsm-1}
+\end{figure}
 
-%
-% TODO: Figure 5 Responder Finite State Machine
-%
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.6\textwidth]{img/protocol-fsm-2.png}
+	\caption{responder \textsc{fsm}}
+	\label{fig:protocol-fsm-2}
+\end{figure}
 
 Figure-X and figure-X shows the state machines used by the Initiator and Responder respectively along with the transitions labelled on the arrows. The transitions in an \texttt{FSMProtocol} happen when a participant receives a message.
 
@@ -337,14 +354,14 @@ Figure-X and figure-X shows the state machines used by the Initiator and Respond
 Both the initiator and the responder have a single \texttt{START} state as required by the \texttt{FSMProtocol}. The initiator has two end states, which are \texttt{TIMEOUT} and \texttt{TRADE\_DONE}. Each transition results in the participant performing a particular action of sending back a message to the responder, which makes the responder transit to the next state.
 
 \begin{description}
-\item[1. \texttt{PROPOSE\_TRADE}:]
-When the participant responds to the offer, it transitions to the \texttt{TRADE\_PROPOSED} state and sends a Unicast message to the broadcaster waiting for its response.
-\item[2. \texttt{TIMED\_OUT}:]
-From the \texttt{TRADE\_PROPOSED} state a timeout of 3 ticks is set so that the initiator times out into an error state.
-\item[3. \texttt{TRADE\_ACCEPTED}:]
-If the responder accepts the trade proposal, the Trade Protocol handles the trade completion through a function called \texttt{handleTradeCompletion()}. If anything goes wrong while handling the trade completion then the participant (initiator) transits to the \texttt{TRADE\_DONE} state by sending a Unicast message to the responder to revert the changes. If the handling of trade completion works well then the participant transitions to the end state \texttt{TRADE\_DONE} by sending a confirmation message to the responder.
-\item[4. \texttt{TRADE\_REJECTED}:]
-If the trade was rejected by the responder then the participant (initiator) transits to the \texttt{TRADE\_DONE} state by sending a confirmation unicast message to the responder that it has received the message.
+	\item[1. \texttt{PROPOSE\_TRADE}:]
+	When the participant responds to the offer, it transitions to the \texttt{TRADE\_PROPOSED} state and sends a Unicast message to the broadcaster waiting for its response.
+	\item[2. \texttt{TIMED\_OUT}:]
+	From the \texttt{TRADE\_PROPOSED} state a timeout of 3 ticks is set so that the initiator times out into an error state.
+	\item[3. \texttt{TRADE\_ACCEPTED}:]
+	If the responder accepts the trade proposal, the Trade Protocol handles the trade completion through a function called \texttt{handleTradeCompletion()}. If anything goes wrong while handling the trade completion then the participant (initiator) transits to the \texttt{TRADE\_DONE} state by sending a Unicast message to the responder to revert the changes. If the handling of trade completion works well then the participant transitions to the end state \texttt{TRADE\_DONE} by sending a confirmation message to the responder.
+	\item[4. \texttt{TRADE\_REJECTED}:]
+	If the trade was rejected by the responder then the participant (initiator) transits to the \texttt{TRADE\_DONE} state by sending a confirmation unicast message to the responder that it has received the message.
 \end{description}
 
 \paragraph{Responder \textsc{fsm}}
@@ -352,14 +369,14 @@ If the trade was rejected by the responder then the participant (initiator) tran
 Figure-X shows the \textsc{fsm} that is used by the responder. Upon receiving a message form the initiator. There is only one \texttt{START} state and the three end states are \texttt{REVERT}, \texttt{TRADE\_DONE} and \texttt{RESPONDER\_TIMEOUT}. Similar to the initiator, the transitions happen with the participant sending a unicast message to the initiator agent.
  
 \begin{description}
-\item[1. \texttt{RESPOND\_TO\_TRADE}:]
-This transition occurs when the initiator spawns a message, which makes the responder transition to the \texttt{WAIT\_FOR\_CONFIRMATION} state. If the responder accepts the exchange then it transitions to the next state by sending a unicast message to the initiator that it accepted the trade, otherwise it transitions to the next state by sending a unicast message to the initiator that it has rejected the offer. Once the participant makes the decision to accept the offer then the \texttt{handleTradeCompletion()} function is called to adjust the carbon offset and cash of the responder. If things fail for reasons such as not enough cash exception from the responder then the changes made to the responder’s carbon offset and available to spend will be reverted. Nevertheless, a reject message is sent to the initiator to inform him that the trade was unsuccessful.
-\item[2. \texttt{REVERTING}:]
-If the initiator fails in completing the trade for reasons such as not enough cash exceptions, then the initiator reverts itself and sends a message to the responder. Once the responder receives this message then it goes to the \texttt{REVERT} state via the \texttt{REVERTING} transition. There, it reverts all of the changes since the start of the conversation.
-\item[3. \texttt{CONFIRMATION}:]
-This is a transition to from \texttt{WAIT\_FOR\_CONFIRMATION} to the end state \texttt{TRADE\_DONE} state. This transition happens when either trade was successful or was unsuccessful (i.e. the responder rejected the trade in the first place).
-\item[4. \texttt{RESPONDER\_TIMEOUT}:]
-Timeout condition of 3 ticks from \texttt{WAIT\_FOR\_CONFIRMATION} state to the \texttt{RESPONDER\_TIMEDOUT} state, which is the end and error state of the responder.
+	\item[1. \texttt{RESPOND\_TO\_TRADE}:]
+	This transition occurs when the initiator spawns a message, which makes the responder transition to the \texttt{WAIT\_FOR\_CONFIRMATION} state. If the responder accepts the exchange then it transitions to the next state by sending a unicast message to the initiator that it accepted the trade, otherwise it transitions to the next state by sending a unicast message to the initiator that it has rejected the offer. Once the participant makes the decision to accept the offer then the \texttt{handleTradeCompletion()} function is called to adjust the carbon offset and cash of the responder. If things fail for reasons such as not enough cash exception from the responder then the changes made to the responder’s carbon offset and available to spend will be reverted. Nevertheless, a reject message is sent to the initiator to inform him that the trade was unsuccessful.
+	\item[2. \texttt{REVERTING}:]
+	If the initiator fails in completing the trade for reasons such as not enough cash exceptions, then the initiator reverts itself and sends a message to the responder. Once the responder receives this message then it goes to the \texttt{REVERT} state via the \texttt{REVERTING} transition. There, it reverts all of the changes since the start of the conversation.
+	\item[3. \texttt{CONFIRMATION}:]
+	This is a transition to from \texttt{WAIT\_FOR\_CONFIRMATION} to the end state \texttt{TRADE\_DONE} state. This transition happens when either trade was successful or was unsuccessful (i.e. the responder rejected the trade in the first place).
+	\item[4. \texttt{RESPONDER\_TIMEOUT}:]
+	Timeout condition of 3 ticks from \texttt{WAIT\_FOR\_CONFIRMATION} state to the \texttt{RESPONDER\_TIMEDOUT} state, which is the end and error state of the responder.
 \end{description}
 
 \subsubsection{Time Service}
