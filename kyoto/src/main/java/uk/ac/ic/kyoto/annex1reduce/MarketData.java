@@ -1,6 +1,7 @@
 package uk.ac.ic.kyoto.annex1reduce;
 
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.countries.OfferMessage;
@@ -12,7 +13,7 @@ public class MarketData {
 
 	private OfferHistory offerHistory;
 
-	final private static int TRADE_DATA_TICKS = 10;
+	final private int TRADE_DATA_TICKS = (new Random().nextInt(6)+2);
 	
 	/**
 	 * Struct with info about how much other people are buying for
@@ -92,7 +93,7 @@ public class MarketData {
 			}
 
 			// If the offer is to sell credits or CDM to us
-			else if (type == TradeType.SELL || type == TradeType.INVEST) {
+			else if (type == TradeType.SELL || type == TradeType.RECEIVE) {
 				if (minimumSell > price) {
 					minimumSell = price;
 				}

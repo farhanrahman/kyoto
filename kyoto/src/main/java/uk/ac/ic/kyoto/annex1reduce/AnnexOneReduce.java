@@ -1,6 +1,7 @@
 package uk.ac.ic.kyoto.annex1reduce;
 
 import java.util.UUID;
+
 import uk.ac.ic.kyoto.annex1reduce.CountrySimulator.ActionList;
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.GameConst;
@@ -71,7 +72,10 @@ public class AnnexOneReduce extends AbstractCountry {
 	@Override
 	protected void behaviour() {
 
+		logger.info(getName() + " is updating market info");
 		marketData.update();
+		logger.info("New estimated buy price = " + Double.toString(getMarketBuyUnitPrice(0)));
+		logger.info("New estimated sell price = " + Double.toString(getMarketSellUnitPrice(0)));
 
 		// If the expected buy price has increased by more than 5%, we should
 		// resimulate
@@ -209,7 +213,7 @@ public class AnnexOneReduce extends AbstractCountry {
 					}
 				}
 				// If the offer is to sell credits or CDM to us
-				else if (type == TradeType.SELL || type == TradeType.INVEST) {
+				else if (type == TradeType.SELL || type == TradeType.RECEIVE) {
 					if (buyCarbonQuantity > 0) {
 						if (averagePrice <= 1.025 * buyCarbonUnitPrice) {
 							double amountToBuy = Math.min(buyCarbonQuantity,
@@ -249,7 +253,7 @@ public class AnnexOneReduce extends AbstractCountry {
 
 		double averagePrice = offer.getUnitCost();
 
-		if (type == TradeType.BUY || type == TradeType.INVEST) {
+		if (type == TradeType.BUY || type == TradeType.RECEIVE) {
 			if (averagePrice <= buyCarbonUnitPrice) {
 				if (quantity <= buyCarbonQuantity) {
 					return true;
@@ -277,7 +281,7 @@ public class AnnexOneReduce extends AbstractCountry {
 		double quantity = offer.getOfferQuantity();
 		double unitCost = offer.getOfferUnitCost();
 
-		if (type == TradeType.BUY || type == TradeType.INVEST) {
+		if (type == TradeType.BUY || type == TradeType.RECEIVE) {
 			buyCarbonQuantity -= quantity;
 		} else if (type == TradeType.SELL) {
 			sellCarbonQuantity -= quantity;
@@ -286,7 +290,7 @@ public class AnnexOneReduce extends AbstractCountry {
 		if (type == TradeType.BUY) {
 			logger.info(getName() + " just bought " + Double.toString(quantity)
 					+ " @ " + Double.toString(unitCost) + " per unit");
-		} else if (type == TradeType.INVEST) {
+		} else if (type == TradeType.RECEIVE) {
 			logger.info(getName() + " just invested into CDM "
 					+ Double.toString(quantity) + " @ "
 					+ Double.toString(unitCost) + " per unit");

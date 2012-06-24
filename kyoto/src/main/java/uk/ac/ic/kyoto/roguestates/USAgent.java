@@ -237,7 +237,6 @@ public class USAgent extends AbstractCountry {
 			} 
 			catch (NotEnoughCashException e) {
 				EnergyEnoughCash = false;
-				e.printStackTrace();
 			}
 			
 //			if(this.getAvailableToSpend() < 1000) {
@@ -373,22 +372,14 @@ public class USAgent extends AbstractCountry {
 					carbonReductionHandler.investInCarbonReduction(ReduceBy);
 				} catch (NotEnoughCarbonOutputException e) {
 					EnoughCarbon = false;
-					e.printStackTrace();
 				} catch (NotEnoughCashException e) {
-					CarbonEnoughCash = false;
+
 					e.printStackTrace();
 				}				
+
 				if(debug) logger.info("CarbonAfter: " + this.getCarbonOutput());
-//			}		
-//		}
-			
-//			if(this.getAvailableToSpend() < 1000) {
-//				if(debug) logger.info("behaviour: Cash below 1000, exiting.");
-//				CarbonEnoughCash = false;
-//			}
-//		}// end while
 	}
-	
+
 	private double getTradeFactorDifference() {
 		int quarterLength = timeService.getTicksInYear() / 4;
 		int quarter=1;
@@ -533,7 +524,7 @@ public class USAgent extends AbstractCountry {
 				leaveKyoto();
 				shouldLeave = false;
 			} catch (CannotLeaveKyotoException e) {
-				e.printStackTrace();
+				if (debug) logger.info("Wasn't able to join Kyoto:");
 			}
 		}
 		
@@ -566,7 +557,7 @@ public class USAgent extends AbstractCountry {
 					logger.info("Trying to join");
 					joinKyoto();
 				} catch (CannotJoinKyotoException e) {
-					e.printStackTrace();
+					if (debug) logger.info("Wasn't able to join Kyoto:");
 				}
 			}
 		}
@@ -823,13 +814,12 @@ public class USAgent extends AbstractCountry {
 				double OfferUnitCost = offerMessage.getOfferUnitCost();				
 				double OfferQuantity = offerMessage.getOfferQuantity();
 				double TradeCost = OfferUnitCost*OfferQuantity;
-				double EquivalentAbsorptionCost = 0;
+				double EquivalentAbsorptionCost;
 				
 				try {
 					EquivalentAbsorptionCost = carbonAbsorptionHandler.getInvestmentRequired(OfferQuantity);
 				} catch (NotEnoughLandException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					EquivalentAbsorptionCost = 0;
 				}
 				double EquivalentReductionCost = carbonReductionHandler.getInvestmentRequired(OfferQuantity);
 				
@@ -894,8 +884,60 @@ public class USAgent extends AbstractCountry {
 	protected boolean acceptTrade(NetworkAddress from, Offer trade) {
 		if(debug) logger.info("acceptTrade: Entering");
 		// TODO Auto-generated method stub
-		if(debug) logger.info("acceptTrade: Returning");
 		
+		if (isKyotoMember() == KyotoMember.ANNEXONE) {
+			double totalOfferCost = trade.getTotalCost();
+			double offerUnits = trade.getQuantity();
+			
+			double absorptionCost;
+			try {
+				absorptionCost = carbonAbsorptionHandler.getInvestmentRequired(offerUnits);
+			} catch (NotEnoughLandException e) {
+				absorptionCost = Double.MAX_VALUE;
+			}
+			
+			double reductionCost = carbonReductionHandler.getInvestmentRequired(offerUnits);
+			
+			double finalInvestment;
+			boolean absorptionCheaper;
+			if (absorptionCost < reductionCost) {
+				finalInvestment = absorptionCost;
+				absorptionCheaper = true;
+			}
+			else {
+				finalInvestment = reductionCost;
+				absorptionCheaper = false;
+			}
+			
+			boolean offsetNeeded = (getCarbonOutput() - getCarbonOffset() - getCarbonAbsorption() > getEmissionsTarget());
+			
+			if (trade.getType() == TradeType.SELL && totalOfferCost < finalInvestment && offsetNeeded && getAvailableToSpend() >= totalOfferCost) {
+				return true;
+			}
+			else if (trade.getType() == TradeType.BUY && totalOfferCost > finalInvestment) {
+				if (absorptionCheaper) {
+					try {
+						carbonAbsorptionHandler.investInCarbonAbsorption(offerUnits);
+					} catch (NotEnoughLandException e) {
+						return false;
+					} catch (NotEnoughCashException e) {
+						return false;
+					}
+				}
+				else {
+					try {
+						carbonReductionHandler.investInCarbonReduction(offerUnits);
+					} catch (NotEnoughCarbonOutputException e) {
+						return false;
+					} catch (NotEnoughCashException e) {
+						return false;
+					}
+				}
+				return true;
+			}
+		}
+		
+		if(debug) logger.info("acceptTrade: Returning at end of function");
 		return false; 
 	}
 	

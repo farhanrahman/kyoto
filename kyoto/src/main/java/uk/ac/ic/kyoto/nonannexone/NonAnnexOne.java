@@ -97,7 +97,6 @@ public class NonAnnexOne extends AbstractCountry {
 	//Function executed every tick that defines the behaviour of the country
 	
 	protected void behaviour() {
-			
 		try 
 		{
 			economy();
@@ -127,17 +126,14 @@ public class NonAnnexOne extends AbstractCountry {
 		
 		if (trade.getInvestmentType() == InvestmentType.ABSORB)
 		{
-			if (currentAvailableArea()=="Safe")
-			{
-				logger.info("CDM Absorb transaction");
-				return true;				
-			}
-			else
-				return false;
-		}
+			logger.info("CDM Absorb transaction");
+			return true;				
+		}	
 		else
+		{
 			logger.info("CDM Reduce transaction");
 			return true;
+		}
 	}
 	
 /************************Functions executed every tick ***************************************************************/
@@ -398,11 +394,17 @@ private void CDM_absorption(double acquire_cash) throws Exception
 {
 
 double change_required; // change in carbon absorption in order to acquire the amount of money specified.
+double necessary_land;
+double available_land;
 
-change_required = carbonAbsorptionHandler.getCarbonAbsorptionChange(acquire_cash);
+necessary_land = carbonAbsorptionHandler.getForestAreaRequired(acquire_cash);
+available_land = getArableLandArea();
 
-
-broadcastInvesteeOffer(change_required,InvestmentType.ABSORB);
+if (necessary_land <= available_land)
+{
+	change_required = carbonAbsorptionHandler.getCarbonAbsorptionChange(acquire_cash);
+	broadcastInvesteeOffer(change_required,InvestmentType.ABSORB);
+}
 
 }
 		
@@ -422,20 +424,5 @@ broadcastInvesteeOffer(change_required,InvestmentType.REDUCE);
 
 }		
 		
-/**************************************************Current Available area status**************************************************************/
-
-//Check available area  in order to choose decision accordingly for accepting to sell credits or plant trees for own sake.
-		private String currentAvailableArea()
-		{
-			
-			if (getArableLandArea() > getLandArea()*(CountryConstants.AREA_LIMIT))
-				return "Safe";
-			else 
-				return "Danger";
-		
-		}
-
-/***************************************************************************************************************/
-
 		
 }		
