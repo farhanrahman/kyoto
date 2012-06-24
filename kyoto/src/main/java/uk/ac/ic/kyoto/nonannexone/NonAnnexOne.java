@@ -128,9 +128,18 @@ public class NonAnnexOne extends AbstractCountry {
 		if (trade.getInvestmentType() == InvestmentType.ABSORB)
 		{
 			if (currentAvailableArea()=="Safe")
+			{
+				logger.info("CDM Absorb transaction");
 				return true;
+				
+				
+			}
 			else
+			{
+				logger.info("CDM Reduce transaction");
 				return false;
+				
+			}
 		}
 		else
 			return true;
