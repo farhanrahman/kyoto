@@ -364,6 +364,17 @@ public class USAgent extends AbstractCountry {
 			}
 		}
 	}
+	
+	@Override
+	protected double getReportedCarbonOutput() {
+		if (isKyotoMember() == KyotoMember.ANNEXONE && getCarbonOutput() > getEmissionsTarget() + getCarbonOffset() + getCarbonAbsorption() && timeService.getCurrentYear() == timeService.getYearsInSession() - 1) {
+			double cheatedOutput = getEmissionsTarget() + getCarbonOffset() + getCarbonAbsorption();
+			return cheatedOutput -= cheatedOutput*0.002;
+		}
+		else {
+			return super.getReportedCarbonOutput();
+		}
+	}
 
 	private void HoldElection() {		
 		if(debug) logger.info("HoldElection: Entering");
