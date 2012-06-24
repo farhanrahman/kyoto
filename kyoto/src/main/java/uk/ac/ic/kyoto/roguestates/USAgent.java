@@ -186,7 +186,6 @@ public class USAgent extends AbstractCountry {
 			} 
 			catch (NotEnoughCashException e) {
 				EnergyEnoughCash = false;
-				e.printStackTrace();
 			}
 			
 //			if(this.getAvailableToSpend() < 1000) {
@@ -300,10 +299,8 @@ public class USAgent extends AbstractCountry {
 					carbonReductionHandler.investInCarbonReduction(ReduceBy);
 				} catch (NotEnoughCarbonOutputException e) {
 					EnoughCarbon = false;
-					e.printStackTrace();
 				} catch (NotEnoughCashException e) {
 					CarbonEnoughCash = false;
-					e.printStackTrace();
 				}
 				
 				if(debug) logger.info("CarbonAfter: " + this.getCarbonOutput());
@@ -460,7 +457,7 @@ public class USAgent extends AbstractCountry {
 				leaveKyoto();
 				shouldLeave = false;
 			} catch (CannotLeaveKyotoException e) {
-				e.printStackTrace();
+				if (debug) logger.info("Wasn't able to join Kyoto:");
 			}
 		}
 		
@@ -491,7 +488,7 @@ public class USAgent extends AbstractCountry {
 				try {
 					joinKyoto();
 				} catch (CannotJoinKyotoException e) {
-					e.printStackTrace();
+					if (debug) logger.info("Wasn't able to join Kyoto:");
 				}
 			}
 		}
@@ -735,13 +732,12 @@ public class USAgent extends AbstractCountry {
 				double OfferUnitCost = offerMessage.getOfferUnitCost();				
 				double OfferQuantity = offerMessage.getOfferQuantity();
 				double TradeCost = OfferUnitCost*OfferQuantity;
-				double EquivalentAbsorptionCost = 0;
+				double EquivalentAbsorptionCost;
 				
 				try {
 					EquivalentAbsorptionCost = carbonAbsorptionHandler.getInvestmentRequired(OfferQuantity);
 				} catch (NotEnoughLandException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					EquivalentAbsorptionCost = 0;
 				}
 				double EquivalentReductionCost = carbonReductionHandler.getInvestmentRequired(OfferQuantity);
 				
@@ -833,7 +829,7 @@ public class USAgent extends AbstractCountry {
 			
 			boolean offsetNeeded = (getCarbonOutput() - getCarbonOffset() - getCarbonAbsorption() > getEmissionsTarget());
 			
-			if (trade.getType() == TradeType.SELL && totalOfferCost < finalInvestment && offsetNeeded) {
+			if (trade.getType() == TradeType.SELL && totalOfferCost < finalInvestment && offsetNeeded && getAvailableToSpend() >= totalOfferCost) {
 				return true;
 			}
 			else if (trade.getType() == TradeType.BUY && totalOfferCost > finalInvestment) {
@@ -859,7 +855,7 @@ public class USAgent extends AbstractCountry {
 			}
 		}
 		
-		if(debug) logger.info("acceptTrade: Returning at final false");
+		if(debug) logger.info("acceptTrade: Returning at end of function");
 		return false; 
 	}
 	
