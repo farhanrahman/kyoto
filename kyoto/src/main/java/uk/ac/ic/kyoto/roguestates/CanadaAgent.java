@@ -207,6 +207,7 @@ public void behaviour() {
 		double carbon_absorbtion;
 		double target=this.getEmissionsTarget();
 		double carbon_change=target-getCarbonOutput()-getCarbonOffset()-getCarbonAbsorption();
+		
 		//check if we can achieve carbon reduction by foresting
 		if(((this.carbonAbsorptionHandler.getCarbonAbsorptionChange(money, land_area))+this.getCarbonOutput()) <= this.getEmissionsTarget() ){
 			System.out.print("We can achieve target");
@@ -221,7 +222,7 @@ public void behaviour() {
 		
 		if(getCarbonOutput() - getCarbonOffset() - getCarbonAbsorption() < target ){
 			System.out.print("Investing not needed");
-		}else{
+		}else {
 			try {
 				this.carbonAbsorptionHandler.investInCarbonAbsorption(this.calc_target());
 			} catch (NotEnoughLandException e) {
@@ -245,15 +246,15 @@ public void behaviour() {
 //				e.printStackTrace();
 //			}
 //		}
-		if (getAvailableToSpend() > 0) {
-			try {
+	//	if (getAvailableToSpend() > 0) {
+			//try {
 				//carbonReductionHandler.invest(availableToSpend*0.1);
-				System.out.println("Spending " + getAvailableToSpend()* 0.1 + " on carbon reduction. Current carbon output is " + getCarbonOutput() + ".");
-			} catch (Exception e) {
-				logger.warn(e.getMessage(), e);
-				e.printStackTrace();
-			}
-		}
+				//System.out.println("Spending " + getAvailableToSpend()* 0.1 + " on carbon reduction. Current carbon output is " + getCarbonOutput() + ".");
+			//} catch (Exception e) {
+				//logger.warn(e.getMessage(), e);
+				//e.printStackTrace();
+			//}
+	//	}
 //		if (availableToSpend > 0) {
 //			try {
 //				energyUsageHandler.investInCarbonIndustry((long) (availableToSpend*0.1));
@@ -269,7 +270,7 @@ public void behaviour() {
 		//System.out.println("My GDPRate is : " + getGDPRate());
 		//System.out.println("My carbon output is : " + getCarbonOutput());
 		//System.out.println("My energy output is : " + getEnergyOutput());
-	}
+	//}
 	
 	@Override
 	protected boolean acceptTrade(NetworkAddress from,Offer offerMessage) {
