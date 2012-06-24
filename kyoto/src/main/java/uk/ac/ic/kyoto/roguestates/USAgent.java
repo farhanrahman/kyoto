@@ -200,7 +200,75 @@ public class USAgent extends AbstractCountry {
 				*/			
 			}
 		//}
+			
+		if (isKyotoMember() == KyotoMember.ANNEXONE) {
+			if (getCarbonOutput() - getCarbonOffset() - getCarbonAbsorption() > getEmissionsTarget()) {
+				double totalDifferenceNeeded = getCarbonOutput() - (getCarbonOffset() + getCarbonAbsorption() + getEmissionsTarget());
+				double absorptionCost;
+				try {
+					absorptionCost = carbonAbsorptionHandler.getInvestmentRequired(totalDifferenceNeeded);
+				} catch (NotEnoughLandException e) {
+					absorptionCost = Double.MAX_VALUE;
+				}
+				double reductionCost = carbonReductionHandler.getInvestmentRequired(totalDifferenceNeeded);
+				double actualInvestment;
+				double factor = getTradeFactorDifference();
+				if (reductionCost < absorptionCost) {
+					actualInvestment = reductionCost - reductionCost*factor;
+				}
+				else {
+					actualInvestment = absorptionCost - absorptionCost*factor;
+				}
+				broadcastBuyOffer(totalDifferenceNeeded, actualInvestment / totalDifferenceNeeded);
+			}
+			else {
+				double totalFreeOffset = getEmissionsTarget() + getCarbonOffset() + getCarbonAbsorption() - getCarbonOutput();
+				double actualInvestment;
+				double factor = getTradeFactorDifference();
+				double absorptionCost;
+				try {
+					absorptionCost = carbonAbsorptionHandler.getInvestmentRequired(totalFreeOffset);
+				} catch (NotEnoughLandException e) {
+					absorptionCost = Double.MAX_VALUE;
+				}
+				
+				double reductionCost = carbonReductionHandler.getInvestmentRequired(totalFreeOffset);
+				
+				if (reductionCost < absorptionCost) {
+					actualInvestment = reductionCost + reductionCost*factor;
+				}
+				else {
+					actualInvestment = absorptionCost + absorptionCost*factor;
+				}
+				broadcastSellOffer(totalFreeOffset, actualInvestment / totalFreeOffset);
+			}
+		}
 		logger.info("behaviour: Returning");
+	}
+	
+	private double getTradeFactorDifference() {
+		int quarterLength = timeService.getTicksInYear() / 4;
+		int quarter=1;
+		int moddedTick = timeService.getCurrentTick() % timeService.getTicksInYear();
+		if (moddedTick >= quarterLength && moddedTick < quarterLength*2)
+			quarter = 2;
+		else if (moddedTick >= quarterLength*2 && moddedTick < quarterLength*3)
+			quarter = 3;
+		else if (moddedTick >= quarterLength*3 && moddedTick < quarterLength*4)
+			quarter = 4;
+		
+		switch (quarter) {
+		case 4:
+			return 0.05;
+		case 3:
+			return 0.1;
+		case 2:
+			return 0.15;
+		case 1:
+			return 0.2;
+		}
+		
+		return 1;
 	}
 	
 	private double CheckInvestmentAmount(double investmentNeeded) {
