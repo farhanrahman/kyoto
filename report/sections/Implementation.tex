@@ -93,9 +93,9 @@ The country starts by having a policy of increasing its energy output as shown i
 
 \begin{align*}
 	&times\_met\_before: \\
-		&0~new\_energy\_aim = previous\_energy\_output + previous\_energy\_output / 8\\
-		&1~new\_energy\_aim = previous\_energy\_output + previous\_energy\_output / 4\\
-		&n~new\_energy\_aim = previous\_energy\_output + previous\_energy\_output / 16exp(-0.693*n)\\
+	&0 \rightarrow new\_energy\_aim = previous\_energy\_output + previous\_energy\_output / 8\\
+	&1 \rightarrow new\_energy\_aim = previous\_energy\_output + previous\_energy\_output / 4\\
+	&n \rightarrow new\_energy\_aim = previous\_energy\_output + previous\_energy\_output / 16exp(-0.693 \times n)\\
 \end{align*}
 
 Each year, the country calculates the difference between its achieved energy output and the target aim that was set the previous year. The difference is then used to estimate the amount of money to invest in carbon industry each tick in order to reach the required energy output. Before the country proceeds with the investment, certain conditions have to be met:
@@ -209,9 +209,9 @@ This function allows participants to estimate and compare the profitability of a
 
 The implementation of carbon absorption is very similar to that of carbon reduction investment. Here, the cost of forestation is inversely proportional to the percentage of area that is unoccupied with respect to entire land area of a country:
 
-\begin{center}
-Occupied Area = 1 - Arable Land Area / Land Area
-\end{center}
+$$
+Occupied~Area= 1 - Arable~Land~Area / Land~Area
+$$
 
 The cost of this action is calculated in the same way as for carbon reduction, with the only difference being the constant values for a and b. Additionally we also now need to calculate the area occupied by newly planted trees. This is done by using a constant specifying how much forest area is needed to absorb single unit of carbon, which is then multiplied by the amount of carbon absorption done.
 
@@ -229,15 +229,15 @@ Each country in our simulation has the ability to influence its economy by inves
 
 The cost of an investment for a given desired growth can be modelled by the following linear function:
 
-\begin{center}
-Cost = Growth * Price of Carbon Investment
-\end{center}
+$$
+Cost = Growth \times Price~of~Carbon~Investment
+$$
 
 Similarly, each participant can also use the handler to query how much economic growth can be achieved for a given cost:
 
-\begin{center}
-Growth = Cost / Price of Carbon Investment
-\end{center}
+$$
+Growth = Cost / Price~of~Carbon~Investment
+$$
 
 Using these two functions, participants can make an informed decision on whether to invest in their industries or decide to reduce it. A country can increase its \textsc{gdp} by building factories which in turn will give them more money to spend in the following year. However, its carbon emissions will also increase as a result.
 
