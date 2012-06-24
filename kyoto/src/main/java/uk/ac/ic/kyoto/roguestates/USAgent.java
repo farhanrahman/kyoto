@@ -8,6 +8,8 @@ import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.GameConst;
 import uk.ac.ic.kyoto.countries.Offer;
 import uk.ac.ic.kyoto.countries.OfferMessage;
+import uk.ac.ic.kyoto.exceptions.CannotJoinKyotoException;
+import uk.ac.ic.kyoto.exceptions.CannotLeaveKyotoException;
 import uk.ac.ic.kyoto.exceptions.NotEnoughCarbonOutputException;
 import uk.ac.ic.kyoto.exceptions.NotEnoughCashException;
 import uk.ac.ic.kyoto.exceptions.NotEnoughLandException;
@@ -305,6 +307,10 @@ public class USAgent extends AbstractCountry {
 		
 		SetTargets(); // by running each year, governing party will need to fulfil cumulatively. 
 		
+		if (debug) logger.info("Recording carbon output of " + getCarbonOutput() + " on year " + timeService.getCurrentYear());
+		
+		emissionsTargetMap.put(timeService.getCurrentYear(), getCarbonOutput());
+		
 		//StoreTargetData();
 		
 		//ProcessTargetData();
@@ -324,8 +330,20 @@ public class USAgent extends AbstractCountry {
 				
 		}
 		*/
+		
+		if (shouldLeave) {
+			try {
+				leaveKyoto();
+				shouldLeave = false;
+			} catch (CannotLeaveKyotoException e) {
+				e.printStackTrace();
+			}
+		}
+		
 		if(debug) logger.info("yearlyFunction: Returning");
 	}
+	
+	private boolean shouldLeave = true;
 	
 	@Override
 	/*
@@ -336,8 +354,41 @@ public class USAgent extends AbstractCountry {
 	 * Carbon offsets are wiped at the beginning of each session. 
 	 */
 	//
-	public void sessionFunction() {
 	
+	public void sessionFunction() {
+
+		int currentYear = timeService.getCurrentYear();
+		int yearsInSession = timeService.getYearsInSession();
+		if (currentYear >= yearsInSession && isKyotoMember() == KyotoMember.ROGUE) {
+			double thisYearOutput = emissionsTargetMap.get(currentYear);
+			double lastSessionOutput = emissionsTargetMap.get(currentYear - timeService.getYearsInSession());
+			
+			if (lastSessionOutput - thisYearOutput / lastSessionOutput > 0.05) {
+				try {
+					joinKyoto();
+				} catch (CannotJoinKyotoException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		else if (isKyotoMember() == KyotoMember.ANNEXONE && getCarbonOutput() - getCarbonOffset() - getCarbonAbsorption() > getEmissionsTarget() && getTimesCaughtCheating() > 0) {
+			try {
+				leaveKyoto();
+			} catch (CannotLeaveKyotoException e) {
+				shouldLeave = true;
+			}
+		}
+	}
+	
+	@Override
+	protected double getReportedCarbonOutput() {
+		if (isKyotoMember() == KyotoMember.ANNEXONE && getCarbonOutput() > getEmissionsTarget() + getCarbonOffset() + getCarbonAbsorption() && timeService.getCurrentYear() == timeService.getYearsInSession() - 1) {
+			double cheatedOutput = getEmissionsTarget() + getCarbonOffset() + getCarbonAbsorption();
+			return cheatedOutput -= cheatedOutput*0.002;
+		}
+		else {
+			return super.getReportedCarbonOutput();
+		}
 	}
 
 	private void HoldElection() {		
@@ -524,7 +575,7 @@ public class USAgent extends AbstractCountry {
 			}
 			else{
 				OfferMessage offerMessage = this.tradeProtocol.decodeInput(in);
-				if(AnalyzeOffer(offerMessage) ) {	
+				if(AnalyzeOffer(offerMessage)) {	
 					try {
 						this.tradeProtocol.respondToOffer(
 								this.tradeProtocol.extractNetworkAddress(in), 
@@ -577,6 +628,45 @@ public class USAgent extends AbstractCountry {
 					return(true);
 				}
 			}						
+		}
+		else if (isKyotoMember() == KyotoMember.ANNEXONE && CalculateCurrentIntensityRatio() > CalculateProjectedIntensityRatio()) {
+			double offerUnitCost = offerMessage.getOfferUnitCost();
+			double offerUnits = offerMessage.getOfferQuantity();
+			double offerTotalCost = offerUnitCost * offerUnits;
+			if (getCarbonOutput() - getCarbonAbsorption() - getCarbonOffset() > getEmissionsTarget() && offerMessage.getOfferType() == TradeType.SELL) {
+				double absorptionCost;
+				try {
+					absorptionCost = carbonAbsorptionHandler.getInvestmentRequired(offerUnits);
+				} catch (NotEnoughLandException e) {
+					absorptionCost = Double.MAX_VALUE;
+				}
+				if (offerTotalCost < carbonReductionHandler.getInvestmentRequired(offerUnits) && offerTotalCost < absorptionCost) {
+					return true;
+				}
+			}
+			else if (getCarbonOutput() - getCarbonAbsorption() - getCarbonOffset() < getEmissionsTarget() && offerMessage.getOfferType() == TradeType.BUY) {
+				double absorptionCost;
+				try {
+					absorptionCost = carbonAbsorptionHandler.getInvestmentRequired(offerUnits, 300918);
+					// This arable land value is the average of all countries' arable land, so a good base comparison
+				}
+				catch (NotEnoughLandException e) {
+					return false;
+				}
+				if (offerTotalCost < absorptionCost && offerTotalCost < carbonReductionHandler.getInvestmentRequired(offerUnits)) {
+					return true;
+				}
+			}
+			else if (offerTotalCost > carbonReductionHandler.getInvestmentRequired(offerUnits) && offerMessage.getOfferType() == TradeType.BUY) {
+				try {
+					carbonReductionHandler.investInCarbonReduction(offerUnits);
+				} catch (NotEnoughCarbonOutputException e) {
+					return false;
+				} catch (NotEnoughCashException e) {
+					return false;
+				}
+				return true;
+			}
 		}
 		
 		if(debug) logger.info("AnalyzeOffer: Returning false");
