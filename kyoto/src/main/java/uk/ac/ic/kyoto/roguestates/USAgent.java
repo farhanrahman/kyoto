@@ -833,7 +833,7 @@ public class USAgent extends AbstractCountry {
 			
 			boolean offsetNeeded = (getCarbonOutput() - getCarbonOffset() - getCarbonAbsorption() > getEmissionsTarget());
 			
-			if (trade.getType() == TradeType.SELL && totalOfferCost < finalInvestment && offsetNeeded) {
+			if (trade.getType() == TradeType.SELL && totalOfferCost < finalInvestment && offsetNeeded && getAvailableToSpend() >= totalOfferCost) {
 				return true;
 			}
 			else if (trade.getType() == TradeType.BUY && totalOfferCost > finalInvestment) {
@@ -859,7 +859,7 @@ public class USAgent extends AbstractCountry {
 			}
 		}
 		
-		if(debug) logger.info("acceptTrade: Returning at final false");
+		if(debug) logger.info("acceptTrade: Returning at end of function");
 		return false; 
 	}
 	
