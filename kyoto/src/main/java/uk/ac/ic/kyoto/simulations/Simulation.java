@@ -183,16 +183,16 @@ public class Simulation extends InjectedSimulation {
 										Double.parseDouble(countryData.getEnergyOutput()), 
 										Double.parseDouble(countryData.getCarbonOutput()));		
 					} else if(className.equals("USAgent")){
-						abstractCountry = new USAgent(
-											Random.randomUUID(), 
-											countryData.getName(),
-											countryData.getISO(), 
-											Double.parseDouble(countryData.getLandArea()), 
-											Double.parseDouble(countryData.getArableLandArea()), 
-											Double.parseDouble(countryData.getGDP()),
-											Double.parseDouble(countryData.getGDPRate()),
-											Long.parseLong(countryData.getEnergyOutput()), 
-											Long.parseLong(countryData.getCarbonOutput()));	
+//						abstractCountry = new USAgent(
+//											Random.randomUUID(), 
+//											countryData.getName(),
+//											countryData.getISO(), 
+//											Double.parseDouble(countryData.getLandArea()), 
+//											Double.parseDouble(countryData.getArableLandArea()), 
+//											Double.parseDouble(countryData.getGDP()),
+//											Double.parseDouble(countryData.getGDPRate()),
+//											Double.parseDouble(countryData.getEnergyOutput()), 
+//											Double.parseDouble(countryData.getCarbonOutput()));	
 					}
 					
 					CarbonData1990.addCountry(countries.get(countryKey).getISO(), Double.parseDouble(countries.get(countryKey).getCarbonOutput1990()));

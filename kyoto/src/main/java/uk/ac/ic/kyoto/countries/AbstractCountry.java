@@ -14,6 +14,7 @@ import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReport;
 import uk.ac.ic.kyoto.countries.OfferMessage.OfferMessageType;
 import uk.ac.ic.kyoto.exceptions.CannotJoinKyotoException;
 import uk.ac.ic.kyoto.exceptions.CannotLeaveKyotoException;
+import uk.ac.ic.kyoto.exceptions.NotEnoughLandException;
 import uk.ac.ic.kyoto.services.Economy;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
@@ -249,6 +250,8 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				
 			if ((timeService.getCurrentYear() % timeService.getYearsInSession()) + (timeService.getCurrentTick() % timeService.getTicksInYear()) == 0) {
 				resetCarbonOffset();
+			}
+			if (timeService.getCurrentYear() % timeService.getYearsInSession() == timeService.getYearsInSession()-1 && timeService.getCurrentTick() % timeService.getTicksInYear() == timeService.getTicksInYear()-1) {
 				sessionFunction();
 			}
 			
@@ -411,6 +414,15 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		
 	}
 	
+	//================================================================================
+    // Detecting Cheating Section
+    //================================================================================
+	
+	private int timesCaughtCheating=0;
+	
+	void caughtCheating() {
+		timesCaughtCheating++;
+	}
 	
 	//================================================================================
     // Private methods
@@ -591,6 +603,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				this.tradeProtocol.tradeToken.generate(),
 				OfferMessageType.BROADCAST_MESSAGE,
 				this.getID());
+		tradeProtocol.offerHistory.addToHistory(SimTime.get(), returnObject.getTradeID(), returnObject);
 		this.network.sendMessage(
 					new MulticastMessage<OfferMessage>(
 							Performative.PROPOSE, 
@@ -611,7 +624,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				this.tradeProtocol.tradeToken.generate(), 
 				OfferMessageType.BROADCAST_MESSAGE,
 				this.getID());
-		
+		tradeProtocol.offerHistory.addToHistory(SimTime.get(), returnObject.getTradeID(), returnObject);
 		this.network.sendMessage(
 					new MulticastMessage<OfferMessage>(
 							Performative.PROPOSE, 
@@ -626,10 +639,15 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	}
 	
 	protected final OfferMessage broadcastInvesteeOffer(double quantity, InvestmentType itype){
-		double unitCost;
+		double unitCost = Double.MAX_VALUE;
 		
 		if (itype.equals(InvestmentType.ABSORB)) {
-			unitCost = this.carbonAbsorptionHandler.getInvestmentRequired(quantity)/quantity;
+			try {
+				unitCost = this.carbonAbsorptionHandler.getInvestmentRequired(quantity)/quantity;
+			} catch (NotEnoughLandException e) {
+				// TODO Auto-generated catch block
+				logger.warn(e);//e.printStackTrace();
+			}
 		}else {
 			unitCost = this.carbonReductionHandler.getInvestmentRequired(quantity)/quantity;
 		}
@@ -641,6 +659,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				this.tradeProtocol.tradeToken.generate(),
 				OfferMessageType.BROADCAST_MESSAGE,
 				this.getID());
+		tradeProtocol.offerHistory.addToHistory(SimTime.get(), returnObject.getTradeID(), returnObject);
 		this.network.sendMessage(
 					new MulticastMessage<OfferMessage>(
 							Performative.PROPOSE, 
@@ -679,6 +698,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				environment.act(new AddRemoveFromMonitor(this, addRemoveType.REMOVE), getID(), authkey);
 				kyotoMemberLevel = KyotoMember.ROGUE;
 				environment.act(new AddRemoveFromMonitor(this, addRemoveType.ADD), getID(), authkey);
+				leaveTime = timeService.getCurrentTick();
 			} catch (ActionHandlingException e) {
 				logger.warn("Exception whilst removing from monitor: " + e);
 				//e.printStackTrace();
@@ -692,6 +712,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		if (timeService.getCurrentTick() > 0) {
 			try {
 				environment.act(new RejoinKyoto(), getID(), authkey);
+				joinTime = timeService.getCurrentTick();
 			} catch (ActionHandlingException e) {
 				logger.warn("Exception whilst rejoining kyoto: " + e);
 				//e.printStackTrace();
@@ -771,5 +792,9 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		}else{
 			throw new IllegalStateException("Attempted to set kyotoMemberLevel in tick " + SimTime.get().intValue());
 		}
+	}
+	
+	public final int getTimesCaughtCheating() {
+		return timesCaughtCheating;
 	}
 }
