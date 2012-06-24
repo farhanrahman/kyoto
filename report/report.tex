@@ -517,9 +517,49 @@ The following keywords will be used to describe the general behaviour of Non Ann
 
 The country starts by having a policy of increasing its energy output as shown in Figure X whilst trying to meet an internally set carbon emission target.
 
+%
+% FIX THIS UP
+%
+\begin{center}
+times_met_before = 0 new_energy_aim = previous_energy_output + previous_energy_output / 8
+times_met_before = 1 new_energy_aim = previous_energy_output + previous_energy_output / 4 
+\dots
+times_met_before = n new_energy_aim = previous_energy_output + previous_energy_output / 
+16exp(-0.693*n)
+\end{center}
+%
+% FIX THIS UP
+%
+
+Each year, the country calculates the difference between its achieved energy output and the target aim that was set the previous year. The difference is then used to estimate the amount of money to invest in carbon industry each tick in order to reach the required energy output. Before the country proceeds with the investment, certain conditions have to be met:
+
+\begin{itemize}
+\item It has the available cash to spend.
+\item If the country has decided to care about the environment, the increase in carbon output due to the investment should not lead to its emission exceeding the set target.
+\end{itemize}
+
+If the latter condition is not met, then the country tries to invest in carbon absorption or carbon reduction in order to decrease its carbon emissions. However, the country will switch to non environmental friendly policies if it does not have enough money.
+ 
+Non Annex I countries take part in Clean Development Mechanisms. This allows Annex I and Non Participant countries to invest in Non Annex I countries in exchange for carbon offset.
+
+In other words, Annex I countries use Non Annex I land area and carbon output to reduce their own emissions in order to meet their targets in the Kyoto Protocol. There are two ways in which countries can invest:
+ 
+\begin{description}
+\item[Carbon Absorption] Decrease available land area, increase carbon absorption
+\item[Carbon Reduction] Carbon output decreases
+\end{description}
+ 
+The amount of carbon output to be changed/given to the Annex I country depends on whether the Non Annex I countries meets its energy output aim.
+
+Carbon absorption offers are all accepted if the country is in an environmentally friendly phase (unless the available land area is at a minimum). 
+
+\paragraph{Non-Participants}
+
+For the purposes of our simulation the rogue states are comprised of the US and Canada, who operate independently of one another, yet necessarily share certain actions and behaviours. 
+
 \subparagraph{United States}
 
-The United States agent uses a metric of "greenhouse gas intensity”, defined as the ratio of emissions to economic output, measured in units of tonnes of \CO per million dollars of \textsc{gdp} to monitor its emissions. For example, using the 1990 data values the simulation is seeded with the intensity evaluates to 4,879,376/5,722,300 = 0.853 (3dp). To put in historical perspective, the Bush administration committed to reduce the intensity of greenhouse gas emissions by 18\% over the period 2002-2012.
+The United States agent uses a metric of "greenhouse gas intensity", defined as the ratio of emissions to economic output, measured in units of tonnes of \CO per million dollars of \textsc{gdp} to monitor its emissions. For example, using the 1990 data values the simulation is seeded with the intensity evaluates to 4,879,376/5,722,300 = 0.853 (3dp). To put in historical perspective, the Bush administration committed to reduce the intensity of greenhouse gas emissions by 18\% over the period 2002-2012.
 
 In the real world it is the governing political party that makes any decisions regarding climate change mitigation, whose actions are in theory in response to the prevailing attitudes of the electorate, and so it is the case for the agent in our simulation. Every four years an election is held, with the initial party in power chosen at random. For simplicity's sake only the two major parties of the republicans and the democrats are represented. Broadly speaking, the democrats seek to increase the intensity value being targeted (which will have a greater impact on carbon reduction), whilst the republicans will target higher growth rates. The ultimate goal of the governing party is to gain re-election, which, as will be detailed below, is determined by the reductions implemented and economic growth over the period. The degree to which each of these effects the re-election chances of the incumbent party varies according to the prevailing attitude of the electorate, and the party in question. The republicans are more strongly punished and rewarded for economic growth, whereas the democrats are more strongly influenced by their carbon reduction efforts (reflecting the concerns of their core supporters). 
 
@@ -534,6 +574,10 @@ As the political party's re-election chances are determined by the levels of car
 Once the target is set, the agent sets about choosing actions. The agent aims to implement any actions over three years within the four year election cycle, allowing no action to be taken in one of the years if conditions are not favourable. If conditions are amenable, all available cash will be used. At the beginning of the election cycle the absolute carbon reduction required over the four year period (taking into account the expected \textsc{gdp} growth) is calculated. The goal in absolute terms for each of the three years is then set. The agent will attempt to fulfil its commitments during the first 99 ticks of the year (assuming a year is 100) through the clean development mechanism (\textsc{cdm}), or subsequent to Kyoto membership, through trading carbon offset with other agents. Before implementing any action, the agent evaluates whether the benefit to their election chances will be increased more by taking the action in question or an alternative. On the last tick of the year, if the targets for carbon reduction or \textsc{gdp} growth have not been met, then the agent will take appropriate action through the carbon reduction and absorption mechanisms, or through investing in industry. The party will take measures to meet either its reduction or growth targets first depending on, once again, the projected effect the meeting/not meeting one will have on their reelection chances. Then use any remaining cash available to meet (if possible) the remaining target. If both targets have been met, they will spend the remainder on their preferred action.
 
 \subparagraph{Canada}
+
+%
+% TO BE FILLED OUT
+%
 
 \subparagraph{Participant actions}
 
