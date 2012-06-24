@@ -73,7 +73,10 @@ public class TradeHistoryImplementation implements TradeHistory{
 	 */
 	public void addToHistory(Time simTime, UUID tradeID, OfferMessage trade){
 		synchronized(history){
-			Map<UUID, OfferMessage> t = new HashMap<UUID,OfferMessage>();
+			Map<UUID, OfferMessage> t = history.get(simTime.intValue());
+			if(t == null){
+				t = new HashMap<UUID,OfferMessage>();
+			}
 			t.put(tradeID, trade);
 			history.put(simTime.intValue(), t);
 		}
