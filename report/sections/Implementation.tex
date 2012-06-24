@@ -451,7 +451,35 @@ Our Kyoto simulation integrates a very basic emulation of the state of the finan
 
 \subsection{Game Balancing}
 
-% Got bored writing section titles here, just follow the standard set above%
+As we have seen, the game is made up of a series of mathematical functions, many of which rely on a set of constants (eg. \texttt{GROWTH\_SCALAR}, \texttt{MAX\_GDP\_GROWTH}). Varying and balancing these constants allows us to create varied and accurate simulations. These can be either initialised at compile time, or injected by the Kyoto \textsc{ui} at runtime, in order to run a wide range of different scenarios.
+
+The balancing of these constants was not a simple task, since changing one may have an impact on others. The following 3 facts were used as a starting point for calculating suitable values for some of the constants:
+
+\begin{enumerate}
+\item Each country has an emission target of -5\% from their base year.
+\item Countries typically invest 0.5\% of their \textsc{gdp} in developing clean industry every year.\cite[Figure 12]{PEW-Environment}
+\item It takes ~0.0156 km$^{2}$ of trees per tonne of carbon absorbed.\cite[Accessed Jun 2012]{Trees-in-Trust}
+\end{enumerate}
+  
+From 1, we can derive: 
+
+\begin{enumerate}[resume]
+\item The likely energy change per year (~ 0.05%)
+\item \textsc{gdp} rate, since we can work out the energy difference
+\end{enumerate}
+
+From 2, we can derive:
+
+\begin{enumerate}[resume]
+\item The amount of cash each country gets each year
+\item Sanction rate and tax rate as proportion of cash
+\end{enumerate}
+
+From 4 and 6, we can derive:
+
+\begin{enumerate}[resume]
+\item The cost of carbon reduction and absorption.
+\end{enumerate}
 
 \subsection{Kyoto \textsc{ui}}
 
@@ -481,4 +509,24 @@ Most agents in the simulation are countries and in order for the simulation to b
 
 % UI IMAGE
 
+\subsubsection{Simulation Data}
+
+Once imported, simulation data resides in a collection in the database. The \textsc{ui} provides a list of all simulations stored in the database with some basic information about the simulation displayed in the list. Next to each simulation is a menu which allows you to do several things with the simulation: view (detailed view of the simulation in the database),  export the simulation as a \textsc{csv} file, edit the simulation, copy it, or delete it.
+
+\paragraph{Simulation Overview Page}
+
+% UI IMAGE
+
 The simulation overview page displays a world map using colour to indicate the values of a selected parameter for each country (default is arable land area percentage). There is a drop down menu (called Map View) which allows changing of the parameters displayed on the map. Below this is a table displaying a detailed output of all the simulation data from the database. This page also links to the \textsc{csv} export feature, copy feature, edit simulation page and a dropdown is present to allow editing of all the countries within the simulation.
+
+\paragraph{Simulation Edit Page}
+
+% UI IMAGE
+ 
+The simulation edit page is a low level editor for the simulation. Functionality is provided to rename the simulation, the simulation authors and all other simulation attributes which it makes sense to edit. It also provides a link to the country editor page (the simulation \textsc{id} is passed in the \textsc{url} to ensure editing takes place on the countries of the correct simulation).
+
+\paragraph{Simulation Results} % The displaying of
+
+%
+% TODO: Write about this
+%
