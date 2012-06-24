@@ -71,7 +71,10 @@ public class AnnexOneReduce extends AbstractCountry {
 	@Override
 	protected void behaviour() {
 
+		logger.info(getName() + " is updating market info");
 		marketData.update();
+		logger.info("New estimated buy price = " + Double.toString(getMarketBuyUnitPrice(0)));
+		logger.info("New estimated sell price = " + Double.toString(getMarketSellUnitPrice(0)));
 
 		// If the expected buy price has increased by more than 5%, we should
 		// resimulate
