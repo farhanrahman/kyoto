@@ -365,7 +365,9 @@ public class AnnexOneSustain extends AbstractCountry {
 					}
 					// If a cheater, leave Kyoto if have been caught constant number of times
 					else {
-						if (getTimesCaughtCheating() > Constants.ALLOWED_TIMES_CAUGHT) {
+						int timesCaughtCheating = this.getTimesCaughtCheating();
+						logger.info(name + "I have benn caught cheating " + timesCaughtCheating + " times");
+						if (timesCaughtCheating > Constants.ALLOWED_TIMES_CAUGHT) {
 							leaveKyoto();
 							logger.info(name + ": Leaving Kyoto, I have been caught cheating too many times");
 						}
