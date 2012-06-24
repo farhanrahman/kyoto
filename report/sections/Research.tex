@@ -292,7 +292,7 @@ A \textsc{mas} has the following advantages over a single agent or centralised a
 
 Agents are very similar to active concurrent objects except for one key difference: agents can say ``No'' (e.g.: refusing a trade proposition in a trading simulation). Often, they also interact using a common high level peer to peer (\textsc{p2p}) communication language, which allows them to coordinate their activities asynchronously. These similarities do mean that concurrent object oriented programming is a suitable base for building multi agents systems.
 
-As mentioned previously, \textsc{mas} are composed of agents and an environment as seen in Figure X. Therefore it is essential that agents are able to perceive the environment where they are situated (e.g.: via sensors, message reception, or event detection) giving partial information on its state and that they are also able to act upon it with possible non-deterministic outcomes (e.g.: via effectors).
+As mentioned previously, \textsc{mas} are composed of agents and an environment as seen in Figure~\ref{fig:mas}. Therefore it is essential that agents are able to perceive the environment where they are situated (e.g.: via sensors, message reception, or event detection) giving partial information on its state and that they are also able to act upon it with possible non-deterministic outcomes (e.g.: via effectors).
 
 \begin{figure}[h!]
 	\centering
@@ -301,11 +301,9 @@ As mentioned previously, \textsc{mas} are composed of agents and an environment 
 	\label{fig:mas}
 \end{figure}
 
-Figure X: Basic Multi Agent System Structure
-
 This allows the programmer to design proactive agents, which are set out to achieve ``well defined goals''. Agents' behaviours are thus goal directed. This requires the environment to be maintained in a certain state and the agent to achieve a certain state of its environment.~\cite{MAS-DoC}
 
-From a software engineering perspective, the most adapted agent structure for our project is to use agents with states as shown in Figure X.
+From a software engineering perspective, the most adapted agent structure for our project is to use agents with states as shown in Figure~\ref{fig:agent-architecture}.
 
 \begin{figure}[h!]
 	\centering
@@ -324,4 +322,34 @@ By using such components, we can encase the software implementation of our simul
 
 \subsection{Presage 2}
 
-%% Sam Macbeth's transfer report is cited 3 times in this part, use \cite{Sam-Transfer-Report} to cite it. (It is already in references.bib)
+There exist several platforms that allow the development of multi agent systems. The two most important ones are Jade and Repast. However, it was decided to use the internally developed Presage 2 platform due to the nature of our desired simulation.
+
+Originally written by Brendan Neville and then improved by Sam MacBeth, the platform offers the ability to rapidly prototype complex agent societies. In Presage 2, agents are allowed to act during incrementing time steps, which results in discrete time driven simulations. It also offers a rich communication layer as well as the ability to batch multiple simulation runs through a web user interface. Finally, the following requirements are met, which allow for the design of social behaviour and the observation of long term global performance and adaptation~\cite{Presage2-agent-societies}:
+
+\begin{description}
+	\item[Abstraction:] the agents and network can be as simple or complex as necessary (e.g.: agents can range from being simply reactive to implementing complex belief, desire and intentions (BDI).)
+
+	\item[Flexibility:] the platform allows the user to easily change the simulation input parameters. In conjunction with the ability to batch run, it is very simple to measure the impact of variable values.
+
+	\item[Extensibility:] base classes and modules can be extended in order to allow the user to add any desired functionality.
+
+	\item[Interaction:] Simulation data can be stored in a MongoDB collection which provides easy access and visualisation of the results.
+
+	\item[Rule engine:] There is support for executable, mutable rule specifications.
+\end{description}
+
+Figure~\ref{fig:presage2-architecture} and \ref{fig:presage2-lifecycle} respectively show Presage 2's general architecture and the breakdown of a simulation run:
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=\textwidth]{img/presage2-arch.png}
+	\caption{Presage2 architecture~\cite{Sam-Transfer-Report}}
+	\label{fig:presage2-architecture}
+\end{figure}
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=\textwidth]{img/presage2-lifecycle.png}
+	\caption{Presage2 simulation architecture~\cite{Sam-Transfer-Report}}
+	\label{fig:presage2-lifecycle}
+\end{figure}
