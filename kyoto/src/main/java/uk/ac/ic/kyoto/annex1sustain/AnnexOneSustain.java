@@ -71,10 +71,11 @@ public class AnnexOneSustain extends AbstractCountry {
 		if (cheaterDecider < Constants.CHEATERS_PERCENTAGE) {
 			cheater = true;
 			maxTimesCaught = generator.nextInt(Constants.MAX_ALLOWED_TIMES_CAUGHT + 1);
+			logger.info(name + ": Cheater, can be caught " + maxTimesCaught + " before leaving Kyoto");
 		}
 		else {
 			cheater = false;
-			maxTimesCaught = 0;
+			maxTimesCaught = -1;
 		}
 	}
 	
@@ -348,7 +349,7 @@ public class AnnexOneSustain extends AbstractCountry {
 				if (Math.round(surplusCarbon) < 0) {
 					
 					// If an honest agent, try to reduce emissions or leave Kyoto if unable to
-					if (cheater) {
+					if (!cheater) {
 						double necessaryReduction = (-surplusCarbon);
 						double reductionCost = carbonReductionHandler.getInvestmentRequired(necessaryReduction);
 						boolean reductionPossible = isReductionPossible(necessaryReduction, 0);
@@ -401,7 +402,7 @@ public class AnnexOneSustain extends AbstractCountry {
 	@Override
 	protected double getReportedCarbonOutput() {
 		double realCarbonOutput = this.getCarbonOutput();
-		double requiredCarbonOutput = this.getEmissionsTarget() - this.getCarbonAbsorption() - this.getCarbonOffset();
+		double requiredCarbonOutput = this.getEmissionsTarget() + this.getCarbonAbsorption() - this.getCarbonOffset();
 		// If not a cheater, not in Kyoto or within target, report true value
 		if (!cheater || isKyotoMember() != KyotoMember.ANNEXONE || realCarbonOutput < requiredCarbonOutput) {
 			return realCarbonOutput;

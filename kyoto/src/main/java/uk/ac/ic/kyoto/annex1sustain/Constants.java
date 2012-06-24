@@ -14,6 +14,6 @@ public final class Constants {
 	
 	// To cheat or not to cheat?
 	public static final double	CHEATERS_PERCENTAGE = 0.1;
-	public static final int		MAX_ALLOWED_TIMES_CAUGHT = 5;
+	public static final int		MAX_ALLOWED_TIMES_CAUGHT = 3;
 	
 }
