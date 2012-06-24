@@ -146,13 +146,64 @@ Once the target is set, the agent sets about choosing actions. The agent aims to
 % TO BE FILLED OUT
 %
 
-\subparagraph{Participant actions}
+\subsection{Participant actions}
 
 \paragraph{Carbon handlers}
 
 \subparagraph{Carbon reduction}
 
+The cost of carbon reduction for a country depends on its ratio of carbon output to energy output, which can be described as a dirty industry percentage:
+
+\begin{center}
+Dirty Industry = Carbon Output / Energy Output
+\end{center}
+
+The less dirty our industry is, the more expensive it gets to clean it further. Therefore, it is reasonable to use a measure of clean industry:
+
+\begin{center}
+Clean Industry = 1 - (Carbon Output / Energy Output)
+\end{center}
+ 
+The relationship between the cost of reducing carbon output by one unit and the percentage of 
+clean industry at a given moment is given in Figure X:
+
+%
+% TODO: Insert figure here
+%
+
+Where:
+\begin{itemize}
+\item a: cost of reducing carbon output by 1 with 0\% clean industry (min cost, constant)
+\item b: cost of reducing carbon output by 1 with 100\% clean industry (max cost, constant)
+\item x0: clean industry percentage before investment
+\item x1: clean industry percentage after investment
+\end{itemize}
+
+ 
+Hence, we can calculate cost of single unit investment at specific clean industry percentage using the following formula:
+
+\begin{center}
+Unit Cost = a + ((b - a) * x)
+\end{center}
+
+%
+% TODO: Fix reference
+%
+
+Since the cost will increase linearly with every unit invested, we can find the average cost for the whole investment as the average of the initial and final cost (based on the x0 and x1 values). This is represented by the red line on Figure X (above).
+ 
+\begin{center}
+Average Cost = ((a + ((b - a) * x1) - (a + ((b-a) * x0))) / 2
+ARROW THING Average  Cost = (a + ((b - a) * (x1 - x0))) / 2
+\end{center}
+
+We can now calculate the total cost of a carbon reduction action by multiplying the average unit cost by the amount required by the country.
+
 \subparagraph{Reduction cost estimate}
+
+This "inverse" operation is mathematically solved with a quadratic equation. However, this is difficult to implement and is error-prone due to double arithmetic in Java. Instead, a binary search bounded between 0 and the current carbon output was used. In each iteration, the function calls the \texttt{getInvestmentRequired()} function with a hypothetical carbon reduction as parameter. It then adjusts the amount of reduction the country will receive depending on whether the returned value is higher or lower than the actual investment. Since there are 30 iterations, it will produce a an accurate result providing the current carbon output is less than 2^{30}.
+  
+This function allows participants to estimate and compare the profitability of a carbon reduction investment. As it is not used by the investment function itself, the lack of absolute accuracy is not crucial.
 
 \subparagraph{Carbon Absorption}
 
@@ -194,6 +245,10 @@ On the other hand, a country can decide to close down factories. This is a cost 
 
 \paragraph{Carbon reporting}
 
+%
+% TODO: NEEDS CONTENT
+%
+
 \paragraph{Joining \& Leaving Kyoto}
 
 In our simulation platform, we allow countries to leave and join the Protocol. In order to replicate the Kyoto country categories, it was decided to offer participants three distinct levels of subscription to the simulation using Java enumerated states. Each of these give access to a different set of possible actions as described previously. Using this functionality, we can emulate real world scenarios such as Canada leaving the Protocol.
@@ -202,15 +257,110 @@ In our simulation platform, we allow countries to leave and join the Protocol. I
 
 \subsubsection{Trade Protocol}
 
+The Trade Protocol allows participants to engage in trading of carbon offset or Clean Development Mechanism (\textsc{cdm}) investments in other participants/countries. The Trade Protocol class inherits from the \texttt{FSMProtocol} class provided in the Presage2 \textsc{api}, which is an implementation of agent protocols, used by agents to communicate with one another.
+ 
+The trade protocol can be used for both carbon trading and Clean Development Mechanisms. The type of message that the trade protocol deals with is an object of type \texttt{OfferMessage}. The \texttt{OfferMessage} object has information of who initiated the conversation and who broadcast the offer in the first place and all the information about the quantity and unit cost of the offer. The quantity refers to the total, in tons of carbon offset, that are being offered. The unit cost refers to the price per ton. The total cost of the offer is the product of these two values.
+
+When a participant broadcasts a carbon trading offer then the type of the Offer (also another 
+object that \texttt{OfferMessage} encapsulates) is set to either:
+ 
+\begin{itemize}
+\item BUY: If participant wants to buy carbon offset.
+\item SELL: If participant wants to sell carbon offset.
+\end{itemize}
+
+For Clean Development Mechanisms, the trade protocol allows the participant to advertise whether they want other countries to invest in their industry to reduce carbon emissions. When a participant wants to advertise about CDM then the following types need to be assigned to the \texttt{OfferMessage} Offer type:
+
+\begin{itemize}
+\item INVEST: participant wants to invest in another country.
+\item RECEIVE: participant is asking for other countries to invest in their industry/country.
+\end{itemize}
+
+It is also further specified whether the form of \textsc{cdm} is for carbon reduction or carbon absorption, which restricts the participant to choose the following investment types:
+
+\begin{itemize}
+\item ABSORB: Whether the investment will be used to reduce carbon emissions by investing in absorption techniques.
+\item REDUCE: Whether the investment will be used to reducing carbon emissions via investing in carbon reduction techniques.
+\item INVALID: If investment type does not exists as it is a buy or sell carbon offer.
+\end{itemize}
+
 \paragraph{Functionality}
+
+Trade Protocol works in the following ways:
+
+\begin{enumerate}
+\item A participant who is willing to engage in a trade sends a broadcast message using the \texttt{network} object provided to every agent. This message contains information about the trade as they wish it be carried out.
+\item Another participant who is interested in the offer broadcasted can start a protocol conversation with the broadcaster. They can reply with slightly altered offers, to simulate a minor form of negotiation.
+\item The broadcaster can then accept or reject the offer that is proposed by the initiator.
+\end{enumerate}
+
+The process is better illustrated with the following diagrams:
+
+%
+% TODO: Figure 1 Broadcaster multicasts a message to other agents
+%
+
+Other agents will receive the offer message and can choose to start a \texttt{TradeProtocolFSM} conversation with the broadcaster.
+
+%
+% TODO: Figure 2 Tom and Yiannis wishes to respond to the broadcast message
+%
+
+In this example, only Tom and Yiannis decided to respond to the broadcast message sent by Peter.
+
+%
+% TODO: Figure 3 Peter decides to respond
+%
+
+Agent Peter can then decide whom to finish the trade with. In this case he decides to accept the offer initiated by Yiannis.
 
 \paragraph{Reverting}
 
+In the event that a trade is unable to be carried through to the end, possibly caused by one of the countries not having enough available funds to complete the transaction, the trade can be reverted, and the involved parties are refunded.
+
 \paragraph{Trade Protocol state machine}
+
+The protocol has two different state machines that are used by the initiator and the broadcaster. The state machines are as follows: 
+
+%
+% TODO: Figure 4 Initiator Finite State Machine
+%
+
+%
+% TODO: Figure 5 Responder Finite State Machine
+%
+
+Figure-X and figure-X shows the state machines used by the Initiator and Responder respectively along with the transitions labelled on the arrows. The transitions in an \texttt{FSMProtocol} happen when a participant receives a message.
 
 \paragraph{Initiator \textsc{fsm}}
 
+Both the initiator and the responder have a single \texttt{START} state as required by the \texttt{FSMProtocol}. The initiator has two end states, which are \texttt{TIMEOUT} and \texttt{TRADE_DONE}. Each transition results in the participant performing a particular action of sending back a message to the responder, which makes the responder transit to the next state.
+
+\begin{description}
+\item[1. \texttt{PROPOSE_TRADE}:]
+When the participant responds to the offer, it transitions to the \texttt{TRADE_PROPOSED} state and sends a Unicast message to the broadcaster waiting for its response.
+\item[2. \texttt{TIMED_OUT}:]
+From the \texttt{TRADE_PROPOSED} state a timeout of 3 ticks is set so that the initiator times out into an error state.
+\item[3. \texttt{TRADE_ACCEPTED}:]
+If the responder accepts the trade proposal, the Trade Protocol handles the trade completion through a function called \texttt{handleTradeCompletion()}. If anything goes wrong while handling the trade completion then the participant (initiator) transits to the \texttt{TRADE_DONE} state by sending a Unicast message to the responder to revert the changes. If the handling of trade completion works well then the participant transitions to the end state \texttt{TRADE_DONE} by sending a confirmation message to the responder.
+\item[4. \texttt{TRADE_REJECTED}:]
+If the trade was rejected by the responder then the participant (initiator) transits to the \texttt{TRADE_DONE} state by sending a confirmation unicast message to the responder that it has received the message.
+\end{description}
+
 \paragraph{Responder \textsc{fsm}}
+ 
+Figure-X shows the \textsc{fsm} that is used by the responder. Upon receiving a message form the initiator. There is only one \texttt{START} state and the three end states are \texttt{REVERT}, \texttt{TRADE_DONE} and \texttt{RESPONDER_TIMEOUT}. Similar to the initiator, the transitions happen with the participant sending a unicast message to the initiator agent.
+ 
+\begin{description}
+\item[1. \texttt{RESPOND_TO_TRADE}:]
+This transition occurs when the initiator spawns a message, which makes the responder transition to the \texttt{WAIT_FOR_CONFIRMATION} state. If the responder accepts the exchange then it transitions to the next state by sending a unicast message to the initiator that it accepted the trade, otherwise it transitions to the next state by sending a unicast message to the initiator that it has rejected the offer. Once the participant makes the decision to accept the offer then the \texttt{handleTradeCompletion()} function is called to adjust the carbon offset and cash of the responder. If things fail for reasons such as not enough cash exception from the responder then the changes made to the responder’s carbon offset and available to spend will be reverted. Nevertheless, a reject message is sent to the initiator to inform him that the trade was unsuccessful.
+\item[2. \texttt{REVERTING}:]
+If the initiator fails in completing the trade for reasons such as not enough cash exceptions, then the initiator reverts itself and sends a message to the responder. Once the responder receives this message then it goes to the \texttt{REVERT} state via the \texttt{REVERTING} transition. There, it reverts all of the changes since the start of the conversation.
+\item[3. \texttt{CONFIRMATION}:]
+This is a transition to from \texttt{WAIT_FOR_CONFIRMATION} to the end state \texttt{TRADE_DONE} state. This transition happens when either trade was successful or was unsuccessful (i.e. the responder rejected the trade in the first place).
+\item[4. \texttt{RESPONDER_TIMEOUT}:]
+Timeout condition of 3 ticks from \texttt{WAIT_FOR_CONFIRMATION} state to the \texttt{RESPONDER_TIMEDOUT} state, which is the end and error state of the responder.
+\end{description}
 
 \subsubsection{Time Service}
 
