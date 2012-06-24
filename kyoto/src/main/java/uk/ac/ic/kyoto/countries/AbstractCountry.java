@@ -53,7 +53,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 		ANNEXONE,
 		NONANNEXONE
 	}
-	KyotoMember kyotoMemberLevel; 
+	protected KyotoMember kyotoMemberLevel; 
 	
 	/*
 	 * These variables are related to land area for

@@ -1,22 +1,17 @@
 package uk.ac.ic.kyoto.roguestates;
 
 
-import java.util.Random; 
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.countries.AbstractCountry;
-import uk.ac.ic.kyoto.services.ParticipantTimeService;
-import uk.ac.ic.kyoto.trade.InvestmentType;
-import uk.ac.ic.kyoto.services.FossilPrices;
-import uk.ac.ic.kyoto.countries.AbstractCountry.KyotoMember;
-import uk.ac.ic.kyoto.trade.TradeType;
-import uk.ac.ic.kyoto.countries.OfferMessage;
 import uk.ac.ic.kyoto.countries.Offer;
-
-
+import uk.ac.ic.kyoto.countries.OfferMessage;
+import uk.ac.ic.kyoto.exceptions.NotEnoughCashException;
+import uk.ac.ic.kyoto.exceptions.NotEnoughLandException;
+import uk.ac.ic.kyoto.services.FossilPrices;
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
-import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.util.fsm.FSMException;
@@ -45,15 +40,6 @@ public class CanadaAgent extends AbstractCountry {
 		return super.getSharedState();
 	}
 
-	
-	
-	@Override
-	public void yearlyFunction() {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	
 	/**
 	 * Increase carbon absorption as long as you have land area and money
 	 */
@@ -94,6 +80,14 @@ public class CanadaAgent extends AbstractCountry {
 		else return false;
 	}
 	
+	/*Industry reduction functions  */
+	/*
+	investment_ammount=this.
+	
+	*/
+	
+	
+	
 	Random rand1= new Random();
 	Random rand2= new Random();
 	
@@ -124,18 +118,6 @@ public class CanadaAgent extends AbstractCountry {
 		else return false;
 	}
 	
-	///////////
-	
-	/*public void SessionFunction() {
-		if(JoiningCriteriaMet()){
-			KyotoMember.NONANNEXONE;
-		}
-		
-		
-	}*/
-	
-	
-	
 	
 	/*
 	boolean JoiningCriteriaMet()
@@ -156,9 +138,8 @@ public class CanadaAgent extends AbstractCountry {
 		//
 	}
 */
-	uk.ac.imperial.presage2.core.messaging.Input input;
 	
-	protected void processInput(uk.ac.imperial.presage2.core.messaging.Input input) {
+	protected void processInput(Input input) {
 		if(this.tradeProtocol.canHandle(input)){
 			this.tradeProtocol.handle(input);
 		}else{
@@ -180,12 +161,17 @@ public class CanadaAgent extends AbstractCountry {
 		
 	}
 	
+	double calc_target()
+	{
+		return((this.getEmissionsTarget())-(this.getCarbonOutput())+this.getCarbonOffset()+this.getCarbonAbsorption());
+	}
+	
 	boolean analyse_offer(OfferMessage offerMessage){
 		//If the offer is feasible return true else false
 		double cost = offerMessage.getOfferUnitCost();
 		double quantity = offerMessage.getOfferQuantity();
 		double available = this.getAvailableToSpend();
-		double carb_red_cost=this.carbonReductionHandler.getInvestmentRequired(quantity);
+		double carb_red_cost=this.carbonReductionHandler.getInvestmentRequired(this.calc_target());
 		double trade_cost = (cost*quantity);
 		if((trade_cost < carb_red_cost) && (trade_cost<available) &&(carb_red_cost<available)){
 			return true;
@@ -194,74 +180,63 @@ public class CanadaAgent extends AbstractCountry {
 		
 	}
 	
-
-	
-	@Override
-	protected boolean acceptTrade(NetworkAddress from, Offer trade) {
-		// TODO Auto-generated method stub
-		return false;
+	boolean analyse_offer(Offer offerMessage) {
+		double cost = offerMessage.getUnitCost();
+		double quantity = offerMessage.getQuantity();
+		double available = this.getAvailableToSpend();
+		double carb_red_cost=this.carbonReductionHandler.getInvestmentRequired(this.calc_target());
+		double trade_cost = (cost*quantity);
+		if((trade_cost < carb_red_cost) && (trade_cost<available) &&(carb_red_cost<available)){
+			return true;
+		}
+		else return false;
 	}
 	
-	
-	@Override
-	protected void behaviour() {
-		// TODO Auto-generated method stub
+public void behaviour() {
 		
-	}
-
-
-	@Override
-	protected void sessionFunction() {
-		// TODO Auto-generated method stub
+		// Check environment save
+		//Check industry reduction
 		
-	}
-
-
-	@Override
-	protected void initialiseCountry() {
-		// TODO Auto-generated method stub
-		if(this.isKyotoMember()){
-			this.check_industry();
+		//If not recession we can consider carbon reductions
+		double carbon_out=this.getCarbonOutput();
+		double carb_offSet=this.getCarbonOffset();
+		double money=this.getAvailableToSpend();
+		double land_area=this.getArableLandArea();
+		double carbon_reduction ;
+		double industry_reduction;
+		double carbon_absorbtion;
+		double target=this.getEmissionsTarget();
+		double carbon_change=target-getCarbonOutput()-getCarbonOffset()-getCarbonAbsorption();
+		//check if we can achieve carbon reduction by foresting
+		if(((this.carbonAbsorptionHandler.getCarbonAbsorptionChange(money, land_area))+this.getCarbonOutput()) <= this.getEmissionsTarget() ){
+			System.out.print("We can achieve target");
+				}
+		
+		//Check if industry within limit and GDP growth
+		if(carbon_change>0){
+			if((this.carbonAbsorptionHandler.getInvestmentRequired(carbon_change, land_area))<=this.getAvailableToSpend()){
+				System.out.print("we can invest in reduction");
+			}
 		}
 		
-	}
-
-
-
-	
-	
-	/******************************************************************************
-	//@Override
-	//public void sessionFunction() {
-		//if (getCarbonOutput() - getCarbonOffset() > getEmissionsTarget()) {
-			// leave Kyoto here
-		//}
-			
-//	}
-	
-	
-	@Override
-	public void initialiseCountry() {
-		//carbonOutput = 80;
-//		try {
-//			tradeProtocol = new TradeProtocol(getID(), authkey, environment, network) {
-//				@Override
-//				protected boolean acceptExchange(NetworkAddress from,
-//						Trade trade) {
-//					if (carbonOutput - emissionsTarget + carbonOffset > 0) {
-//						return true;
-//					}
-//					return true;
-//				}
-//			};
-//		} catch (FSMException e) {
-//			logger.warn(e.getMessage(), e);
-//			e.printStackTrace();
-//		}
-	}
-	
-	@Override
-	public void behaviour() {
+		if(getCarbonOutput() - getCarbonOffset() - getCarbonAbsorption() < target ){
+			System.out.print("Investing not needed");
+		}else{
+			try {
+				this.carbonAbsorptionHandler.investInCarbonAbsorption(this.calc_target());
+			} catch (NotEnoughLandException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (NotEnoughCashException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			}
+			//Consider investing in industry or buy credits after comparison
+		}
+		
+		
+		
 //		Set<NetworkAddress> nodes = network.getConnectedNodes();
 //		for (NetworkAddress i: nodes) {
 //			try {
@@ -290,12 +265,64 @@ public class CanadaAgent extends AbstractCountry {
 //			}
 //		}
 //		System.out.println(energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(500));
-		System.out.println("I have this much money: " + getAvailableToSpend() + ".");
-		System.out.println("My GDPRate is : " + getGDPRate());
-		System.out.println("My carbon output is : " + getCarbonOutput());
-		System.out.println("My energy output is : " + getEnergyOutput());
+		//System.out.println("I have this much money: " + getAvailableToSpend() + ".");
+		//System.out.println("My GDPRate is : " + getGDPRate());
+		//System.out.println("My carbon output is : " + getCarbonOutput());
+		//System.out.println("My energy output is : " + getEnergyOutput());
+	}
+	
+	@Override
+	protected boolean acceptTrade(NetworkAddress from,Offer offerMessage) {
+		// TODO Auto-generated method stub
+		if(this.analyse_offer(offerMessage)){
+			return true;
+		}
+		
+		else return false;
+	}
+	
+	@Override
+	public void yearlyFunction() {//Implement any actions every year
+		// TODO Auto-generated method stub
+		//Check gdp growth against emmisions every year and  decide how to reduce
+		
 	}
 
-	***********************************************************************/
 	
+	
+	@Override//Every 10 years do the check to stay or leave kyoto
+	public void sessionFunction() {
+		if (getCarbonOutput() - getCarbonOffset() > getEmissionsTarget()) {
+			leaveKyoto();
+		}
+			
+	}
+	
+	
+	@Override
+	public void initialiseCountry() {
+	/*carbonOutput = 80;
+		try {
+			tradeProtocol = new TradeProtocol(getID(), authkey, environment, network) {
+				@Override
+				protected boolean acceptExchange(NetworkAddress from,
+						Trade trade) {
+					if (carbonOutput - emissionsTarget + carbonOffset > 0) {
+						return true;
+					}
+					return true;
+				}
+			};
+		} catch (FSMException e) {
+			logger.warn(e.getMessage(), e);
+			e.printStackTrace();
+		}
+	}*/
+		
+		kyotoMemberLevel = KyotoMember.ANNEXONE;
+		
+	}
+	
+	
+
 }
