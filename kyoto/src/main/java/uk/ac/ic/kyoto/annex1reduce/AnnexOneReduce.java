@@ -143,9 +143,10 @@ public class AnnexOneReduce extends AbstractCountry {
 	 */
 	public void getMarketPrices(ActionList optimal) {
 
-		double carbonDifference = this.getCarbonOffset()
-				+ this.getCarbonAbsorption() - this.getCarbonOffset();
-
+		double netCarbonOutput = getCarbonOutput() - getCarbonAbsorption()
+				- getCarbonOffset();
+		double carbonDifference = netCarbonOutput - getEmissionsTarget();		
+		
 		// The amount of carbon we want to buy at the current price
 		buyCarbonQuantity = carbonDifference * optimal.reduce.buyCreditFrac;
 
@@ -161,8 +162,14 @@ public class AnnexOneReduce extends AbstractCountry {
 		// The cost of investing in industry
 		double industryInvest = estimatedMoney * optimal.maintain.industryFrac;
 
-		double carbonIncrease = energyUsageHandler
+		double carbonIncrease;
+		if (industryInvest >0) {
+			 carbonIncrease = energyUsageHandler
 				.calculateCarbonIndustryGrowth(industryInvest);
+		}
+		else {
+			carbonIncrease = 0;
+		}
 
 		buyCarbonQuantity += carbonIncrease
 				* optimal.maintain.buyCreditOffsetFrac;
