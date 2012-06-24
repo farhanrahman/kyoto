@@ -75,14 +75,14 @@ public class USAgent extends AbstractCountry {
 			
 			// Up until this point only CDM or trading will have taken place. 
 
-			if(isDemocratElected()) {
-				DoCarbonReduction();
-				DoEnergyInvestments();					
-			}
-			else {
-				DoEnergyInvestments();
-				DoCarbonReduction();					
-			}
+//			if(isDemocratElected()) {
+//				DoCarbonReduction();
+//				DoEnergyInvestments();					
+//			}
+//			else {
+//				DoEnergyInvestments();
+//				DoCarbonReduction();					
+//			}
 		}
 			/*
 			// if the party might lose even after meeting targets
@@ -685,6 +685,7 @@ public class USAgent extends AbstractCountry {
 								this.tradeProtocol.extractNetworkAddress(in), 
 								offerMessage.getOfferQuantity(),
 								offerMessage);
+						logger.info("CDMING AT: " + tradeProtocol.extractNetworkAddress(in));
 					} catch (IllegalArgumentException e1) {
 						logger.warn(e1);
 					} catch (FSMException e1) {
@@ -706,7 +707,7 @@ public class USAgent extends AbstractCountry {
 			if(debug) logger.info("AnalyzeOffer: TradeType==RECEIVE");
 			
 			
-			if(CalculateCurrentIntensityRatio() > CalculateProjectedIntensityRatio()) {
+			//if(CalculateCurrentIntensityRatio() > CalculateProjectedIntensityRatio()) {
 				if(debug) logger.info("AnalyzeOffer: getIntensityRatio() > getIntensityTarget()");
 				double OfferUnitCost = offerMessage.getOfferUnitCost();				
 				double OfferQuantity = offerMessage.getOfferQuantity();
@@ -731,7 +732,7 @@ public class USAgent extends AbstractCountry {
 					if(debug) logger.info("AnalyzeOffer: Returning true");
 					return(true);
 				}
-			}						
+			//}						
 		}
 		else if (isKyotoMember() == KyotoMember.ANNEXONE && CalculateCurrentIntensityRatio() > CalculateProjectedIntensityRatio()) {
 			double offerUnitCost = offerMessage.getOfferUnitCost();
@@ -784,6 +785,7 @@ public class USAgent extends AbstractCountry {
 		if(debug) logger.info("acceptTrade: Entering");
 		// TODO Auto-generated method stub
 		if(debug) logger.info("acceptTrade: Returning");
+		
 		return false; 
 	}
 	
