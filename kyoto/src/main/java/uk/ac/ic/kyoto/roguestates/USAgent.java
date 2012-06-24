@@ -806,8 +806,60 @@ public class USAgent extends AbstractCountry {
 	protected boolean acceptTrade(NetworkAddress from, Offer trade) {
 		if(debug) logger.info("acceptTrade: Entering");
 		// TODO Auto-generated method stub
-		if(debug) logger.info("acceptTrade: Returning");
 		
+		if (isKyotoMember() == KyotoMember.ANNEXONE) {
+			double totalOfferCost = trade.getTotalCost();
+			double offerUnits = trade.getQuantity();
+			
+			double absorptionCost;
+			try {
+				absorptionCost = carbonAbsorptionHandler.getInvestmentRequired(offerUnits);
+			} catch (NotEnoughLandException e) {
+				absorptionCost = Double.MAX_VALUE;
+			}
+			
+			double reductionCost = carbonReductionHandler.getInvestmentRequired(offerUnits);
+			
+			double finalInvestment;
+			boolean absorptionCheaper;
+			if (absorptionCost < reductionCost) {
+				finalInvestment = absorptionCost;
+				absorptionCheaper = true;
+			}
+			else {
+				finalInvestment = reductionCost;
+				absorptionCheaper = false;
+			}
+			
+			boolean offsetNeeded = (getCarbonOutput() - getCarbonOffset() - getCarbonAbsorption() > getEmissionsTarget());
+			
+			if (trade.getType() == TradeType.SELL && totalOfferCost < finalInvestment && offsetNeeded) {
+				return true;
+			}
+			else if (trade.getType() == TradeType.BUY && totalOfferCost > finalInvestment) {
+				if (absorptionCheaper) {
+					try {
+						carbonAbsorptionHandler.investInCarbonAbsorption(offerUnits);
+					} catch (NotEnoughLandException e) {
+						return false;
+					} catch (NotEnoughCashException e) {
+						return false;
+					}
+				}
+				else {
+					try {
+						carbonReductionHandler.investInCarbonReduction(offerUnits);
+					} catch (NotEnoughCarbonOutputException e) {
+						return false;
+					} catch (NotEnoughCashException e) {
+						return false;
+					}
+				}
+				return true;
+			}
+		}
+		
+		if(debug) logger.info("acceptTrade: Returning at final false");
 		return false; 
 	}
 	
