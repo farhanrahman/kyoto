@@ -9,7 +9,6 @@ import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.Offer;
 import uk.ac.ic.kyoto.countries.OfferMessage;
 import uk.ac.ic.kyoto.exceptions.CannotLeaveKyotoException;
-import uk.ac.ic.kyoto.exceptions.NotEnoughCashException;
 import uk.ac.ic.kyoto.exceptions.NotEnoughLandException;
 import uk.ac.ic.kyoto.services.FossilPrices;
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
@@ -193,7 +192,79 @@ public class CanadaAgent extends AbstractCountry {
 		else return false;
 	}
 	
+	/*The carbon reduction achievable through carbon reduction method */
+	double check_reduction_by_absorbtion(){
+		double absorption_change;	//Gives the carbon reduction through absorbtion
+		
+		if(this.calc_target()<0){
+			try {
+				absorption_change = this.carbonAbsorptionHandler.getCarbonAbsorptionChange(this.getAvailableToSpend(),this.getArableLandArea());
+			} catch (NotEnoughLandException e1) {
+				absorption_change = 0;
+			}
+			return absorption_change;
+		}
+		else{
+			return 0;
+		}
+		
+	}
+	
+	/* Check reduction method carbon reduction quantity */
+	double check_reduction_carbon(){
+		double carb_reduct;
+		if(this.calc_target()<0){
+			 carb_reduct=this.carbonReductionHandler.getCarbonOutputChange(getAvailableToSpend(), getCarbonOutput(), getEnergyOutput());
+			 return carb_reduct;
+		}
+		else return 0;
+		
+		
+	}
+	
+	double investment_to_absorb(){
+		double k=this.check_reduction_by_absorbtion();
+		double moneys;
+		try {
+			moneys=this.carbonAbsorptionHandler.getInvestmentRequired(k);
+			
+		} catch (NotEnoughLandException e) {
+			// TODO Auto-generated catch block
+			moneys=Double.MAX_VALUE;
+		}
+		return (moneys);
+	}
+	
+	double investment_to_reduce()
+	{
+		double k=this.check_reduction_carbon();
+		double moneys;
+		moneys=this.carbonReductionHandler.getInvestmentRequired(k);
+		return (moneys);
+	}
+	
+	
+		
 public void behaviour() {
+	
+	while(this.isKyotoMember()==KyotoMember.ANNEXONE){
+		if(this.calc_target()<0){
+			double money_to_spend=Math.min((this.investment_to_absorb()),(this.investment_to_reduce()) );
+			logger.info("The money we have to spend is "+ money_to_spend);
+					
+		}
+		else
+		{
+			broadcastBuyOffer((this.calc_target()),((this.getAvailableToSpend())/(this.calc_target())));
+			logger.info("We buy carbon credits");
+		}
+	}
+	
+}
+	
+	
+	
+	/*
 		
 		// Check environment save
 		//Check industry reduction
@@ -210,16 +281,16 @@ public void behaviour() {
 		double carbon_change=target-getCarbonOutput()-getCarbonOffset()-getCarbonAbsorption();
 		
 		//check if we can achieve carbon reduction by foresting
-		if(isKyotoMember()==KyotoMember.ANNEXONE){
+		while(isKyotoMember()==KyotoMember.ANNEXONE){
 			
-		double absorption_change;
+		double absorption_change;	//Gives the carbon reduction through absorbtion
 		try {
 			absorption_change = this.carbonAbsorptionHandler.getCarbonAbsorptionChange(money_we_have, land_area);
 		} catch (NotEnoughLandException e1) {
 			absorption_change = 0;
 		}
 		if((absorption_change+carbon_out) <= target ){
-			System.out.print("We can achieve target");
+			logger.info("We can achieve target");
 				}
 		
 		//Check if industry within limit and GDP growth
@@ -232,12 +303,12 @@ public void behaviour() {
 			}
 		if(carbon_change>0){
 			if(inv_required<=money_we_have){
-				System.out.print("we can invest in reduction");
+				logger.info("we can invest in reduction");
 			}
 		}
 		
 		if(getCarbonOutput() - getCarbonOffset() - getCarbonAbsorption() < target ){
-			System.out.print("Investing not needed");
+			logger.info("Investing not needed");
 			//Invest in carbon industry if we are within our targets and maximize GDP growth
 			double growth=this.energyUsageHandler.calculateCarbonIndustryGrowth(money_we_have);
 			if(growth>0){
@@ -301,7 +372,8 @@ public void behaviour() {
 		//System.out.println("My carbon output is : " + getCarbonOutput());
 		//System.out.println("My energy output is : " + getEnergyOutput());
 	//}
-	
+	*/
+
 	@Override
 	protected boolean acceptTrade(NetworkAddress from,Offer offerMessage) {
 		// TODO Auto-generated method stub

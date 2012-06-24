@@ -21,7 +21,7 @@ import uk.ac.imperial.presage2.util.fsm.FSMException;
 public class USAgent extends AbstractCountry {
 
 	private static final int 		Average1 = 4;
-	private static final double  DecreaseIntensityByPercent = 0.995;
+	private static final double  DecreaseIntensityByPercent = 0.95;
 	private static final double  IncreaseGDPByPercent = 1.005;
 	
 	private boolean DemocratElected; 			// chosen at random on class instantiation
@@ -75,13 +75,22 @@ public class USAgent extends AbstractCountry {
 			
 			// Up until this point only CDM or trading will have taken place. 
 
+//			if(isDemocratElected()) {
+//				DoCarbonReduction();
+//				DoEnergyInvestments();					
+//			}
+//			else {
+//				DoEnergyInvestments();
+//				DoCarbonReduction();					
+//			}
 			if(isDemocratElected()) {
 				DoCarbonReduction();
-				DoEnergyInvestments();					
+				//DoEnergyInvestments();					
 			}
 			else {
-				DoEnergyInvestments();
-				DoCarbonReduction();					
+				DoCarbonReduction();
+				//DoEnergyInvestments();
+				//DoCarbonReduction();					
 			}
 		}
 			/*
@@ -134,58 +143,59 @@ public class USAgent extends AbstractCountry {
 				broadcastSellOffer(totalFreeOffset, actualInvestment / totalFreeOffset);
 			}
 		}
+		
 		logger.info("behaviour: Returning");
 	}
 	
 	private void DoEnergyInvestments() {
+		if(debug) logger.info("DoEnergyInvestments: Entering");
 		
 		double InvestmentNeeded = 0;
 		double RequiredCarbonOutputIncrease = 0;		
 		boolean EnergyEnoughCash = true;
 		
-		if(this.getAvailableToSpend() < 1000) {
-			if(debug) logger.info("behaviour: Cash below 1000, exiting.");
-			EnergyEnoughCash = false;
-		}
+//		if(this.getAvailableToSpend() < 1000) {
+//			if(debug) logger.info("behaviour: Cash below 1000, exiting.");
+//			EnergyEnoughCash = false;
+//		}
 		
-		while( this.getCarbonOutput() < this.CalculateTargetCarbonOutput() && EnergyEnoughCash ) {
+		//while( this.getCarbonOutput() < this.CalculateTargetCarbonOutput() && EnergyEnoughCash ) {
 		
 			// HOW MUCH CASH DO WE HAVE
 			double AvailableCash = this.getAvailableToSpend();
 			if(debug) logger.info("behaviour: AvailableCash = " + AvailableCash);
 			
-			// WHAT INCREASE DO WE NEED TO MEET TARGET
-			double CarbonOutput = this.getCarbonOutput();
-			if(debug) logger.info("behaviour: CarbonOutput = " + CarbonOutput);
-			
-			double TargetCarbonOutput = this.CalculateTargetCarbonOutput();
-			if(debug) logger.info("behaviour: TargetCarbonOutput = " + TargetCarbonOutput);					
-			
-			RequiredCarbonOutputIncrease = TargetCarbonOutput-CarbonOutput;
-			if(debug) logger.info("behaviour: RequiredCarbonOutputDecrease = " + RequiredCarbonOutputIncrease);
+//			// WHAT INCREASE DO WE NEED TO MEET TARGET
+//			double CarbonOutput = this.getCarbonOutput();
+//			if(debug) logger.info("behaviour: CarbonOutput = " + CarbonOutput);
+//			
+//			double TargetCarbonOutput = this.CalculateTargetCarbonOutput();
+//			if(debug) logger.info("behaviour: TargetCarbonOutput = " + TargetCarbonOutput);					
+//			
+//			RequiredCarbonOutputIncrease = TargetCarbonOutput-CarbonOutput;
+//			if(debug) logger.info("behaviour: RequiredCarbonOutputDecrease = " + RequiredCarbonOutputIncrease);
 			
 			double MaximumIncreasePossible = energyUsageHandler.calculateCarbonIndustryGrowth(AvailableCash)*0.9;
 			
 			InvestmentNeeded = energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(Math.min(RequiredCarbonOutputIncrease, MaximumIncreasePossible));				
 			if(debug) logger.info("behaviour: InvestmentNeeded = " + InvestmentNeeded);
-			
-			if(debug) logger.info("behaviour: InvestmentNeeded = " + InvestmentNeeded);
-			
+				
+			if(debug) logger.info("EnergyBefore: " + this.getEnergyOutput());			
 			try {
 				energyUsageHandler.investInCarbonIndustry(InvestmentNeeded);
-			} catch (NotEnoughCashException e) {
+			} 
+			catch (NotEnoughCashException e) {
 				EnergyEnoughCash = false;
 				e.printStackTrace();
 			}
 			
-			if(this.getAvailableToSpend() < 1000) {
-				if(debug) logger.info("behaviour: Cash below 1000, exiting.");
-				EnergyEnoughCash = false;
-			}
+//			if(this.getAvailableToSpend() < 1000) {
+//				if(debug) logger.info("behaviour: Cash below 1000, exiting.");
+//				EnergyEnoughCash = false;
+//			}
+			if(debug) logger.info("EnergyAfter: " + this.getEnergyOutput());
 			
-		}
-		
-
+			if(debug) logger.info("DoEnergyInvestments: Exiting");
 	}
 
 	private void DoCarbonReduction() {
@@ -198,44 +208,44 @@ public class USAgent extends AbstractCountry {
 		boolean EnoughCarbon = true;
 		double InvestAmount = 0;
 		
-		if(this.getAvailableToSpend() < 1000) {
-			if(debug) logger.info("behaviour: Cash below 1000, exiting.");
-			CarbonEnoughCash = false;
-		}
-		
-		while((this.CalculateCurrentIntensityRatio() > this.CalculateProjectedIntensityRatio()) // while target not reached 
-		&& CarbonEnoughCash && EnoughLand && EnoughCarbon) { // booleans set to false if corresponding exception thrown
-			
+//		if(this.getAvailableToSpend() < 1000) {
+//			if(debug) logger.info("behaviour: Cash below 1000, exiting.");
+//			CarbonEnoughCash = false;
+//		}
+//		
+//		while((this.CalculateCurrentIntensityRatio() > this.CalculateProjectedIntensityRatio()) // while target not reached 
+//		&& CarbonEnoughCash && EnoughLand && EnoughCarbon) { // booleans set to false if corresponding exception thrown
+//			
 			// HOW MUCH CASH DO WE HAVE
 			double AvailableCash = this.getAvailableToSpend();
 			if(debug) logger.info("behaviour: AvailableCash = " + AvailableCash);
 			
-			// WHAT REDUCTION DO WE NEED TO MEET TARGET
-			double CarbonOutput = this.getCarbonOutput();
-			if(debug) logger.info("behaviour: CarbonOutput = " + CarbonOutput);
-			double TargetCarbonOutput = this.CalculateTargetCarbonOutput();
-			if(debug) logger.info("behaviour: TargetCarbonOutput = " + TargetCarbonOutput);					
-			RequiredCarbonOutputDecrease = TargetCarbonOutput-CarbonOutput;
-			if(debug) logger.info("behaviour: RequiredCarbonOutputDecrease = " + RequiredCarbonOutputDecrease);
-			
-			// IF WE SPENT ALL MONEY, WHAT ABSORPTION WOULD BE POSSIBLE
-			double ArableLand = this.getArableLandArea();
-			if(debug) logger.info("behaviour: ArableLand = " + ArableLand);
-			
-			double CarbonAbsorptionConst = GameConst.getForestCarbonAbsorption();
-			if(debug) logger.info("behaviour: CarbonAbsorptionConst = " + CarbonAbsorptionConst);
-			
-			double MaxAbsorptionPossible = 0;
-			MaxAbsorptionPossible = ArableLand*CarbonAbsorptionConst;
-			/*
-			try {
-				MaxAbsorptionPossible = carbonAbsorptionHandler.getCarbonAbsorptionChange(AvailableCash, this.getArableLandArea()*0.9)*0.9; // scaled down to avoid rounding issues
-			} catch (NotEnoughLandException e3) {
-				EnoughLand = false;
-				e3.printStackTrace();
-			}
-			*/
-			if(debug) logger.info("behaviour: MaxAbsorptionPossible = " + MaxAbsorptionPossible);					
+//			// WHAT REDUCTION DO WE NEED TO MEET TARGET
+//			double CarbonOutput = this.getCarbonOutput();
+//			if(debug) logger.info("behaviour: CarbonOutput = " + CarbonOutput);
+//			double TargetCarbonOutput = this.CalculateTargetCarbonOutput();
+//			if(debug) logger.info("behaviour: TargetCarbonOutput = " + TargetCarbonOutput);					
+//			RequiredCarbonOutputDecrease = TargetCarbonOutput-CarbonOutput;
+//			if(debug) logger.info("behaviour: RequiredCarbonOutputDecrease = " + RequiredCarbonOutputDecrease);
+//			
+//			// IF WE SPENT ALL MONEY, WHAT ABSORPTION WOULD BE POSSIBLE
+//			double ArableLand = this.getArableLandArea();
+//			if(debug) logger.info("behaviour: ArableLand = " + ArableLand);
+//			
+//			double CarbonAbsorptionConst = GameConst.getForestCarbonAbsorption();
+//			if(debug) logger.info("behaviour: CarbonAbsorptionConst = " + CarbonAbsorptionConst);
+//			
+//			double MaxAbsorptionPossible = 0;
+//			MaxAbsorptionPossible = ArableLand/CarbonAbsorptionConst;
+//			/*
+//			try {
+//				MaxAbsorptionPossible = carbonAbsorptionHandler.getCarbonAbsorptionChange(AvailableCash, this.getArableLandArea()*0.9)*0.9; // scaled down to avoid rounding issues
+//			} catch (NotEnoughLandException e3) {
+//				EnoughLand = false;
+//				e3.printStackTrace();
+//			}
+//			*/
+//			if(debug) logger.info("behaviour: MaxAbsorptionPossible = " + MaxAbsorptionPossible);					
 			
 			// IF WE SPENT ALL MONEY, WHAT REDUCTION WOULD BE POSSIBLE
 			double MaxReductionPossible = 0;
@@ -243,43 +253,48 @@ public class USAgent extends AbstractCountry {
 			if(debug) logger.info("behaviour: MaxReductionPossible = " + MaxReductionPossible);
 			
 			// COST OF ABSORPTION OF THE REQUIRED AMOUNT, OR THE MAX POSSIBLE
-			try {
-				AbsorptionInvestmentNeeded = carbonAbsorptionHandler.getInvestmentRequired(Math.min(MaxAbsorptionPossible, RequiredCarbonOutputDecrease));
-			} catch (NotEnoughLandException e2) {
-				//EnoughLand = false;
-				e2.printStackTrace();
-			}											
-			if(debug) logger.info("behaviour: AbsorptionInvestmentNeeded = " + AbsorptionInvestmentNeeded);
+//			try {
+//				//AbsorptionInvestmentNeeded = carbonAbsorptionHandler.getInvestmentRequired(Math.min(MaxAbsorptionPossible, RequiredCarbonOutputDecrease));
+//				AbsorptionInvestmentNeeded = carbonAbsorptionHandler.getInvestmentRequired(Math.min(MaxAbsorptionPossible, RequiredCarbonOutputDecrease));
+//			} catch (NotEnoughLandException e2) {
+//				//EnoughLand = false;
+//				e2.printStackTrace();
+//			}											
+//			if(debug) logger.info("behaviour: AbsorptionInvestmentNeeded = " + AbsorptionInvestmentNeeded);
 			
 			// COST OF ABSORPTION OF THE REQUIRED AMOUNT, OR THE MAX POSSIBLE
-			ReductionInvestmentNeeded = carbonReductionHandler.getInvestmentRequired(Math.min(MaxReductionPossible, RequiredCarbonOutputDecrease));
+			//ReductionInvestmentNeeded = carbonReductionHandler.getInvestmentRequired(Math.min(MaxReductionPossible, RequiredCarbonOutputDecrease));
+			ReductionInvestmentNeeded = carbonReductionHandler.getInvestmentRequired(MaxReductionPossible);
 			if(debug) logger.info("behaviour: ReductionInvestmentNeeded = " + ReductionInvestmentNeeded);
 			
-			// 
-			if(AbsorptionInvestmentNeeded < ReductionInvestmentNeeded) {
-				InvestAmount = CheckInvestmentAmount(AbsorptionInvestmentNeeded);
-				try {
-					ReduceBy = carbonAbsorptionHandler.getCarbonAbsorptionChange(InvestAmount);
-				} 
-				catch (NotEnoughLandException e1) {
-					// TODO Auto-generated catch block
-					EnoughLand = false;
-					e1.printStackTrace();
-				}
-				
-				try {
-					carbonAbsorptionHandler.investInCarbonAbsorption(ReduceBy);
-				} catch (NotEnoughCashException e) {
-					CarbonEnoughCash = false;
-					e.printStackTrace();
-				} catch (NotEnoughLandException LandException) {
-					EnoughLand = false;
-					LandException.printStackTrace();
-				}
-			}
-			else {
+//			// 
+//			if(AbsorptionInvestmentNeeded < ReductionInvestmentNeeded) {
+//				InvestAmount = CheckInvestmentAmount(AbsorptionInvestmentNeeded);
+//				try {
+//					ReduceBy = carbonAbsorptionHandler.getCarbonAbsorptionChange(InvestAmount);
+//				} 
+//				catch (NotEnoughLandException e1) {
+//					// TODO Auto-generated catch block
+//					EnoughLand = false;
+//					e1.printStackTrace();
+//				}
+//				
+//				try {
+//					carbonAbsorptionHandler.investInCarbonAbsorption(ReduceBy);
+//				} catch (NotEnoughCashException e) {
+//					CarbonEnoughCash = false;
+//					e.printStackTrace();
+//				} catch (NotEnoughLandException LandException) {
+//					EnoughLand = false;
+//					LandException.printStackTrace();
+//				}
+//			}
+//			else {
 				//InvestAmount = CheckInvestmentAmount(ReductionInvestmentNeeded)*0.9;
 				ReduceBy = carbonReductionHandler.getCarbonOutputChange(ReductionInvestmentNeeded, this.getCarbonOutput(), this.getEnergyOutput());
+				if(debug) logger.info("DoReduction: ReduceBy = " + ReduceBy);
+				
+				if(debug) logger.info("CarbonBefore: " + this.getCarbonOutput());
 				
 				try {
 					carbonReductionHandler.investInCarbonReduction(ReduceBy);
@@ -290,13 +305,15 @@ public class USAgent extends AbstractCountry {
 					CarbonEnoughCash = false;
 					e.printStackTrace();
 				}
-			}
+				
+				if(debug) logger.info("CarbonAfter: " + this.getCarbonOutput());
+//			}
 			
-			if(this.getAvailableToSpend() < 1000) {
-				if(debug) logger.info("behaviour: Cash below 1000, exiting.");
-				CarbonEnoughCash = false;
-			}
-		}// end while
+//			if(this.getAvailableToSpend() < 1000) {
+//				if(debug) logger.info("behaviour: Cash below 1000, exiting.");
+//				CarbonEnoughCash = false;
+//			}
+//		}// end while
 	}
 	
 	private double getTradeFactorDifference() {
@@ -434,6 +451,9 @@ public class USAgent extends AbstractCountry {
 				
 		}
 		*/
+		if(isKyotoMember() == KyotoMember.ANNEXONE) {
+			if(debug) logger.info("yearlyFunction: Current KyotoMember");
+		}
 		
 		if (shouldLeave) {
 			try {
@@ -497,35 +517,36 @@ public class USAgent extends AbstractCountry {
 
 	private void HoldElection() {		
 		if(debug) logger.info("HoldElection: Entering");
-		double IntensityScore;
-		double GDPRateScore;
-		
-		if(isDemocratElected()) {
-			IntensityScore = CalculateIntensityScore(0);
-			GDPRateScore = CalculateGDPRateScore(Random.randomInt(5)/100); // increase the GDPRate score by a random amount
-			
-			if(IntensityScore < GDPRateScore) { 
-				setDemocratElected(false);
-				if(debug) logger.info("HoldElection: RepublicanElected");
-			}
-			else {
-				setDemocratElected(true);
-				if(debug) logger.info("HoldElection: Democrat Re-Elected");			
-			}
-		}
-		else {
-			IntensityScore = CalculateIntensityScore(Random.randomInt(5)/100);
-			GDPRateScore = CalculateGDPRateScore(0); // increase the Intensity Score
-			
-			if(GDPRateScore < IntensityScore) { 
-				setDemocratElected(true);
-				if(debug) logger.info("HoldElection: Democrat Elected");
-			}
-			else {
-				setDemocratElected(false);
-				if(debug) logger.info("HoldElection: Republican Re-Elected");			
-			}
-		}
+		SetInitialPoliticalParty();
+//		double IntensityScore;
+//		double GDPRateScore;
+//		
+//		if(isDemocratElected()) {
+//			IntensityScore = CalculateIntensityScore(0);
+//			GDPRateScore = CalculateGDPRateScore(Random.randomInt(5)/100); // increase the GDPRate score by a random amount
+//			
+//			if(IntensityScore < GDPRateScore) { 
+//				setDemocratElected(false);
+//				if(debug) logger.info("HoldElection: RepublicanElected");
+//			}
+//			else {
+//				setDemocratElected(true);
+//				if(debug) logger.info("HoldElection: Democrat Re-Elected");			
+//			}
+//		}
+//		else {
+//			IntensityScore = CalculateIntensityScore(Random.randomInt(5)/100);
+//			GDPRateScore = CalculateGDPRateScore(0); // increase the Intensity Score
+//			
+//			if(GDPRateScore < IntensityScore) { 
+//				setDemocratElected(true);
+//				if(debug) logger.info("HoldElection: Democrat Elected");
+//			}
+//			else {
+//				setDemocratElected(false);
+//				if(debug) logger.info("HoldElection: Republican Re-Elected");			
+//			}
+//		}
 		
 		if(debug) logger.info("HoldElection: Returning");
 	}
@@ -685,6 +706,7 @@ public class USAgent extends AbstractCountry {
 								this.tradeProtocol.extractNetworkAddress(in), 
 								offerMessage.getOfferQuantity(),
 								offerMessage);
+						logger.info("CDMING AT: " + tradeProtocol.extractNetworkAddress(in));
 					} catch (IllegalArgumentException e1) {
 						logger.warn(e1);
 					} catch (FSMException e1) {
@@ -704,9 +726,11 @@ public class USAgent extends AbstractCountry {
 		if(offerMessage.getOfferType()==TradeType.RECEIVE) { // CDM type
 			// Democrats will opt for reduction if it is cost effective regardless of whether target has already been met.
 			if(debug) logger.info("AnalyzeOffer: TradeType==RECEIVE");
-			
-			
-			if(CalculateCurrentIntensityRatio() > CalculateProjectedIntensityRatio()) {
+
+			//if(CalculateCurrentIntensityRatio() > CalculateProjectedIntensityRatio()) {
+
+//			if(CalculateCurrentIntensityRatio() > CalculateProjectedIntensityRatio()) {
+
 				if(debug) logger.info("AnalyzeOffer: getIntensityRatio() > getIntensityTarget()");
 				double OfferUnitCost = offerMessage.getOfferUnitCost();				
 				double OfferQuantity = offerMessage.getOfferQuantity();
@@ -731,7 +755,6 @@ public class USAgent extends AbstractCountry {
 					if(debug) logger.info("AnalyzeOffer: Returning true");
 					return(true);
 				}
-			}						
 		}
 		else if (isKyotoMember() == KyotoMember.ANNEXONE && CalculateCurrentIntensityRatio() > CalculateProjectedIntensityRatio()) {
 			double offerUnitCost = offerMessage.getOfferUnitCost();
@@ -784,6 +807,7 @@ public class USAgent extends AbstractCountry {
 		if(debug) logger.info("acceptTrade: Entering");
 		// TODO Auto-generated method stub
 		if(debug) logger.info("acceptTrade: Returning");
+		
 		return false; 
 	}
 	

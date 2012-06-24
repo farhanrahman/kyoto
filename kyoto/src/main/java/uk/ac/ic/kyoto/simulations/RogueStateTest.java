@@ -7,6 +7,7 @@ import uk.ac.ic.kyoto.actions.AddRemoveFromMonitorHandler;
 import uk.ac.ic.kyoto.actions.AddToCarbonTargetHandler;
 import uk.ac.ic.kyoto.actions.ApplyMonitorTaxHandler;
 import uk.ac.ic.kyoto.actions.QueryEmissionsTargetHandler;
+import uk.ac.ic.kyoto.actions.RejoinKyotoHandler;
 import uk.ac.ic.kyoto.actions.SubmitCarbonEmissionReportHandler;
 import uk.ac.ic.kyoto.countries.CarbonTarget;
 import uk.ac.ic.kyoto.countries.Monitor;
@@ -20,6 +21,7 @@ import uk.ac.ic.kyoto.services.Economy;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
 import uk.ac.ic.kyoto.services.ParticipantCarbonReportingService;
 import uk.ac.ic.kyoto.services.ParticipantTimeService;
+import uk.ac.ic.kyoto.services.TradeHistoryService;
 import uk.ac.imperial.presage2.core.simulator.InjectedSimulation;
 import uk.ac.imperial.presage2.core.simulator.Parameter;
 import uk.ac.imperial.presage2.core.simulator.Scenario;
@@ -58,9 +60,11 @@ public class RogueStateTest extends InjectedSimulation {
 			.addActionHandler(QueryEmissionsTargetHandler.class)
 			.addActionHandler(AddRemoveFromMonitorHandler.class)
 			.addActionHandler(ApplyMonitorTaxHandler.class)
+			.addActionHandler(RejoinKyotoHandler.class)
 			.addGlobalEnvironmentService(CarbonReportingService.class)
 			.addGlobalEnvironmentService(Monitor.class)
 			.addGlobalEnvironmentService(CarbonTarget.class)
+			.addGlobalEnvironmentService(TradeHistoryService.class)
 			);
 		
 		modules.add(NetworkModule.fullyConnectedNetworkModule().withNodeDiscovery());
