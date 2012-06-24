@@ -1,6 +1,7 @@
 package uk.ac.ic.kyoto.annex1reduce;
 
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.countries.OfferMessage;
@@ -12,7 +13,7 @@ public class MarketData {
 
 	private OfferHistory offerHistory;
 
-	final private static int TRADE_DATA_TICKS = 10;
+	final private int TRADE_DATA_TICKS = (new Random().nextInt(6)+2);
 	
 	/**
 	 * Struct with info about how much other people are buying for
@@ -29,7 +30,7 @@ public class MarketData {
 
 		for (int i = 0; i < TRADE_DATA_TICKS; i++) {
 			buyArray[i] = new BuyStruct(0, 0, 0);
-			sellArray[i] = new SellStruct(9999999, 9999999, 9999999);
+			sellArray[i] = new SellStruct(999999999, 999999999, 999999999);
 		}
 	}
 
@@ -107,13 +108,13 @@ public class MarketData {
 		if (numBuys != 0) {
 			averageBuy /= numBuys;
 			addBuyStruct(new BuyStruct(minimumBuy, averageBuy, maximumBuy));
-			calculateBuyingPrice();
+			calculateSellingPrice();
 		}
 
 		if (numSells != 0) {
 			averageSell /= numSells;
 			addSellStruct(new SellStruct(minimumSell, averageSell, maximumSell));
-			calculateSellingPrice();
+			calculateBuyingPrice();
 		}
 
 		/*
@@ -141,7 +142,7 @@ public class MarketData {
 	 * The price WE can buy at. Calculated depending on what other want to sell
 	 * at. The lower the better.
 	 */
-	private double buyingPrice = Double.MAX_VALUE / 1000000000000.0;
+	private double buyingPrice = 10000000000000.0;
 
 	/**
 	 * Calculate price WE can sell at, according to what others want to buy at.

@@ -58,6 +58,8 @@ public class Simulation extends InjectedSimulation {
 	public double STABLE_MARKET_CHANCE;
 	@Parameter(name="RECESSION_MARKET_CHANCE")
 	public double RECESSION_MARKET_CHANCE;
+	@Parameter(name="MAX_GDP_GROWTH")
+	public double MAX_GDP_GROWTH;
 	@Parameter(name="MONITOR_COST_PERCENTAGE")
 	public double MONITOR_COST_PERCENTAGE;
 	@Parameter(name="SANCTION_RATE")
@@ -77,7 +79,7 @@ public class Simulation extends InjectedSimulation {
 	protected Set<AbstractModule> getModules() {
 		
 		new GameConst(GROWTH_MARKET_STATE, STABLE_MARKET_STATE, RECESSION_MARKET_STATE, 
-				GROWTH_MARKET_CHANCE, STABLE_MARKET_CHANCE, RECESSION_MARKET_CHANCE,
+				GROWTH_MARKET_CHANCE, STABLE_MARKET_CHANCE, RECESSION_MARKET_CHANCE, MAX_GDP_GROWTH,
 				MONITOR_COST_PERCENTAGE, SANCTION_RATE, MONITORING_PRICE,
 				YEARS_IN_SESSION, TARGET_REDUCTION, MINIMUM_KYOTO_REJOIN_TIME,
 				MINIMUM_KYOTO_MEMBERSHIP_DURATION);
@@ -189,8 +191,8 @@ public class Simulation extends InjectedSimulation {
 											Double.parseDouble(countryData.getArableLandArea()), 
 											Double.parseDouble(countryData.getGDP()),
 											Double.parseDouble(countryData.getGDPRate()),
-											Long.parseLong(countryData.getEnergyOutput()), 
-											Long.parseLong(countryData.getCarbonOutput()));	
+											Double.parseDouble(countryData.getEnergyOutput()), 
+											Double.parseDouble(countryData.getCarbonOutput()));	
 					}
 					
 					CarbonData1990.addCountry(countries.get(countryKey).getISO(), Double.parseDouble(countries.get(countryKey).getCarbonOutput1990()));

@@ -23,7 +23,6 @@ public class LeavingRejoiningKyotoAgent extends AbstractCountry {
 			double energyOutput, double carbonOutput) {
 		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate,
 				energyOutput, carbonOutput);
-		setKyotoMemberLevel(KyotoMember.NONANNEXONE);
 	}
 
 	@Override
@@ -43,16 +42,16 @@ public class LeavingRejoiningKyotoAgent extends AbstractCountry {
 		
 		logger.info("BEFOREHAND: " + isKyotoMember());
 		
-		try {
-			leaveKyoto();
-		} catch (CannotLeaveKyotoException e) {
-			e.printStackTrace();
-		}
-		try {
-			joinKyoto();
-		} catch (CannotJoinKyotoException e) {
-			e.printStackTrace();
-		}
+//		try {
+//			leaveKyoto();
+//		} catch (CannotLeaveKyotoException e) {
+//			e.printStackTrace();
+//		}
+//		try {
+//			joinKyoto();
+//		} catch (CannotJoinKyotoException e) {
+//			e.printStackTrace();
+//		}
 		logger.info("MEMBERSHIP LEVEL: " + isKyotoMember()); 
 	}
 

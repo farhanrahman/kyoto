@@ -128,11 +128,15 @@ public class NonAnnexOne extends AbstractCountry {
 		if (trade.getInvestmentType() == InvestmentType.ABSORB)
 		{
 			if (currentAvailableArea()=="Safe")
-				return true;
+			{
+				logger.info("CDM Absorb transaction");
+				return true;				
+			}
 			else
 				return false;
 		}
 		else
+			logger.info("CDM Reduce transaction");
 			return true;
 	}
 	
@@ -195,6 +199,7 @@ public class NonAnnexOne extends AbstractCountry {
 		double carbon_difference; 
 		double available_area;
 		available_area = getArableLandArea();
+		double necessary_land_area;
 		
 		
 		if (getCarbonOutput() + energyUsageHandler.calculateCarbonIndustryGrowth(money_invest) <= environment_friendly_target)
@@ -230,15 +235,19 @@ public class NonAnnexOne extends AbstractCountry {
 			try
 			{ 
 				carbon_difference = (getCarbonOutput() + energyUsageHandler.calculateCarbonIndustryGrowth(money_invest)) - environment_friendly_target;
+				necessary_land_area = carbonAbsorptionHandler.getForestAreaRequired(carbon_difference);
 				
-				if ((carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend()) && ((carbonAbsorptionHandler.getForestAreaRequired(carbon_difference) < available_area)))
-					{
-					carbonAbsorptionHandler.investInCarbonAbsorption(carbon_difference);
-					logger.info("Country invests in carbon absorption to increase carbon absorption and thus reach environment target carbon output");
-					}
+				if (necessary_land_area <= available_area)
+				{
+						if (carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend()) 
+						{
+							carbonAbsorptionHandler.investInCarbonAbsorption(carbon_difference);
+							logger.info("Country invests in carbon absorption to increase carbon absorption and thus reach environment target carbon output");
+						}
+				}
 				
-				else if ((carbonAbsorptionHandler.getInvestmentRequired(carbon_difference) < getAvailableToSpend() ) && (carbonAbsorptionHandler.getForestAreaRequired(carbon_difference) >= available_area))
-				
+				else if (necessary_land_area > available_area) 
+							
 					{ 
 					// when country does not have enough arable land area to invest in carbon absorption,
 					//invests in carbon reduction
@@ -249,14 +258,15 @@ public class NonAnnexOne extends AbstractCountry {
 						carbonReductionHandler.investInCarbonReduction(carbon_difference);
 						logger.info("Country has enough cash to invest in carbon reduction, invests");
 						}
-					}
-				else 
+					
+					else 
 					//when the country does not have enough available to spend
 					//then it does not care anymore about the environment.
 					{
 					logger.info("Country has insufficient funds to reach environment friendly target");
 					green_care = false;
 					
+					}
 					}
 					
 			}

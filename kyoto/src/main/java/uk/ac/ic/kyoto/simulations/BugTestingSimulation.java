@@ -300,9 +300,13 @@ public class BugTestingSimulation extends InjectedSimulation {
 //		CarbonData1990.addCountry("KE4", 60000);
 //		CarbonData1990.addCountry("EVL", 750000);
 		
+//		AbstractParticipant join1 = new LeavingRejoiningKyotoAgent(Random.randomUUID(), "Kekeke4", "KE4", 10000, 2000, 500000, 0.01, 70000, 60000);
+//		s.addParticipant(join1);
+//		CarbonData1990.addCountry("KE4", 60000);
+		
+		
 		AbstractParticipant join1 = new LeavingRejoiningKyotoAgent(Random.randomUUID(), "Kekeke4", "KE4", 10000, 2000, 500000, 0.01, 70000, 60000);
 		s.addParticipant(join1);
-		CarbonData1990.addCountry("KE4", 60000);
-
+		CarbonData1990.addCountry("KE4", 20000);
 	}
 }
