@@ -266,15 +266,61 @@ The EU, having seen the efficiency advantages of working as part of a common reg
 
 Research has also shown that there may be problems of efficiency when there is significant wealth and technology inequalities. Where there are no regulation for a \textsc{cpr}, technology inequalities can exacerbate inefficient use, and those participants with better technologies over-extract from the core resource, while less technologically advanced participants will lag behind. Where \textsc{cpr}s are regulated, efficiency gains from  the regime will be lower as inequality amongst participants increases. This has somewhat been avoided in the Kyoto Protocol by the introduction of Clean Development Mechanisms; this allows Annex I countries to invest in clean development in Non-Annex countries, thereby reducing the technology gap between developing and developed countries, which in turn increases the efficiency of participants in this regime.~\cite{Wealth-inequality-regulated}\cite{Wealth-inequality-unregulated}
 
-In summary it does appear that Kyoto can be mapped to a Common Pool Resource scheme, and while some of the problems faced by other \textsc{cpr} systems have been carefully thought out (efficiency of regimes, \textsc{cdm} to combat wealth inequality), other problems still remain (no limits for Non-Annex countries, countries playing Kyoto to their advantage), which may cause long term problems to the efficacy of the protocol.
+\paragraph{In summary} it does appear that Kyoto can be mapped to a Common Pool Resource scheme, and while some of the problems faced by other \textsc{cpr} systems have been carefully thought out (efficiency of regimes, \textsc{cdm} to combat wealth inequality), other problems still remain (no limits for Non-Annex countries, countries playing Kyoto to their advantage), which may cause long term problems to the efficacy of the protocol.
 
 \subsection{Multi-Agent Systems}
 
 \subsubsection{Definition}
 
+A multi-agent system (\textsc{mas}) is a paradigm for conceptualising, designing, and implementing a system composed of multiple intelligent agents within an environment. We can therefore use \textsc{mas} as a model to portray computing as a process of interaction~\cite{MAS-DoC} where agents can autonomously cooperate, reach agreements or even compete with other agents that have different interests.  Thus topics such as portfolio managemen~\cite{Warren-ISA}, joint mission planning~\cite{Joccasta-ISA} and the modelling of social structure~\cite{jasss-soc-surrey} are areas where \textsc{mas} research may be an appropriate approach.
+
+A \textsc{mas} has the following advantages over a single agent or centralised approach:
+
+\begin{itemize}
+	\item A \textsc{mas} distributes computational resources and capabilities across a network of interconnected agents. In addition, a \textsc{mas} does not suffer from resource limitations, performance bottlenecks, and/or critical failures as it is decentralised.
+
+	\item A \textsc{mas} allows for agent wrappers around one or more existing legacy systems which allows them to be incorporated into an agent society.
+
+	\item A \textsc{mas} efficiently retrieves, filters, and globally coordinates information from sources that are spatially distributed.
+
+	\item A \textsc{mas} provides solutions in situations where expertise is spatially and temporally distributed.
+
+	\item A \textsc{mas} enhances overall system performance. It allows computational efficiency and robustness whilst maintaining modularity, flexibility, and reusability.
+\end{itemize}
+
 \subsubsection{Structure of an Agent}
 
+Agents are very similar to active concurrent objects except for one key difference: agents can say ``No'' (e.g.: refusing a trade proposition in a trading simulation). Often, they also interact using a common high level peer to peer (\textsc{p2p}) communication language, which allows them to coordinate their activities asynchronously. These similarities do mean that concurrent object oriented programming is a suitable base for building multi agents systems.
+
+As mentioned previously, \textsc{mas} are composed of agents and an environment as seen in Figure X. Therefore it is essential that agents are able to perceive the environment where they are situated (e.g.: via sensors, message reception, or event detection) giving partial information on its state and that they are also able to act upon it with possible non-deterministic outcomes (e.g.: via effectors).
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.6\textwidth]{img/mas.png}
+	\caption{Basic multi agent system structure}
+	\label{fig:mas}
+\end{figure}
+
+Figure X: Basic Multi Agent System Structure
+
+This allows the programmer to design proactive agents, which are set out to achieve ``well defined goals''. Agents' behaviours are thus goal directed. This requires the environment to be maintained in a certain state and the agent to achieve a certain state of its environment.~\cite{MAS-DoC}
+
+From a software engineering perspective, the most adapted agent structure for our project is to use agents with states as shown in Figure X.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[]{img/agent-architecture.png}
+	\caption{General agent architecture~\cite{Sam-Transfer-Report}}
+	\label{fig:agent-architecture}
+\end{figure}
+
+We can use the agent's internal data to record information about the environment state and its history. Separating the internal state into public and private sectors also allows the agent to keep some information hidden from other querying agents. Finally, all \textsc{p2p} messages are sent via a network adapter which allows us to abstract away communication protocols and methods.
+
 \subsubsection{Services and Protocols}
+
+In order to simplify the implementation of agents, it was agreed that we would require additional services and protocols on top of the environment and network. Services allow us to retrieve the environment shared state raw data in a more user-friendly way. Similarly, protocols encapsulate inter-agent communication.
+
+By using such components, we can encase the software implementation of our simulation framework. Any changes made to the way the environment stores data or how communications are handled would therefore not affect the behaviour of our agents.
 
 \subsection{Presage 2}
 
