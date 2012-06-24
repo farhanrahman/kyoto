@@ -71,7 +71,7 @@ public class AnnexOneSustain extends AbstractCountry {
 		if (cheaterDecider < Constants.CHEATERS_PERCENTAGE) {
 			cheater = true;
 			maxTimesCaught = generator.nextInt(Constants.MAX_ALLOWED_TIMES_CAUGHT + 1);
-			logger.info(name + ": Cheater, can be caught " + maxTimesCaught + " before leaving Kyoto");
+			logger.info(name + ": Cheater, can be caught " + maxTimesCaught + " times before leaving Kyoto");
 		}
 		else {
 			cheater = false;
