@@ -14,6 +14,7 @@ import uk.ac.ic.kyoto.countries.testCountries.DoNothing;
 import uk.ac.ic.kyoto.countries.testCountries.GDPTestCount;
 import uk.ac.ic.kyoto.nonannexone.NonAnnexOne;
 import uk.ac.ic.kyoto.roguestates.USAgent;
+import uk.ac.ic.kyoto.roguestates.CanadaAgent;
 import uk.ac.ic.kyoto.services.CarbonReportingService;
 import uk.ac.ic.kyoto.services.Economy;
 import uk.ac.ic.kyoto.services.GlobalTimeService;
@@ -75,21 +76,21 @@ public class RogueStateTest extends InjectedSimulation {
 	protected void addToScenario(Scenario s) {
 		
 		// Russia Stats
-		final double landArea = 16377742;
-		final double arableLandArea = 1218599;
-		final double GDP = 2.41602E+11;
-		final double energyOutput = 1571812255.0;
-		final double carbonOutput = 1511270000.0;
-		final double GDPRate = -0.0481;
+		//final double landArea = 16377742;
+		//final double arableLandArea = 1218599;
+		//final double GDP = 2.41602E+11;
+		//final double energyOutput = 1571812255.0;
+		//final double carbonOutput = 1511270000.0;
+		//final double GDPRate = -0.0481;
 
 		//className,name,ISO,landArea,arableLandArea,GDP,GDPRate,energyOutput,carbonOutput,carbonOutput1990
 		//AnnexOneSustain,Russia,RUS,16377742,1218599,2.41602E+11,-0.0481,1571812255,1511270000,2220721000	
-		String name1 = "Russia";
-		String ISO1 = "RUS";
+		//String name1 = "Russia";
+		//String ISO1 = "RUS";
 		
-		AbstractParticipant p1 = new NonAnnexOne(Random.randomUUID(), name1, ISO1, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput);
-		s.addParticipant(p1);
-		CarbonData1990.addCountry(ISO1, 2220721000.0);
+		//AbstractParticipant p1 = new NonAnnexOne(Random.randomUUID(), name1, ISO1, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput);
+		//s.addParticipant(p1);
+		//CarbonData1990.addCountry(ISO1, 2220721000.0);
 		
 		// US Stats
 		final double landArea2 = 9161966;
@@ -101,10 +102,10 @@ public class RogueStateTest extends InjectedSimulation {
 			
 		//className,name,ISO,landArea,arableLandArea,GDP,GDPRate,energyOutput,carbonOutput,carbonOutput1990			
 		//USAgent,United States,USA,9161966,1650062,8.741E+12,0.0492,6304070667,5449078000,4879376000		
-		String name2 = "United States";
-		String ISO2 = "USA";
+		String name2 = "Canada";
+		String ISO2 = "CAN";
 		
-		AbstractParticipant p2 = new USAgent(Random.randomUUID(), name2, ISO2, landArea2, arableLandArea2, GDP2, GDPRate2, energyOutput2, carbonOutput2);
+		AbstractParticipant p2 = new CanadaAgent(Random.randomUUID(), name2, ISO2, landArea2, arableLandArea2, GDP2, GDPRate2, energyOutput2, carbonOutput2);
 		s.addParticipant(p2);
 		CarbonData1990.addCountry(ISO2, 4879376000.0);
 		

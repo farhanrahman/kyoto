@@ -20,7 +20,7 @@ import uk.ac.imperial.presage2.util.fsm.FSMException;
 
 public class CanadaAgent extends AbstractCountry {
 
-	private double	AverageGDPRate; // to be stored in an array or DB for furhter analysis.
+	//private double	AverageGDPRate; // to be stored in an array or DB for furhter analysis.
 	long Currentyear;				//The present year global	
 	long Prevyear=Currentyear-1;	//Previous year
 	int n=8,m=3;					//Number of players and projects initially
@@ -28,7 +28,7 @@ public class CanadaAgent extends AbstractCountry {
 	int industry_projects=0;
 	double ratio;
 	public CanadaAgent(UUID id, String name,String ISO, double landArea, double arableLandArea, double GDP,
-			double GDPRate, double emissionsTarget, double energyOutput, double carbonOutput) {
+			double GDPRate, double energyOutput, double carbonOutput) {
 		super(id, name, ISO, landArea, arableLandArea, GDP,
 				GDPRate, energyOutput, carbonOutput);
 		//
@@ -200,23 +200,25 @@ public void behaviour() {
 		
 		//If not recession we can consider carbon reductions
 		double carbon_out=this.getCarbonOutput();
-		double carb_offSet=this.getCarbonOffset();
-		double money=this.getAvailableToSpend();
+		//double carb_offSet=this.getCarbonOffset();
+		double money_we_have=this.getAvailableToSpend();
 		double land_area=this.getArableLandArea();
-		double carbon_reduction ;
-		double industry_reduction;
-		double carbon_absorbtion;
+		//double carbon_reduction ;
+		//double industry_reduction;
+		//double carbon_absorbtion=this.getCarbonAbsorption();
 		double target=this.getEmissionsTarget();
 		double carbon_change=target-getCarbonOutput()-getCarbonOffset()-getCarbonAbsorption();
 		
 		//check if we can achieve carbon reduction by foresting
+		if(isKyotoMember()==KyotoMember.ANNEXONE){
+			
 		double absorption_change;
 		try {
-			absorption_change = this.carbonAbsorptionHandler.getCarbonAbsorptionChange(money, land_area);
+			absorption_change = this.carbonAbsorptionHandler.getCarbonAbsorptionChange(money_we_have, land_area);
 		} catch (NotEnoughLandException e1) {
 			absorption_change = 0;
 		}
-		if((absorption_change+this.getCarbonOutput()) <= this.getEmissionsTarget() ){
+		if((absorption_change+carbon_out) <= target ){
 			System.out.print("We can achieve target");
 				}
 		
@@ -229,16 +231,30 @@ public void behaviour() {
 				inv_required=Double.MAX_VALUE;
 			}
 		if(carbon_change>0){
-			if(inv_required<=this.getAvailableToSpend()){
+			if(inv_required<=money_we_have){
 				System.out.print("we can invest in reduction");
 			}
 		}
 		
 		if(getCarbonOutput() - getCarbonOffset() - getCarbonAbsorption() < target ){
 			System.out.print("Investing not needed");
+			//Invest in carbon industry if we are within our targets and maximize GDP growth
+			double growth=this.energyUsageHandler.calculateCarbonIndustryGrowth(money_we_have);
+			if(growth>0){
+				double investment=this.energyUsageHandler.calculateCostOfInvestingInCarbonIndustry(growth);
+				try {
+					this.energyUsageHandler.investInCarbonIndustry(investment);
+				} catch (NotEnoughCashException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+						
 		}else {
 			try {
+				//double to_buy=target-getCarbonOutput()+getCarbonOffset()+getCarbonAbsorption();
 				this.carbonAbsorptionHandler.investInCarbonAbsorption(this.calc_target());
+				broadcastBuyOffer(calc_target(), (money_we_have/calc_target()));
 			} catch (NotEnoughLandException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -247,8 +263,8 @@ public void behaviour() {
 				e.printStackTrace();
 			}
 			}
-			//Consider investing in industry or buy credits after comparison
-		}
+		}//Consider investing in industry or buy credits after comparison
+	}
 		
 		
 		
