@@ -93,7 +93,7 @@ public class MarketData {
 			}
 
 			// If the offer is to sell credits or CDM to us
-			else if (type == TradeType.SELL || type == TradeType.INVEST) {
+			else if (type == TradeType.SELL || type == TradeType.RECEIVE) {
 				if (minimumSell > price) {
 					minimumSell = price;
 				}
