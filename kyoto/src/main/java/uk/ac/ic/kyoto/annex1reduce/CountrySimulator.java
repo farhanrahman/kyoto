@@ -17,8 +17,6 @@ class CountrySimulator {
 
 	private Logger logger = Logger.getLogger(CountrySimulator.class);
 
-	// TODO, look ahead a minimum of 5 years or a maximum of 15 years. Always
-	// end at a session end.
 	private int LOOK_AHEAD_YEARS;
 	private int SANCTION_YEAR;
 
@@ -61,11 +59,11 @@ class CountrySimulator {
 		for (int i = 0; i < LOOK_AHEAD_YEARS; i++) {
 			// Cull the reduce states
 
-			// logger.info("unculledReduceSize " + i + " = "
-			// + stateList[i].reduceStates.size());
+//			logger.info("unculledReduceSize " + i + " = "
+//					+ stateList[i].reduceStates.size());
 			stateList[i].reduceStates = cullStates(stateList[i].reduceStates);
-			// logger.info("reduceSize " + i + " = "
-			// + stateList[i].reduceStates.size());
+//			logger.info("reduceSize " + i + " = "
+//					+ stateList[i].reduceStates.size());
 
 			// Branch off all unculled reduce states by performing a maintain
 			// action
@@ -75,11 +73,11 @@ class CountrySimulator {
 			}
 
 			// Cull the maintain states
-			// logger.info("unculledMaintainSize " + i + " = "
-			// + stateList[i].maintainStates.size());
+//			logger.info("unculledMaintainSize " + i + " = "
+//					+ stateList[i].maintainStates.size());
 			stateList[i].maintainStates = cullStates(stateList[i].maintainStates);
-			// logger.info("maintainSize " + i + " = "
-			// + stateList[i].maintainStates.size());
+//			logger.info("maintainSize " + i + " = "
+//					+ stateList[i].maintainStates.size());
 
 			// Branch off all unculled maintain states by performing a sell
 			// action
@@ -90,11 +88,11 @@ class CountrySimulator {
 			}
 
 			// Cull the sell states
-			// logger.info("unculledSellSize " + i + " = "
-			// + stateList[i].sellStates.size());
+//			logger.info("unculledSellSize " + i + " = "
+//					+ stateList[i].sellStates.size());
 			stateList[i].sellStates = cullStates(stateList[i].sellStates);
-			// logger.info("sellSize " + i + " = "
-			// + stateList[i].sellStates.size());
+//			logger.info("sellSize " + i + " = "
+//					+ stateList[i].sellStates.size());
 
 			// So long as we aren't in the final year
 			if (i != (LOOK_AHEAD_YEARS - 1)) {
@@ -370,8 +368,8 @@ class CountrySimulator {
 					carbonAbsorbedReduced, previousState, investments);
 			double carbonOffsetIncreased = oldCarbonDifference
 					* action.buyCreditFrac;
-			double marketCost = country
-					.getMarketBuyPrice(carbonOffsetIncreased);
+			double marketCost = carbonOffsetIncreased
+					* country.getMarketBuyUnitPrice(this.year);
 			this.availableToSpend = previousState.availableToSpend
 					- investmentCost - marketCost;
 
@@ -430,8 +428,8 @@ class CountrySimulator {
 			// Number of carbon credits gained by buying credits
 			double carbonCreditIncrease = action.buyCreditOffsetFrac
 					* energyIncrease;
-			double marketBuyPrice = country
-					.getMarketBuyPrice(carbonCreditIncrease);
+			double marketBuyPrice = carbonCreditIncrease
+					* country.getMarketBuyUnitPrice(this.year);
 
 			// Amount of carbon we need to reduce by investing in offsets
 			double[] investments = new double[2];
@@ -528,8 +526,8 @@ class CountrySimulator {
 
 			double totalCreditsSold = carbonBelowTarget * action.sellFrac;
 
-			double marketSellEarnings = country
-					.getMarketSellPrice(totalCreditsSold);
+			double marketSellEarnings = totalCreditsSold
+					* country.getMarketSellUnitPrice(this.year);
 
 			this.availableToSpend = previousState.availableToSpend
 					- investmentCost + marketSellEarnings;
@@ -664,7 +662,7 @@ class CountrySimulator {
 			new CountryState(this, new SellAction(0, 0, 0));
 
 			// Ensure we don't try to sell if the sell price is 0
-			if (country.getMarketSellPrice(1) < 1) {
+			if (country.getMarketSellUnitPrice(this.year) < 1) {
 				return;
 			}
 

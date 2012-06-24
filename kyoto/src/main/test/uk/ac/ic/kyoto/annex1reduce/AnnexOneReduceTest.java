@@ -36,9 +36,6 @@ public class AnnexOneReduceTest {
 				landArea, arableLandArea, GDP, GDPRate, energyOutput,
 				carbonOutput);
 		
-		// test = new AnnexOneReduce(UUID.randomUUID(), "JunitTest",
-		// "JUT",1000000,500000,1000000,1000000,1000000,700000);
-		
 		test.setAvailableToSpend(availableToSpend);
 		test.setEmissionsTarget(emissionsTarget);
 
@@ -48,8 +45,10 @@ public class AnnexOneReduceTest {
 	@Test
 	public void testbehaviour() {
 
+		test.runSimulation();
 		test.performReduceMaintainActions();
 		test.runSimulation();
+
 
 	}
 
