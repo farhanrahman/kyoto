@@ -1,0 +1,272 @@
+\section{Implementation}
+
+\subsection{Agents}
+
+\subsubsection{Participants}
+
+\paragraph{Annex I (Sustain)}
+
+Agents implementing this type of strategy are meant to represent countries which are part of Kyoto and belong to Annex I group, but their emission targets are equal or higher than their emissions for the first Kyoto session.
+
+The usual reason for this is that normally, while the first session started in 1990, the data used for setting the targets comes from 1990. During this period of history, many Eastern Bloc countries moved from heavily carbon-based economies to more environmentally conscious economies. Hence, even though Kyoto takes their former high carbon emissions into account, they have reduced their carbon output quite significantly since then, reaching or even exceeding the targets before the first session started. That, in turn, means that they do not have to reduce their emissions further during the first session.
+
+\subparagraph{Strategy}
+
+In order to make strategies distinct between annex I sustain and annex I reduce, annex I sustain countries will only remain a part of the Kyoto Protocol as long as they meet their targets. In the event that emission targets are lower than the acceptable output level of an annex I sustain country, the country will depart from the Protocol and become a rogue state. 
+
+However, it is important to recognise that annex I sustain countries did ratify the Kyoto Protocol when it was originally proposed and finalised. These countries' governments have expressed a desire to minimise their impact on the environment to some extent. It is with this in mind, that annex I sustain countries make sure that their overall emissions never rise above their starting levels. Any investment in industry to promote economic growth is offset by corresponding investments in cleaning industry or constructing carbon sinks.
+
+On the other hand, annex I sustain countries are reluctant to reduce their carbon emissions if it adversely affects their economic growth. Any reductions in emissions are because the country has judged that investment will be profitable when the resulting offset is sold on the carbon commodity market. This may seem like a bleak attitude for a set of countries to adopt, painting them as opportunistic and self-interested. However, this diversified the strategies our countries employ over the course of an entire varied simulation and more properly models Common Pool Resources, where individual interests are weighed against that of the collective.
+
+The strategy contains three steps, taken every year in order:
+
+\begin{description}
+\item[1. Invest in industry] \hfill \\
+Part of a year's budget is reserved for increasing the economy. Since this group represents mostly newly-developed countries, this is prioritised to promote long term growth.
+
+As outlined earlier, the investment must be accompanied with carbon reduction or absorption, so that overall carbon emissions do not increase. To achieve that, a specific point is found for which total price of investments in industry and matching emission decrease is equal to the reserved budget.
+
+\item[2. Sell carbon credits] \hfill \\
+If the emissions of the country are lower than the target for a given year, the country will accumulate carbon offset, representing the âunusedâ emissions. The agents will attempt to sell all of these credits. Since carbon trading is essentially an open market, setting an average price can be challenging. To maximise profits from sales, the agents will start with a high asking price, reducing it gradually as the year progresses if no one is interested in buying, and increasing it when the sales go well.
+
+\item[3. Invest in emissions reduction] \hfill \\
+When a country has no credits to sell anymore, but there is still demand for carbon offset on the market, it may decide to invest in carbon reduction or absorption to generate additional carbon offset First, it estimates how many of the generated units can possibly be sold during the current session, assuming the market price persists. If the estimated profit is higher than cost of the investment, the country will proceed with it. Should this occur, the country will reduce its emissions by the end of the session (reducing global output as an incidental benefit), and hence will end up with a target higher than actual emissions in the next session, just as in the previous one. If this is the case, it will stay in Kyoto for the next session.
+
+\end{description}
+
+\paragraph{Annex I (Reduce)}
+
+In our project, we define Annex I Reduce countries as participants whose current emissions are higher than their 1990 base targets, requiring them to prioritise the reduction of their carbon emissions. Good examples of such countries are the fifteen European countries.
+
+For their behaviour, it was decided that the best approach was to design a mini simulation that would perform exhaustive testing on every possible country action, extrapolating emissions and industry growth into the future. It then decides which action results in the best outcome, with regard to maximizing economic growth while still meeting Kyoto Protocol targets and then performs the optimal actions in the simulation.
+
+While simple in theory, in practice there are some major hurdles. The most troublesome of these is that there are an enormous number of possible actions a given Annex I Reduce country can take, all of which operate on a continuous scale. Every action has an almost infinite number of options that can be taken. For example, a country could choose to reduce their carbon emissions through absorption by spending 1\% of their available cash, or by spending 100\% of their available cash, or any number in between. They could then decide to buy vast amounts of carbon offset from the market, at any price, or put up sell offers. All of these actions can be performed in a single tick.
+
+\subparagraph{Strategy}
+
+Some heuristics had to be implemented to keep the simulation from spiralling out of control. It also ensured that as few \textsc{cpu} cycles as possible are wasted on actions that were simply irrational and could never lead to any useful results. To do this, it was decided to split each turn into three phases: the 'reduce' phase, the 'maintain' phase and the 'sell' phase.
+
+The reduce phase happens first. It checks whether our current carbon output is below our carbon target. If we are at or below our target, then nothing is done. However, if we are above our current target, the testing will branch off into combinations of three distinct actions. The carbon target will be met by either buying carbon offset from the market, by reducing the carbon output through investing in absorption and reduction or, if in particularly dire financial situation, by reducing the economic output of the country. Every time a branch occurs, a new 'state' is created.
+
+Before the maintain phase occurs, we compare every branched state with one another and check whether one state is objectively superior for every possible pair of states. For example, let a state have two attributes 'Money' and 'Carbon', where a higher 'Money' and a lower 'Carbon' is better. If state 1 has a 'Money' value of 100 and a 'Carbon' value of 50, and state 2 has a 'Money' value of 90 and a 'Carbon' value of 60, then state 1 is objectively better than state 2. Therefore we can immediately eliminate state 2 as a possible action. Alternatively, if a state 3 has a 'Money' value of 110 and a 'Carbon' value of 60, we cannot objectively say that it is any better than state 1 and thus cannot remove this from the simulation. By performing this culling, we can prevent our search space from getting too large and avoid going down paths where we can already tell there will be better alternatives.
+
+Next is the maintain phase. As we are now guaranteed to be at least at or below our carbon target, the country can focus on improving its industry, which will eventually result in an increase in the available cash to spend. The simulation will branch off from each unculled state created in the reduce phase by first investing in industry (i.e.: increasing our energy output, which in turn increases our \textsc{gdp}) by some amount and then by offsetting the extra carbon created by investing in absorption and reduction, or by buying the offset from the market. Once again, a cull is performed after all branches have been taken.
+
+Finally there is the sell stage. Here, we reduce our carbon output (by investing in carbon absorption and reduction, or by shutting down factories) by a certain amount and then sell our newly created carbon offset at the highest possible price. Once again, all unrealistic states are culled.
+
+The combination of these three phases makes up a list of possible actions for one year of the game. However, since a session lasts a number of years (at which point any accumulated carbon offsets are abandoned when new emissions targets are calculated), simulating the possible behaviour for a single year simply does not provide us with enough information to choose an ideal action path. We need to continue the internal projections up until the end of the current session.
+
+Once this is over and we have a large number of end states, we can analyse our them to find the ones which can be objectively considered the best. This will be the one with the best economy and the lowest carbon output. When identified, we simply traverse our path back to the initial state and perform the action path in the actual game.
+
+Overall, this method takes full advantage of all possible options available to a country, including utilising the market as much as possible. No possible rational action is ruled out until it is clear that there are objectively superior alternatives. As a result, we achieve a behaviour that is very close to the optimal action for the country, resulting in maximum monetary gains while still reaching all set carbon targets.
+
+As the annex I reduce countries were deemed to be paragons of justice, some actions such as cheating and ignoring carbon targets weren't coded in. However if a country finds itself constantly shutting down factories (due to a lack of money to perform any other actions) in order to meet carbon targets, it will choose to leave the Kyoto Protocol until it can get back on its feet again financially.
+
+\paragraph{Non-Annex I}
+
+The Non Annex I group is mainly composed of developing countries whose primary aim is economic growth. Since \textsc{gdp} growth is directly proportional to energy output in this project, the aim of Non Annex I countries is to increase its industry as much as possible. 
+
+Investing in industry, and therefore growing a country's economy increases its carbon output at the same time. However, the Kyoto Protocol dictates that sanctions are not enforced on Non Annex I countries since they are not set targets to fulfill. They are therefore free to emit as much \CO as their industry requires.
+
+Nevertheless, the Non Annex I behaviour was implemented such that they do care about the environment as well as their growth when cash is available in abundance.
+
+The following keywords will be used to describe the general behaviour of Non Annex 1 countries:
+
+\begin{description}
+\item[1. energy\_aim:] the energy output the country wants to reach by the end of the year.
+\item[2. times\_aim\_met:] how many consecutive times the energy output aim was met.
+\item[3. aim\_success:] variable that represents whether the country met its energy target or not.
+\item[4. green\_care:] variable that controls if the country cares or not about the environment.
+\item[5. green\_lands:] variable that controls whether the country has actually met its environmental commitments.
+\item[6. environment\_friendly\_target:] if it exists, variable that stores the country's carbon emission target. 
+\end{description}
+
+The country starts by having a policy of increasing its energy output as shown in Figure X whilst trying to meet an internally set carbon emission target.
+
+%
+% FIX THIS UP
+%
+\begin{center}
+times_met_before = 0 new_energy_aim = previous_energy_output + previous_energy_output / 8
+times_met_before = 1 new_energy_aim = previous_energy_output + previous_energy_output / 4 
+\dots
+times_met_before = n new_energy_aim = previous_energy_output + previous_energy_output / 
+16exp(-0.693*n)
+\end{center}
+%
+% FIX THIS UP
+%
+
+Each year, the country calculates the difference between its achieved energy output and the target aim that was set the previous year. The difference is then used to estimate the amount of money to invest in carbon industry each tick in order to reach the required energy output. Before the country proceeds with the investment, certain conditions have to be met:
+
+\begin{itemize}
+\item It has the available cash to spend.
+\item If the country has decided to care about the environment, the increase in carbon output due to the investment should not lead to its emission exceeding the set target.
+\end{itemize}
+
+If the latter condition is not met, then the country tries to invest in carbon absorption or carbon reduction in order to decrease its carbon emissions. However, the country will switch to non environmental friendly policies if it does not have enough money.
+ 
+Non Annex I countries take part in Clean Development Mechanisms. This allows Annex I and Non Participant countries to invest in Non Annex I countries in exchange for carbon offset.
+
+In other words, Annex I countries use Non Annex I land area and carbon output to reduce their own emissions in order to meet their targets in the Kyoto Protocol. There are two ways in which countries can invest:
+ 
+\begin{description}
+\item[Carbon Absorption] Decrease available land area, increase carbon absorption
+\item[Carbon Reduction] Carbon output decreases
+\end{description}
+ 
+The amount of carbon output to be changed/given to the Annex I country depends on whether the Non Annex I countries meets its energy output aim.
+
+Carbon absorption offers are all accepted if the country is in an environmentally friendly phase (unless the available land area is at a minimum). 
+
+\paragraph{Non-Participants}
+
+For the purposes of our simulation the rogue states are comprised of the US and Canada, who operate independently of one another, yet necessarily share certain actions and behaviours. 
+
+\subparagraph{United States}
+
+The United States agent uses a metric of "greenhouse gas intensity", defined as the ratio of emissions to economic output, measured in units of tonnes of \CO per million dollars of \textsc{gdp} to monitor its emissions. For example, using the 1990 data values the simulation is seeded with the intensity evaluates to 4,879,376/5,722,300 = 0.853 (3dp). To put in historical perspective, the Bush administration committed to reduce the intensity of greenhouse gas emissions by 18\% over the period 2002-2012.
+
+In the real world it is the governing political party that makes any decisions regarding climate change mitigation, whose actions are in theory in response to the prevailing attitudes of the electorate, and so it is the case for the agent in our simulation. Every four years an election is held, with the initial party in power chosen at random. For simplicity's sake only the two major parties of the republicans and the democrats are represented. Broadly speaking, the democrats seek to increase the intensity value being targeted (which will have a greater impact on carbon reduction), whilst the republicans will target higher growth rates. The ultimate goal of the governing party is to gain re-election, which, as will be detailed below, is determined by the reductions implemented and economic growth over the period. The degree to which each of these effects the re-election chances of the incumbent party varies according to the prevailing attitude of the electorate, and the party in question. The republicans are more strongly punished and rewarded for economic growth, whereas the democrats are more strongly influenced by their carbon reduction efforts (reflecting the concerns of their core supporters). 
+
+The agent has three overarching behaviour patterns controlling its attitude toward carbon reduction, represented by a integer variable between 1 and 10, where 10 is highly positive, and 1 is ambivalent. The real world representation of this being the prevailing attitude of the electorate, to which, in theory, the governing party responds and chooses actions in accordance with. This attitude variable is specifiable at the beginning of the simulation, and can change year by year. A more positive attitude results in more ambitious targets for the desired intensity level improvement chosen for the election cycle. Additionally, the more positive the attitude, the more influenced by success or failure in reaching or exceeding reduction targets the populace are, and the less they are influenced by lower economic growth. The opposite is true for more ambivalent attitudes.
+
+The agent, as in reality, is not a member of the Kyoto protocol at the start of the simulation, and thus is not subject to either monitoring or sanctioning. Despite its non-member status however, it is not entirely ambivalent toward carbon reduction. The agent has been designed so that through the natural oscillation of the party in power intensity levels will steadily decrease, and ultimately result in a decrease in absolute levels, which will result in the agent eventually joining the Kyoto protocol. Each year the agent checks to see if, were it part of Kyoto, would it have met its emission target. If for three years in a row the target is met then the agent joins Kyoto, conversely, if targets are not met for three years in a row after joining Kyoto, the agent will once again leave.
+
+The winner of an election is decided by a function of the economic performance over the election cycle and the election year (the justification for the latter being the relatively short term memory of the typical voter), the carbon reduction measures undertaken, and the attitudes of the electorate and the party's core supporters toward these. After these factors have been taken into account, some level of randomness is introduced (perhaps one party has a particularly compelling candidate).
+
+As the political party's re-election chances are determined by the levels of carbon reduction and economic growth achieved during the election cycle, it chooses targets for these (in the case of economic growth, assuming stable market conditions) in order to maximise this chance. The targets are initially based on the long term percentages reductions/growth rates achieved before being adjusted up or down. In order for an absolute decrease in emissions it is necessary for the emissions intensity to improve faster than economic growth. So, for an absolute decrease the targeted improvement in intensity must be higher than this. The desired improvement in the intensity level is thus taken at base to be the long term economic growth rate over the four year election period plus a value determined by the overall attitude of the electorate. E.g. If the year on year growth rate was 5\%, this would result in a 21.5\% compounded rate from the start to the end of the period. Targets are valid and acted upon over the four year election period in order to allow behaviors to adapt to the prevailing global economic conditions, in times where growth is strong, giving rise to more available cash, more investments toward carbon reduction are made, contrarily, during periods of poor economic growth more investments into the economy are made. 
+
+Once the target is set, the agent sets about choosing actions. The agent aims to implement any actions over three years within the four year election cycle, allowing no action to be taken in one of the years if conditions are not favourable. If conditions are amenable, all available cash will be used. At the beginning of the election cycle the absolute carbon reduction required over the four year period (taking into account the expected \textsc{gdp} growth) is calculated. The goal in absolute terms for each of the three years is then set. The agent will attempt to fulfil its commitments during the first 99 ticks of the year (assuming a year is 100) through the clean development mechanism (\textsc{cdm}), or subsequent to Kyoto membership, through trading carbon offset with other agents. Before implementing any action, the agent evaluates whether the benefit to their election chances will be increased more by taking the action in question or an alternative. On the last tick of the year, if the targets for carbon reduction or \textsc{gdp} growth have not been met, then the agent will take appropriate action through the carbon reduction and absorption mechanisms, or through investing in industry. The party will take measures to meet either its reduction or growth targets first depending on, once again, the projected effect the meeting/not meeting one will have on their reelection chances. Then use any remaining cash available to meet (if possible) the remaining target. If both targets have been met, they will spend the remainder on their preferred action.
+
+\subparagraph{Canada}
+
+%
+% TO BE FILLED OUT
+%
+
+\subparagraph{Participant actions}
+
+\paragraph{Carbon handlers}
+
+\subparagraph{Carbon reduction}
+
+\subparagraph{Reduction cost estimate}
+
+\subparagraph{Carbon Absorption}
+
+The implementation of carbon absorption is very similar to that of carbon reduction investment. Here, the cost of forestation is inversely proportional to the percentage of area that is unoccupied with respect to entire land area of a country:
+
+\begin{center}
+Occupied Area = 1 - Arable Land Area / Land Area
+\end{center}
+
+The cost of this action is calculated in the same way as for carbon reduction, with the only difference being the constant values for a and b. Additionally we also now need to calculate the area occupied by newly planted trees. This is done by using a constant specifying how much forest area is needed to absorb single unit of carbon, which is then multiplied by the amount of carbon absorption done.
+
+\subparagraph{Absorption cost estimation}
+
+Again, the implementation is the same as in the case of carbon reduction. There is only one difference, which causes a slight problem. Binary search requires lower and upper bound, and, potentially, carbon absorption can be as high as possible (providing a country has sufficient land and funds). Hence, we needed to use some upper bound to allow using binary search algorithm.
+
+Even though a country can invest in carbon absorption as much as it wants, it does not make much sense for it to exceed carbon output, and shouldn't be realistically possible providing reasonable constants for prices. Hence, the upper bound which is used here is a difference between carbon output and carbon absorption of a country, so that, for maximum investment, the function will return absorption change which forces actual emissions to atmosphere to 0.
+
+Still, this will produce false results where investment is high enough to potentially increase carbon absorption beyond carbon output. Again, this is just an additional function for countries to make writing strategies easier and make them more interesting. Since there is no way around it, it was decided to allow this potential inaccuracy.
+
+\paragraph{Energy handlers}
+
+Each country in our simulation has the ability to influence its economy by investing or reducing its carbon industry. This functionality is provided to each participant through an instance of the energy handler. Unlike the carbon handlers, the price of a unit of investment in your carbon industry is a constant defined at the start of the simulation. In addition, there is no cap on the amount a country is allowed to develop its industry. 
+
+The cost of an investment for a given desired growth can be modelled by the following linear function:
+
+\begin{center}
+Cost = Growth * Price of Carbon Investment
+\end{center}
+
+Similarly, each participant can also use the handler to query how much economic growth can be achieved for a given cost:
+
+\begin{center}
+Growth = Cost / Price of Carbon Investment
+\end{center}
+
+Using these two functions, participants can make an informed decision on whether to invest in their industries or decide to reduce it. A country can increase its \textsc{gdp} by building factories which in turn will give them more money to spend in the following year. However, its carbon emissions will also increase as a result.
+
+On the other hand, a country can decide to close down factories. This is a cost free method of reducing carbon emissions, though it also leads to a contraction of its economy and \textsc{gdp}. 
+
+\paragraph{Carbon reporting}
+
+\paragraph{Joining \& Leaving Kyoto}
+
+In our simulation platform, we allow countries to leave and join the Protocol. In order to replicate the Kyoto country categories, it was decided to offer participants three distinct levels of subscription to the simulation using Java enumerated states. Each of these give access to a different set of possible actions as described previously. Using this functionality, we can emulate real world scenarios such as Canada leaving the Protocol.
+
+\subsection{Protocols}
+
+\subsubsection{Trade Protocol}
+
+\paragraph{Functionality}
+
+\paragraph{Reverting}
+
+\paragraph{Trade Protocol state machine}
+
+\paragraph{Initiator \textsc{fsm}}
+
+\paragraph{Responder \textsc{fsm}}
+
+\subsubsection{Time Service}
+
+The time service is an environment service, extending Presage2's existing environment interaction classes and development framework. It allows for coordination of time-based events and synchronises various features within our Kyoto Protocol simulation. Although Presage2 does have existing objects (SimTime) which can be used to attain simulation time, this is an absolute value in discrete logical time since the beginning of the simulation. It therefore does not take into consideration the variety of chronological distinctions the Kyoto Protocol requires, such as subdivisions into years and sessions.
+
+It was initially decided to use a global service. It would perform most of the logic integral to coordinating time-driven activities, and would be layered on top of Presage2's integrated SimTime object. However, it is necessary for agents to be able to query for information regarding the current year and session in order to make important strategic and behavioural decisions. Presage2 enforces that agents (participants) are unable to communicate directly with global services. While agents can act on the environment and affect services, performing the reverse is somewhat more complex.
+
+At this stage, it would seem a participant time service would be more appropriate, since participant services can communicate directly with agents. However, another key functionality of the time service is the publishing of new events, both for the end of years and sessions, which trigger key monitoring, sanctioning, reporting, and architectural actions essential to the managed nature of the Kyoto Protocol. Unfortunately, implementation is not in place within Presage2 for participant services to generate (or interact with) the EventBus class, the object essential to publishing or receiving events.
+
+With these restrictions in mind, the time service was subdivided into two separate services. The participant service communicates with agents and relays information regarding the current year and session, among other minor time-related information gathering tasks. The global service is the backbone of the time service, generating new year and session events for the monitoring and targeting services to hook onto. It also carries out calculations to derive the current year and session from the discrete simulation time and communicates this information to the participant service.
+
+Both classes extend from Presage2's predefined EnvironmentService class, and use Google's Guice injection systems for initialisation and, in the global service's case, to register with the EventBus.
+
+\subsubsection{Monitor}
+
+The monitor's purpose is to regularly check whether countries are meeting their targets and randomly check for false carbon emission reports. If either case is true, a scaling sanction is applied to the country.
+
+We were initially unsure whether the monitor should be an independent agent or an environment service. We settled on making it a service, so that it could listen to an event that would trigger the monitoring as agent are unable to do so.
+
+When countries are initialised they subscribe to the monitor either as Annex I or Non Annex I. Although only Annex I countries are monitored, the Non-Annex I countries list was required to fix an issue with events at the end of a year happening in the right order. Indeed, countries were calling for their targets for the next year to be updated before the monitor could compare the results for the previous year against its previous targets. This was fixed by updating targets after the monitoring function in the Monitor service.
+
+Every year the monitor charges the Annex I countries a tax, which is used to perform the monitoring action on randomly selected countries. If the monitor runs out of money, it cannot monitor and countries are free to behave without fear of sanction (although this information is hidden).
+
+\subsubsection{Carbon Target}
+
+\subsubsection{Market}
+
+\subsection{Game Balancing}
+
+% Got bored writing section titles here, just follow the standard set above%
+
+\subsection{Kyoto \textsc{ui}}
+
+\subsubsection{Overview}
+
+The Kyoto \textsc{ui} is a web interface designed for instantiating and editing Presage 2 simulations. Web technologies used include an Apache web server, \textsc{php}, \textsc{html} and Javascript. Combined with a few additional libraries, these technologies provide the functionality required to display rich pages which allow for good visual representation and easy editing of data.
+
+\subsubsection{Database Implementation}
+
+The mongo database is interfaced using an \textsc{odm} (Object Document Mapper) library called mongorecord. This wraps interfaces for querying and writing the collections in the database with \textsc{php} classes which can be instantiated and used throughout the project.
+
+\subsubsection{Simulation Initialisation Data Import and Export}
+
+In order for any simulation to have a starting point, data must be imported containing information such as how long the simulation should run for and the data is required to set up each of the agents. Presage 2 has a command line interface which can be used to create simulations in the database and add parameters to them. The structure of these simulations in the database was used as a framework to import \textsc{csv} files of data to create simulations in the same format as generated by the Presage 2 \textsc{cli}.
+
+\subsubsection{\textsc{csv} Import and Export Functionality}
+
+To get data in and out of the system \textsc{csv} (Comma Separated Value) files are used. This is a convenient method of transferring data as the \textsc{csv} file can be opened and edited in spreadsheet software such as Microsoft Excel. Data collected on countries of the world is inserted into the simulations, as are parameters from 'default' \textsc{csv} files. Once these are in the database, the \textsc{ui} can copy and edit them. Simulations can then be exported as a backup or to transfer them to another database. This functionality underpins the whole simulation by providing an easy way to get a huge amount of data in and out of the system quickly, easily and reliably.
+
+\subsubsection{Simulation Editor \textsc{ui}}
+
+Once data has been imported from the \textsc{csv} file it may be necessary to make new simulations by changing parameters etc. This is one of the main tasks of the web \textsc{ui}, to make this editing visually comprehensive and easier than manually editing the \textsc{csv} file or the database entry.
+
+\subsubsection{Agent (Country) Data}
+
+Most agents in the simulation are countries and in order for the simulation to be as realistic as possible these are modelled on real countries with parameters describing land mass etc. stored in the database. It is useful to edit some of these parameters such as the percentage of land mass available for green development to investigate what happens in a simulation given agents with different parameters. In the \textsc{ui} there is a page specifically for editing countries which displays a clickable map of the world with a dropdown menu for country selection. This way all countries within a single simulation can be displayed as a bunch of editable parameters.
+
+% UI IMAGE
+
+The simulation overview page displays a world map using colour to indicate the values of a selected parameter for each country (default is arable land area percentage). There is a drop down menu (called Map View) which allows changing of the parameters displayed on the map. Below this is a table displaying a detailed output of all the simulation data from the database. This page also links to the \textsc{csv} export feature, copy feature, edit simulation page and a dropdown is present to allow editing of all the countries within the simulation.
