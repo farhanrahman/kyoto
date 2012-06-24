@@ -259,6 +259,9 @@ class CountrySimulator {
 		if (states.size() == 0) {
 			throw new Exception("All states are invalid");
 		}
+		else if (states.size() > 2000) {
+			throw new Exception("Too many states! Returning default behaviour");
+		}
 
 		boolean hasBeenReplaced = true;
 
