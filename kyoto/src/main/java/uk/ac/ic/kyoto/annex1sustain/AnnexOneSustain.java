@@ -365,7 +365,7 @@ public class AnnexOneSustain extends AbstractCountry {
 					}
 					// If a cheater, leave Kyoto if have been caught constant number of times
 					else {
-						if (getTimesCaughtCheating() >= Constants.MAX_TIMES_CAUGHT) {
+						if (getTimesCaughtCheating() > Constants.ALLOWED_TIMES_CAUGHT) {
 							leaveKyoto();
 							logger.info(name + ": Leaving Kyoto, I have been caught cheating too many times");
 						}
@@ -386,9 +386,11 @@ public class AnnexOneSustain extends AbstractCountry {
 	
 	@Override
 	protected double getReportedCarbonOutput() {
+		// If not a cheater, report true
 		if (Constants.CHEATER == false) {
 			return this.getCarbonOutput();
 		}
+		// If cheater, report that will meet target exactly
 		else {
 			return (this.getEmissionsTarget() - this.getCarbonAbsorption() - this.getCarbonOffset());
 		}
