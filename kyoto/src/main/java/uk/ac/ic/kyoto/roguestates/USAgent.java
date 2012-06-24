@@ -291,6 +291,10 @@ public class USAgent extends AbstractCountry {
 		
 		SetTargets(); // by running each year, governing party will need to fulfil cumulatively. 
 		
+		logger.info("Recording carbon output of " + getCarbonOutput() + " on year " + timeService.getCurrentYear());
+		
+		emissionsTargetMap.put(timeService.getCurrentYear(), getCarbonOutput());
+		
 		//StoreTargetData();
 		
 		//ProcessTargetData();
@@ -323,7 +327,7 @@ public class USAgent extends AbstractCountry {
 	 */
 	//
 	public void sessionFunction() {
-	// TODO what should be here?	
+		
 	}
 
 	private void HoldElection() {		
@@ -508,7 +512,7 @@ public class USAgent extends AbstractCountry {
 			}
 			else{
 				OfferMessage offerMessage = this.tradeProtocol.decodeInput(in);
-				if(AnalyzeOffer(offerMessage) ) {	
+				if(AnalyzeOffer(offerMessage)) {	
 					try {
 						this.tradeProtocol.respondToOffer(
 								this.tradeProtocol.extractNetworkAddress(in), 
@@ -561,6 +565,45 @@ public class USAgent extends AbstractCountry {
 					return(true);
 				}
 			}						
+		}
+		else if (isKyotoMember() == KyotoMember.ANNEXONE && CalculateCurrentIntensityRatio() > CalculateProjectedIntensityRatio()) {
+			double offerUnitCost = offerMessage.getOfferUnitCost();
+			double offerUnits = offerMessage.getOfferQuantity();
+			double offerTotalCost = offerUnitCost * offerUnits;
+			if (getCarbonOutput() - getCarbonAbsorption() - getCarbonOffset() > getEmissionsTarget() && offerMessage.getOfferType() == TradeType.SELL) {
+				double absorptionCost;
+				try {
+					absorptionCost = carbonAbsorptionHandler.getInvestmentRequired(offerUnits);
+				} catch (NotEnoughLandException e) {
+					absorptionCost = Double.MAX_VALUE;
+				}
+				if (offerTotalCost < carbonReductionHandler.getInvestmentRequired(offerUnits) && offerTotalCost < absorptionCost) {
+					return true;
+				}
+			}
+			else if (getCarbonOutput() - getCarbonAbsorption() - getCarbonOffset() < getEmissionsTarget() && offerMessage.getOfferType() == TradeType.BUY) {
+				double absorptionCost;
+				try {
+					absorptionCost = carbonAbsorptionHandler.getInvestmentRequired(offerUnits, 300918);
+					// This arable land value is the average of all countries' arable land, so a good base comparison
+				}
+				catch (NotEnoughLandException e) {
+					return false;
+				}
+				if (offerTotalCost < absorptionCost && offerTotalCost < carbonReductionHandler.getInvestmentRequired(offerUnits)) {
+					return true;
+				}
+			}
+			else if (offerTotalCost > carbonReductionHandler.getInvestmentRequired(offerUnits) && offerMessage.getOfferType() == TradeType.BUY) {
+				try {
+					carbonReductionHandler.investInCarbonReduction(offerUnits);
+				} catch (NotEnoughCarbonOutputException e) {
+					return false;
+				} catch (NotEnoughCashException e) {
+					return false;
+				}
+				return true;
+			}
 		}
 		
 		if(debug) logger.info("AnalyzeOffer: Returning false");
