@@ -503,7 +503,11 @@ Once data has been imported from the \textsc{csv} file it may be necessary to ma
 
 Most agents in the simulation are countries and in order for the simulation to be as realistic as possible these are modelled on real countries with parameters describing land mass etc. stored in the database. It is useful to edit some of these parameters such as the percentage of land mass available for green development to investigate what happens in a simulation given agents with different parameters. In the \textsc{ui} there is a page specifically for editing countries which displays a clickable map of the world with a dropdown menu for country selection. This way all countries within a single simulation can be displayed as a bunch of editable parameters.
 
-% UI IMAGE
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.6\textwidth]{img/ui1.png}
+	\caption{}
+\end{figure}
 
 \subsubsection{Simulation Data}
 
@@ -511,13 +515,21 @@ Once imported, simulation data resides in a collection in the database. The \tex
 
 \paragraph{Simulation Overview Page}
 
-% UI IMAGE
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.6\textwidth]{img/ui2.png}
+	\caption{}
+\end{figure}
 
 The simulation overview page displays a world map using colour to indicate the values of a selected parameter for each country (default is arable land area percentage). There is a drop down menu (called Map View) which allows changing of the parameters displayed on the map. Below this is a table displaying a detailed output of all the simulation data from the database. This page also links to the \textsc{csv} export feature, copy feature, edit simulation page and a dropdown is present to allow editing of all the countries within the simulation.
 
 \paragraph{Simulation Edit Page}
 
-% UI IMAGE
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.6\textwidth]{img/ui3.png}
+	\caption{}
+\end{figure}
  
 The simulation edit page is a low level editor for the simulation. Functionality is provided to rename the simulation, the simulation authors and all other simulation attributes which it makes sense to edit. It also provides a link to the country editor page (the simulation \textsc{id} is passed in the \textsc{url} to ensure editing takes place on the countries of the correct simulation).
 

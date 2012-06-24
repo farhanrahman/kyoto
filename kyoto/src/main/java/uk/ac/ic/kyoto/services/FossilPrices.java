@@ -19,7 +19,7 @@ import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
 
 public class FossilPrices extends EnvironmentService {
 	
-	protected FossilPrices(EnvironmentSharedStateAccess sharedState) {
+	public FossilPrices(EnvironmentSharedStateAccess sharedState) {
 		super(sharedState);
 		
 		try {
