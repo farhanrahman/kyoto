@@ -201,7 +201,7 @@ We can now calculate the total cost of a carbon reduction action by multiplying 
 
 \subparagraph{Reduction cost estimate}
 
-This "inverse" operation is mathematically solved with a quadratic equation. However, this is difficult to implement and is error-prone due to double arithmetic in Java. Instead, a binary search bounded between 0 and the current carbon output was used. In each iteration, the function calls the \texttt{getInvestmentRequired()} function with a hypothetical carbon reduction as parameter. It then adjusts the amount of reduction the country will receive depending on whether the returned value is higher or lower than the actual investment. Since there are 30 iterations, it will produce a an accurate result providing the current carbon output is less than 2^{30}.
+This "inverse" operation is mathematically solved with a quadratic equation. However, this is difficult to implement and is error-prone due to double arithmetic in Java. Instead, a binary search bounded between 0 and the current carbon output was used. In each iteration, the function calls the \texttt{getInvestmentRequired()} function with a hypothetical carbon reduction as parameter. It then adjusts the amount of reduction the country will receive depending on whether the returned value is higher or lower than the actual investment. Since there are 30 iterations, it will produce a an accurate result providing the current carbon output is less than 2$^{30}$.
   
 This function allows participants to estimate and compare the profitability of a carbon reduction investment. As it is not used by the investment function itself, the lack of absolute accuracy is not crucial.
 
@@ -334,32 +334,32 @@ Figure-X and figure-X shows the state machines used by the Initiator and Respond
 
 \paragraph{Initiator \textsc{fsm}}
 
-Both the initiator and the responder have a single \texttt{START} state as required by the \texttt{FSMProtocol}. The initiator has two end states, which are \texttt{TIMEOUT} and \texttt{TRADE_DONE}. Each transition results in the participant performing a particular action of sending back a message to the responder, which makes the responder transit to the next state.
+Both the initiator and the responder have a single \texttt{START} state as required by the \texttt{FSMProtocol}. The initiator has two end states, which are \texttt{TIMEOUT} and \texttt{TRADE\_DONE}. Each transition results in the participant performing a particular action of sending back a message to the responder, which makes the responder transit to the next state.
 
 \begin{description}
-\item[1. \texttt{PROPOSE_TRADE}:]
-When the participant responds to the offer, it transitions to the \texttt{TRADE_PROPOSED} state and sends a Unicast message to the broadcaster waiting for its response.
-\item[2. \texttt{TIMED_OUT}:]
-From the \texttt{TRADE_PROPOSED} state a timeout of 3 ticks is set so that the initiator times out into an error state.
-\item[3. \texttt{TRADE_ACCEPTED}:]
-If the responder accepts the trade proposal, the Trade Protocol handles the trade completion through a function called \texttt{handleTradeCompletion()}. If anything goes wrong while handling the trade completion then the participant (initiator) transits to the \texttt{TRADE_DONE} state by sending a Unicast message to the responder to revert the changes. If the handling of trade completion works well then the participant transitions to the end state \texttt{TRADE_DONE} by sending a confirmation message to the responder.
-\item[4. \texttt{TRADE_REJECTED}:]
-If the trade was rejected by the responder then the participant (initiator) transits to the \texttt{TRADE_DONE} state by sending a confirmation unicast message to the responder that it has received the message.
+\item[1. \texttt{PROPOSE\_TRADE}:]
+When the participant responds to the offer, it transitions to the \texttt{TRADE\_PROPOSED} state and sends a Unicast message to the broadcaster waiting for its response.
+\item[2. \texttt{TIMED\_OUT}:]
+From the \texttt{TRADE\_PROPOSED} state a timeout of 3 ticks is set so that the initiator times out into an error state.
+\item[3. \texttt{TRADE\_ACCEPTED}:]
+If the responder accepts the trade proposal, the Trade Protocol handles the trade completion through a function called \texttt{handleTradeCompletion()}. If anything goes wrong while handling the trade completion then the participant (initiator) transits to the \texttt{TRADE\_DONE} state by sending a Unicast message to the responder to revert the changes. If the handling of trade completion works well then the participant transitions to the end state \texttt{TRADE\_DONE} by sending a confirmation message to the responder.
+\item[4. \texttt{TRADE\_REJECTED}:]
+If the trade was rejected by the responder then the participant (initiator) transits to the \texttt{TRADE\_DONE} state by sending a confirmation unicast message to the responder that it has received the message.
 \end{description}
 
 \paragraph{Responder \textsc{fsm}}
  
-Figure-X shows the \textsc{fsm} that is used by the responder. Upon receiving a message form the initiator. There is only one \texttt{START} state and the three end states are \texttt{REVERT}, \texttt{TRADE_DONE} and \texttt{RESPONDER_TIMEOUT}. Similar to the initiator, the transitions happen with the participant sending a unicast message to the initiator agent.
+Figure-X shows the \textsc{fsm} that is used by the responder. Upon receiving a message form the initiator. There is only one \texttt{START} state and the three end states are \texttt{REVERT}, \texttt{TRADE\_DONE} and \texttt{RESPONDER\_TIMEOUT}. Similar to the initiator, the transitions happen with the participant sending a unicast message to the initiator agent.
  
 \begin{description}
-\item[1. \texttt{RESPOND_TO_TRADE}:]
-This transition occurs when the initiator spawns a message, which makes the responder transition to the \texttt{WAIT_FOR_CONFIRMATION} state. If the responder accepts the exchange then it transitions to the next state by sending a unicast message to the initiator that it accepted the trade, otherwise it transitions to the next state by sending a unicast message to the initiator that it has rejected the offer. Once the participant makes the decision to accept the offer then the \texttt{handleTradeCompletion()} function is called to adjust the carbon offset and cash of the responder. If things fail for reasons such as not enough cash exception from the responder then the changes made to the responder’s carbon offset and available to spend will be reverted. Nevertheless, a reject message is sent to the initiator to inform him that the trade was unsuccessful.
+\item[1. \texttt{RESPOND\_TO\_TRADE}:]
+This transition occurs when the initiator spawns a message, which makes the responder transition to the \texttt{WAIT\_FOR\_CONFIRMATION} state. If the responder accepts the exchange then it transitions to the next state by sending a unicast message to the initiator that it accepted the trade, otherwise it transitions to the next state by sending a unicast message to the initiator that it has rejected the offer. Once the participant makes the decision to accept the offer then the \texttt{handleTradeCompletion()} function is called to adjust the carbon offset and cash of the responder. If things fail for reasons such as not enough cash exception from the responder then the changes made to the responder’s carbon offset and available to spend will be reverted. Nevertheless, a reject message is sent to the initiator to inform him that the trade was unsuccessful.
 \item[2. \texttt{REVERTING}:]
 If the initiator fails in completing the trade for reasons such as not enough cash exceptions, then the initiator reverts itself and sends a message to the responder. Once the responder receives this message then it goes to the \texttt{REVERT} state via the \texttt{REVERTING} transition. There, it reverts all of the changes since the start of the conversation.
 \item[3. \texttt{CONFIRMATION}:]
-This is a transition to from \texttt{WAIT_FOR_CONFIRMATION} to the end state \texttt{TRADE_DONE} state. This transition happens when either trade was successful or was unsuccessful (i.e. the responder rejected the trade in the first place).
-\item[4. \texttt{RESPONDER_TIMEOUT}:]
-Timeout condition of 3 ticks from \texttt{WAIT_FOR_CONFIRMATION} state to the \texttt{RESPONDER_TIMEDOUT} state, which is the end and error state of the responder.
+This is a transition to from \texttt{WAIT\_FOR\_CONFIRMATION} to the end state \texttt{TRADE\_DONE} state. This transition happens when either trade was successful or was unsuccessful (i.e. the responder rejected the trade in the first place).
+\item[4. \texttt{RESPONDER\_TIMEOUT}:]
+Timeout condition of 3 ticks from \texttt{WAIT\_FOR\_CONFIRMATION} state to the \texttt{RESPONDER\_TIMEDOUT} state, which is the end and error state of the responder.
 \end{description}
 
 \subsubsection{Time Service}
