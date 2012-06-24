@@ -300,7 +300,9 @@ public void behaviour() {
 	public void yearlyFunction() {//Implement any actions every year
 		// TODO Auto-generated method stub
 		//Check gdp growth against emmisions every year and  decide how to reduce
-		
+		if((this.getGDPRate()>0) && (this.carbonReductionHandler.getCarbonOutputChange(getAvailableToSpend(), getCarbonOutput(), getEnergyOutput()))<getEmissionsTarget()){
+			isKyotoMember();
+		}
 	}
 
 	
