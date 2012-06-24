@@ -12,4 +12,8 @@ public final class Constants {
 	// Profitability of absorption/reduction for selling
 	public static final double	EXPECTED_SALES_INITIAL = 0.5;
 	
+	// To cheat or not to cheat?
+	public static final boolean	CHEATER = false;
+	public static final int		MAX_TIMES_CAUGHT = 3;
+	
 }
