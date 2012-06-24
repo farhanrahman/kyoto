@@ -8,6 +8,7 @@ import java.util.UUID;
 import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.Offer;
 import uk.ac.ic.kyoto.countries.OfferMessage;
+import uk.ac.ic.kyoto.exceptions.CannotLeaveKyotoException;
 import uk.ac.ic.kyoto.exceptions.NotEnoughCashException;
 import uk.ac.ic.kyoto.exceptions.NotEnoughLandException;
 import uk.ac.ic.kyoto.services.FossilPrices;
@@ -209,13 +210,26 @@ public void behaviour() {
 		double carbon_change=target-getCarbonOutput()-getCarbonOffset()-getCarbonAbsorption();
 		
 		//check if we can achieve carbon reduction by foresting
-		if(((this.carbonAbsorptionHandler.getCarbonAbsorptionChange(money, land_area))+this.getCarbonOutput()) <= this.getEmissionsTarget() ){
+		double absorption_change;
+		try {
+			absorption_change = this.carbonAbsorptionHandler.getCarbonAbsorptionChange(money, land_area);
+		} catch (NotEnoughLandException e1) {
+			absorption_change = 0;
+		}
+		if((absorption_change+this.getCarbonOutput()) <= this.getEmissionsTarget() ){
 			System.out.print("We can achieve target");
 				}
 		
 		//Check if industry within limit and GDP growth
+		double inv_required;
+		
+			try {
+				inv_required=this.carbonAbsorptionHandler.getInvestmentRequired(carbon_change, land_area);
+			} catch (NotEnoughLandException e) {
+				inv_required=Double.MAX_VALUE;
+			}
 		if(carbon_change>0){
-			if((this.carbonAbsorptionHandler.getInvestmentRequired(carbon_change, land_area))<=this.getAvailableToSpend()){
+			if(inv_required<=this.getAvailableToSpend()){
 				System.out.print("we can invest in reduction");
 			}
 		}
@@ -286,7 +300,9 @@ public void behaviour() {
 	public void yearlyFunction() {//Implement any actions every year
 		// TODO Auto-generated method stub
 		//Check gdp growth against emmisions every year and  decide how to reduce
-		
+		if((this.getGDPRate()>0) && (this.carbonReductionHandler.getCarbonOutputChange(getAvailableToSpend(), getCarbonOutput(), getEnergyOutput()))<getEmissionsTarget()){
+			isKyotoMember();
+		}
 	}
 
 	
@@ -294,7 +310,11 @@ public void behaviour() {
 	@Override//Every 10 years do the check to stay or leave kyoto
 	public void sessionFunction() {
 		if (getCarbonOutput() - getCarbonOffset() > getEmissionsTarget()) {
-			leaveKyoto();
+			try {
+				leaveKyoto();
+			} catch (CannotLeaveKyotoException e) {
+				System.out.print("Check");
+			}
 		}
 			
 	}
