@@ -7,6 +7,7 @@ import uk.ac.ic.kyoto.countries.AbstractCountry;
 import uk.ac.ic.kyoto.countries.AbstractCountry.KyotoMember;
 import uk.ac.ic.kyoto.countries.Offer;
 import uk.ac.ic.kyoto.countries.OfferMessage;
+import uk.ac.ic.kyoto.exceptions.CannotLeaveKyotoException;
 import uk.ac.ic.kyoto.exceptions.NotEnoughCarbonOutputException;
 import uk.ac.ic.kyoto.exceptions.NotEnoughCashException;
 import uk.ac.ic.kyoto.exceptions.NotEnoughLandException;
@@ -31,13 +32,14 @@ public class AnnexOneSustain extends AbstractCountry {
     //================================================================================
 	
 	protected String	name;						// Name of the country
-	protected double	surplusCarbonTarget;		// Number of credits we can and want to sell without carbon absorption/reduction
+	protected double	surplusCarbonTarget;		// Number of credits we still have left at the beginning of the year
 	protected double	surplusCarbon;				// Number of credits we still have left
-	protected double	surplusCarbonPrice;			// Price of surplus carbon while within target
+	protected double	surplusCarbonPrice;			// Price of surplus carbon at which we are ready to sell
 	protected double	expectedSales;				// Specifies where our acceptable price will lie between two extreme profitability points
 	protected double	carbonToReduce;				// Carbon we have to reduce if sale was successful
 	protected double 	carbonToAbsorb;				// Carbon we have to absorb if sale was successful
 	protected Semaphore tradeSemaphore;				// Semaphore making sure only one trade happens at any given time
+	protected double	reportedCarbonOutput;		// Carbon Output reported, might be true or not if cheating
 	
 	
 	//================================================================================
@@ -72,10 +74,13 @@ public class AnnexOneSustain extends AbstractCountry {
 	@Override
 	protected void behaviour() {
 		if (isKyotoMember() == KyotoMember.ANNEXONE) {
-			// Decrease price if semaphore set to 1 (no conversation or offer accepted at the start). Broadcast own offer.
+			
+			// If semaphore is not taken (not in conversations) decrease price and broadcast own offer if carbon left
 			if ((tradeSemaphore.availablePermits() == 1) && (Math.round(surplusCarbon) > 0)) {
+				
 				surplusCarbonPrice /= Constants.PRICE_FAILURE_SCALER;
 				logger.info(name + ": Decreased internal price to " + surplusCarbonPrice);
+				
 				broadcastSellOffer(surplusCarbon, surplusCarbonPrice);
 				logger.info(name + ": Broadcasting offer of sale: " + surplusCarbon + " @ " + surplusCarbonPrice);
 			}
@@ -110,7 +115,7 @@ public class AnnexOneSustain extends AbstractCountry {
 						}
 					}
 					
-					// If not, need to invest to get required carbon
+					// If not enough surplus carbon, need to invest to get required carbon
 					else {
 						double additionalCarbon = quantityOffered - surplusCarbon;
 						double additionalFunds = priceOffered * quantityOffered;
@@ -234,16 +239,7 @@ public class AnnexOneSustain extends AbstractCountry {
 		initialInvestments();
 		updateExpectedSales();
 		resetYearlyTargets();
-		
-		if (isKyotoMember() == KyotoMember.ANNEXONE) {
-			if (Math.round(surplusCarbon) < 0) {
-				leaveKyoto();
-				logger.info(name + ": Leaving Kyoto, my target is below my emissions");
-			}
-			else {
-				logger.info(name + ": Staying in Kyoto, my target is above my emissions");
-			}
-		}
+		decideOnKyoto();
 	}
 	
 	protected void initialInvestments() {
@@ -256,7 +252,7 @@ public class AnnexOneSustain extends AbstractCountry {
 		double carbonAbsTrees = 0;
 		
 		try {
-			totalInvestment = this.getAvailableToSpend() * Constants.INDUSTRY_GROWTH_MONEY_PERCENTAGE / 2;
+			totalInvestment = this.getAvailableToSpend() * Constants.INDUSTRY_GROWTH_MONEY_PERCENTAGE;
 			industryInvestment = totalInvestment / 2;
 			investmentDiff = industryInvestment;
 			
@@ -264,8 +260,13 @@ public class AnnexOneSustain extends AbstractCountry {
 				investmentDiff /= 2;
 				carbonGained = energyUsageHandler.calculateCarbonIndustryGrowth(industryInvestment);
 				carbonRedCost = carbonReductionHandler.getInvestmentRequired(carbonGained, (this.getCarbonOutput() + carbonGained), (this.getEnergyOutput() + carbonGained));
-				carbonAbsCost = carbonAbsorptionHandler.getInvestmentRequired(carbonGained);
 				carbonAbsTrees = carbonAbsorptionHandler.getForestAreaRequired(carbonGained);
+				if (carbonAbsTrees < this.getArableLandArea()) {
+					carbonAbsCost = carbonAbsorptionHandler.getInvestmentRequired(carbonGained);
+				}
+				else {
+					carbonAbsCost = Double.MAX_VALUE;
+				}
 				
 				if ((carbonRedCost + industryInvestment < totalInvestment) ||
 					((carbonAbsCost + industryInvestment < totalInvestment) && (carbonAbsTrees < this.getArableLandArea())))
@@ -327,6 +328,74 @@ public class AnnexOneSustain extends AbstractCountry {
 	protected void resetYearlyTargets() {
 		updateSurplusCarbon();
 		surplusCarbonTarget = surplusCarbon;
+	}
+	
+	protected void decideOnKyoto() {
+		try {
+			if (isKyotoMember() == KyotoMember.ANNEXONE) {
+				if (Math.round(surplusCarbon) < 0) {
+					
+					// If an honest agent, try to reduce emissions or leave Kyoto if unable to
+					if (Constants.CHEATER == false) {
+						double necessaryReduction = (-surplusCarbon);
+						double reductionCost = carbonReductionHandler.getInvestmentRequired(necessaryReduction);
+						boolean reductionPossible = isReductionPossible(necessaryReduction, 0);
+						boolean absorptionPossible = isAbsorptionPossible(necessaryReduction, 0);
+						double absorptionCost;
+						
+						try {
+							absorptionCost = carbonAbsorptionHandler.getInvestmentRequired(necessaryReduction);
+						}
+						catch (NotEnoughLandException e) {
+							absorptionCost = Double.MAX_VALUE;
+						}
+						
+						if ((reductionCost < absorptionCost || !absorptionPossible) && reductionPossible) {
+							carbonReductionHandler.investInCarbonReduction(necessaryReduction);
+							logger.info(name + ": Reduced carbon by " + (necessaryReduction) + " to remain in Kyoto");
+						}
+						else if (absorptionPossible) {
+							carbonAbsorptionHandler.investInCarbonAbsorption(necessaryReduction);
+							logger.info(name + ": Absorbed carbon by " + (necessaryReduction) + " to remain in Kyoto");
+						}
+						else {
+							leaveKyoto();
+							logger.info(name + ": Leaving Kyoto, my target is below my emissions and can't do anything about it");
+						}
+					}
+					// If a cheater, leave Kyoto if have been caught constant number of times
+					else {
+						int timesCaughtCheating = this.getTimesCaughtCheating();
+						logger.info(name + "I have benn caught cheating " + timesCaughtCheating + " times");
+						if (timesCaughtCheating > Constants.ALLOWED_TIMES_CAUGHT) {
+							leaveKyoto();
+							logger.info(name + ": Leaving Kyoto, I have been caught cheating too many times");
+						}
+					}
+				}
+				else {
+					logger.info(name + ": Staying in Kyoto, my target is above my emissions");
+				}
+			}
+		}
+		catch (CannotLeaveKyotoException e) {
+			logger.info(name + ": Want to leave Kyoto, but cannot");
+		}
+		catch (Exception e) {
+			logger.warn(name + ": Problem with deciding whether to stay in Kyoto");
+		}
+	}
+	
+	@Override
+	protected double getReportedCarbonOutput() {
+		// If not a cheater, report true
+		if (Constants.CHEATER == false) {
+			return this.getCarbonOutput();
+		}
+		// If cheater, report that will meet target exactly
+		else {
+			return (this.getEmissionsTarget() - this.getCarbonAbsorption() - this.getCarbonOffset());
+		}
 	}
 	
 	

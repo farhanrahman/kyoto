@@ -29,8 +29,9 @@ public final class CarbonAbsorptionHandler {
 	 * 
 	 * @return
 	 * Cost of absorbing carbon by the specified amount.
+	 * @throws NotEnoughLandException 
 	 */
-	public final double getInvestmentRequired(double carbonAbsorptionChange){
+	public final double getInvestmentRequired(double carbonAbsorptionChange) throws NotEnoughLandException{
 		return getInvestmentRequired(carbonAbsorptionChange, this.country.arableLandArea);
 	}
 	
@@ -46,13 +47,18 @@ public final class CarbonAbsorptionHandler {
 	 * 
 	 * @return
 	 * Cost of absorbing carbon by the specified amount.
+	 * @throws NotEnoughLandException 
 	 */
-	public final double getInvestmentRequired(double carbonAbsorptionChange, double arableLandArea) {
+	public final double getInvestmentRequired(double carbonAbsorptionChange, double arableLandArea) throws NotEnoughLandException {
 
 		double investmentRequired;
 		
 		// Calculate forest area required to absorb given amount of carbon
 		double forestArea = getForestAreaRequired(carbonAbsorptionChange);
+		
+		if (forestArea > this.country.arableLandArea) {
+			throw new NotEnoughLandException();
+		}
 		
 		// Calculate occupied area measure after and before investment
 		double occupiedAreaMeasureBefore = calculateOccupiedAreaMeasure(arableLandArea, country.landArea);
@@ -78,8 +84,9 @@ public final class CarbonAbsorptionHandler {
 	 * 
 	 * @return
 	 * Change in carbon absorption achieved with specified investment.
+	 * @throws NotEnoughLandException 
 	 */
-	public final double getCarbonAbsorptionChange(double investmentAmount) {
+	public final double getCarbonAbsorptionChange(double investmentAmount) throws NotEnoughLandException {
 		return getCarbonAbsorptionChange(investmentAmount, country.arableLandArea);
 	}
 	
@@ -96,11 +103,16 @@ public final class CarbonAbsorptionHandler {
 	 * 
 	 * @return
 	 * Change in carbon absorption achieved with specified investment.
+	 * @throws NotEnoughLandException 
 	 */
-	public final double getCarbonAbsorptionChange(double investmentAmount, double arableLandArea) {
+	public final double getCarbonAbsorptionChange(double investmentAmount, double arableLandArea) throws NotEnoughLandException {
 		double carbonAbsorptionChange;
 		
 		double carbonDiff = (country.carbonOutput - country.carbonAbsorption) / 2;
+		
+		while (getForestAreaRequired(carbonDiff) > arableLandArea) {
+			carbonDiff*=0.9;
+		}
 		
 		carbonAbsorptionChange = carbonDiff;
 		
@@ -112,13 +124,11 @@ public final class CarbonAbsorptionHandler {
 			//If value is higher, lower our estimate, else increase it
 			if (tempInvestmentAmount < investmentAmount) {
 				carbonAbsorptionChange += carbonDiff;
-				tempInvestmentAmount = getInvestmentRequired(carbonAbsorptionChange, arableLandArea);
-
 			}
 			else if (tempInvestmentAmount > investmentAmount) {
 				carbonAbsorptionChange -= carbonDiff;
-				tempInvestmentAmount = getInvestmentRequired(carbonAbsorptionChange, arableLandArea);
 			}
+			tempInvestmentAmount = getInvestmentRequired(carbonAbsorptionChange, arableLandArea);
 		}
 		
 		return carbonAbsorptionChange;
@@ -194,6 +204,12 @@ public final class CarbonAbsorptionHandler {
 		}
 		
 		return occupiedAreaMeasure;
+	}
+
+	public double getCarbonOutputChange(double absorptionInvestmentNeeded,
+			double carbonOutput, double energyOutput) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 	
 }

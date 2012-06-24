@@ -57,7 +57,7 @@ public abstract class TradeProtocol extends FSMProtocol {
 	Token tradeToken;
 
 	private TradeHistory tradeHistory;
-	private OfferHistory offerHistory = new OfferHistory();
+	OfferHistory offerHistory = new OfferHistory();
 	private AbstractCountry participant;
 
 	public enum ResponderReplies{
@@ -408,7 +408,6 @@ public abstract class TradeProtocol extends FSMProtocol {
 
 		public TradeSpawnEvent(NetworkAddress with, double quantity, double unitCost, TradeType type, InvestmentType itype, OfferMessage offerMessage) {
 			super(with);
-			TradeProtocol.this.offerHistory.addToHistory(SimTime.get(), offerMessage.getTradeID(), offerMessage);
 			this.offerMessage = new OfferMessage(new Offer(quantity, unitCost, type, itype), offerMessage.getTradeID(), OfferMessageType.TRADE_PROTOCOL, offerMessage.getBroadCaster());
 			this.offerMessage.setInitiator(TradeProtocol.this.getId());/*Set the initiator id*/
 		}

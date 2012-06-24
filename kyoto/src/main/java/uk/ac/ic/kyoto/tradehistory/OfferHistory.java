@@ -51,7 +51,7 @@ public class OfferHistory {
 	 * @return the offer histories since tick 0.
 	 */
 	public Map<Integer, Map<UUID, OfferMessage>> getHistory() {
-		return Collections.unmodifiableMap(new HashMap<Integer, Map<UUID,OfferMessage>>(history));
+		return new HashMap<Integer, Map<UUID,OfferMessage>>(history);
 	}
 
 	/**
@@ -61,7 +61,7 @@ public class OfferHistory {
 	 * @return the offer history for tick = simTime
 	 */
 	public Map<UUID, OfferMessage> getHistoryForTime(Time simTime) {
-		return Collections.unmodifiableMap(history.get(simTime.intValue()));
+		return history.get(simTime.intValue());
 	}
 	
 	/**
@@ -72,7 +72,7 @@ public class OfferHistory {
 	 * @return the offer history for simulation tick = simTime.
 	 */
 	public Map<UUID, OfferMessage> getHistoryForTime(Integer simTime) {
-		return Collections.unmodifiableMap(history.get(simTime));
+		return history.get(simTime);
 	}
 
 	/**

@@ -37,7 +37,7 @@ public class TradeHistoryImplementation implements TradeHistory{
 	 * a map simulation time -> map of trades that happened in that simulation time
 	 */
 	public final Map<Integer,Map<UUID,OfferMessage>> getHistory(){
-		return Collections.unmodifiableMap(new HashMap<Integer, Map<UUID,OfferMessage>>(history));
+		return (new HashMap<Integer, Map<UUID,OfferMessage>>(history));
 	}
 
 	/**
@@ -46,7 +46,7 @@ public class TradeHistoryImplementation implements TradeHistory{
 	 * time = simTime
 	 */
 	public Map<UUID,OfferMessage> getHistoryForTime(Time simTime){
-		return Collections.unmodifiableMap(history.get(simTime.intValue()));
+		return history.get(simTime.intValue());
 	}
 	
 	/**

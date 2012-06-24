@@ -251,6 +251,8 @@ public class Monitor extends EnvironmentService {
 		
 		logger.info("SANCTIONING: " + sanctionee.getName());
 		
+		sanctionee.caughtCheating();
+		
 		// Update the list of countries that have cheated
 		if (sinBin.containsKey(sanctionee)) {
 			sinCount = sinBin.get(sanctionee) + 1;
@@ -276,6 +278,7 @@ public class Monitor extends EnvironmentService {
 	public void targetSanction(AbstractCountry country, double carbonExcess) {
 		double penalty = carbonExcess * GameConst.getPenaltyCoef();
 		carbonTargetingService.addCountryPenalty(country.getID(), penalty);
+		logger.info("THIS PERSON HASN'T MET THEIR TARGET: " + country.getName());
 		
 		// Charge the country for not meeting the target - financial penalties aren't applied by kyoto
 		//country.setAvailableToSpend(Math.round((country.getAvailableToSpend() - carbonExcess * GameConst.getSanctionRate())));
