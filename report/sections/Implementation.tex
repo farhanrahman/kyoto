@@ -505,6 +505,18 @@ From 4 and 6, we can derive:
 
 The Kyoto \textsc{ui} is a web interface designed for instantiating and editing Presage 2 simulations. Web technologies used include an Apache web server, \textsc{php}, \textsc{html} and Javascript. Combined with a few additional libraries, these technologies provide the functionality required to display rich pages which allow for good visual representation and easy editing of data.
 
+\subsubsection{Inception}
+
+Initially, investigations into a \textsc{ui} began to solve the problem of a large amount of incoming data. This data can be used to initialise the agents and simulation in order to more effectively model the Kyoto Protocol.
+
+Each agent requires 10 fields of initialisation data, and data was collected for up to 179 countries in the world which have data, so a CSV file {\texttt{Sim2sim.csv}) carry country simulation info which can be added to GIT and shared between users.
+
+Simulation CSV (\texttt{Sim1param.csv}) is to be used alongside the country data, to initialise the simulation. This data comprises of setting up the document in mongodb that presage is expecting.
+
+It quickly became clear that the KyotoUI could be more than a database initialise program, and with some improvements it could become a dashboard for politicians and economists and have commercial value. The further development to KyotoUI is inspired by the idea that we are applying an accessible front to a specialised presage simulator (kyoto) in order to setup and report on simulations. Making simulations easier to initialise and draw answers from the results, means users can have analysis of more simulations, and draw better conclusions on whether the kyoto protocol could work such as these will last in the long run.
+
+Some additions made to the presage simulation collection were to add a description and author field, to better represent the multi-user approach and have better record keeping. Also in the simulations collection is a list of all the starting data kyoto to load the necessary, under a branch named “countries”.
+
 \subsubsection{Database Implementation}
 
 The mongo database is interfaced using an \textsc{odm} (Object Document Mapper) library called mongorecord. This wraps interfaces for querying and writing the collections in the database with \textsc{php} classes which can be instantiated and used throughout the project.
