@@ -66,15 +66,15 @@ Overall, this method takes full advantage of all possible options available to a
 
 As the annex I reduce countries were deemed to be paragons of justice, some actions such as cheating and ignoring carbon targets weren't coded in. However if a country finds itself constantly shutting down factories (due to a lack of money to perform any other actions) in order to meet carbon targets, it will choose to leave the Kyoto Protocol until it can get back on its feet again financially.
 
-\paragraph{Non-Annex I}
+\paragraph{Non-Annex}
 
-The Non Annex I group is mainly composed of developing countries whose primary aim is economic growth. Since \textsc{gdp} growth is directly proportional to energy output in this project, the aim of Non Annex I countries is to increase its industry as much as possible. 
+The Non-Annex group is mainly composed of developing countries whose primary aim is economic growth. Since \textsc{gdp} growth is directly proportional to energy output in this project, the aim of Non-Annex countries is to increase its industry as much as possible. 
 
-Investing in industry, and therefore growing a country's economy increases its carbon output at the same time. However, the Kyoto Protocol dictates that sanctions are not enforced on Non Annex I countries since they are not set targets to fulfill. They are therefore free to emit as much \CO as their industry requires.
+Investing in industry, and therefore growing a country's economy increases its carbon output at the same time. However, the Kyoto Protocol dictates that sanctions are not enforced on Non-Annex countries since they are not set targets to fulfill. They are therefore free to emit as much \CO as their industry requires.
 
-Nevertheless, the Non Annex I behaviour was implemented such that they do care about the environment as well as their growth when cash is available in abundance.
+Nevertheless, the Non-Annex behaviour was implemented such that they do care about the environment as well as their growth when cash is available in abundance.
 
-The following keywords will be used to describe the general behaviour of Non Annex 1 countries:
+The following keywords will be used to describe the general behaviour of Non-Annex countries:
 
 \begin{description}
 	\item[1. energy\_aim:] the energy output the country wants to reach by the end of the year.
@@ -107,16 +107,16 @@ Each year, the country calculates the difference between its achieved energy out
 
 If the latter condition is not met, then the country tries to invest in carbon absorption or carbon reduction in order to decrease its carbon emissions. However, the country will switch to non environmental friendly policies if it does not have enough money.
  
-Non Annex I countries take part in Clean Development Mechanisms. This allows Annex I and Non Participant countries to invest in Non Annex I countries in exchange for carbon offset.
+Non-Annex countries take part in Clean Development Mechanisms. This allows Annex I and Non Participant countries to invest in Non-Annex countries in exchange for carbon offset.
 
-In other words, Annex I countries use Non Annex I land area and carbon output to reduce their own emissions in order to meet their targets in the Kyoto Protocol. There are two ways in which countries can invest:
+In other words, Annex I countries use Non-Annex land area and carbon output to reduce their own emissions in order to meet their targets in the Kyoto Protocol. There are two ways in which countries can invest:
  
 \begin{description}
 	\item[Carbon Absorption] Decrease available land area, increase carbon absorption
 	\item[Carbon Reduction] Carbon output decreases
 \end{description}
  
-The amount of carbon output to be changed/given to the Annex I country depends on whether the Non Annex I countries meets its energy output aim.
+The amount of carbon output to be changed/given to the Annex I country depends on whether the Non-Annex countries meets its energy output aim.
 
 Carbon absorption offers are all accepted if the country is in an environmentally friendly phase (unless the available land area is at a minimum). 
 
@@ -390,7 +390,7 @@ The monitor's purpose is to regularly check whether countries are meeting their 
 
 We were initially unsure whether the monitor should be an independent agent or an environment service. We settled on making it a service, so that it could listen to an event that would trigger the monitoring as agent are unable to do so.
 
-When countries are initialised they subscribe to the monitor either as Annex I or Non Annex I. Although only Annex I countries are monitored, the Non-Annex I countries list was required to fix an issue with events at the end of a year happening in the right order. Indeed, countries were calling for their targets for the next year to be updated before the monitor could compare the results for the previous year against its previous targets. This was fixed by updating targets after the monitoring function in the Monitor service.
+When countries are initialised they subscribe to the monitor either as Annex I or Non-Annex. Although only Annex I countries are monitored, the Non-Annex countries list was required to fix an issue with events at the end of a year happening in the right order. Indeed, countries were calling for their targets for the next year to be updated before the monitor could compare the results for the previous year against its previous targets. This was fixed by updating targets after the monitoring function in the Monitor service.
 
 Every year the monitor charges the Annex I countries a tax, which is used to perform the monitoring action on randomly selected countries. If the monitor runs out of money, it cannot monitor and countries are free to behave without fear of sanction (although this information is hidden).
 
