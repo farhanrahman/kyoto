@@ -265,7 +265,7 @@ public abstract class AbstractCountry extends AbstractParticipant {
 				behaviour();
 			}
 			
-			//logSimulationData();
+			logSimulationData();
 			dumpCurrentTickData();
 			
 //			this.releaseExecuteLock();
