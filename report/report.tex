@@ -20,7 +20,7 @@
 % This is a simple template for a LaTeX document using the "article" class.
 % See "book", "report", "letter" for other types of document.
 
-\documentclass{article} % use larger type; default would be 10pt
+\documentclass[fleqn]{article} % use larger type; default would be 10pt
 
 \usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
 
@@ -42,16 +42,17 @@
 \usepackage[none]{hyphenat}
 
 %%% PACKAGES
-\usepackage{booktabs} % for much better looking tables
-\usepackage{array} % for better arrays (eg matrices) in maths
-\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
-\usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
-\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{paralist}
+\usepackage{fancyvrb}
 \usepackage{cite}
 \usepackage{url}
 \usepackage{amsmath}
 \usepackage{enumitem} %some fancy list stuff
-% These packages are all incorporated in the memoir class to one degree or another...
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
 
 %%% HEADERS & FOOTERS
 \usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
