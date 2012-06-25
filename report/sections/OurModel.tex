@@ -4,7 +4,7 @@ Here we detail the design decisions made regarding the modelling of the Kyoto Pr
 
 \subsection{Time}
 
-Presage2 is a discrete time simulation engine. For the purpose of our simulation we refer to time in terms of sessions, years, and ticks. Ticks map directly to Presage2's discrete units of time. Years last for a number of ticks defined at simulation time. Sessions are composed of multiple years, with a default of 10. In the real world Kyoto Protocol, the length of a session is mutable depending on the global economic and political climate. However, we felt it was a suitable abstraction from reality to use a consistent length for sessions throughout any individual simulation.
+For the purpose of our simulation we refer to time in terms of sessions, years, and ticks. Presage2 is a discrete time simulation engine and ticks in our simulation map directly to Presage2's discrete units of time. Years last for a number of ticks defined at simulation time. Sessions are composed of multiple years, with a default of 10. In the real world Kyoto Protocol, the length of a session is mutable depending on the global economic and political climate. However, we felt it was a suitable abstraction from reality to use a consistent length for sessions throughout any individual simulation.
 
 \subsection{Energy Output}
 
@@ -26,10 +26,10 @@ energy output = carbon output / fossil fuel \%
 
 As with real world governments, our models of agent behaviors are necessarily constrained by the funds available to their respective administrations in their efforts to conserve the environment. \textsc{gdp} is a readily accessible and, for the complexity of our simulation, suitably accurate representation of countries' relative wealth. However, our simulation represents only the Kyoto Protocol in isolation, and an associated model of the global economy would be required to accurately gauge individual spending on the numerous national and international projects flexibly related to the Kyoto Protocol. To abstract away this complexity, each country is allocated a portion of its \textsc{gdp} every year as spendable income on projects relating to the Kyoto Protocol.
 
-Manipulation of a country's GDP growth rate is the primary way we represent economic growth or recession. The formulae involved in modeling GDP growth depend primarily on a country's energy output, as defined above. This encourages investment in industry to promote economic growth, making maximisation of GDP growth a contrary but still achievable objective when adhering to Kyoto Protocol targets. These formulae also discourage drastic cutbacks in industry, which is intended to be an emergency measure for countries that are unable to meet their targets. This penalisation encourages long term thinking in the agent's behaviour, and rewards careful investment and management of targets alongside economic priorities.
+Manipulation of a country's \textsc{gdp} growth rate is the primary way we represent economic growth or recession. The formulae involved in modeling \textsc{gdp} growth depend primarily on a country's energy output, as defined above. This encourages investment in industry to promote economic growth, making maximisation of \textsc{gdp} growth a contrary but still achievable objective when adhering to Kyoto Protocol targets. These formulae also discourage drastic cutbacks in industry, which is intended to be an emergency measure for countries that are unable to meet their targets. This penalisation encourages long term thinking in the agent's behaviour, and rewards careful investment and management of targets alongside economic priorities.
 
-\subsection{The Kyoto Protocol}
-The Kyoto Protocol can be summarised into the following flow of actions:
+\subsection{Monitoring and Sanctioning}
+At the end of every year in our simulation, monitoring and sanctioning are performed to manage the emissions targets and detect fraudulent emissions reports. Each country is queried for its emissions reports by the monitoring service. The service then monitors a selection of countries, extracting their true carbon emissions, representing an abstraction of investigation by the \textsc{unfccc}. The monitoring service carries out sanctioning, imposing financial penalties on cheaters and harsher targets on countries who report emissions above their targets. Once sanctioning has been completed, the targetting service assigns new emissions targets to each country and the simulation proceeds as normal.
 
 \begin{figure}[h!]
 	\centering
@@ -37,24 +37,24 @@ The Kyoto Protocol can be summarised into the following flow of actions:
 	\label{fig:kyoto_4_states}
 \end{figure}
 
-While we were eager to try and have our simulation model the Kyoto Protocol accurately, some changes needed to be made to discourage agents from abusing the game mechanics. For example, in a 10 year session, a participant could maximise their industry and \textsc{gdp} for the first 9 years and hence generate a large amount of fund. This could then be followed by a drastic reduction in industry to meet its target in the last year.
+While we were eager to try and have our simulation model the Kyoto Protocol accurately, some changes needed to be made to discourage agents from abusing the game mechanics. For example, in a 10 year session, a participant could maximise their industry and \textsc{gdp} for the first 9 years and hence generate a large amount of funds. This could then be followed by a drastic reduction in industry to meet its target in the last year. This would create an excess of funds while the agent disregarded its emissions targets, giving it and unfair and unrealistic advantage.
 
 \begin{description}
 \item [Target Setting] \hfill \\ 
-In the real world, targets are calculated per session for each participant. However, our model calculates the session target for each participant, and then sets incremental, yearly targets which, if an individual country meets these targets, will ensure it meets its session target as well. This removes the potential abuse of the \textsc{gdp} functionality, since our simulated \textsc{gdp} is not externally sensitive to non-Kyoto Protocol events like \textsc{gdp} is in the real world.
+In the real world, targets are calculated per session for each participant. However, our model calculates the session target for each participant and then sets incremental, yearly targets which, if an individual country meets these targets, will ensure it meets its session target as well. This removes the potential abuse of the \textsc{gdp} functionality, since our simulated \textsc{gdp} is not externally sensitive to non-Kyoto Protocol events like \textsc{gdp} is in the real world.
 
 \item [Reporting] \hfill \\ 
-Our model follows the Kyoto Protocol and reporting is done yearly.
+Our model follows the Kyoto Protocol and reporting is done yearly. Our reporting system is intentionally designed to allow countries to falsify their emissions reports, in the event that they, for any reason, wish to present incorrect emission data. One of the primary reasons for this would be not meeting emissions targets. At the risk of incurring financial penalties, it is possible for a country to avoid target sanctioning, which would have required an even more drastic reduction in the following year.
 
 \item [Monitoring] \hfill \\ 
-As per the \textsc{cpr} model, monitoring of participants should incur a cost. Every year all participants are `taxed' a certain percentage of their \textsc{gdp} in our model, which is used to cover the cost of monitoring participants. The Kyoto Protocol does not specifically call for a tax to cover its monitoring, although the \textsc{unfccc} is funded by its members, so our model represents a suitable abstraction to reality.
+As per the \textsc{cpr} model, monitoring of participants should incur a cost. Every year all participants are `taxed' a certain percentage of their \textsc{gdp} in our model, which is used to cover the cost of monitoring participants. The Kyoto Protocol does not specifically call for a tax to cover its monitoring, although the \textsc{unfccc} is funded by its members, so our model represents a suitable abstraction from reality.
 
 In the real world, monitoring is done every 5 years by a team of experts. We decided to monitor more frequently in order to discourage unrealistic participant behaviour. A number of random participants are checked yearly using the funds gained from the `monitor tax'. Repeat offenders, who have been found cheating before, have an increased probability of being monitored in the future.
 
 \item [Sanctioning] \hfill \\ 
 Sanctions are applied immediately when participants are found to have missed targets or have reported fraudulent emissions. The sanction for missing a target is a proportional increase in that participant's target in the following year, which is in line with the Kyoto Protocol regulations.
 
-The sanction for fraudulent reporting in real life are rather `light weight', only suggesting a recalculation of the reported figures. In the real world, this kind of fraudulent activity would also result in political pressure from other Kyoto participants, but this would be hard to model in our simulation. We wanted to look at the effect of a more `harsh' form of sanctioning, and thus it was decided to impose financial sanctions for fraudulent reporting.
+The sanction for fraudulent reporting in real life are rather `light weight', only suggesting a recalculation of the reported figures. In the real world, this kind of fraudulent activity would also result in political pressure from other Kyoto participants, but this would be difficult to model in our simulation. We wanted to look at the effect of a more `harsh' form of sanctioning, and thus we decided to impose financial sanctions for fraudulent reporting. This makes cheating, from an artificial intelligence perspective, a decision rather than a default. If the real world approach of simple target correction were employed then correctly reporting a failure to meet an emissions target is, from the isolated perspective represented in our simulation, never a sensible course of action. We wanted to avoid eliminating potential actions countries could take.
 \end{description}
 
 \subsection{Participants \& Actions}
