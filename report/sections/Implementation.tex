@@ -126,7 +126,7 @@ Carbon absorption offers are all accepted if the country is in an environmentall
 
 \subsubsection{Non-Participants}
 
-For the purposes of our simulation the rogue states are comprised of the US and Canada, who operate independently of one another, yet necessarily share certain actions and behaviours. 
+For the purposes of our simulation the rogue states are comprised of the \textsc{us}, who operate independently of one another, yet necessarily share certain actions and behaviours. 
 
 \subparagraph{United States}
 
@@ -143,12 +143,6 @@ The winner of an election is decided by a function of the economic performance o
 As the political party's re-election chances are determined by the levels of carbon reduction and economic growth achieved during the election cycle, it chooses targets for these (in the case of economic growth, assuming stable market conditions) in order to maximise this chance. The targets are initially based on the long term percentages reductions/growth rates achieved before being adjusted up or down. In order for an absolute decrease in emissions it is necessary for the emissions intensity to improve faster than economic growth. So, for an absolute decrease the targeted improvement in intensity must be higher than this. The desired improvement in the intensity level is thus taken at base to be the long term economic growth rate over the four year election period plus a value determined by the overall attitude of the electorate. E.g. If the year on year growth rate was 5\%, this would result in a 21.5\% compounded rate from the start to the end of the period. Targets are valid and acted upon over the four year election period in order to allow behaviors to adapt to the prevailing global economic conditions, in times where growth is strong, giving rise to more available cash, more investments toward carbon reduction are made, contrarily, during periods of poor economic growth more investments into the economy are made. 
 
 Once the target is set, the agent sets about choosing actions. The agent aims to implement any actions over three years within the four year election cycle, allowing no action to be taken in one of the years if conditions are not favourable. If conditions are amenable, all available cash will be used. At the beginning of the election cycle the absolute carbon reduction required over the four year period (taking into account the expected \textsc{gdp} growth) is calculated. The goal in absolute terms for each of the three years is then set. The agent will attempt to fulfil its commitments during the first 99 ticks of the year (assuming a year is 100) through the clean development mechanism (\textsc{cdm}), or subsequent to Kyoto membership, through trading carbon offset with other agents. Before implementing any action, the agent evaluates whether the benefit to their election chances will be increased more by taking the action in question or an alternative. On the last tick of the year, if the targets for carbon reduction or \textsc{gdp} growth have not been met, then the agent will take appropriate action through the carbon reduction and absorption mechanisms, or through investing in industry. The party will take measures to meet either its reduction or growth targets first depending on, once again, the projected effect the meeting/not meeting one will have on their reelection chances. Then use any remaining cash available to meet (if possible) the remaining target. If both targets have been met, they will spend the remainder on their preferred action.
-
-%\subparagraph{Canada}
-
-%
-% TO BE FILLED OUT
-%
 
 \subsection{Participant Actions}
 
@@ -270,7 +264,7 @@ object that \texttt{OfferMessage} encapsulates) is set to either:
 	\item \texttt{SELL}: If participant wants to sell carbon offset.
 \end{itemize}
 
-For Clean Development Mechanisms, the trade protocol allows the participant to advertise whether they want other countries to invest in their industry to reduce carbon emissions. When a participant wants to advertise about CDM then the following types need to be assigned to the \texttt{OfferMessage} Offer type:
+For Clean Development Mechanisms, the trade protocol allows the participant to advertise whether they want other countries to invest in their industry to reduce carbon emissions. When a participant wants to advertise about \textsc{cdm} then the following types need to be assigned to the \texttt{OfferMessage} Offer type:
 
 \begin{itemize}
 	\item \texttt{INVEST}: participant wants to invest in another country.
