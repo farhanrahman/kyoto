@@ -2,6 +2,7 @@ package uk.ac.ic.kyoto.tradehistory;
 
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import uk.ac.ic.kyoto.countries.OfferMessage;
 import uk.ac.ic.kyoto.singletonfactory.SingletonProvider;
@@ -25,7 +26,7 @@ public interface TradeHistory {
 	 * tick 0.
 	 * @return
 	 */
-	public Map<Integer, Map<UUID, OfferMessage>> getHistory();
+	public ConcurrentHashMap<Integer, Map<UUID, OfferMessage>> getHistory();
 	
 	/**
 	 * Method to get a map of trades for that
@@ -33,7 +34,7 @@ public interface TradeHistory {
 	 * @param simTime of type Time
 	 * @return
 	 */
-	public Map<UUID, OfferMessage> getHistoryForTime(Time simTime);
+	public ConcurrentHashMap<UUID, OfferMessage> getHistoryForTime(Time simTime);
 	
 	/**
 	 * Method to check whether trade exists
