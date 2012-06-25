@@ -89,7 +89,7 @@ The following keywords will be used to describe the general behaviour of Non Ann
 	\item[6. environment\_friendly\_target:] if it exists, variable that stores the country's carbon emission target. 
 \end{description}
 
-The country starts by having a policy of increasing its energy output as shown in Figure X whilst trying to meet an internally set carbon emission target.
+The country starts by having a policy of increasing its energy output, whilst trying to meet an internally set carbon emission target:
 
 %
 % Er. do these make sense ??
@@ -333,6 +333,7 @@ The protocol has two different state machines that are used by the initiator and
 
 %
 % FIX THE POSITION OF THESE FIGURES
+% cs2309: What is wrong with them?
 %
 
 \begin{figure}[h!]
@@ -349,11 +350,7 @@ The protocol has two different state machines that are used by the initiator and
 	\label{fig:protocol-fsm-2}
 \end{figure}
 
-%
-% FIX THESE REFS
-%
-
-Figure-X and figure-X shows the state machines used by the Initiator and Responder respectively along with the transitions labelled on the arrows. The transitions in an \texttt{FSMProtocol} happen when a participant receives a message.
+Figure~\ref{fig:protocol-fsm-1} and ~\ref{fig:protocol-fsm-2} shows the state machines used by the Initiator and Responder respectively along with the transitions labelled on the arrows. The transitions in an \texttt{FSMProtocol} happen when a participant receives a message.
 
 \paragraph{Initiator FSM}
 
@@ -372,11 +369,7 @@ Both the initiator and the responder have a single \texttt{START} state as requi
 
 \paragraph{Responder FSM}
 
-%
-% FIX THIS REF
-%
-
-Figure-X shows the \textsc{fsm} that is used by the responder. Upon receiving a message form the initiator. There is only one \texttt{START} state and the three end states are \texttt{REVERT}, \texttt{TRADE\_DONE} and \texttt{RESPONDER\_TIMEOUT}. Similar to the initiator, the transitions happen with the participant sending a unicast message to the initiator agent.
+Figure\ref{fig:protocol-fsm-2} shows the \textsc{fsm} that is used by the responder. Upon receiving a message form the initiator. There is only one \texttt{START} state and the three end states are \texttt{REVERT}, \texttt{TRADE\_DONE} and \texttt{RESPONDER\_TIMEOUT}. Similar to the initiator, the transitions happen with the participant sending a unicast message to the initiator agent.
  
 \begin{description}
 	\item[1. \texttt{RESPOND\_TO\_TRADE}:]
