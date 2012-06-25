@@ -45,7 +45,7 @@ While we were eager to try and have our simulation model the Kyoto Protocol accu
 
 \begin{description}
 \item [Target Setting] \hfill \\ 
-In the real world, targets are calculated per session for each participant. However, our model calculates the session targets for each participant, and then sets incremental, yearly targets which, if an individual country meets these targets, will ensure it meets its session target as well. This removes the potential abuse of the \textsc{gdp} functionality, since our simulated \textsc{gdp} is not externally sensitive to non-Kyoto Protocol events like \textsc{gdp} is in the real world.
+In the real world, targets are calculated per session for each participant. However, our model calculates the session target for each participant, and then sets incremental, yearly targets which, if an individual country meets these targets, will ensure it meets its session target as well. This removes the potential abuse of the \textsc{gdp} functionality, since our simulated \textsc{gdp} is not externally sensitive to non-Kyoto Protocol events like \textsc{gdp} is in the real world.
 
 \item [Reporting] \hfill \\ 
 Our model follows the Kyoto Protocol and reporting is done yearly.
@@ -68,7 +68,7 @@ Countries which form part of the Kyoto Protocol have been split into 4 groups:
 	\item{Annex I (Must reduce emissions -- e.g. \textsc{eu})}
 	\item{Annex I (Must sustain emissions -- e.g. Russia)}
 	\item{Non-Annex (Developing countries)}
-	\item{Rogue Countries (Not part of Kyoto)}
+	\item{Rogue States (Not part of Kyoto)}
 \end{itemize}
 
 While Annex I and Non-Annex countries have been implemented as per the Protocol specification, it was decided that we would remove the Annex II class (which is just a subset of Annex I), and allow all Annex I classes to invest in \textsc{cdm}.
