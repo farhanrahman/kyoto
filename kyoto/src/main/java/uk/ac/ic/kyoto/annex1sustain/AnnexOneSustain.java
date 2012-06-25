@@ -377,10 +377,12 @@ public class AnnexOneSustain extends AbstractCountry {
 						if ((reductionCost < absorptionCost || !absorptionPossible) && reductionPossible) {
 							carbonReductionHandler.investInCarbonReduction(necessaryReduction);
 							logger.info(name + ": Reduced carbon by " + (necessaryReduction) + " to remain in Kyoto");
+							resetYearlyTargets();
 						}
 						else if (absorptionPossible) {
 							carbonAbsorptionHandler.investInCarbonAbsorption(necessaryReduction);
 							logger.info(name + ": Absorbed carbon by " + (necessaryReduction) + " to remain in Kyoto");
+							resetYearlyTargets();
 						}
 						else {
 							leaveKyoto();
@@ -440,7 +442,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			sessionOffsetGain = carbonDifference * yearsUntilEnd;
 		}
 		catch (Exception e) {
-			logger.warn(name + ": Problem with calculating offset gain :" + e.getMessage());
+			logger.info(name + ": Problem with calculating offset gain :" + e.getMessage());
 			sessionOffsetGain = 0;
 		}
 		
