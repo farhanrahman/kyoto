@@ -60,19 +60,24 @@ class CountrySimulator {
 
 		// For all years to look ahead
 		for (int i = 0; i < LOOK_AHEAD_YEARS; i++) {
-			// Cull the reduce states
 
-			// logger.info("unculledReduceSize " + i + " = "
-			// + stateList[i].reduceStates.size());
+			// Cull the reduce states
 			try {
 				stateList[i].reduceStates = cullStates(stateList[i].reduceStates);
 			} catch (Exception e) {
 				logger.warn(country.getName()
-						+ " has either no or too many possible states! Returning a default behaviour.");
+						+ " has no possible states! Returning a default behaviour.");
 				return DEFAULT_ACTION;
 			}
 			// logger.info("reduceSize " + i + " = "
 			// + stateList[i].reduceStates.size());
+
+			if (stateList[i].reduceStates.size() > 10000) {
+				logger.warn(country.getName()
+						+ " has too many possible states! Ending the behaviour simulation early.");
+				ActionList megaAction = getOptimalState(stateList[i].reduceStates);
+				return megaAction;
+			}
 
 			// Branch off all unculled reduce states by performing a maintain
 			// action
@@ -82,17 +87,22 @@ class CountrySimulator {
 			}
 
 			// Cull the maintain states
-			// logger.info("unculledMaintainSize " + i + " = "
-			// + stateList[i].maintainStates.size());
 			try {
 				stateList[i].maintainStates = cullStates(stateList[i].maintainStates);
 			} catch (Exception e) {
 				logger.warn(country.getName()
-						+ " has either no or too many possible states! Returning a default behaviour.");
+						+ " has no possible states! Returning a default behaviour.");
 				return DEFAULT_ACTION;
 			}
 			// logger.info("maintainSize " + i + " = "
 			// + stateList[i].maintainStates.size());
+
+			if (stateList[i].maintainStates.size() > 10000) {
+				logger.warn(country.getName()
+						+ " has too many possible states! Ending the behaviour simulation early.");
+				ActionList megaAction = getOptimalState(stateList[i].maintainStates);
+				return megaAction;
+			}
 
 			// Branch off all unculled maintain states by performing a sell
 			// action
@@ -103,17 +113,22 @@ class CountrySimulator {
 			}
 
 			// Cull the sell states
-			// logger.info("unculledSellSize " + i + " = "
-			// + stateList[i].sellStates.size());
 			try {
 				stateList[i].sellStates = cullStates(stateList[i].sellStates);
 			} catch (Exception e) {
 				logger.warn(country.getName()
-						+ " has either no or too many possible states! Returning a default behaviour.");
+						+ " has no possible states! Returning a default behaviour.");
 				return DEFAULT_ACTION;
 			}
 			// logger.info("sellSize " + i + " = "
 			// + stateList[i].sellStates.size());
+
+			if (stateList[i].sellStates.size() > 10000) {
+				logger.warn(country.getName()
+						+ " has too many possible states! Ending the behaviour simulation early.");
+				ActionList megaAction = getOptimalState(stateList[i].sellStates);
+				return megaAction;
+			}
 
 			// So long as we aren't in the final year
 			if (i != (LOOK_AHEAD_YEARS - 1)) {
@@ -261,8 +276,6 @@ class CountrySimulator {
 
 		if (states.size() == 0) {
 			throw new Exception("All states are invalid");
-		} else if (states.size() > 10000) {
-			throw new Exception("Too many states! Returning default behaviour");
 		}
 
 		boolean hasBeenReplaced = true;
