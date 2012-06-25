@@ -146,47 +146,7 @@ public class USAgent extends AbstractCountry {
 		logger.info("behaviour: Returning");
 	}
 	
-	private double CalculateEnergyCashToInvest() {
-		double AvailableCash = this.getAvailableToSpend();
-		if(debug) logger.info("CalculateEnergyCashToInvest: AvailableCash = " + AvailableCash);
-		
-		double PartyMultiple;
-		if(!isDemocratElected()) { // republicans get a boost to their GDPScore
-			PartyMultiple = 1.1;
-		}
-		else {
-			PartyMultiple = 1;
-		}
-		//1+((-1*CurrentAttitude)/10);
-		
-		int 	CurrentAttitude  = this.getPrevailingAttitude();
-		double AttitudeMultiple = (1+(CurrentAttitude/10/2)); // thus + 5 will increase amount
-		if(debug) logger.info("CalculateEnergyCashToInvest: AttitudeMultiple = " + AttitudeMultiple);
-		
-		double InvestEnergyCash = AvailableCash*0.95*0.4*PartyMultiple*AttitudeMultiple;
-		if(debug) logger.info("CalculateEnergyCashToInvest: InvestEnergyCash = " + InvestEnergyCash);
-		return InvestEnergyCash;
-	}
 	
-	private double CalculateReductionCashToInvest() {
-		double AvailableCash = this.getAvailableToSpend();
-		if(debug) logger.info("CalculateReductionCashToInvest: AvailableCash = " + AvailableCash);
-		
-		double PartyMultiple;
-		if(!isDemocratElected()) { // republicans get a boost to their GDPScore
-			PartyMultiple = 1;
-		}
-		else {
-			PartyMultiple = 1.2;
-		}
-		
-		int 	CurrentAttitude  = this.getPrevailingAttitude();
-		double AttitudeMultiple = 1+(-1*(CurrentAttitude/10)); // thus +5 will decrease amount
-		if(debug) logger.info("CalculateReductionCashToInvest: AttitudeMultiple = " + AttitudeMultiple);
-		
-		double InvestEnergyCash = AvailableCash*0.95*0.4*PartyMultiple*AttitudeMultiple;
-		return InvestEnergyCash;
-	}
 	
 	private void DoEnergyInvestments() {
 		if(debug) logger.info("DoEnergyInvestments: Entering");
@@ -253,7 +213,7 @@ public class USAgent extends AbstractCountry {
 		double AbsorptionInvestmentNeeded = 0;
 		double ReductionInvestmentNeeded = 0;
 		double ReduceBy = 0;	
-		boolean CarbonEnoughCash = true;
+		boolean EnoughCash = true;
 		boolean EnoughLand = true;
 		boolean EnoughCarbon = true;
 		double InvestAmount = 0;
@@ -271,7 +231,7 @@ public class USAgent extends AbstractCountry {
 		}
 		if(debug) logger.info("DoCarbonReduction: CashToInvest = " + CashToInvest);
 		
-//		while(CarbonEnoughCash && EnoughLand && EnoughCarbon) { // booleans set to false if corresponding exception thrown
+		while(EnoughCash && EnoughLand && EnoughCarbon) { // booleans set to false if corresponding exception thrown
 		
 //			// WHAT REDUCTION DO WE NEED TO MEET TARGET
 //			double CarbonOutput = this.getCarbonOutput();
@@ -373,11 +333,13 @@ public class USAgent extends AbstractCountry {
 				} catch (NotEnoughCarbonOutputException e) {
 					EnoughCarbon = false;
 				} catch (NotEnoughCashException e) {
-
-					e.printStackTrace();
-				}				
-
+					EnoughCash = false;
+					//e.printStackTrace();
+				}
 				if(debug) logger.info("CarbonAfter: " + this.getCarbonOutput());
+		}
+
+				
 	}
 
 	private double getTradeFactorDifference() {
@@ -405,6 +367,47 @@ public class USAgent extends AbstractCountry {
 		return 1;
 	}
 	
+	private double CalculateEnergyCashToInvest() {
+		double AvailableCash = this.getAvailableToSpend();
+		if(debug) logger.info("CalculateEnergyCashToInvest: AvailableCash = " + AvailableCash);
+		
+		double PartyMultiple;
+		if(!isDemocratElected()) { // republicans get a boost to their GDPScore
+			PartyMultiple = 1.1;
+		}
+		else {
+			PartyMultiple = 1;
+		}
+		//1+((-1*CurrentAttitude)/10);
+		
+		int 	CurrentAttitude  = this.getPrevailingAttitude();
+		double AttitudeMultiple = (1+(CurrentAttitude/10/2)); // thus + 5 will increase amount
+		if(debug) logger.info("CalculateEnergyCashToInvest: AttitudeMultiple = " + AttitudeMultiple);
+		
+		double InvestEnergyCash = AvailableCash*0.95*0.4*PartyMultiple*AttitudeMultiple;
+		if(debug) logger.info("CalculateEnergyCashToInvest: InvestEnergyCash = " + InvestEnergyCash);
+		return InvestEnergyCash;
+	}
+	
+	private double CalculateReductionCashToInvest() {
+		double AvailableCash = this.getAvailableToSpend();
+		if(debug) logger.info("CalculateReductionCashToInvest: AvailableCash = " + AvailableCash);
+		
+		double PartyMultiple;
+		if(!isDemocratElected()) { // republicans get a boost to their GDPScore
+			PartyMultiple = 1;
+		}
+		else {
+			PartyMultiple = 1.2;
+		}
+		
+		int 	CurrentAttitude  = this.getPrevailingAttitude();
+		double AttitudeMultiple = 1+(-1*(CurrentAttitude/10)); // thus +5 will decrease amount
+		if(debug) logger.info("CalculateReductionCashToInvest: AttitudeMultiple = " + AttitudeMultiple);
+		
+		double InvestEnergyCash = AvailableCash*0.95*0.4*PartyMultiple*AttitudeMultiple;
+		return InvestEnergyCash;
+	}
 	
 	private double CheckInvestmentAmount(double investmentNeeded) {
 		double InvestAmount;
