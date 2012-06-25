@@ -1,6 +1,6 @@
 \section{Kyoto as a Multi-Agent System}
 
-Here we detail the design decisions made regarding the modelling of the Kyoto Protocol \textsc{cpr} and its implementation as a multi-agent system. We describe the simplifications made to the Protocol and any assumptions made about the real world and economy.
+Here we detail the design decisions made regarding the modelling of the Kyoto Protocol \textsc{cpr} and considerations involved in mapping the Kyoto Protocol to a multi-agent system simulation. In order to properly explain the implementation of any one component of our Kyoto Protocol system, we must first elaborate on the larger structure of the project, giving a high level overview of the framework our agents are built upon.
 
 \subsection{Time}
 
@@ -22,15 +22,11 @@ energy output = carbon output / fossil fuel \%
 % MATHSIFY THIS SHIT
 %
 
-\subsection{Money}
+\subsection{Economy}
 
-%
-% FIX THIS SUBSECTION
-%
+As with real world governments, our models of agent behaviors are necessarily constrained by the funds available to their respective administrations in their efforts to conserve the environment. \textsc{gdp} is a readily accessible and, for the complexity of our simulation, suitably accurate representation of countries' relative wealth. However, our simulation represents only the Kyoto Protocol in isolation, and an associated model of the global economy would be required to accurately gauge individual spending on the numerous national and international projects flexibly related to the Kyoto Protocol. To abstract away this complexity, each country is allocated a portion of its \textsc{gdp} every year as spendable income on projects relating to the Kyoto Protocol.
 
-Our model requires that participants have money to be able to spend on any of the actions available to them. Cash is thus calculated as a percentage of the participant's Gross Domestic Product (\textsc{gdp}). Whilst in real life, countries may wish to vary their carbon reduction budgets, we decided that the percentage dedicated to green initiatives would remain constant.
-
-\textsc{gdp} is initially set from real world country data and it is understood that countries need to be able to affect their \textsc{gdp} rate (growth or recession). In real life, \textsc{gdp} rates are controlled by a large number of factors; this has been simplified in our model such that \textsc{gdp} rate is only affected by energy output.
+Manipulation of a country's GDP growth rate is the primary way we represent economic growth or recession. The formulae involved in modeling GDP growth depend primarily on a country's energy output, as defined above. This encourages investment in industry to promote economic growth, making maximisation of GDP growth a contrary but still achievable objective when adhering to Kyoto Protocol targets. These formulae also discourage drastic cutbacks in industry, which is intended to be an emergency measure for countries that are unable to meet their targets. This penalisation encourages long term thinking in the agent's behaviour, and rewards careful investment and management of targets alongside economic priorities.
 
 \subsection{The Kyoto Protocol}
 The Kyoto Protocol can be summarised into the following flow of actions:
