@@ -161,7 +161,8 @@ public abstract class TradeProtocol extends FSMProtocol {
 							public void processMessage(Message<?> message,
 									FSMConversation conv, Transition transition) {
 								OfferMessage offerMessage = ((OfferMessage) message.getData());
-								Offer trade = new Offer(offerMessage.getOfferQuantity(), offerMessage.getOfferUnitCost(), offerMessage.getOfferType(), offerMessage.getOfferInvestmentType());
+								//Offer trade = new Offer(offerMessage.getOfferQuantity(), offerMessage.getOfferUnitCost(), offerMessage.getOfferType(), offerMessage.getOfferInvestmentType());
+								Offer trade = offerMessage.getOffer();
 								if(handleTradeCompletion(trade.reverse())){
 									/*Everything worked out well. Its okay to end this FSM*/
 									logger.info("Trade was accepted");
@@ -258,7 +259,8 @@ public abstract class TradeProtocol extends FSMProtocol {
 						FSMConversation conv, Transition transition) {
 					if (message.getData() instanceof OfferMessage) {
 						OfferMessage offerMessage = ((OfferMessage) message.getData());
-						Offer trade = new Offer(offerMessage.getOfferQuantity(), offerMessage.getOfferUnitCost(), offerMessage.getOfferType(), offerMessage.getOfferInvestmentType());
+						//Offer trade = new Offer(offerMessage.getOfferQuantity(), offerMessage.getOfferUnitCost(), offerMessage.getOfferType(), offerMessage.getOfferInvestmentType());
+						Offer trade = offerMessage.getOffer();
 						conv.setEntity(offerMessage);
 						NetworkAddress from = conv.getNetwork()
 								.getAddress();
@@ -325,7 +327,8 @@ public abstract class TradeProtocol extends FSMProtocol {
 								//TODO
 								/*Revert changes*/
 								OfferMessage offerMessage = ((OfferMessage) message.getData());
-								Offer trade = new Offer(offerMessage.getOfferQuantity(), offerMessage.getOfferUnitCost(), offerMessage.getOfferType(), offerMessage.getOfferInvestmentType());
+								//Offer trade = new Offer(offerMessage.getOfferQuantity(), offerMessage.getOfferUnitCost(), offerMessage.getOfferType(), offerMessage.getOfferInvestmentType());
+								Offer trade = offerMessage.getOffer();
 								revertResponderFromInitiatorFailure(trade);
 								TradeProtocol.this.tradeHistory.removeTradeHistoryWithID(offerMessage.getTradeID());
 								tradeFailed(message.getFrom(),offerMessage); /*Inform responder that trade failed*/
