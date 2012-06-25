@@ -74,8 +74,10 @@ public class AnnexOneReduce extends AbstractCountry {
 
 		logger.info(getName() + " is updating market info");
 		marketData.update();
-		logger.info("New estimated buy price = " + Double.toString(getMarketBuyUnitPrice(0)));
-		logger.info("New estimated sell price = " + Double.toString(getMarketSellUnitPrice(0)));
+		logger.info("New estimated buy price = "
+				+ Double.toString(getMarketBuyUnitPrice(0)));
+		logger.info("New estimated sell price = "
+				+ Double.toString(getMarketSellUnitPrice(0)));
 
 		// If the expected buy price has increased by more than 5%, we should
 		// resimulate
@@ -145,8 +147,8 @@ public class AnnexOneReduce extends AbstractCountry {
 
 		double netCarbonOutput = getCarbonOutput() - getCarbonAbsorption()
 				- getCarbonOffset();
-		double carbonDifference = netCarbonOutput - getEmissionsTarget();		
-		
+		double carbonDifference = netCarbonOutput - getEmissionsTarget();
+
 		// The amount of carbon we want to buy at the current price
 		buyCarbonQuantity = carbonDifference * optimal.reduce.buyCreditFrac;
 
@@ -163,11 +165,10 @@ public class AnnexOneReduce extends AbstractCountry {
 		double industryInvest = estimatedMoney * optimal.maintain.industryFrac;
 
 		double carbonIncrease;
-		if (industryInvest >0) {
-			 carbonIncrease = energyUsageHandler
-				.calculateCarbonIndustryGrowth(industryInvest);
-		}
-		else {
+		if (industryInvest > 0) {
+			carbonIncrease = energyUsageHandler
+					.calculateCarbonIndustryGrowth(industryInvest);
+		} else {
 			carbonIncrease = 0;
 		}
 
@@ -586,12 +587,15 @@ public class AnnexOneReduce extends AbstractCountry {
 			investments[1] = 0;
 			return 0;
 		}
-		
+
 		// Overestimate a bit
 		carbonReduction *= 1.01;
 
-		double prevCost = this.carbonReductionHandler.getInvestmentRequired(
-				carbonReduction, carbonOutput, energyOutput);
+		double onlyReductionCost = this.carbonReductionHandler
+				.getInvestmentRequired(carbonReduction, carbonOutput,
+						energyOutput);
+
+		double prevCost = onlyReductionCost;
 
 		double absorbFrac = 0.5;
 		double reduceFrac = 0.5;
@@ -609,7 +613,7 @@ public class AnnexOneReduce extends AbstractCountry {
 						.getInvestmentRequired(absorbFrac * carbonReduction,
 								arableLandArea);
 			} catch (NotEnoughLandException e) {
-				absorbCost = 99999999999999999999999.0;
+				absorbCost = 999999999999999999.0;
 			}
 
 			reduceCost = this.carbonReductionHandler.getInvestmentRequired(
@@ -628,8 +632,14 @@ public class AnnexOneReduce extends AbstractCountry {
 			fracDiff /= 2;
 		}
 
-		absorbCost = (double) Math.round(absorbCost);
-		reduceCost = (double) Math.round(reduceCost);
+		if (prevCost > onlyReductionCost) {
+			absorbFrac = 0;
+			reduceFrac = 1;
+		} else {
+
+			absorbFrac = ((double) Math.round(1000 * absorbFrac)) / 1000;
+			reduceFrac = ((double) Math.round(1000 * reduceFrac)) / 1000;
+		}
 
 		investments[0] = absorbCost;
 		investments[1] = reduceCost;
@@ -660,6 +670,10 @@ public class AnnexOneReduce extends AbstractCountry {
 
 		// Overestimate a bit
 		carbonReduction *= 1.01;
+
+		double onlyReductionCost = this.carbonReductionHandler
+				.getInvestmentRequired(carbonReduction, carbonOutput,
+						energyOutput);
 
 		double prevCost = this.carbonReductionHandler.getInvestmentRequired(
 				carbonReduction, carbonOutput, energyOutput);
@@ -699,8 +713,14 @@ public class AnnexOneReduce extends AbstractCountry {
 			fracDiff /= 2;
 		}
 
-		absorbFrac = ((double) Math.round(1000 * absorbFrac)) / 1000;
-		reduceFrac = ((double) Math.round(1000 * reduceFrac)) / 1000;
+		if (prevCost > onlyReductionCost) {
+			absorbFrac = 0;
+			reduceFrac = 1;
+		} else {
+
+			absorbFrac = ((double) Math.round(1000 * absorbFrac)) / 1000;
+			reduceFrac = ((double) Math.round(1000 * reduceFrac)) / 1000;
+		}
 
 		carbon[0] = absorbFrac * carbonReduction;
 		carbon[1] = reduceFrac * carbonReduction;
