@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.log4j.Logger;
 
@@ -25,7 +26,7 @@ import com.google.inject.Singleton;
  */
 @Singleton
 public class TradeHistoryImplementation implements TradeHistory{
-	private static Map<Integer, Map<UUID, OfferMessage>> history = new HashMap<Integer,Map<UUID,OfferMessage>>();
+	private static ConcurrentHashMap<Integer, ConcurrentHashMap<UUID, OfferMessage>> history = new ConcurrentHashMap<Integer,ConcurrentHashMap<UUID,OfferMessage>>();
 	
 	private String simID = null;
 	
@@ -36,8 +37,8 @@ public class TradeHistoryImplementation implements TradeHistory{
 	 * @return returns a history of all the trade histories in the form of
 	 * a map simulation time -> map of trades that happened in that simulation time
 	 */
-	public final Map<Integer,Map<UUID,OfferMessage>> getHistory(){
-		return (new HashMap<Integer, Map<UUID,OfferMessage>>(history));
+	public final ConcurrentHashMap<Integer, Map<UUID, OfferMessage>> getHistory(){
+		return (new ConcurrentHashMap<Integer, Map<UUID,OfferMessage>>(history));
 	}
 
 	/**
@@ -45,7 +46,7 @@ public class TradeHistoryImplementation implements TradeHistory{
 	 * @return the history of trades for simulation
 	 * time = simTime
 	 */
-	public Map<UUID,OfferMessage> getHistoryForTime(Time simTime){
+	public ConcurrentHashMap<UUID,OfferMessage> getHistoryForTime(Time simTime){
 		return history.get(simTime.intValue());
 	}
 	
@@ -73,9 +74,9 @@ public class TradeHistoryImplementation implements TradeHistory{
 	 */
 	public void addToHistory(Time simTime, UUID tradeID, OfferMessage trade){
 		synchronized(history){
-			Map<UUID, OfferMessage> t = history.get(simTime.intValue());
+			ConcurrentHashMap<UUID, OfferMessage> t = history.get(simTime.intValue());
 			if(t == null){
-				t = new HashMap<UUID,OfferMessage>();
+				t = new ConcurrentHashMap<UUID,OfferMessage>();
 			}
 			t.put(tradeID, trade);
 			history.put(simTime.intValue(), t);
