@@ -48,11 +48,11 @@ While simple in theory, in practice there are some major hurdles. The most troub
 
 \subparagraph{Strategy}
 
-Some heuristics had to be implemented to keep the simulation from spiralling out of control. It also ensured that as few \textsc{cpu} cycles as possible are wasted on actions that were simply irrational and could never lead to any useful results. To do this, it was decided to split each turn into three phases: the 'reduce' phase, the 'maintain' phase and the 'sell' phase.
+Some heuristics had to be implemented to keep the simulation from spiralling out of control. It also ensured that as few \textsc{cpu} cycles as possible are wasted on actions that were simply irrational and could never lead to any useful results. To do this, it was decided to split each turn into three phases: the `reduce' phase, the `maintain' phase and the `sell' phase.
 
-The reduce phase happens first. It checks whether our current carbon output is below our carbon target. If we are at or below our target, then nothing is done. However, if we are above our current target, the testing will branch off into combinations of three distinct actions. The carbon target will be met by either buying carbon offset from the market, by reducing the carbon output through investing in absorption and reduction or, if in particularly dire financial situation, by reducing the economic output of the country. Every time a branch occurs, a new 'state' is created.
+The reduce phase happens first. It checks whether our current carbon output is below our carbon target. If we are at or below our target, then nothing is done. However, if we are above our current target, the testing will branch off into combinations of three distinct actions. The carbon target will be met by either buying carbon offset from the market, by reducing the carbon output through investing in absorption and reduction or, if in particularly dire financial situation, by reducing the economic output of the country. Every time a branch occurs, a new `state' is created.
 
-Before the maintain phase occurs, we compare every branched state with one another and check whether one state is objectively superior for every possible pair of states. For example, let a state have two attributes 'Money' and 'Carbon', where a higher 'Money' and a lower 'Carbon' is better. If state 1 has a 'Money' value of 100 and a 'Carbon' value of 50, and state 2 has a 'Money' value of 90 and a 'Carbon' value of 60, then state 1 is objectively better than state 2. Therefore we can immediately eliminate state 2 as a possible action. Alternatively, if a state 3 has a 'Money' value of 110 and a 'Carbon' value of 60, we cannot objectively say that it is any better than state 1 and thus cannot remove this from the simulation. By performing this culling, we can prevent our search space from getting too large and avoid going down paths where we can already tell there will be better alternatives.
+Before the maintain phase occurs, we compare every branched state with one another and check whether one state is objectively superior for every possible pair of states. For example, let a state have two attributes `Money' and `Carbon', where a higher `Money' and a lower `Carbon' is better. If state 1 has a `Money' value of 100 and a `Carbon' value of 50, and state 2 has a `Money' value of 90 and a `Carbon' value of 60, then state 1 is objectively better than state 2. Therefore we can immediately eliminate state 2 as a possible action. Alternatively, if a state 3 has a `Money' value of 110 and a `Carbon' value of 60, we cannot objectively say that it is any better than state 1 and thus cannot remove this from the simulation. By performing this culling, we can prevent our search space from getting too large and avoid going down paths where we can already tell there will be better alternatives.
 
 Next is the maintain phase. As we are now guaranteed to be at least at or below our carbon target, the country can focus on improving its industry, which will eventually result in an increase in the available cash to spend. The simulation will branch off from each unculled state created in the reduce phase by first investing in industry (i.e.: increasing our energy output, which in turn increases our \textsc{gdp}) by some amount and then by offsetting the extra carbon created by investing in absorption and reduction, or by buying the offset from the market. Once again, a cull is performed after all branches have been taken.
 
@@ -136,13 +136,13 @@ Once the target is set, the agent sets about choosing actions. The agent aims to
 The cost of carbon reduction for a country depends on its ratio of carbon output to energy output, which can be described as a dirty industry percentage:
 
 \begin{align*}
-Dirty~Industry = Carbon Output~/~Energy Output
+\mtext{Dirty Industry} = \mtext{Carbon Output}~/~\mtext{Energy Output}
 \end{align*}
 
 The less dirty our industry is, the more expensive it gets to clean it further. Therefore, it is reasonable to use a measure of clean industry:
 
 \begin{align*}
-Clean~Industry = 1 - (Carbon Output~/~Energy~Output)
+\mtext{Clean Industry} = 1 - (\mtext{Carbon Output}~/~\mtext{Energy Output})
 \end{align*}
  
 The relationship between the cost of reducing carbon output by one unit and the percentage of 
@@ -167,14 +167,14 @@ Where:
 Hence, we can calculate cost of single unit investment at specific clean industry percentage using the following formula:
 
 \begin{align*}
-Unit~Cost = a + ((b - a) * x)
+\mtext{Unit Cost} = a + ((b - a) * x)
 \end{align*}
 
 Since the cost will increase linearly with every unit invested, we can find the average cost for the whole investment as the average of the initial and final cost (based on the x0 and x1 values). This is represented by the red line on Figure~\ref{fig:carbon_reduction}.
  
 \begin{align*}
-Average Cost &= ((a + ((b - a) * x1) - (a + ((b-a) * x0))) / 2 \\
-&\Leftrightarrow Average  Cost = (a + ((b - a) * (x1 - x0))) / 2
+\mtext{Average Cost} &= ((a + ((b - a) * x1) - (a + ((b-a) * x0))) / 2 \\
+&\Leftrightarrow \mtext{Average  Cost} = (a + ((b - a) * (x1 - x0))) / 2
 \end{align*}
 
 We can now calculate the total cost of a carbon reduction action by multiplying the average unit cost by the amount required by the country.
@@ -391,30 +391,30 @@ All target calculations are triggered by the end of year event generated by the 
 
 How the worldwide targets are calculated:
 \begin{align*}
-Reduction~Coefficient&= 0.95 ~ (5\%~reduction) \\
-s &= current~session~number\\
+\mtext{Reduction Coefficient}&= 0.95 ~ (5\%~reduction) \\
+s &= \mtext{current session number}\\
 \\
-World~session~target[s] &= world~session~target [s - 1] \times Reduction~Coefficient\\
-Kyoto~target [s] &= world~session~target [s] - total~non~annex~I~output [s - 1]\\
+\mtext{World session target}[s] &= \mtext{world session target} [s - 1] \times \mtext{Reduction Coefficient}\\
+\mtext{Kyoto target}[s] &= \mtext{world session target}[s] - \mtext{total non annex I output}[s - 1]\\
 \end{align*}
 
 Annex I target calculations, in each session:
 
 \begin{align*}
-y &= current~year~number\\
+y &= \mtext{current year number}\\
 \\
-Country~Proportion [s] &= country~output [y - 1]\\
-&~~~~/~(world~output [y - 1] - non~annex~I~output [y - 1])\\
-Country~Session~Target [s] &= Kyoto~target [s] \times country~proportion [s]\\
+\mtext{Country Proportion}[s] &= \mtext{country output}[y - 1]\\
+&~~~~/~(\mtext{world output}[y - 1] - \mtext{non annex I output}[y - 1])\\
+\mtext{Country Session Target}[s] &= \mtext{Kyoto target}[s] \times \mtext{country proportion}[s]\\
 \end{align*}
 
 In each Year:
 
 \begin{align*}
-Session~Progress  &= current~year~in~session~/~number~of~years~in session\\
-Session~Target~Difference&= session~target [s - 1] - session~target [s]\\
-Year~Target&= session~target[s - 1] - session~target~difference\\
-&~~~~\times session~progress - penalty\\
+\mtext{Session Progress}  &= \mtext{current year in session}~/~\mtext{number of years in session}\\
+\mtext{Session Target Difference}&= \mtext{session target}[s - 1] - \mtext{session target}[s]\\
+\mtext{Year Target}&= \mtext{session target}[s - 1] - \mtext{session target difference}\\
+&~~~~\times \mtext{session progress} - \mtext{penalty}\\
 \end{align*}
 
 In the event that a session target is needed from before session 0, world data from 1990 is used in its place. This models the Kyoto Protocol's basis of its initial targets.
