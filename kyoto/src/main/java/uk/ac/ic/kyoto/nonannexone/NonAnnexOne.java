@@ -400,10 +400,13 @@ double available_land;
 necessary_land = carbonAbsorptionHandler.getForestAreaRequired(acquire_cash);
 available_land = getArableLandArea();
 
-if (necessary_land <= available_land)
+if (necessary_land <= available_land) //if enough land 
 {
 	change_required = carbonAbsorptionHandler.getCarbonAbsorptionChange(acquire_cash);
-	broadcastInvesteeOffer(change_required,InvestmentType.ABSORB);
+	if (change_required > 0)
+	{
+		broadcastInvesteeOffer(change_required,InvestmentType.ABSORB);
+	}
 }
 
 }
@@ -417,10 +420,10 @@ private void CDM_reduction(double acquire_cash) throws Exception
 	double change_required; // change in carbon absorption in order to acquire the amount of money specified.
 
 	change_required = carbonReductionHandler.getCarbonOutputChange(acquire_cash, getCarbonOutput(), getEnergyOutput());
-
-
-broadcastInvesteeOffer(change_required,InvestmentType.REDUCE);	
-
+	if (change_required > 0)
+	{
+		broadcastInvesteeOffer(change_required,InvestmentType.REDUCE);	
+	}
 
 }		
 		
