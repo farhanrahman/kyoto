@@ -377,11 +377,11 @@ public class NonAnnexOne extends AbstractCountry {
 	{
 		if (succeed) //country met environment target goal, decrease goal.
 			
-		environment_friendly_target = previous_target - CountryConstants.DECREASING_CARBON_TARGET;
+		environment_friendly_target = previous_target - CountryConstants.ADJUSTING_CARBON_TARGET;
 		
 		if (succeed == false) //country did not meet environment target goal, increase target
 		
-		environment_friendly_target = previous_target + CountryConstants.DECREASING_CARBON_TARGET;
+		environment_friendly_target = previous_target + CountryConstants.ADJUSTING_CARBON_TARGET;
 		
 	}
 	
