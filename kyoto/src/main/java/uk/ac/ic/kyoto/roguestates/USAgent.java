@@ -14,6 +14,7 @@ import uk.ac.ic.kyoto.exceptions.NotEnoughCarbonOutputException;
 import uk.ac.ic.kyoto.exceptions.NotEnoughCashException;
 import uk.ac.ic.kyoto.exceptions.NotEnoughLandException;
 import uk.ac.ic.kyoto.trade.TradeType;
+import uk.ac.imperial.presage2.core.network.Message;
 import uk.ac.imperial.presage2.core.network.NetworkAddress;
 import uk.ac.imperial.presage2.core.util.random.Random;
 import uk.ac.imperial.presage2.util.fsm.FSMException;
@@ -146,47 +147,7 @@ public class USAgent extends AbstractCountry {
 		logger.info("behaviour: Returning");
 	}
 	
-	private double CalculateEnergyCashToInvest() {
-		double AvailableCash = this.getAvailableToSpend();
-		if(debug) logger.info("CalculateEnergyCashToInvest: AvailableCash = " + AvailableCash);
-		
-		double PartyMultiple;
-		if(!isDemocratElected()) { // republicans get a boost to their GDPScore
-			PartyMultiple = 1.1;
-		}
-		else {
-			PartyMultiple = 1;
-		}
-		//1+((-1*CurrentAttitude)/10);
-		
-		int 	CurrentAttitude  = this.getPrevailingAttitude();
-		double AttitudeMultiple = (1+(CurrentAttitude/10/2)); // thus + 5 will increase amount
-		if(debug) logger.info("CalculateEnergyCashToInvest: AttitudeMultiple = " + AttitudeMultiple);
-		
-		double InvestEnergyCash = AvailableCash*0.95*0.4*PartyMultiple*AttitudeMultiple;
-		if(debug) logger.info("CalculateEnergyCashToInvest: InvestEnergyCash = " + InvestEnergyCash);
-		return InvestEnergyCash;
-	}
 	
-	private double CalculateReductionCashToInvest() {
-		double AvailableCash = this.getAvailableToSpend();
-		if(debug) logger.info("CalculateReductionCashToInvest: AvailableCash = " + AvailableCash);
-		
-		double PartyMultiple;
-		if(!isDemocratElected()) { // republicans get a boost to their GDPScore
-			PartyMultiple = 1;
-		}
-		else {
-			PartyMultiple = 1.2;
-		}
-		
-		int 	CurrentAttitude  = this.getPrevailingAttitude();
-		double AttitudeMultiple = 1+(-1*(CurrentAttitude/10)); // thus +5 will decrease amount
-		if(debug) logger.info("CalculateReductionCashToInvest: AttitudeMultiple = " + AttitudeMultiple);
-		
-		double InvestEnergyCash = AvailableCash*0.95*0.4*PartyMultiple*AttitudeMultiple;
-		return InvestEnergyCash;
-	}
 	
 	private void DoEnergyInvestments() {
 		if(debug) logger.info("DoEnergyInvestments: Entering");
@@ -253,7 +214,7 @@ public class USAgent extends AbstractCountry {
 		double AbsorptionInvestmentNeeded = 0;
 		double ReductionInvestmentNeeded = 0;
 		double ReduceBy = 0;	
-		boolean CarbonEnoughCash = true;
+		boolean EnoughCash = true;
 		boolean EnoughLand = true;
 		boolean EnoughCarbon = true;
 		double InvestAmount = 0;
@@ -271,7 +232,7 @@ public class USAgent extends AbstractCountry {
 		}
 		if(debug) logger.info("DoCarbonReduction: CashToInvest = " + CashToInvest);
 		
-//		while(CarbonEnoughCash && EnoughLand && EnoughCarbon) { // booleans set to false if corresponding exception thrown
+		while(EnoughCash && EnoughLand && EnoughCarbon) { // booleans set to false if corresponding exception thrown
 		
 //			// WHAT REDUCTION DO WE NEED TO MEET TARGET
 //			double CarbonOutput = this.getCarbonOutput();
@@ -373,11 +334,13 @@ public class USAgent extends AbstractCountry {
 				} catch (NotEnoughCarbonOutputException e) {
 					EnoughCarbon = false;
 				} catch (NotEnoughCashException e) {
-
-					e.printStackTrace();
-				}				
-
+					EnoughCash = false;
+					//e.printStackTrace();
+				}
 				if(debug) logger.info("CarbonAfter: " + this.getCarbonOutput());
+		}
+
+				
 	}
 
 	private double getTradeFactorDifference() {
@@ -405,6 +368,47 @@ public class USAgent extends AbstractCountry {
 		return 1;
 	}
 	
+	private double CalculateEnergyCashToInvest() {
+		double AvailableCash = this.getAvailableToSpend();
+		if(debug) logger.info("CalculateEnergyCashToInvest: AvailableCash = " + AvailableCash);
+		
+		double PartyMultiple;
+		if(!isDemocratElected()) { // republicans get a boost to their GDPScore
+			PartyMultiple = 1.1;
+		}
+		else {
+			PartyMultiple = 1;
+		}
+		//1+((-1*CurrentAttitude)/10);
+		
+		int 	CurrentAttitude  = this.getPrevailingAttitude();
+		double AttitudeMultiple = (1+(CurrentAttitude/10/2)); // thus + 5 will increase amount
+		if(debug) logger.info("CalculateEnergyCashToInvest: AttitudeMultiple = " + AttitudeMultiple);
+		
+		double InvestEnergyCash = AvailableCash*0.95*0.4*PartyMultiple*AttitudeMultiple;
+		if(debug) logger.info("CalculateEnergyCashToInvest: InvestEnergyCash = " + InvestEnergyCash);
+		return InvestEnergyCash;
+	}
+	
+	private double CalculateReductionCashToInvest() {
+		double AvailableCash = this.getAvailableToSpend();
+		if(debug) logger.info("CalculateReductionCashToInvest: AvailableCash = " + AvailableCash);
+		
+		double PartyMultiple;
+		if(!isDemocratElected()) { // republicans get a boost to their GDPScore
+			PartyMultiple = 1;
+		}
+		else {
+			PartyMultiple = 1.2;
+		}
+		
+		int 	CurrentAttitude  = this.getPrevailingAttitude();
+		double AttitudeMultiple = 1+(-1*(CurrentAttitude/10)); // thus +5 will decrease amount
+		if(debug) logger.info("CalculateReductionCashToInvest: AttitudeMultiple = " + AttitudeMultiple);
+		
+		double InvestEnergyCash = AvailableCash*0.95*0.4*PartyMultiple*AttitudeMultiple;
+		return InvestEnergyCash;
+	}
 	
 	private double CheckInvestmentAmount(double investmentNeeded) {
 		double InvestAmount;
@@ -776,7 +780,9 @@ public class USAgent extends AbstractCountry {
 
 				}
 				
-				if(AnalyzeOffer(offerMessage)) {	
+				Message<OfferMessage> m = (Message<OfferMessage>) in;
+				
+				if(AnalyzeOffer(offerMessage) && !tradeProtocol.getActiveConversations().contains(m.getFrom())) {	
 					try {
 						this.tradeProtocol.respondToOffer(
 								this.tradeProtocol.extractNetworkAddress(in), 
@@ -802,77 +808,82 @@ public class USAgent extends AbstractCountry {
 	
 	protected boolean AnalyzeOffer(OfferMessage offerMessage) {
 		if(debug) logger.info("AnalyzeOffer: Entering");
-		if(offerMessage.getOfferType()==TradeType.RECEIVE) { // CDM type
-			// Democrats will opt for reduction if it is cost effective regardless of whether target has already been met.
-			if(debug) logger.info("AnalyzeOffer: TradeType==RECEIVE");
-
-			//if(CalculateCurrentIntensityRatio() > CalculateProjectedIntensityRatio()) {
-
-//			if(CalculateCurrentIntensityRatio() > CalculateProjectedIntensityRatio()) {
-
-				if(debug) logger.info("AnalyzeOffer: getIntensityRatio() > getIntensityTarget()");
-				double OfferUnitCost = offerMessage.getOfferUnitCost();				
-				double OfferQuantity = offerMessage.getOfferQuantity();
-				double TradeCost = OfferUnitCost*OfferQuantity;
-				double EquivalentAbsorptionCost;
-				
-				try {
-					EquivalentAbsorptionCost = carbonAbsorptionHandler.getInvestmentRequired(OfferQuantity);
-				} catch (NotEnoughLandException e) {
-					EquivalentAbsorptionCost = 0;
+		
+		
+		//tradeProtocol.extractNetworkAddress(off)
+		//if(tradeProtocol.getActiveConversationMembers().contains(offerMessage.getTradeID())) { // only if not already in conversation weith agent.
+			if(offerMessage.getOfferType()==TradeType.RECEIVE) { // CDM type
+				// Democrats will opt for reduction if it is cost effective regardless of whether target has already been met.
+				if(debug) logger.info("AnalyzeOffer: TradeType==RECEIVE");
+	
+				//if(CalculateCurrentIntensityRatio() > CalculateProjectedIntensityRatio()) {
+	
+	//			if(CalculateCurrentIntensityRatio() > CalculateProjectedIntensityRatio()) {
+	
+					if(debug) logger.info("AnalyzeOffer: getIntensityRatio() > getIntensityTarget()");
+					double OfferUnitCost = offerMessage.getOfferUnitCost();				
+					double OfferQuantity = offerMessage.getOfferQuantity();
+					double TradeCost = OfferUnitCost*OfferQuantity;
+					double EquivalentAbsorptionCost;
+					
+					try {
+						EquivalentAbsorptionCost = carbonAbsorptionHandler.getInvestmentRequired(OfferQuantity);
+					} catch (NotEnoughLandException e) {
+						EquivalentAbsorptionCost = 0;
+					}
+					double EquivalentReductionCost = carbonReductionHandler.getInvestmentRequired(OfferQuantity);
+					
+					if(debug) logger.info("AnalyzeOffer: OfferUnitCost = " + OfferUnitCost);
+					if(debug) logger.info("AnalyzeOffer: OfferQuantity = " + OfferQuantity);
+					if(debug) logger.info("AnalyzeOffer: TradeCost = " + TradeCost);
+					if(debug) logger.info("AnalyzeOffer: EquivalentAbsorptionCost = " + EquivalentAbsorptionCost);
+					if(debug) logger.info("AnalyzeOffer: EquivalentReductionCost = " + EquivalentReductionCost);
+					
+					if(TradeCost < Math.min(EquivalentReductionCost, EquivalentAbsorptionCost)) {					
+						if(debug) logger.info("AnalyzeOffer: Returning true");
+						return(true);
+					}
+			}
+			else if (isKyotoMember() == KyotoMember.ANNEXONE && CalculateCurrentIntensityRatio() > CalculateProjectedIntensityRatio()) {
+				double offerUnitCost = offerMessage.getOfferUnitCost();
+				double offerUnits = offerMessage.getOfferQuantity();
+				double offerTotalCost = offerUnitCost * offerUnits;
+				if (getCarbonOutput() - getCarbonAbsorption() - getCarbonOffset() > getEmissionsTarget() && offerMessage.getOfferType() == TradeType.SELL) {
+					double absorptionCost;
+					try {
+						absorptionCost = carbonAbsorptionHandler.getInvestmentRequired(offerUnits);
+					} catch (NotEnoughLandException e) {
+						absorptionCost = Double.MAX_VALUE;
+					}
+					if (offerTotalCost < carbonReductionHandler.getInvestmentRequired(offerUnits) && offerTotalCost < absorptionCost) {
+						return true;
+					}
 				}
-				double EquivalentReductionCost = carbonReductionHandler.getInvestmentRequired(OfferQuantity);
-				
-				if(debug) logger.info("AnalyzeOffer: OfferUnitCost = " + OfferUnitCost);
-				if(debug) logger.info("AnalyzeOffer: OfferQuantity = " + OfferQuantity);
-				if(debug) logger.info("AnalyzeOffer: TradeCost = " + TradeCost);
-				if(debug) logger.info("AnalyzeOffer: EquivalentAbsorptionCost = " + EquivalentAbsorptionCost);
-				if(debug) logger.info("AnalyzeOffer: EquivalentReductionCost = " + EquivalentReductionCost);
-				
-				if(TradeCost < Math.min(EquivalentReductionCost, EquivalentAbsorptionCost)) {					
-					if(debug) logger.info("AnalyzeOffer: Returning true");
-					return(true);
+				else if (getCarbonOutput() - getCarbonAbsorption() - getCarbonOffset() < getEmissionsTarget() && offerMessage.getOfferType() == TradeType.BUY) {
+					double absorptionCost;
+					try {
+						absorptionCost = carbonAbsorptionHandler.getInvestmentRequired(offerUnits, 300918);
+						// This arable land value is the average of all countries' arable land, so a good base comparison
+					}
+					catch (NotEnoughLandException e) {
+						return false;
+					}
+					if (offerTotalCost < absorptionCost && offerTotalCost < carbonReductionHandler.getInvestmentRequired(offerUnits)) {
+						return true;
+					}
 				}
-		}
-		else if (isKyotoMember() == KyotoMember.ANNEXONE && CalculateCurrentIntensityRatio() > CalculateProjectedIntensityRatio()) {
-			double offerUnitCost = offerMessage.getOfferUnitCost();
-			double offerUnits = offerMessage.getOfferQuantity();
-			double offerTotalCost = offerUnitCost * offerUnits;
-			if (getCarbonOutput() - getCarbonAbsorption() - getCarbonOffset() > getEmissionsTarget() && offerMessage.getOfferType() == TradeType.SELL) {
-				double absorptionCost;
-				try {
-					absorptionCost = carbonAbsorptionHandler.getInvestmentRequired(offerUnits);
-				} catch (NotEnoughLandException e) {
-					absorptionCost = Double.MAX_VALUE;
-				}
-				if (offerTotalCost < carbonReductionHandler.getInvestmentRequired(offerUnits) && offerTotalCost < absorptionCost) {
+				else if (offerTotalCost > carbonReductionHandler.getInvestmentRequired(offerUnits) && offerMessage.getOfferType() == TradeType.BUY) {
+					try {
+						carbonReductionHandler.investInCarbonReduction(offerUnits);
+					} catch (NotEnoughCarbonOutputException e) {
+						return false;
+					} catch (NotEnoughCashException e) {
+						return false;
+					}
 					return true;
 				}
 			}
-			else if (getCarbonOutput() - getCarbonAbsorption() - getCarbonOffset() < getEmissionsTarget() && offerMessage.getOfferType() == TradeType.BUY) {
-				double absorptionCost;
-				try {
-					absorptionCost = carbonAbsorptionHandler.getInvestmentRequired(offerUnits, 300918);
-					// This arable land value is the average of all countries' arable land, so a good base comparison
-				}
-				catch (NotEnoughLandException e) {
-					return false;
-				}
-				if (offerTotalCost < absorptionCost && offerTotalCost < carbonReductionHandler.getInvestmentRequired(offerUnits)) {
-					return true;
-				}
-			}
-			else if (offerTotalCost > carbonReductionHandler.getInvestmentRequired(offerUnits) && offerMessage.getOfferType() == TradeType.BUY) {
-				try {
-					carbonReductionHandler.investInCarbonReduction(offerUnits);
-				} catch (NotEnoughCarbonOutputException e) {
-					return false;
-				} catch (NotEnoughCashException e) {
-					return false;
-				}
-				return true;
-			}
-		}
+		//}
 		
 		if(debug) logger.info("AnalyzeOffer: Returning false");
 		return(false);

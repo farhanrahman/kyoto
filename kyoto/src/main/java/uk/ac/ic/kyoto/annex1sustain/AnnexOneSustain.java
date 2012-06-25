@@ -215,10 +215,21 @@ public class AnnexOneSustain extends AbstractCountry {
 				surplusCarbonPrice *= Constants.PRICE_SUCCESS_SCALER;
 				logger.info(name + ": Scaled internal price to " + surplusCarbonPrice);
 			}
-			tradeSemaphore.release();
+		}
+		catch (NotEnoughCarbonOutputException e) {
+			logger.warn(name + ": Not enough carbon output for investments after trade");
+		}
+		catch (NotEnoughCashException e) {
+			logger.warn(name + ": Not enough cash for investments after trade");
+		}
+		catch (NotEnoughLandException e) {
+			logger.warn(name + ": Not enough land for investments after trade");
 		}
 		catch (Exception e) {
-			logger.warn(name + ": Problem with investments after successful trade: " + e.getMessage());
+			logger.warn(name + ": Problem with investments after trade: " + e.getMessage());
+		}
+		finally {
+			tradeSemaphore.release();
 		}
 	}
 	
@@ -454,7 +465,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			}
 		}
 		catch (Exception e) {
-			logger.warn(name + ": Problem with assessing possibility of carbon reduction: " + e.getMessage());
+			logger.info(name + ": Problem with assessing possibility of carbon reduction: " + e.getMessage());
 			possible = false;
 		}
 		
@@ -481,7 +492,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			}
 		}
 		catch (Exception e) {
-			logger.warn(name + ": Problem with assessing possibility of carbon absorption: " + e.getMessage());
+			logger.info(name + ": Problem with assessing possibility of carbon absorption: " + e.getMessage());
 			possible = false;
 		}
 		
@@ -498,7 +509,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			reductionMargin = profit - cost;
 		}
 		catch (Exception e) {
-			logger.warn(name + ": Problem with assessing margin of carbon reduction: " + e.getMessage());
+			logger.info(name + ": Problem with assessing margin of carbon reduction: " + e.getMessage());
 			reductionMargin = -Double.MAX_VALUE; // To make sure not profitable
 		}
 		
@@ -515,7 +526,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			absorptionMargin = profit - cost;
 		}
 		catch (Exception e) {
-			logger.warn(name + ": Problem with assessing margin of carbon absorption: " + e.getMessage());
+			logger.info(name + ": Problem with assessing margin of carbon absorption: " + e.getMessage());
 			absorptionMargin = -Double.MAX_VALUE; // To make sure not profitable
 		}
 		
@@ -529,7 +540,7 @@ public class AnnexOneSustain extends AbstractCountry {
 			surplusSaleMargin = quantity * (price - surplusCarbonPrice);
 		}
 		catch (Exception e) {
-			logger.warn(name + ": Problem with assessing profitability of sale: " + e.getMessage());
+			logger.info(name + ": Problem with assessing profitability of sale: " + e.getMessage());
 			surplusSaleMargin = -Double.MAX_VALUE; // To make sure not profitable
 		}
 		
