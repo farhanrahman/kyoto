@@ -85,18 +85,7 @@ The following keywords will be used to describe the general behaviour of Non-Ann
 	\item[6. environment\_friendly\_target:] if it exists, variable that stores the country's carbon emission target. 
 \end{description}
 
-The country starts by having a policy of increasing its energy output, whilst trying to meet an internally set carbon emission target:
-
-%
-% Er. do these make sense ??
-% 
-
-\begin{align*}
-	&times\_met\_before: \\
-	&0 \rightarrow new\_energy\_aim = previous\_energy\_output + previous\_energy\_output / 8\\
-	&1 \rightarrow new\_energy\_aim = previous\_energy\_output + previous\_energy\_output / 4\\
-	&n \rightarrow new\_energy\_aim = previous\_energy\_output + previous\_energy\_output / 16exp(-0.693 \times n)\\
-\end{align*}
+The country starts by having a policy of increasing its energy output, whilst trying to meet an internally set carbon emission target.
 
 Each year, the country calculates the difference between its achieved energy output and the target aim that was set the previous year. The difference is then used to estimate the amount of money to invest in carbon industry each tick in order to reach the required energy output. Before the country proceeds with the investment, certain conditions have to be met:
 
