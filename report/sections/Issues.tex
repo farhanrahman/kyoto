@@ -4,7 +4,7 @@
 
 Initially, testing and simulations were performed on local machines which connected Presage2 to a MongoDB server hosted on the Imperial College Network. The web UI was based on a remote server hosted by one of our group members. We encountered difficulties as simulations began to increase in size. When executing country behaviours on a scale required for simulating the real world (approximately 180 countries), the volume of output became problematic.
 
-On Monday (18th June), the MongoDB server hosted on the Imperial College network crashed. Following the database crash, we altered Presage2's runtime settings so it used local databases installed on individual user machines. However, this became untenable for the collation of results for analysis and data representation.
+On Monday (18th June), the MongoDB server hosted on the Imperial College network crashed. Following the database crash, we altered Presage2's runtime settings so it used local databases installed on individual user machines. However, this became untenable for the collation of results for analysis and data representation. This was one of the reasons we elected to the the Amazon Web Service (\textsc{aws}).
 
 \subsection{Deployable JAR}
 
@@ -14,13 +14,11 @@ To be able to use multiple college computers easily, we needed to turn the proje
 
 Individual simulations can take up to four hours to run, depending on the complexity. We initially believed that the bottleneck was a lack of processing power for simulations (hence the attempts to utilise the college cluster).  Simulations were set up on multiple college machines all pointing to one of two \textsc{aws} based databases.  However, the load proved too much and the database servers failed.
 
-The compromised to solution was to use two Amazon Web Service machines with each hosting a their own instance of the \textsc{ui}, database, and simulation files.  This meant we could only run two simulations in parallel but it was a reliable way of producing results.
+The compromised to solution was to use two \textsc{aws} machines with each hosting a their own instance of the \textsc{ui}, database, and simulation files.  This meant we could only run two simulations in parallel but it was a reliable way of producing results.
 
 \subsection{Behaviour Bugs}
 
 Bugs in individual country behaviours proved difficult to debug before integrating the countries into larger simulations. While any large architectural bugs were diagnosed through local bug testing simulations, some unexpected issues arose when all of the countries attempted to run concurrently.
-
-\subsubsection{Concurrency}
 
 Throughout the testing phase in development of our Kyoto Protocol simulator, our design became progressively more threadsafe.
 
@@ -33,7 +31,7 @@ In order to manage access to the large quantity of shared code accessed by count
 \paragraph{Shared State}
 At the beginning of the project, our understanding of the shared state, as it was implemented in Presage2 and even the concept of its existence in the context of multi-agent systems, was severely limited. When our code interacted with the shared state, since we structured our queries incorrectly, we encountered null pointer exceptions that were difficult to track down through debug step throughs since Maven's dependency system meant many components were compiled binaries only.
 
-\subsection{Carbon Reporting Synchronization}
+\subsection{Carbon Reporting Synchronisation}
 
 This was an issue that has since been completely resolved by severely delayed our development process for a day in the final week. When reporting carbon emissions, countries updated the shared state by acting on the environment. However, we were unaware that there was a secondary, internal recording system was embedded within each agent via inheriting some shared code. By not updating the internal records, null pointer exceptions were generated at the end of every year and targets were not set properly. This is clearly a communication issue between project members and was resolved when the appropriate team members approached the code at the same time.
 
