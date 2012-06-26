@@ -27,7 +27,7 @@ Bugs in individual country behaviours proved difficult to debug before integrati
 Throughout the testing phase in development of our Kyoto Protocol simulator, our design became progressively more threadsafe.
 
 \paragraph{Maps} 
-One of the simpler issues which we did solve in most instances where it arose was that of concurrent access to java \texttt{HashMap} objects. This was remedied by introducing concurrent hash maps in their place. Due to an executive decision to code freeze in the final few days of testing, not all \texttt{HashMap} have been replaced with concurrent maps.
+One of the simpler issues which was did solve in most instances was that of concurrent access to java \texttt{HashMap} objects. This was remedied by introducing concurrent hash maps in their place. Due to an executive decision to code freeze in the final few days of testing, not all \texttt{HashMap} have been replaced with concurrent maps.
 
 \paragraph{Semaphores}
 In order to manage access to the large quantity of shared code accessed by countries as they act during a simulation, we introduced semaphores to manage shared resources.
