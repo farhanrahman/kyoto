@@ -50,9 +50,7 @@ These effect the chances of the global economy being in recession or growth, wit
 
 \subsection{Tested Scenarios}
 
-%
-%	TODO: Intro here
-%
+We have a variety of scenarios which have been simulated and run through to completion, with the results then collated and analysed for graphical representation. We attempted to cover a wide variety of Kyoto Protocol environments across our scenarios, while also maintaining baselines for comparison between them. However, we were also limited by the net processing time of running so many scenarios. Running multiple scenarios concurrently, as addressed in the Issues section, presents problems with the MongoDB server, so they must be run relatively sequentially. A single scenario can take up to four hours to run, depending on complexity and number of agents. After execution, the raw data dumped to the database must be processed for representation, which can take up to an additional two hours.
 
 \subsubsection{Real World Scenario}
 
@@ -60,7 +58,7 @@ These effect the chances of the global economy being in recession or growth, wit
 
 \subsubsection{Annex I Only}
 
-This simulation only takes countries that are part of Annex I into account, but is otherwise identical to the Main Simulation.
+This simulation only takes countries that are part of Annex I into account, but is otherwise identical to the Real World Simulation.
 
 Non-Annex countries put additional burden on Annex I countries due to their emissions forming part of the global output. Since the former are not set emission targets, they will generally increase their energy and carbon output to help their developing economies. This means stricter emission goals for developed countries, so that the global emissions can still be decreased by 5\% every session. If we remove Non-Annex countries from the simulation, achieving that target becomes significantly easier and cheaper for Annex I countries, as their individual targets are lower.
 
