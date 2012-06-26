@@ -1,0 +1,28 @@
+\section{Introduction}
+
+At the start of the project, we were introduced to a game consisting of four simple rules:
+
+\begin{enumerate}
+\item Each participant is given a number of resources
+\item Each participant may put any number of their resources back into a common pool
+\item	The resources in the pool are multiplied by a factor N (where $N > 1$)
+\item	Each participant may appropriate a given amount
+\end{enumerate}
+
+This set of rules describes a very basic Common Pool Resource (\textsc{cpr}) problem. We found that if participants did not follow the rules regarding appropriation, the common pool resource was abused. This led to some participants being left with no resources at all. It was therefore decided that more stringent rules were necessary, where participants could be subject to random monitoring. However, a certain number of resources from the common pool would need to be used to fund this process. The resulting rules were now as follows:
+
+\begin{enumerate}
+	\item Each participant is given a number of resources
+	\item Each participant must put at least half of their resources into a common pool
+	\item The resources in the pool are multiplied by a factor N (where $N > 1$)
+	\item Each participant may appropriate a given amount
+	\item Participants may choose to monitor others, at the cost of 1 resource being taken from the common pool.
+\end{enumerate}
+
+The addition of monitoring led to a more effective prevention of `cheating', and therefore a more efficient distribution of the resource. Indeed, this is a good example of the efficacy of common pool resource utilisation when participants act as individuals, and participants agree on rules and monitoring as a collective.
+
+This report details the research, design, and implementation of a multi-agent simulation of the Kyoto common pool resource system, which is similar to the simple game described above. A multi-agent system is a paradigm for expressing systems composed of intelligent agents acting within a defined environment. This maps well to the Kyoto Protocol, allowing us to simulate individual countries and their governments' attitudes as independent agents. The common pool involved in our model is that of worldwide greenhouse gas (\textsc{ghg}) emissions.
+
+We define our model in greater depth, describing how we build upon the existing architecture of Presage2, a multi-agent simulation engine. After giving an overview of our primary design decisions, we outline the specific implementation of individual components within our simulation. Following this, we present simulation data attained from running our Kyoto Protocol system, and compare how our system performs when compared to reality, as well as what predictions it makes about the long term impacts of the Kyoto Protocol on global emissions.
+
+% What is out of scope in this report

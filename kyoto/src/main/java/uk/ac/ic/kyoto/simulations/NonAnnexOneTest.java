@@ -73,9 +73,11 @@ public class NonAnnexOneTest extends InjectedSimulation {
 		//Something new
 		Logger logger = Logger.getLogger(Simulation.class);
 		
-		AbstractParticipant p1 = new TradeProtocolTestAgent(Random.randomUUID(), "George", "CS1", 20000, 10000000, 5000000, 3, 200000, 28000, 50000);
-		AbstractParticipant p2 = new NonAnnexOne(Random.randomUUID(), "Brazil", "CS2", 2000000, 1000000, 5000000, 30000, 20000, 8000);
+		AbstractParticipant p1 = new TradeProtocolTestAgent(Random.randomUUID(), "George", "CS1", 20000, 10000000, 5000000, 3, 200000, 28000);
+		AbstractParticipant p2 = new NonAnnexOne(Random.randomUUID(), "Antigua and Barbuda", "CS2", 443, 80, 566962963.0, 0.0597, 359068, 334000);
 		
+		//NonAnnexOne,Bhutan,BTN,38394,1081,357347686,0.0648,436866,385000,128000
+		//NonAnnexOne,Antigua and Barbuda,ATG,443,80,566962963,0.0597,359068,334000,301000,,
 		s.addParticipant(p1);
 		s.addParticipant(p2);
 		CarbonData1990.addCountry("CS1", 50000);

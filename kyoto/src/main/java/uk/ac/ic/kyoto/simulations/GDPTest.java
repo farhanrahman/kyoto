@@ -78,7 +78,7 @@ public class GDPTest extends InjectedSimulation {
 		final double GDP = 1976272728895.0;
 		final double energyOutput = 1054601548;
 		final double carbonOutput = 895533000;
-		final double GDPRate = 0.0206;
+		final double GDPRate = -0.0606;
 		
 			String name = "Germany";
 			String ISO = "DE";

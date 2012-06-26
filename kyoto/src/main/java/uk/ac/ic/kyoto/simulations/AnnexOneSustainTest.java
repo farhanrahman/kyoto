@@ -72,17 +72,25 @@ public class AnnexOneSustainTest extends InjectedSimulation {
 		
 		// Germany Stats
 		final double landArea = 400000;
-		final double arableLandArea = 100000;
+		final double arableLandArea = 10;
 		final double GDP = 2000000000000.0;
 		final double energyOutput = 1000000000;
-		final double carbonOutput = 900000000;
+		final double carbonOutput = 1000000000;
 		final double GDPRate = 0.0206;
 		
-			String name = "AnnexOneSustainTester";
-			String ISO = "DE";
-			AbstractParticipant p = new AnnexOneSustain(Random.randomUUID(), name, ISO, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput);
-			s.addParticipant(p);
-			CarbonData1990.addCountry(ISO, 900000000);
+		String name = "AnnexOneSustainTester";
+		String ISO = "DE";
 		
+		String name2 = "TradeBot";
+		String ISO2 = "TB";
+			
+		AbstractParticipant p1 = new AnnexOneSustain(Random.randomUUID(), name, ISO, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput);
+		AbstractParticipant p2 = new TradeProtocolTestAgent(Random.randomUUID(), name2, ISO2, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput);
+		
+		s.addParticipant(p1);
+		s.addParticipant(p2);
+		
+		CarbonData1990.addCountry(ISO, 1000000000);
+		CarbonData1990.addCountry(ISO2, 1000000000);	
 	}
 }

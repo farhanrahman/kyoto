@@ -46,11 +46,11 @@ public final class GameConst {
 	/**
 	 * The price of increasing carbon absorption by one unit when we have 100% arable area
 	 */
-	private static double CARBON_ABSORPTION_PRICE_MIN = 15;
+	private static double CARBON_ABSORPTION_PRICE_MIN = 10;
 	/**
 	 * The price of increasing carbon absorption by one unit when we have 0% arable area
 	 */
-	private static double CARBON_ABSORPTION_PRICE_MAX = 300;
+	private static double CARBON_ABSORPTION_PRICE_MAX = 750;
 	/**
 	 * Forest area that absorbs single ton of carbon
 	 */
@@ -105,15 +105,26 @@ public final class GameConst {
 	private static int MINIMUM_KYOTO_MEMBERSHIP_DURATION = 10;
 	
 	public GameConst(double growths, double stables, double recs, double growthc,
-			double stablec, double recc, double monitorpercent, double sancrate, 
+			double stablec, double recc, double maxgdp, double monitorpercent, double sancrate, 
 			double monitorprice, int yearsInSession, double targred,
-			int minJoinTime, int minKyotoMembership) {
+			int minJoinTime, int minKyotoMembership, int ticksInYear,
+			
+			double carbonInvestmentPrice,
+			double growthScaler,
+			double percentageOfGDP,
+			double carbonReductionPriceMin,
+			double carbonReductionPriceMax,
+			double carbonAbsorptionPriceMin,
+			double carbonAbsorptionPriceMax,
+			double forestCarbonAbsorption			
+			) {
 		GROWTH_MARKET_STATE = growths;
 		STABLE_MARKET_STATE = stables;
 		RECESSION_MARKET_STATE = recs;
 		GROWTH_MARKET_CHANCE = growthc;
 		STABLE_MARKET_CHANCE = stablec;
 		RECESSION_MARKET_CHANCE = recc;
+		MAX_GDP_GROWTH = maxgdp;
 		MONITOR_COST_PERCENTAGE = monitorpercent;
 		SANCTION_RATE = sancrate;
 		MONITORING_PRICE = monitorprice;
@@ -121,6 +132,15 @@ public final class GameConst {
 		TARGET_REDUCTION = targred;
 		MINIMUM_KYOTO_REJOIN_TIME = minJoinTime;
 		MINIMUM_KYOTO_MEMBERSHIP_DURATION = minKyotoMembership;
+		TICKS_IN_YEAR = ticksInYear;
+		CARBON_INVESTMENT_PRICE = carbonInvestmentPrice;
+		GROWTH_SCALER = growthScaler;
+		PERCENTAGE_OF_GDP = percentageOfGDP;
+		CARBON_REDUCTION_PRICE_MIN = carbonReductionPriceMin;
+		CARBON_REDUCTION_PRICE_MAX = carbonReductionPriceMax;
+		CARBON_ABSORPTION_PRICE_MIN = carbonAbsorptionPriceMin;
+		CARBON_ABSORPTION_PRICE_MAX = carbonAbsorptionPriceMax;
+		FOREST_CARBON_ABSORPTION = forestCarbonAbsorption;
 	}
 
 	public static double getGrowthMarketState() {

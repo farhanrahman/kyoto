@@ -22,22 +22,23 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 	
 	public TradeProtocolTestAgent(UUID id, String name, String ISO, double landArea,
 			double arableLandArea, double GDP, double GDPRate,
-			long emissionsTarget, long energyOutput, long carbonOutput) {
-		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, emissionsTarget,
-				energyOutput);
+			double energyOutput, double carbonOutput) {
+		super(id, name, ISO, landArea, arableLandArea, GDP, GDPRate, energyOutput, carbonOutput);
 	}
 	
 	@Override
 	protected void processInput(Input in) {
 		if (this.tradeProtocol.canHandle(in)) {
 			this.tradeProtocol.handle(in);
-		}else{
+		}
+		else{
 			OfferMessage offerMessage = this.tradeProtocol.decodeInput(in);
 			/*analyse the offer*/
 			try {
+				System.out.println("+++ got an offer at price " + offerMessage.getOfferUnitCost());
 				this.tradeProtocol.respondToOffer(
 						this.tradeProtocol.extractNetworkAddress(in), 
-						offerMessage.getOfferQuantity(),
+						offerMessage.getOfferQuantity() * 0.66,
 						offerMessage);
 			} catch (IllegalArgumentException e1) {
 				logger.warn(e1);
@@ -69,27 +70,21 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 
 	@Override
 	protected void behaviour() {
-		if(this.getName().equals("Test1")){
+		//if(this.getName().equals("Test1")){
 			//if(counter == 0){
-				int quantity = 10;
-				double unitCost = 2;
-				this.broadcastBuyOffer(quantity, unitCost);
-			//	counter++;
-			
-			  	InvestmentType i = InvestmentType.ABSORB;
-			  	//InvestmentType i = InvestmentType.REDUCE;
-		  
-//			  	this.broadcastInvesteeOffer(quantity, i);
+				//int quantity = 10;
+				//double unitCost = 2;
+				this.broadcastBuyOffer(10, 1000000);
 			
 			//}
-		}
+		//}
 		
 		//this.tradeProtocol.incrementTime();
-		logger.info("Myname: " + this.getName() + ", I have this much money: " + this.getAvailableToSpend() + ".");
+		//logger.info("Myname: " + this.getName() + ", I have this much money: " + this.getAvailableToSpend() + ".");
 		//logger.info("Myname: " + this.getName() + ", My GDPRate is : " + GDPRate);
 		//logger.info("Myname: " + this.getName() + ", My carbon output is : " + carbonOutput);
 		//logger.info("Myname: " + this.getName() + ", My energy output is : " + energyOutput);
-		logger.info("Myname: " + this.getName() + ", My carbonOffset is : " + this.getCarbonOffset());
+		//logger.info("Myname: " + this.getName() + ", My carbonOffset is : " + this.getCarbonOffset());
 	}
 
 	@Override

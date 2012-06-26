@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import org.apache.log4j.Logger;
+
 import uk.ac.ic.kyoto.countries.GameConst;
 
 /**
@@ -13,8 +15,8 @@ import uk.ac.ic.kyoto.countries.GameConst;
  */
 class CountrySimulator {
 
-	// TODO, look ahead a minimum of 5 years or a maximum of 15 years. Always
-	// end at a session end.
+	private Logger logger = Logger.getLogger(CountrySimulator.class);
+
 	private int LOOK_AHEAD_YEARS;
 	private int SANCTION_YEAR;
 
@@ -28,6 +30,9 @@ class CountrySimulator {
 
 	private CountryState startState;
 
+	private static ActionList DEFAULT_ACTION = new ActionList(new ReduceAction(
+			1, 0, 0), new MaintainAction(0, 0, 0), new SellAction(0, 0, 0));
+
 	public ActionList simulate(double carbonOutput, double energyOutput,
 			double prevEnergyOutput, double carbonOffset,
 			double carbonAbsorption, double emissionsTarget,
@@ -35,7 +40,7 @@ class CountrySimulator {
 			double arableLandArea, int yearsUntilSanctions) {
 
 		this.SANCTION_YEAR = yearsUntilSanctions;
-		this.LOOK_AHEAD_YEARS = Math.max(SANCTION_YEAR + 12, 15);
+		this.LOOK_AHEAD_YEARS = 8;
 
 		// Initialise the starting point in the simulation
 		startState = new CountryState(carbonOutput, energyOutput,
@@ -55,13 +60,24 @@ class CountrySimulator {
 
 		// For all years to look ahead
 		for (int i = 0; i < LOOK_AHEAD_YEARS; i++) {
-			// Cull the reduce states
 
-			System.out.println("unculledReduceSize " + i + " = "
-					+ stateList[i].reduceStates.size());
-			stateList[i].reduceStates = cullStates(stateList[i].reduceStates);
-			System.out.println("reduceSize " + i + " = "
-					+ stateList[i].reduceStates.size());
+			// Cull the reduce states
+			try {
+				stateList[i].reduceStates = cullStates(stateList[i].reduceStates);
+			} catch (Exception e) {
+				logger.warn(country.getName()
+						+ " has no possible states! Returning a default behaviour.");
+				return DEFAULT_ACTION;
+			}
+			// logger.info("reduceSize " + i + " = "
+			// + stateList[i].reduceStates.size());
+
+			if (stateList[i].reduceStates.size() > 10000) {
+				logger.warn(country.getName()
+						+ " has too many possible states! Ending the behaviour simulation early.");
+				ActionList megaAction = getOptimalState(stateList[i].reduceStates);
+				return megaAction;
+			}
 
 			// Branch off all unculled reduce states by performing a maintain
 			// action
@@ -71,11 +87,22 @@ class CountrySimulator {
 			}
 
 			// Cull the maintain states
-			System.out.println("unculledMaintainSize " + i + " = "
-					+ stateList[i].maintainStates.size());
-			stateList[i].maintainStates = cullStates(stateList[i].maintainStates);
-			System.out.println("maintainSize " + i + " = "
-					+ stateList[i].maintainStates.size());
+			try {
+				stateList[i].maintainStates = cullStates(stateList[i].maintainStates);
+			} catch (Exception e) {
+				logger.warn(country.getName()
+						+ " has no possible states! Returning a default behaviour.");
+				return DEFAULT_ACTION;
+			}
+			// logger.info("maintainSize " + i + " = "
+			// + stateList[i].maintainStates.size());
+
+			if (stateList[i].maintainStates.size() > 10000) {
+				logger.warn(country.getName()
+						+ " has too many possible states! Ending the behaviour simulation early.");
+				ActionList megaAction = getOptimalState(stateList[i].maintainStates);
+				return megaAction;
+			}
 
 			// Branch off all unculled maintain states by performing a sell
 			// action
@@ -86,11 +113,22 @@ class CountrySimulator {
 			}
 
 			// Cull the sell states
-			System.out.println("unculledSellSize " + i + " = "
-					+ stateList[i].sellStates.size());
-			stateList[i].sellStates = cullStates(stateList[i].sellStates);
-			System.out.println("sellSize " + i + " = "
-					+ stateList[i].sellStates.size());
+			try {
+				stateList[i].sellStates = cullStates(stateList[i].sellStates);
+			} catch (Exception e) {
+				logger.warn(country.getName()
+						+ " has no possible states! Returning a default behaviour.");
+				return DEFAULT_ACTION;
+			}
+			// logger.info("sellSize " + i + " = "
+			// + stateList[i].sellStates.size());
+
+			if (stateList[i].sellStates.size() > 10000) {
+				logger.warn(country.getName()
+						+ " has too many possible states! Ending the behaviour simulation early.");
+				ActionList megaAction = getOptimalState(stateList[i].sellStates);
+				return megaAction;
+			}
 
 			// So long as we aren't in the final year
 			if (i != (LOOK_AHEAD_YEARS - 1)) {
@@ -128,18 +166,17 @@ class CountrySimulator {
 			startSellList.add(state);
 		}
 
-		Iterator<CountryState> iterator = startSellStates.iterator();
-
-		while (iterator.hasNext()) {
-			System.out.println();
-			CountryState state = iterator.next();
-			state.printPath();
-			System.out.println();
-			state.printActionPath();
-		}
-
-		System.out.println();
-		System.out.println("NumStates = " + startSellStates.size());
+		// Iterator<CountryState> iterator = startSellStates.iterator();
+		// while (iterator.hasNext()) {
+		// logger.info("");
+		// CountryState state = iterator.next();
+		// state.printPath();
+		// logger.info("");
+		// state.printActionPath();
+		//
+		// }
+		logger.info("");
+		logger.info("NumStates = " + startSellStates.size());
 
 		float s_investFrac = 0;
 		float s_sellFrac = 0;
@@ -187,18 +224,20 @@ class CountrySimulator {
 		r_buyCreditFrac /= size;
 		r_investFrac /= size;
 		r_shutDownFrac /= size;
-		
-		System.out.println("s_investFrac " + s_investFrac);
-		System.out.println("s_sellFrac " + s_sellFrac);
-		System.out.println("s_shutDownFrac " + s_shutDownFrac);
-		
-		System.out.println("m_buyCreditOffsetFrac " + m_buyCreditOffsetFrac);
-		System.out.println("m_industryFrac " + m_industryFrac);
-		System.out.println("m_investOffsetFrac " + m_investOffsetFrac);
-		
-		System.out.println("r_buyCreditFrac " + r_buyCreditFrac);
-		System.out.println("r_investFrac " + r_investFrac);
-		System.out.println("r_shutDownFrac " + r_shutDownFrac);
+
+		logger.info("");
+		logger.info(country.getName());
+		logger.info("s_investFrac " + s_investFrac);
+		logger.info("s_sellFrac " + s_sellFrac);
+		logger.info("s_shutDownFrac " + s_shutDownFrac);
+
+		logger.info("m_buyCreditOffsetFrac " + m_buyCreditOffsetFrac);
+		logger.info("m_industryFrac " + m_industryFrac);
+		logger.info("m_investOffsetFrac " + m_investOffsetFrac);
+
+		logger.info("r_buyCreditFrac " + r_buyCreditFrac);
+		logger.info("r_investFrac " + r_investFrac);
+		logger.info("r_shutDownFrac " + r_shutDownFrac);
 
 		ActionList megaAction = new ActionList(new ReduceAction(r_shutDownFrac,
 				r_buyCreditFrac, r_investFrac), new MaintainAction(
@@ -213,8 +252,10 @@ class CountrySimulator {
 	 * 
 	 * @param states
 	 * @return The culled list of input states
+	 * @throws Exception
 	 */
-	private ArrayList<CountryState> cullStates(ArrayList<CountryState> states) {
+	private ArrayList<CountryState> cullStates(ArrayList<CountryState> states)
+			throws Exception {
 
 		// Firstly, remove all states with invalid attributes
 
@@ -226,7 +267,15 @@ class CountrySimulator {
 				iterator.remove();
 			} else if (state.carbonOutput < 0) {
 				iterator.remove();
+			} else if (state.arableLandArea < 0) {
+				iterator.remove();
+			} else if (state.toBeCulled == true) {
+				iterator.remove();
 			}
+		}
+
+		if (states.size() == 0) {
+			throw new Exception("All states are invalid");
 		}
 
 		boolean hasBeenReplaced = true;
@@ -299,7 +348,9 @@ class CountrySimulator {
 
 		final public Action action;
 
-		final public double carbonDiff;
+		final public double netCarbonOutput;
+
+		boolean toBeCulled = false;
 
 		private CountryState(final double carbonOutput,
 				final double energyOutput, final double previousEnergyOutput,
@@ -327,10 +378,11 @@ class CountrySimulator {
 
 			this.action = null;
 
-			carbonDiff = carbonOutput - carbonAbsorption;
+			netCarbonOutput = carbonOutput - carbonAbsorption;
 		}
 
 		/**
+		 * Constructor for a reduce state
 		 * 
 		 * @param previousState
 		 *            The state that performs the action
@@ -339,7 +391,7 @@ class CountrySimulator {
 		 */
 		private CountryState(CountryState previousState, ReduceAction action) {
 
-			this.previousEnergyOutput = previousState.previousEnergyOutput;
+			this.previousEnergyOutput = previousState.energyOutput;
 
 			this.previousState = previousState;
 			this.action = action;
@@ -351,27 +403,48 @@ class CountrySimulator {
 
 			double oldCarbonDifference = previousState.getCarbonDifference();
 
-			// Price of reaching our target by investment and buying credits
-			double[] investments = new double[2];
-			double carbonAbsorbedReduced = action.investFrac
-					* oldCarbonDifference;
-			double investmentCost = country.getAbsorbReduceInvestment(
-					carbonAbsorbedReduced, previousState, investments);
+			// Price of reaching our target by buying credits
 			double carbonOffsetIncreased = oldCarbonDifference
 					* action.buyCreditFrac;
-			double marketCost = country.getMarketBuyPrice(
-					carbonOffsetIncreased);
+
+			double marketCost = carbonOffsetIncreased
+					* country.getMarketBuyUnitPrice(this.year);
+
+			// Price of reaching our target by investment and buying credits
+			double carbonAbsorbedReduced = action.investFrac
+					* oldCarbonDifference;
+
+			double[] investments = new double[2];
+			double investmentCost;
+			if (carbonAbsorbedReduced > 0) {
+				investmentCost = country.getAbsorbReduceInvestment(
+						carbonAbsorbedReduced, previousState, investments);
+			} else {
+				investmentCost = 0;
+				investments[0] = 0;
+				investments[1] = 0;
+			}
+
 			this.availableToSpend = previousState.availableToSpend
 					- investmentCost - marketCost;
 
 			// Amount of arable land lost
-			double arableLandCost = country.getArableLandCost(investments[0],
-					previousState.arableLandArea);
+			double arableLandCost;
+			double absorptionIncrease;
+
+			if (investments[0] > 0) {
+				arableLandCost = country.getArableLandCost(investments[0],
+						previousState.arableLandArea);
+				absorptionIncrease = country.getCarbonAbsorptionChange(
+						investments[0], previousState.arableLandArea);
+			} else {
+				arableLandCost = 0;
+				absorptionIncrease = 0;
+			}
+
 			this.arableLandArea = previousState.arableLandArea - arableLandCost;
 
 			// Amount of carbon absorption we've increased by
-			double absorptionIncrease = country.getCarbonAbsorptionChange(
-					investments[0], previousState.arableLandArea);
 			this.carbonAbsorption = previousState.carbonAbsorption
 					+ absorptionIncrease;
 
@@ -381,17 +454,25 @@ class CountrySimulator {
 
 			// Our carbon output decreased by the amount we invest in reduction
 			// plus the amount of factories we shut down
-			double carbonOutputReduced = country.getCarbonReduction(
-					investments[1], previousState);
+
+			double carbonOutputReduced;
+
+			if (investments[1] > 0) {
+				carbonOutputReduced = country.getCarbonReduction(
+						investments[1], previousState);
+			} else {
+				carbonOutputReduced = 0;
+			}
+
 			this.carbonOutput = previousState.carbonOutput
 					- carbonOutputReduced - energyReduction;
 
 			// Our carbon offset increased by the amount of carbon we bought in
 			// the market
 			this.carbonOffset = previousState.carbonOffset
-					- carbonOffsetIncreased;
+					+ carbonOffsetIncreased;
 
-			carbonDiff = carbonOutput - carbonAbsorption;
+			netCarbonOutput = carbonOutput - carbonAbsorption;
 		}
 
 		/**
@@ -406,6 +487,8 @@ class CountrySimulator {
 
 			this.previousState = previousState;
 			this.action = action;
+			this.GDPRate = previousState.GDPRate;
+			this.GDP = previousState.GDP;
 			this.year = previousState.year;
 			this.emissionsTarget = previousState.emissionsTarget;
 			stateList[this.year].addMaintain(this);
@@ -413,67 +496,92 @@ class CountrySimulator {
 			// energy Increase = carbon Increase when investing in factories
 			double energyIncreasePrice = action.industryFrac
 					* previousState.availableToSpend;
-			double energyIncrease = country
-					.getCarbonEnergyIncrease(energyIncreasePrice);
 
-			// Number of carbon credits gained by buying credits
-			double carbonCreditIncrease = action.buyCreditOffsetFrac
-					* energyIncrease;
-			double marketBuyPrice = country.getMarketBuyPrice(
-					carbonCreditIncrease);
-
-			// Amount of carbon we need to reduce by investing in offsets
-			double[] investments = new double[2];
-			double investmentPrice = country.getAbsorbReduceInvestment(
-					action.investOffsetFrac * energyIncrease, previousState,
-					investments);
-			double arableLandReduction = country.getArableLandCost(
-					investments[0], previousState.arableLandArea);
-			double absorptionIncrease = country.getCarbonAbsorptionChange(
-					investments[0], previousState.arableLandArea);
-			double carbonOutputReduction = country.getCarbonReduction(
-					investments[1], previousState);
-
-			energyOutput = previousState.energyOutput + energyIncrease;
-			carbonOutput = previousState.carbonOutput + energyIncrease
-					- carbonOutputReduction;
-
-			if (this.year == SANCTION_YEAR) {
-				carbonOffset = 0;
-				SANCTION_YEAR += 10;
+			double energyIncrease;
+			if (energyIncreasePrice > 0) {
+				energyIncrease = country
+						.getCarbonEnergyIncrease(energyIncreasePrice);
 			} else {
-				carbonOffset = previousState.carbonOffset
-						+ carbonCreditIncrease;
+				energyIncrease = 0;
 			}
 
-			arableLandArea = previousState.arableLandArea - arableLandReduction;
+			// Price of reaching our target by buying credits
+			double carbonOffsetIncreased = action.buyCreditOffsetFrac
+					* energyIncrease;
+			double marketCost = carbonOffsetIncreased
+					* country.getMarketBuyUnitPrice(this.year);
 
-			carbonAbsorption = previousState.carbonAbsorption
+			// Amount of carbon we need to reduce by investing in offsets
+			double carbonAbsorbedReduced = action.investOffsetFrac
+					* energyIncrease;
+
+			double[] investments = new double[2];
+			double investmentCost;
+			if (carbonAbsorbedReduced > 0) {
+				investmentCost = country.getAbsorbReduceInvestment(
+						carbonAbsorbedReduced, previousState, investments);
+			} else {
+				investmentCost = 0;
+				investments[0] = 0;
+				investments[1] = 0;
+			}
+
+			// Amount of arable land lost
+			double arableLandCost;
+			double absorptionIncrease;
+
+			if (investments[0] > 0) {
+				arableLandCost = country.getArableLandCost(investments[0],
+						previousState.arableLandArea);
+				absorptionIncrease = country.getCarbonAbsorptionChange(
+						investments[0], previousState.arableLandArea);
+			} else {
+				arableLandCost = 0;
+				absorptionIncrease = 0;
+			}
+
+			double carbonOutputReduced;
+
+			if (investments[1] > 0) {
+				carbonOutputReduced = country.getCarbonReduction(
+						investments[1], previousState);
+			} else {
+				carbonOutputReduced = 0;
+			}
+
+			this.energyOutput = previousState.energyOutput + energyIncrease;
+			this.carbonOutput = previousState.carbonOutput + energyIncrease
+					- carbonOutputReduced;
+
+			this.arableLandArea = previousState.arableLandArea - arableLandCost;
+
+			this.carbonAbsorption = previousState.carbonAbsorption
 					+ absorptionIncrease;
 
-			GDPRate = calculateGDPRate(previousState.GDPRate,
-					this.energyOutput, this.previousEnergyOutput);
+			this.carbonOffset = previousState.carbonOffset
+					+ carbonOffsetIncreased;
 
-			GDP = previousState.GDP + previousState.GDP * GDPRate;
+			this.availableToSpend = previousState.availableToSpend
+					- investmentCost - marketCost - energyIncreasePrice;
 
-			availableToSpend = previousState.availableToSpend - investmentPrice
-					- marketBuyPrice - energyIncreasePrice
-					+ (GDP * GameConst.getPercentageOfGdp());
-
-			carbonDiff = carbonOutput - carbonAbsorption;
+			this.netCarbonOutput = carbonOutput;
 		}
 
+		/**
+		 * Create a new sellState
+		 * 
+		 * @param previousState
+		 * @param action
+		 */
 		private CountryState(CountryState previousState, SellAction action) {
 
-			this.previousEnergyOutput = previousState.energyOutput;
+			this.previousEnergyOutput = previousState.previousEnergyOutput;
 
 			this.previousState = previousState;
 			this.action = action;
 			this.year = previousState.year;
 			this.emissionsTarget = country
 					.getNextEmissionTarget(previousState.emissionsTarget);
-			this.GDPRate = previousState.GDPRate;
-			this.GDP = previousState.GDP;
 			stateList[this.year].addSell(this);
 
 			// Our current total carbon output, including any offsets
@@ -488,15 +596,40 @@ class CountrySimulator {
 			// Invest in being clean
 			double carbonAbsorbedReduced = totalCarbonOutput
 					* action.investFrac;
+
 			double[] investments = new double[2];
-			double investmentCost = country.getAbsorbReduceInvestment(
-					carbonAbsorbedReduced, previousState, investments);
-			double arableLandReduction = country.getArableLandCost(
-					investments[0], previousState.arableLandArea);
-			double absorptionIncrease = country.getCarbonAbsorptionChange(
-					investments[0], previousState.arableLandArea);
-			double carbonOutputReduction = country.getCarbonReduction(
-					investments[1], previousState);
+			double investmentCost;
+			if (carbonAbsorbedReduced > 0) {
+				investmentCost = country.getAbsorbReduceInvestment(
+						carbonAbsorbedReduced, previousState, investments);
+			} else {
+				investmentCost = 0;
+				investments[0] = 0;
+				investments[1] = 0;
+			}
+
+			// Amount of arable land lost
+			double arableLandCost;
+			double absorptionIncrease;
+
+			if (investments[0] > 0) {
+				arableLandCost = country.getArableLandCost(investments[0],
+						previousState.arableLandArea);
+				absorptionIncrease = country.getCarbonAbsorptionChange(
+						investments[0], previousState.arableLandArea);
+			} else {
+				arableLandCost = 0;
+				absorptionIncrease = 0;
+			}
+
+			double carbonOutputReduced;
+
+			if (investments[1] > 0) {
+				carbonOutputReduced = country.getCarbonReduction(
+						investments[1], previousState);
+			} else {
+				carbonOutputReduced = 0;
+			}
 
 			// Sell additional offset over next years target
 			double newCarbonOutput = totalCarbonOutput
@@ -505,22 +638,56 @@ class CountrySimulator {
 
 			double totalCreditsSold = carbonBelowTarget * action.sellFrac;
 
-			double marketSellEarnings = country.getMarketSellPrice(
-					totalCreditsSold);
+			double marketSellEarnings = totalCreditsSold
+					* country.getMarketSellUnitPrice(this.year);
 
-			this.availableToSpend = previousState.availableToSpend
-					- investmentCost + marketSellEarnings;
-			this.arableLandArea = previousState.arableLandArea
-					- arableLandReduction;
+			this.arableLandArea = previousState.arableLandArea - arableLandCost;
 			this.carbonAbsorption = previousState.carbonAbsorption
 					+ absorptionIncrease;
 			this.energyOutput = previousState.energyOutput
 					- shutDownCarbonReduction;
-			this.carbonOutput = previousState.carbonOutput
-					- shutDownCarbonReduction - carbonOutputReduction;
-			this.carbonOffset = previousState.carbonOffset - totalCreditsSold;
 
-			carbonDiff = this.carbonOutput - carbonAbsorption;
+			this.carbonOutput = previousState.carbonOutput
+					- shutDownCarbonReduction - carbonOutputReduced;
+
+			double tempCarbonOffset = previousState.carbonOffset
+					- totalCreditsSold;
+
+			double tempCarbonOutput = this.carbonOutput - this.carbonAbsorption
+					- tempCarbonOffset;
+
+			double carbonAboveTarget = tempCarbonOutput
+					- previousState.emissionsTarget;
+
+			if (carbonAboveTarget > 0) {
+				toBeCulled = true;
+			}
+
+			// Reset carbon offset at the end of a session
+			if (this.year == SANCTION_YEAR) {
+				this.carbonOffset = 0;
+				SANCTION_YEAR += 10;
+			} else {
+				this.carbonOffset = previousState.carbonOffset
+						- totalCreditsSold;
+			}
+
+			GDPRate = calculateGDPRate(previousState.GDPRate,
+					this.energyOutput, this.previousEnergyOutput);
+
+			GDP = previousState.GDP + previousState.GDP * GDPRate;
+
+			double tempAvailableToSpend = previousState.availableToSpend
+					- investmentCost + marketSellEarnings;
+
+			if (tempAvailableToSpend < 0) {
+				toBeCulled = true;
+			}
+
+			availableToSpend = tempAvailableToSpend
+					+ (GDP * GameConst.getPercentageOfGdp());
+
+			netCarbonOutput = this.carbonOutput - this.carbonAbsorption;
 		}
 
 		private double getCarbonDifference() {
@@ -540,9 +707,12 @@ class CountrySimulator {
 
 			int maxGrains = 10;
 			int minGrains = 2;
-			int yearModifier = Math.max(0, 3 * this.year);
+			int yearModifier = Math.max(0, 4 * this.year);
 			int numGrains = Math.max(maxGrains - yearModifier, minGrains);
 			float grain = 100f / numGrains;
+
+			// Default state
+			new CountryState(this, new ReduceAction(1, 0, 0));
 
 			// If we actually need to reduce our carbon
 			if (this.getCarbonDifference() > 0) {
@@ -574,8 +744,8 @@ class CountrySimulator {
 			float investOffsetFrac;
 			float buyCreditOffsetFrac;
 
-			// Do nothing
-			new CountryState(this, new MaintainAction(0, 1, 0));
+			// Default state
+			new CountryState(this, new MaintainAction(0, 0, 0));
 
 			// If we shut down factories last phase, it's pointless to invest in
 			// factories this phase
@@ -588,7 +758,7 @@ class CountrySimulator {
 
 			int maxGrains = 10;
 			int minGrains = 2;
-			int yearModifier = Math.max(0, 3 * this.year);
+			int yearModifier = Math.max(0, 4 * this.year);
 			int numGrains = Math.max(maxGrains - yearModifier, minGrains);
 			float max = 90f;
 			float grain = max / numGrains;
@@ -631,17 +801,19 @@ class CountrySimulator {
 
 			int maxGrains = 10;
 			int minGrains = 2;
-			int yearModifier = Math.max(0, 3 * this.year);
+			int yearModifier = Math.max(0, 4 * this.year);
 			int numGrains = Math.max(maxGrains - yearModifier, minGrains);
 			float max = 2f;
 			float grain = max / numGrains;
 			float min = grain;
 
-			// Sell any offset if we happen to have excess
-			new CountryState(this, new SellAction(0, 0, 1));
-
-			// Do nothing
+			// Default state
 			new CountryState(this, new SellAction(0, 0, 0));
+
+			// Ensure we don't try to sell if the sell price is 0
+			if (country.getMarketSellUnitPrice(this.year) < 1) {
+				return;
+			}
 
 			for (float i = min; i <= max; i = i + grain) {
 				shutDownFrac = 0;
@@ -683,12 +855,12 @@ class CountrySimulator {
 		}
 
 		public void printState() {
-			System.out.println("Year " + year);
-			System.out.println("AvailToSpend " + this.availableToSpend);
-			System.out.println("CNetOutput " + this.carbonDiff);
-			System.out.println("energyOutput " + this.energyOutput);
-			System.out.println("GDP " + this.GDP);
-			System.out.println("GDPRate " + this.GDPRate);
+			logger.info("Year " + year);
+			logger.info("AvailToSpend " + this.availableToSpend);
+			logger.info("CNetOutput " + this.netCarbonOutput);
+			logger.info("energyOutput " + this.energyOutput);
+			logger.info("GDP " + this.GDP);
+			logger.info("GDPRate " + this.GDPRate);
 			if (action != null) {
 				action.printDetails();
 			}
@@ -819,9 +991,9 @@ class CountrySimulator {
 			}
 
 			// If we have less carbon output
-			if (state1.carbonDiff < state2.carbonDiff) {
+			if (state1.netCarbonOutput < state2.netCarbonOutput) {
 				isWorse = false;
-			} else if (state1.carbonDiff > state2.carbonDiff) {
+			} else if (state1.netCarbonOutput > state2.netCarbonOutput) {
 				isBetter = false;
 			}
 
@@ -912,9 +1084,9 @@ class CountrySimulator {
 			}
 
 			// If we have less carbon output
-			if (state1.carbonDiff < state2.carbonDiff) {
+			if (state1.netCarbonOutput < state2.netCarbonOutput) {
 				isWorse = false;
-			} else if (state1.carbonDiff > state2.carbonDiff) {
+			} else if (state1.netCarbonOutput > state2.netCarbonOutput) {
 				isBetter = false;
 			}
 
@@ -991,20 +1163,6 @@ class CountrySimulator {
 			} else if (state1.GDPRate < state2.GDPRate) {
 				isBetter = false;
 			}
-
-			// // If we make more energy
-			// if (state1.energyOutput > state2.energyOutput) {
-			// isWorse = false;
-			// } else if (state1.energyOutput < state2.energyOutput) {
-			// isBetter = false;
-			// }
-
-			// // If we have less carbon output
-			// if (state1.carbonDiff < state2.carbonDiff) {
-			// isWorse = false;
-			// } else if (state1.carbonDiff > state2.carbonDiff) {
-			// isBetter = false;
-			// }
 
 			if (isBetter) {
 				return Compare.BETTER;

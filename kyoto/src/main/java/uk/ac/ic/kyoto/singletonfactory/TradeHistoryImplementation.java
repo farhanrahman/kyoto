@@ -1,6 +1,5 @@
-package uk.ac.ic.kyoto.tradehistory;
+package uk.ac.ic.kyoto.singletonfactory;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -8,6 +7,7 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 
 import uk.ac.ic.kyoto.countries.OfferMessage;
+import uk.ac.ic.kyoto.tradehistory.TradeHistory;
 import uk.ac.ic.kyoto.util.sim.jsonobjects.DataStorer;
 import uk.ac.ic.kyoto.util.sim.jsonobjects.tradedata.TradeData;
 import uk.ac.imperial.presage2.core.Time;
@@ -36,7 +36,9 @@ public class TradeHistoryImplementation implements TradeHistory{
 	 * a map simulation time -> map of trades that happened in that simulation time
 	 */
 	public final Map<Integer,Map<UUID,OfferMessage>> getHistory(){
-		return Collections.unmodifiableMap(new HashMap<Integer, Map<UUID,OfferMessage>>(history));
+		synchronized(history){
+			return (new HashMap<Integer, Map<UUID,OfferMessage>>(history));
+		}
 	}
 
 	/**
@@ -45,7 +47,9 @@ public class TradeHistoryImplementation implements TradeHistory{
 	 * time = simTime
 	 */
 	public Map<UUID,OfferMessage> getHistoryForTime(Time simTime){
-		return Collections.unmodifiableMap(history.get(simTime.intValue()));
+		synchronized(history){
+			return history.get(simTime.intValue());
+		}
 	}
 	
 	/**
@@ -72,7 +76,10 @@ public class TradeHistoryImplementation implements TradeHistory{
 	 */
 	public void addToHistory(Time simTime, UUID tradeID, OfferMessage trade){
 		synchronized(history){
-			Map<UUID, OfferMessage> t = new HashMap<UUID,OfferMessage>();
+			Map<UUID, OfferMessage> t = history.get(simTime.intValue());
+			if(t == null){
+				t = new HashMap<UUID,OfferMessage>();
+			}
 			t.put(tradeID, trade);
 			history.put(simTime.intValue(), t);
 		}

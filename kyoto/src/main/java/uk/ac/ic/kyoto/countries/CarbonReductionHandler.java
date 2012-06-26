@@ -137,29 +137,21 @@ public final class CarbonReductionHandler{
 	public final void investInCarbonReduction(double carbonOutputChange) throws NotEnoughCarbonOutputException, NotEnoughCashException {
 		double investmentAmount;
 		
-		try {
-			// Calculate the investment necessary to reduce carbon output by specified amount
-			investmentAmount = getInvestmentRequired(carbonOutputChange);
-			
-			// If enough cash and carbon output, proceed with the investment
-			if (investmentAmount <= this.country.availableToSpend){
-				if (carbonOutputChange <= this.country.carbonOutput) {
-					this.country.availableToSpend -= investmentAmount;
-					this.country.carbonOutput -= carbonOutputChange;
-				}
-				else {
-					throw new NotEnoughCarbonOutputException();
-				}
+		// Calculate the investment necessary to reduce carbon output by specified amount
+		investmentAmount = getInvestmentRequired(carbonOutputChange);
+		
+		// If enough cash and carbon output, proceed with the investment
+		if (investmentAmount <= this.country.availableToSpend){
+			if (carbonOutputChange <= this.country.carbonOutput) {
+				this.country.availableToSpend -= investmentAmount;
+				this.country.carbonOutput -= carbonOutputChange;
 			}
 			else {
-				throw new NotEnoughCashException(this.country.availableToSpend, investmentAmount);
+				throw new NotEnoughCarbonOutputException();
 			}
 		}
-		catch (NotEnoughCarbonOutputException e) {
-			throw e;
-		}
-		catch (NotEnoughCashException e) {
-			throw e;
+		else {
+			throw new NotEnoughCashException(this.country.availableToSpend, investmentAmount);
 		}
 	}
 	

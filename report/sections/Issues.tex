@@ -1,0 +1,45 @@
+
+\section{Issues}
+
+During the implementation of the Kyoto protocol, we encountered various issues, particularly with regards to running simulations.
+
+\subsection{MongoDB}
+
+Initially, testing and simulations were performed on local machines which connected Presage2 to a MongoDB server hosted on the Imperial College Network. The web \textsc{ui} was based on a remote server hosted by one of our group members. We encountered difficulties as simulations began to increase in size. When executing country behaviours on a scale required for simulating the real world (approximately 180 countries), the volume of output became problematic.
+
+On Monday (18th June), the MongoDB server hosted on the Imperial College network crashed. Following the database crash, we altered Presage2's runtime settings so it used local databases installed on individual user machines. However, this became untenable for the collation of results for analysis and data representation. This was one of the reasons we elected to the the Amazon Web Service (\textsc{aws}).
+
+\subsection{Deployable JAR}
+
+To be able to use multiple college computers easily, we needed to turn the project into a portable \textsc{jar} file. Time restrictions and the complexity of Maven's dynamic dependency systems made this more complex than we anticipated.  We attempted to use a college cluster (Crayfish), but it did not have Maven installed and so required a \textsc{jar} file.
+
+\subsection{Simulation Execution Time}
+
+Individual simulations can take up to four hours to run, depending on the complexity. We initially believed that the bottleneck was a lack of processing power for simulations (hence the attempts to utilise the college cluster).  Simulations were set up on multiple college machines all pointing to one of two \textsc{aws} based databases.  However, the load proved too much and the database servers failed.
+
+Our compromise was to use two \textsc{aws} machines with each hosting a their own instance of the \textsc{ui}, database, and simulation files.  This meant we could only run two simulations in parallel but it was a reliable way of producing results.
+
+\subsection{Behaviour Bugs}
+
+Bugs in individual country behaviours proved difficult to debug before integrating the countries into larger simulations. While any large architectural bugs were diagnosed through local bug testing simulations, some unexpected issues arose when all of the countries attempted to run concurrently.
+
+Throughout the testing phase in development of our Kyoto Protocol simulator, our design became progressively more threadsafe.
+
+\paragraph{Maps} 
+One of the simpler issues which was did solve in most instances was that of concurrent access to java \texttt{HashMap} objects. This was remedied by introducing concurrent hash maps in their place. Due to an executive decision to code freeze in the final few days of testing, not all \texttt{HashMap} have been replaced with concurrent maps.
+
+\paragraph{Semaphores}
+In order to manage access to the large quantity of shared code accessed by countries as they act during a simulation, we introduced semaphores to manage shared resources.
+
+\paragraph{Shared State}
+At the beginning of the project, our understanding of the shared state, as it was implemented in Presage2 and even the concept of its existence in the context of multi-agent systems, was severely limited. When our code interacted with the shared state, since we structured our queries incorrectly, we encountered \texttt{NullPointerException} that were difficult to track down through debug step throughs since Maven's dependency system meant many components were compiled binaries only.
+
+\subsection{Carbon Reporting Synchronisation}
+
+This was an issue that has since been resolved but severely delayed our development process in the final week. When reporting carbon emissions, countries updated the shared state by acting on the environment. However, we were unaware that there was a secondary, internal recording system was embedded within each agent via inheriting some shared code. By not updating the internal records, \texttt{NullPointerException} were generated at the end of every year and targets were not set properly. This is clearly a communication issue between project members and was resolved when the appropriate team members approached the code at the same time.
+
+\subsection{Trade Protocol Timing}
+
+The trading protocol which allows countries to buy and sell carbon offset and participate in \textsc{cdm} was a class that extended an existing Presage2 agent communication protocol architecture. The single transaction involves multiple messages sent back and forth between the two participant parties, to ensure that negotiation can be properly handled and that any errors are reverted as intended. However, these messages happen in separate discrete time units and are driven by Presage2's underlying architecture, rather than any code that we have implemented ourselves. As such, controlling how long a transaction takes proved difficult.
+
+In our final implementation, trades can take varying, unpredictable amounts of time. This presents problems when the trades overlap the ends of years and particularly the ends of sessions, because carbon offset is updated or reset at those times. Countries' behaviours are dependent on the values currently stored in the class's fields and their attitude toward a given trade has a tendency to fluctuate should these adverse conditions arise. However, these are corner cases that do not affect the general trends of the simulations.
