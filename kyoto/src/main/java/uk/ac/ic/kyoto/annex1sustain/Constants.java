@@ -10,7 +10,7 @@ public final class Constants {
 	public static final double	PRICE_FAILURE_SCALER = 1.1;
 	
 	// Profitability of absorption/reduction for selling
-	public static final double	EXPECTED_SALES_INITIAL = 0.5;
+	public static final double	EXPECTED_SALES_INITIAL = 1.0;
 	
 	// To cheat or not to cheat?
 	public static final double	CHEATERS_PERCENTAGE = 0.1;

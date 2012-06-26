@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import uk.ac.ic.kyoto.countries.OfferMessage;
-import uk.ac.ic.kyoto.singletonfactory.SingletonProvider;
 import uk.ac.imperial.presage2.core.Time;
 
 /**

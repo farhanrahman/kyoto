@@ -74,7 +74,7 @@ public class TradeProtocolTestAgent extends AbstractCountry {
 			//if(counter == 0){
 				//int quantity = 10;
 				//double unitCost = 2;
-				this.broadcastBuyOffer(1000, 100);
+				this.broadcastBuyOffer(10, 1000000);
 			
 			//}
 		//}
