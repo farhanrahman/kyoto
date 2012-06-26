@@ -16,7 +16,7 @@ The usual reason for this is that normally, while the first session started in 1
 
 \subparagraph{Strategy}
 
-In order to make strategies distinct between Annex I sustain and annex I reduce, Annex I sustain countries will only remain a part of the Kyoto Protocol as long as they meet their targets. In the event that emission targets are lower than the acceptable output level for that participant, the country will attempt to reduce their emissions by investing in carbon reduction or absorption. Where funds, area or carbon output to reduce are unavailable, participants will leave the Protocol and become a `rogue state'. A small subset of participants are able to cheat (When their emissions exceed their targets, they report false values). If these cheating participants are caught multiple times, they may leave the Kyoto Protocol.
+In order to make strategies distinct between Annex I sustain and Annex I reduce, Annex I sustain countries will only remain a part of the Kyoto Protocol as long as they meet their targets. In the event that emission targets are lower than the acceptable output level for that participant, the country will attempt to reduce their emissions by investing in carbon reduction or absorption. Where funds, area or carbon output to reduce are unavailable, participants will leave the Protocol and become a rogue state. A small subset of participants are able to cheat (When their emissions exceed their targets, they report false values). If these cheating participants are caught multiple times, they may leave the Kyoto Protocol.
 
 
 However, it is important to recognise that Annex I sustain countries did ratify the Kyoto Protocol when it was originally proposed and finalised. These countries' governments have expressed a desire to minimise their impact on the environment to some extent. It is with this in mind, that annex I sustain countries make sure that their overall emissions never rise above their starting levels. Any investment in industry to promote economic growth is offset by corresponding investments in cleaning industry or constructing carbon sinks.
@@ -66,7 +66,7 @@ Once this is over and we have a large number of end states, we can analyse our t
 
 As the Annex I reduce countries were deemed to be paragons of justice, some actions such as cheating and ignoring carbon targets weren't coded in. Overall, though, this method takes as much advantage as it can of the possible options available to a country, including utilising the market as much as possible. Unfortunately, due to computational constraints and the aggressive heuristics that were used, the absolute best possible action a country can perform in a given year doesn't tend to be taken although something very close will be performed.
 
-This behaviour approach is an example of an uniformed breadth first general graph search where the ideal end state has no constraint other than to be superior to any other possible end state. This method means that the underlying algorithms can change in any way (e.g. the calculation of GDP) with only minimal changes to the behaviour code, while still being able to maximise economic growth and manage carbon output correctly.
+This behaviour approach is an example of an uniformed breadth first general graph search where the ideal end state has no constraint other than to be superior to any other possible end state. This method means that the underlying algorithms can change in any way (e.g. the calculation of \textsc{gdp}) with only minimal changes to the behaviour code, while still being able to maximise economic growth and manage carbon output correctly.
 
 \paragraph{Non-Annex}
 
@@ -169,14 +169,14 @@ Where:
 Hence, we can calculate cost of single unit investment at specific clean industry percentage using the following formula:
 
 \begin{align*}
-\mtext{Unit Cost} = a + ((b - a) * x)
+\mtext{Unit Cost} = a + ((b - a) \times x)
 \end{align*}
 
 Since the cost will increase linearly with every unit invested, we can find the average cost for the whole investment as the average of the initial and final cost (based on the x0 and x1 values). This is represented by the red line on Figure~\ref{fig:carbon_reduction}.
  
 \begin{align*}
-\mtext{Average Cost} &= ((a + ((b - a) * x1) - (a + ((b-a) * x0))) / 2 \\
-&\Leftrightarrow \mtext{Average  Cost} = (a + ((b - a) * (x1 - x0))) / 2
+\mtext{Average Cost} &= ((a + ((b - a) \times x1) - (a + ((b-a) \times x0))) / 2 \\
+&\Leftrightarrow \mtext{Average  Cost} = (a + ((b - a) \times (x1 - x0))) / 2
 \end{align*}
 
 We can now calculate the total cost of a carbon reduction action by multiplying the average unit cost by the amount required by the country.
@@ -243,7 +243,7 @@ The Trade Protocol allows participants to engage in trading of carbon offset or 
  
 The trade protocol can be used for both carbon trading and Clean Development Mechanisms. The type of message that the trade protocol deals with is an object of type \texttt{OfferMessage}. The \texttt{OfferMessage} object has information of who initiated the conversation and who broadcast the offer in the first place and all the information about the quantity and unit cost of the offer. The quantity refers to the total, in tonnes of carbon offset, that are being offered. The unit cost refers to the price per ton. The total cost of the offer is the product of these two values.
 
-When a participant broadcasts a carbon trading offer then the type of the Offer (also another 
+When a participant broadcasts a carbon trading offer then the type of the \texttt{Offer} (also another 
 object that \texttt{OfferMessage} encapsulates) is set to either:
  
 \begin{itemize}
@@ -350,7 +350,7 @@ Both the initiator and the responder have a single \texttt{START} state as requi
 
 \paragraph{Responder FSM}
 
-Figure\ref{fig:protocol-fsm-2} shows the \textsc{fsm} that is used by the responder. Upon receiving a message form the initiator. There is only one \texttt{START} state and the three end states are \texttt{REVERT}, \texttt{TRADE\_DONE} and \texttt{RESPONDER\_TIMEOUT}. Similar to the initiator, the transitions happen with the participant sending a unicast message to the initiator agent.
+Figure~\ref{fig:protocol-fsm-2} shows the \textsc{fsm} that is used by the responder. Upon receiving a message form the initiator. There is only one \texttt{START} state and the three end states are \texttt{REVERT}, \texttt{TRADE\_DONE} and \texttt{RESPONDER\_TIMEOUT}. Similar to the initiator, the transitions happen with the participant sending a unicast message to the initiator agent.
  
 \begin{description}
 	\item[1. \texttt{RESPOND\_TO\_TRADE}:]
@@ -365,15 +365,15 @@ Figure\ref{fig:protocol-fsm-2} shows the \textsc{fsm} that is used by the respon
 
 \subsubsection{Time Service}
 
-The time service is an environment service, extending Presage2's existing environment interaction classes and development framework. It allows for coordination of time-based events and synchronises various features within our Kyoto Protocol simulation. Although Presage2 does have existing objects (SimTime) which can be used to attain simulation time, this is an absolute value in discrete logical time since the beginning of the simulation. It therefore does not take into consideration the variety of chronological distinctions the Kyoto Protocol requires, such as subdivisions into years and sessions.
+The time service is an environment service, extending Presage2's existing environment interaction classes and development framework. It allows for coordination of time-based events and synchronises various features within our Kyoto Protocol simulation. Although Presage2 does have existing objects (\texttt{SimTime}) which can be used to attain simulation time, this is an absolute value in discrete logical time since the beginning of the simulation. It therefore does not take into consideration the variety of chronological distinctions the Kyoto Protocol requires, such as subdivisions into years and sessions.
 
-It was initially decided to use a global service. It would perform most of the logic integral to coordinating time-driven activities, and would be layered on top of Presage2's integrated SimTime object. However, it is necessary for agents to be able to query for information regarding the current year and session in order to make important strategic and behavioural decisions. Presage2 enforces that agents (participants) are unable to communicate directly with global services. While agents can act on the environment and affect services, performing the reverse is somewhat more complex.
+It was initially decided to use a global service. It would perform most of the logic integral to coordinating time-driven activities, and would be layered on top of Presage2's integrated \texttt{SimTime} object. However, it is necessary for agents to be able to query for information regarding the current year and session in order to make important strategic and behavioural decisions. Presage2 enforces that agents (participants) are unable to communicate directly with global services. While agents can act on the environment and affect services, performing the reverse is somewhat more complex.
 
-At this stage, it would seem a participant time service would be more appropriate, since participant services can communicate directly with agents. However, another key functionality of the time service is the publishing of new events, both for the end of years and sessions, which trigger key monitoring, sanctioning, reporting, and architectural actions essential to the managed nature of the Kyoto Protocol. Unfortunately, implementation is not in place within Presage2 for participant services to generate (or interact with) the EventBus class, the object essential to publishing or receiving events.
+At this stage, it would seem a participant time service would be more appropriate, since participant services can communicate directly with agents. However, another key functionality of the time service is the publishing of new events, both for the end of years and sessions, which trigger key monitoring, sanctioning, reporting, and architectural actions essential to the managed nature of the Kyoto Protocol. Unfortunately, implementation is not in place within Presage2 for participant services to generate (or interact with) the \texttt{EventBus} class, the object essential to publishing or receiving events.
 
 With these restrictions in mind, the time service was subdivided into two separate services. The participant service communicates with agents and relays information regarding the current year and session, among other minor time-related information gathering tasks. The global service is the backbone of the time service, generating new year and session events for the monitoring and targeting services to hook onto. It also carries out calculations to derive the current year and session from the discrete simulation time and communicates this information to the participant service.
 
-Both classes extend from Presage2's predefined EnvironmentService class, and use Google's Guice injection systems for initialisation and, in the global service's case, to register with the EventBus.
+Both classes extend from Presage2's predefined \texttt{EnvironmentService} class, and use Google's Guice injection systems for initialisation and, in the global service's case, to register with the \texttt{EventBus}.
 
 \subsubsection{Monitor}
 
@@ -427,11 +427,11 @@ Only Annex I countries are calculated a target. However, both Non-Annex countrie
 
 \paragraph{Implementation}
 
-The carbon target service retains all the necessary data required for the above calculations in a private arraylist. Year targets are also set using a package protected method in the \texttt{AbstractCountry} superclass.
+The carbon target service retains all the necessary data required for the above calculations in a private \texttt{ArrayList}. Year targets are also set using a package protected method in the \texttt{AbstractCountry} superclass.
  
 Within our simulation it is possible for countries to report false carbon emissions. Each year monitor service decides to monitor a subset of the countries. If a country is found to have reported a false value, its \texttt{UUID} is added to a list of cheaters. This list is then passed to \texttt{CarbonTarget} each year by \texttt{Monitor}, and is referenced when querying carbon output values for the target calculation.
  
-Some countries (for example the \textsc{us}) may wish to join Kyoto at some point during the simulation. Since individual year targets are interpolated values dependent on session targets, and session targets are dependent on global emissions and each country's status as a rogue or member state, having a country join the Kyoto Protocol mid session is, in our simulation, extremely difficult. Each country's target would need to be recalculated and this introduces potential conflicts with existing strategies that the member state AIs have chosen. As a solution to this, we decided that rogue states could only join Kyoto at the beginning of a new session. Any rogue state that attempts to join the Kyoto Protocol in the middle of a session will be put on a waiting queue and will automatically be registered and become an Annex I country at the beginning of the next session.
+Some countries (for example the \textsc{us}) may wish to join Kyoto at some point during the simulation. Since individual year targets are interpolated values dependent on session targets, and session targets are dependent on global emissions and each country's status as a rogue or member state, having a country join the Kyoto Protocol mid session is, in our simulation, extremely difficult. Each country's target would need to be recalculated and this introduces potential conflicts with existing strategies that the member state \textsc{ai}s have chosen. As a solution to this, we decided that rogue states could only join Kyoto at the beginning of a new session. Any rogue state that attempts to join the Kyoto Protocol in the middle of a session will be put on a waiting queue and will automatically be registered and become an Annex I country at the beginning of the next session.
 
 We decided that any rogue state joining the Kyoto Protocol would automatically become an Annex I country for two reasons. One was the simplification of the rejoining process, which had already become extremely complex. Also, when compared to reality, it seemed reasonable that any country which left the Kyoto Protocol and then rejoined at a later date would then be assigned targets and monitored, to ensure that the system was not abused for financial gain. The US, the only major nation that did not ratify the Kyoto Protocol at its inception, would be an Annex I country regardless, were it to participate.
 
@@ -447,7 +447,7 @@ Our Kyoto simulation integrates a very basic emulation of the state of the finan
 
 As we have seen, the game is made up of a series of mathematical functions, many of which rely on a set of constants (eg. \texttt{GROWTH\_SCALAR}, \texttt{MAX\_GDP\_GROWTH}). Varying and balancing these constants allows us to create varied and accurate simulations. These can be either initialised at compile time, or injected by the Kyoto \textsc{ui} at runtime, in order to run a wide range of different scenarios.
 
-The balancing of these constants was not a simple task, since changing one may have an impact on others. The following 3 facts were used as a starting point for calculating suitable values for some of the constants:
+The balancing of these constants was not a simple task, since changing one may have an impact on others. The following three facts were used as a starting point for calculating suitable values for some of the constants:
 
 \begin{enumerate}
 \item Each country has an emission target of -5\% from their base year.
@@ -477,7 +477,7 @@ From 4 and 6, we can derive:
 
 \subsection{Kyoto UI}
 
-The Kyoto \textsc{ui} is a web interface designed for instantiating and editing Presage 2 simulations. Web technologies used include an Apache web server, \textsc{php}, \textsc{html} and Javascript. Combined with a few additional libraries, these technologies provide the functionality required to display rich pages which allow for good visual representation and easy editing of data.
+The Kyoto \textsc{ui} is a web interface designed for instantiating and editing Presage2 simulations. Web technologies used include an Apache web server, \textsc{php}, \textsc{html} and Javascript. Combined with a few additional libraries, these technologies provide the functionality required to display rich pages which allow for good visual representation and easy editing of data.
 
 \subsubsection{Inception}
 

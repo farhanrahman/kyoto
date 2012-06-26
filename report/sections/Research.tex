@@ -88,7 +88,7 @@ Some Annex I countries, categorised as Economies In Transition (\textsc{eit}), h
 
 \subparagraph{European Union Emission Trading System}
 
-The European Union Emission Trading System (\textsc{eu ets}) allows for trading between participants in the EU and between industry operators in the \textsc{eu}. Governments of \textsc{eu} states agree on national emissions caps, and then allocate allowances to their industrial operators. Operators may privately move allowances between themselves, privately match buyers and sellers, or trade on the carbon exchange. Trading has proved to be very unpopular outside of the \textsc{eu}.~\cite{Grubb-09}
+The European Union Emission Trading System (\textsc{eu ets}) allows for trading between participants in the \textsc{eu} and between industry operators in the \textsc{eu}. Governments of \textsc{eu} states agree on national emissions caps, and then allocate allowances to their industrial operators. Operators may privately move allowances between themselves, privately match buyers and sellers, or trade on the carbon exchange. Trading has proved to be very unpopular outside of the \textsc{eu}.~\cite{Grubb-09}
 
 \paragraph{Clean Development Mechanisms}
 
@@ -199,7 +199,7 @@ These case studies look at examples of \textsc{cpr}s in the real world, the stra
 
 \paragraph{Commercial fishing}
 
-In the 70s, the fishing industry was in danger of shrinking due to overfishing. The measures taken to prevent this are analogous to that of a CPR problem. This makes it a good example to demonstrate the theory of \textsc{cpr}.
+In the 70s, the fishing industry was in danger of shrinking due to overfishing. The measures taken to prevent this are analogous to that of a \textsc{cpr} problem. This makes it a good example to demonstrate the theory of \textsc{cpr}.
 
 In 1979 the \textsc{un} set out new regulations and `protected zones' for each country with a coastline.~\cite{Canada-sea-law} \textsc{cpr} models suggest that when individuals are allowed to make decisions in isolation, with minimal institutional structure, the aggregate behaviour will be inefficient. In other words, left to their own devices each countries' fishermen would take as many fish as possible, leading to the eventual depletion of the resource. By putting institutional rules in place, the \textsc{un} were aiming to control the behaviour of the individuals (fishermen).
 
@@ -215,7 +215,7 @@ Scientists in the 1970s discovered an area of the Antarctic stratosphere with ve
 
 Chlorofluorocarbons (\textsc{cfc}s) were to blame for this destruction of the ozone layer, with a single \textsc{cfc} molecule having the power to chemically unbind 4000 molecules of the ozone. The individuals in this case were the manufacturers working with \textsc{cfc}s. Their isolated decisions would be to not regulate their \textsc{cfc} usage at all, in order to maximize the profit made on their products. Consequently, the ozone layer was in danger of being totally depleated.
 
-A regime was put in place, the `Montreal Protocol on Substances that Deplete the Ozone Layer', which set out plans to cut production of \textsc{cfc}s by 100\% over 10 years. The benefit provided by the ozone layer outweighed the increased cost to manufacturers and consumers caused by the removal of \textsc{cfc}s from industrial manufacturing processes. This reflects CPR theory, where by applying institutionalised proportional cutbacks, a shared resource can be used sustainably.~\cite{CPR-proportional-reduction}
+A regime was put in place, the `Montreal Protocol on Substances that Deplete the Ozone Layer', which set out plans to cut production of \textsc{cfc}s by 100\% over 10 years. The benefit provided by the ozone layer outweighed the increased cost to manufacturers and consumers caused by the removal of \textsc{cfc}s from industrial manufacturing processes. This reflects \textsc{cpr} theory, where by applying institutionalised proportional cutbacks, a shared resource can be used sustainably.~\cite{CPR-proportional-reduction}
 
 The ozone holes have now ceased growing (and will eventually disappear), and so this example case of \textsc{cpr} can be considered a success.
 
@@ -281,7 +281,7 @@ As mentioned previously, \textsc{mas} are composed of agents and an environment 
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=0.6\textwidth]{img/mas.png}
-	\caption{Basic multi agent system structure}
+	\caption{Basic multi agent system structure~\cite{MAS-DoC}}
 	\label{fig:mas}
 \end{figure}
 
@@ -306,12 +306,12 @@ By using such components, we can encase the software implementation of our simul
 
 \subsubsection{Presage2}
 
-There exist several platforms that allow the development of multi agent systems. The two most important ones are Jade and Repast. However, it was decided to use the internally developed Presage 2 platform due to the nature of our desired simulation.
+There exist several platforms that allow the development of multi agent systems. The two most important ones are Jade and Repast. However, it was decided to use the internally developed Presage2 platform due to the nature of our desired simulation.
 
-Originally written by Brendan Neville and then improved by Sam MacBeth, the platform offers the ability to rapidly prototype complex agent societies. In Presage 2, agents are allowed to act during incrementing time steps, which results in discrete time driven simulations. It also offers a rich communication layer as well as the ability to batch multiple simulation runs through a web user interface. Finally, the following requirements are met, which allow for the design of social behaviour and the observation of long term global performance and adaptation~\cite{Presage2-agent-societies}:
+Originally written by Brendan Neville and then improved by Sam MacBeth, the platform offers the ability to rapidly prototype complex agent societies. In Presage2, agents are allowed to act during incrementing time steps, which results in discrete time driven simulations. It also offers a rich communication layer as well as the ability to batch multiple simulation runs through a web user interface. Finally, the following requirements are met, which allow for the design of social behaviour and the observation of long term global performance and adaptation~\cite{Presage2-agent-societies}:
 
 \begin{description}
-	\item[Abstraction:] the agents and network can be as simple or complex as necessary (e.g.: agents can range from being simply reactive to implementing complex belief, desire and intentions (BDI).)
+	\item[Abstraction:] the agents and network can be as simple or complex as necessary (e.g.: agents can range from being simply reactive to implementing complex belief, desire and intentions (\textsc{bdi}).)
 
 	\item[Flexibility:] the platform allows the user to easily change the simulation input parameters. In conjunction with the ability to batch run, it is very simple to measure the impact of variable values.
 
@@ -322,7 +322,7 @@ Originally written by Brendan Neville and then improved by Sam MacBeth, the plat
 	\item[Rule engine:] There is support for executable, mutable rule specifications.
 \end{description}
 
-Figure~\ref{fig:presage2-architecture} and \ref{fig:presage2-lifecycle} respectively show Presage 2's general architecture and the breakdown of a simulation run:
+Figure~\ref{fig:presage2-architecture} and \ref{fig:presage2-lifecycle} respectively show Presage2's general architecture and the breakdown of a simulation run:
 
 \begin{figure}[h!]
 	\centering

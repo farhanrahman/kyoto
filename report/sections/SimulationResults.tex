@@ -21,11 +21,11 @@ The monitor provides a form of insurance against countries cheating. Giving coun
 
 \item[Participants] \hfill \\
 
-Removing the so called `rogue' countries (\textsc{us}) from our simulation would have a large beneficial effect on global emission targets for the remaining participants. This scenario could be compared to a real-world situation where these countries' outputs don't contribute to the way Kyoto set its targets. Although this probably wouldn't help the global carbon emission problem, countries would be more likely to stay if their targets were easier (see Canada).
+Removing the so called `rogue' countries (\textsc{us}) from our simulation would have a large beneficial effect on global emission targets for the remaining participants. This scenario could be compared to a real-world situation where these countries' outputs don't contribute to the way Kyoto set its targets. Although this probably wouldn't help the global carbon emission problem, countries would be more likely to stay if their targets were easier.
 
-On the other hand, we could simulate only having `rogue' countries who behave only according to their own internally-set targets. The resulting behaviour would probably be chaotic and not beneficial to the global emission problem. This would be similar to the possible real-world situation where all countries withdraw their support for Kyoto, but commit to their own reduction targets.
+On the other hand, we could simulate only having rogue states who behave only according to their own internally-set targets. The resulting behaviour would probably be chaotic and not beneficial to the global emission problem. This would be similar to the possible real-world situation where all countries withdraw their support for Kyoto, but commit to their own reduction targets.
 
-The last hypothetical situation we thought would be of interest was if all countries ratified and were classified as Annex 1. Emission targets would be simpler to understand (and fairer compared to the \textsc{us}'s current unrattified status). Also no \textsc{cdm} would take place. This would take away one of the easiest ways for a country to meet their targets while keeping their heavy carbon industry. There is much concern in the real world over the effectiveness and morality of using \textsc{cdm} to reduce carbon emissions. Taking away arable land from third world countries that could be used to grow crops, just to plant trees which will take several decades to become effective carbon sinks sounds very dubious.
+The last hypothetical situation we thought would be of interest was if all countries ratified and were classified as Annex I. Emission targets would be simpler to understand (and fairer compared to the \textsc{us}'s current unrattified status). Also no \textsc{cdm} would take place. This would take away one of the easiest ways for a country to meet their targets while keeping their heavy carbon industry. There is much concern in the real world over the effectiveness and morality of using \textsc{cdm} to reduce carbon emissions. Taking away arable land from third world countries that could be used to grow crops, just to plant trees which will take several decades to become effective carbon sinks sounds very dubious.
 
 \item[CO$_2$ Reduction Rate] \hfill \\
 
@@ -38,7 +38,7 @@ Realistically, countries will invest a different proportion of \textsc{gdp} into
 
 \item[GDP Growth] \hfill \\
 
-We have enforced an upper and lower limit on \textsc{gdp} growth of $\pm$-7\%. This reflects the typical real-world values for the majority of stable countries. Increasing this range would make the market more volatile. During growth, investment in industry will have an exaggerated effect, whereas global recession could make it difficult for anyone to meet their targets.
+We have enforced an upper and lower limit on \textsc{gdp} growth of $\pm$7\%. This reflects the typical real world values for the majority of stable countries. Increasing this range would make the market more volatile. During growth, investment in industry will have an exaggerated effect, whereas global recession could make it difficult for anyone to meet their targets.
 
 \item[Market State Factors] \hfill \\
 
@@ -59,9 +59,9 @@ However, on closer inspection, the Protocol can be be seen to have harmed the co
 
 In contrast, many of the ex-Soviet Bloc countries initially have emission targets well above their current carbon outputs and so can make a significant profit by selling excess credits and reinvesting in their economy. This benefits them throughout the 40 year period, and they correspondingly have a noticeably increase in \textsc{gdp}, and also increase their carbon output. Further to this, these countries are ambivalent towards Kyoto’s aims and so leave when their emissions targets force them to reduce their growth.
 
-Canada is the first Annex country to leave Kyoto. It has a large emissions target and an economy highly dependant on fossil fuels. Interestingly, in this simulation Canada is implemented using the same behaviour code as the countries who are ambivalent towards Kyoto (it is an Annex I sustain agent), but is still the first to leave. This demonstrates that our agent code acts dependent upon its parameterisation and is flexible enough to make intelligent, branching decisions based on its current status in any given scenario. This closely mirrors real world behaviour, as Canada actually left the Kyoto Protocol around 10 years in.
+Canada is the first Annex I country to leave Kyoto. It has a large emissions target and an economy highly dependant on fossil fuels. Interestingly, in this simulation Canada is implemented using the same behaviour code as the countries who are ambivalent towards Kyoto (it is an Annex I sustain agent), but is still the first to leave. This demonstrates that our agent code acts dependent upon its parameterisation and is flexible enough to make intelligent, branching decisions based on its current status in any given scenario. This closely mirrors real world behaviour, as Canada actually left the Kyoto Protocol around 10 years in.
 
-\$785.8B worth of trades were performed in the 40 year period. Trade values vary hugely with a maximum value of \$193421 but an average of \$2611. Trade prices can be falsely inflated by countries hoarding credits until near sanction deadlines and temporarily increasing the price when certain countries are forced to buy.
+\$785.8b worth of trades were performed in the 40 year period. Trade values vary hugely with a maximum value of \$193421 but an average of \$2611. Trade prices can be falsely inflated by countries hoarding credits until near sanction deadlines and temporarily increasing the price when certain countries are forced to buy.
 
 \textsc{cdm} acts as a stabilising force within the market. Prices for \textsc{cdm} are not set by countries, but are based on the actual cost of their investment. Cost of \textsc{cdm} will increase throughout the game, due to carbon absorption and reduction costs increasing relatively. High demand for \textsc{cdm} will increase the cost faster.
 
@@ -93,9 +93,11 @@ This behaviour has been evident from the simulation data. With agents being able
 
 As a consequence, the global increase of \textsc{gdp} almost doubles compared to the original simulation. There may be two reasons for that:
 
-Allowing developed countries to keep investing in and increasing their economies produces much higher gains than what developing countries can generate, even when they do not need to keep to any targets, or
+\begin{itemize}
+	\item Allowing developed countries to keep investing in and increasing their economies produces much higher gains than what developing countries can generate, even when they do not need to keep to any targets, or 
 
-The economy state - which is random for every simulation - was significantly more favourable for the Annex One only simulation than for the Main simulation.
+	\item The economy state - which is random for every scenario - was significantly more favourable for the Annex I only scenario than for the real world scenario.
+\end{itemize}
 
 Another significant difference is the price of obtaining carbon credits. Following the free market rules, removing the option to invest in developing countries in exchange for the credits should decrease their supply on the market, and hence increase their price. However, the existence of United States disrupts that theoretical model completely. They cannot participate in trading, but still have significant funds to spend and a will to contribute to lowering global carbon emissions. Hence, they invest heavily in Non-Annex countries, regardless of the price. This explains why the average price of obtaining carbon credits is almost 4 times lower if \textsc{us} is removed from the simulation.
 
@@ -173,9 +175,9 @@ As can be seen by comparing Figure~\ref{fig:350} and Figure~\ref{fig:352}, the A
 
 The scenario modelling recession was run with a subset of the total number of countries available. The parameters were chosen such that it would be more likely, at any given time, to have a global recession rather than stability or growth.
 
-Realistically in a recession, countries will increase government spending to get positive economic growth. This particular simulation models the phenomenon quite well. In the subset simulation, countries which were part of the kyoto protocol as Annex I nations faced strict targets, which made it more difficult for them to maintain a stable economic growth in the recession. Figure~\ref{fig:recession}(\ref{subfig:recession-1}) illustrated the initial \textsc{gdp} vs the Carbon Output figures for participants in this simulation.
+Realistically in a recession, countries will increase government spending to get positive economic growth. This particular simulation models the phenomenon quite well. In the subset simulation, countries which were part of the kyoto protocol as Annex I nations faced strict targets, which made it more difficult for them to maintain a stable economic growth in the recession. Figure~\ref{subfig:recession-1} illustrated the initial \textsc{gdp} vs the carbon output figures for participants in this simulation.
 
-As the simulation progresses the \textsc{gdp}s of the Annex I countries decrease and a general trend of increasing \textsc{gdp} can be noted in the Non-Annex countries. Non-Annex countries do not get carbon emission targets nor do they get monitored so there are more opportunities for spending in economic expansion with little concern to the carbon output. On the other hand, Annex I countries find it more difficult to meet their targets especially in a difficult global economic condition. An interesting point in the simulation is when Slovakia, an Annex I countries leaves kyoto because of difficulties in meeting the carbon emission targets. At the end of the simulation two countries leave the Kyoto Protocol (Slovakia and Poland). Figure~\ref{fig:recession}(\ref{subfig:recession-2}) The following diagram shows the state of the simulation when the two countries left Kyoto.
+As the simulation progresses the \textsc{gdp}s of the Annex I countries decrease and a general trend of increasing \textsc{gdp} can be noted in the Non-Annex countries. Non-Annex countries do not get carbon emission targets nor do they get monitored so there are more opportunities for spending in economic expansion with little concern to the carbon output. On the other hand, Annex I countries find it more difficult to meet their targets especially in a difficult global economic condition. An interesting point in the simulation is when Slovakia, an Annex I countries leaves kyoto because of difficulties in meeting the carbon emission targets. At the end of the simulation two countries leave the Kyoto Protocol (Slovakia and Poland). Figure~\ref{subfig:recession-2} shows the state of the simulation when the two countries left Kyoto.
 
 \begin{figure}[H]
 		\centering
@@ -189,7 +191,7 @@ As the simulation progresses the \textsc{gdp}s of the Annex I countries decrease
         \begin{subfigure}[b]{\textwidth}
                 \centering
                 \includegraphics[width=\textwidth]{img/simulations/recession-after.png}
-				\caption{Data at end of simulation.}
+				\caption{Data at point where participants leave Kyoto.}
 				\label{subfig:recession-2}
         \end{subfigure}
         \caption{Results for simulation (recession)}\label{fig:recession}
