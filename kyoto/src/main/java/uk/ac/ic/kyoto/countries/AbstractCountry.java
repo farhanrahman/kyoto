@@ -224,18 +224,18 @@ public abstract class AbstractCountry extends AbstractParticipant {
 	
 	@Override
 	final public void execute() {
-		try{
+//		try{
 				super.execute();
-				if(!this.isExecuteLocked()){
-					this.acquireExecuteLock(); //acquire the lock
-				}else{
-					throw new IllegalAccessException("Execute function called more than once in one tick. Simulation time: " 
-							+ SimTime.get().intValue()
-							+ ", Participant ID: "
-							+ this.getID()
-							+ ", name: "
-							+ this.getName());
-				}
+//				if(!this.isExecuteLocked()){
+//					this.acquireExecuteLock(); //acquire the lock
+//				}else{
+//					throw new IllegalAccessException("Execute function called more than once in one tick. Simulation time: " 
+//							+ SimTime.get().intValue()
+//							+ ", Participant ID: "
+//							+ this.getID()
+//							+ ", name: "
+//							+ this.getName());
+//				}
 				
 				if (timeService.getCurrentTick() % timeService.getTicksInYear() == 0) {
 					logger.warn(this.ISO + " first day of new year on tick " + timeService.getCurrentTick());
@@ -268,12 +268,12 @@ public abstract class AbstractCountry extends AbstractParticipant {
 			logSimulationData();
 			dumpCurrentTickData();
 			
-			this.releaseExecuteLock();
+//			this.releaseExecuteLock();
 			
-		} catch(IllegalAccessException e){
-			logger.warn(e);
-			//e.printStackTrace();
-		}
+//		} catch(IllegalAccessException e){
+//			logger.warn(e);
+//			//e.printStackTrace();
+//		}
 	}
 	
 	/**

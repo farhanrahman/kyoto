@@ -72,10 +72,10 @@ public class AnnexOneSustainTest extends InjectedSimulation {
 		
 		// Germany Stats
 		final double landArea = 400000;
-		final double arableLandArea = 100000;
+		final double arableLandArea = 10;
 		final double GDP = 2000000000000.0;
 		final double energyOutput = 1000000000;
-		final double carbonOutput = 900000000;
+		final double carbonOutput = 1000000000;
 		final double GDPRate = 0.0206;
 		
 		String name = "AnnexOneSustainTester";

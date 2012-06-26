@@ -111,5 +111,13 @@ public class OfferMessage {
 	void setInitiator(UUID initiator) {
 		this.initiator = initiator;
 	}
+	
+	/**
+	 * Package protected method returning offer
+	 * @return current offer
+	 */
+	Offer getOffer(){
+		return this.offer;
+	}
 
 }

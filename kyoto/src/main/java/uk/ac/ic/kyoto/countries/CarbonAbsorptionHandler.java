@@ -76,6 +76,7 @@ public final class CarbonAbsorptionHandler {
 		return investmentRequired;
 	}
 	
+	
 	/**
 	 * Calls getCarbonAbsorptionChange with actual arableLandArea of the country.
 	 * 

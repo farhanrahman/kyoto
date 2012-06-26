@@ -93,7 +93,7 @@ public class MarketData {
 			}
 
 			// If the offer is to sell credits or CDM to us
-			else if (type == TradeType.SELL || type == TradeType.INVEST) {
+			else if (type == TradeType.SELL || type == TradeType.RECEIVE) {
 				if (minimumSell > price) {
 					minimumSell = price;
 				}
@@ -117,19 +117,9 @@ public class MarketData {
 			calculateBuyingPrice();
 		}
 
-		/*
-		 * If the price we can buy at is lower than the price we can sell at,
-		 * something has gone horribly wrong (as it means people are buying at a
-		 * price higher than the price things are being sold at).
-		 * 
-		 * Lets exploit these poor souls. Raise the price we can sell at to the
-		 * price we can buy at
-		 */
-
 		if (sellingPrice > buyingPrice) {
-			sellingPrice = buyingPrice;
+			buyingPrice = 1.05 * sellingPrice;
 		}
-
 	}
 
 	/**
