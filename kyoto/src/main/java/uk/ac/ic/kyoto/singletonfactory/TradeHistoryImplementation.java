@@ -1,6 +1,5 @@
 package uk.ac.ic.kyoto.singletonfactory;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -37,7 +36,9 @@ public class TradeHistoryImplementation implements TradeHistory{
 	 * a map simulation time -> map of trades that happened in that simulation time
 	 */
 	public final Map<Integer,Map<UUID,OfferMessage>> getHistory(){
-		return (new HashMap<Integer, Map<UUID,OfferMessage>>(history));
+		synchronized(history){
+			return (new HashMap<Integer, Map<UUID,OfferMessage>>(history));
+		}
 	}
 
 	/**
@@ -46,7 +47,9 @@ public class TradeHistoryImplementation implements TradeHistory{
 	 * time = simTime
 	 */
 	public Map<UUID,OfferMessage> getHistoryForTime(Time simTime){
-		return history.get(simTime.intValue());
+		synchronized(history){
+			return history.get(simTime.intValue());
+		}
 	}
 	
 	/**
@@ -73,7 +76,10 @@ public class TradeHistoryImplementation implements TradeHistory{
 	 */
 	public void addToHistory(Time simTime, UUID tradeID, OfferMessage trade){
 		synchronized(history){
-			Map<UUID, OfferMessage> t = new HashMap<UUID,OfferMessage>();
+			Map<UUID, OfferMessage> t = history.get(simTime.intValue());
+			if(t == null){
+				t = new HashMap<UUID,OfferMessage>();
+			}
 			t.put(tradeID, trade);
 			history.put(simTime.intValue(), t);
 		}
