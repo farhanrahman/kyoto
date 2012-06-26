@@ -65,6 +65,24 @@ Canada is the first Annex country to leave Kyoto. It has a large emissions targe
 
 \textsc{cdm} acts as a stabilising force within the market. Prices for \textsc{cdm} are not set by countries, but are based on the actual cost of their investment. Cost of \textsc{cdm} will increase throughout the game, due to carbon absorption and reduction costs increasing relatively. High demand for \textsc{cdm} will increase the cost faster.
 
+\begin{figure}[H]
+		\centering
+        \begin{subfigure}[b]{\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{img/simulations/main-before.png}
+				\caption{Data at start of simulation.}
+				\label{subfig:main-1}
+        \end{subfigure}
+        \\
+        \begin{subfigure}[b]{\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{img/simulations/main-after.png}
+				\caption{Data at end of simulation.}
+				\label{subfig:main-2}
+        \end{subfigure}
+        \caption{Results from real world senario}\label{fig:main}
+\end{figure}
+
 \subsubsection{Annex I Only}
 
 This simulation only takes countries that are part of Annex I into account, but is otherwise identical to the Real World Simulation.
@@ -85,6 +103,24 @@ Another significant difference is the price of obtaining carbon credits. Followi
 
 All of the other figures scale linearly with the number of countries being simulated. Global emission target and reduced carbon emissions, as well as the total number of credit trades and their combined value are decreased by a factor of 6-8 comparing to the original simulation, which matches the decrease in number of participating countries.
 
+\begin{figure}[H]
+		\centering
+        \begin{subfigure}[b]{\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{img/simulations/all-annex1-before.png}
+				\caption{Data at start of simulation.}
+				\label{subfig:all-annex1-1}
+        \end{subfigure}
+        \\
+        \begin{subfigure}[b]{\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{img/simulations/all-annex1-after.png}
+				\caption{Data at end of simulation.}
+				\label{subfig:all-annex1-2}
+        \end{subfigure}
+        \caption{Simulation running only Annex I participants}\label{fig:all-annex1}
+\end{figure}
+
 \subsubsection{Comparing Reduction Rates}
 
 We ran a set of three scenarios which used reduction rates of 0.98, 0.95, and 0.92. These scenarios were otherwise identical, so that we could analyse the effect reduction rates have on the efficacy of the Kyoto Protocol.
@@ -95,9 +131,9 @@ Global reductions in the high and low scenarios are in the range of 2000 megaton
 
 In the low simulation, the first country to go from being an Annex I country to a rogue state does so 12 years after the start of the simulation. In the high scenario, the first country does so after 17 years. This difference demonstrates the variation introduced by the reduction rates.
 
-As can be seen by comparing figure X and figure Y, the Annex I countries are most drastically affected by more or less severe emissions targets.
+As can be seen by comparing Figure~\ref{fig:350} and Figure~\ref{fig:352}, the Annex I countries are most drastically affected by more or less severe emissions targets.
 
-\begin{figure}[h!]
+\begin{figure}[H]
 		\centering
         \begin{subfigure}[b]{\textwidth}
                 \centering
@@ -112,10 +148,10 @@ As can be seen by comparing figure X and figure Y, the Annex I countries are mos
 				\caption{Data at end of simulation.}
 				\label{subfig:350-2}
         \end{subfigure}
-        \caption{350}\label{fig:350}
+        \caption{Results for simulation ($reduction~rate=0.98$)}\label{fig:350}
 \end{figure}
 
-\begin{figure}[h!]
+\begin{figure}[H]
 		\centering
         \begin{subfigure}[b]{\textwidth}
                 \centering
@@ -130,5 +166,5 @@ As can be seen by comparing figure X and figure Y, the Annex I countries are mos
 				\caption{Data at end of simulation.}
 				\label{subfig:352-2}
         \end{subfigure}
-        \caption{352}\label{fig:352}
+        \caption{Results for simulation ($reduction~rate=0.92$)}\label{fig:352}
 \end{figure}
