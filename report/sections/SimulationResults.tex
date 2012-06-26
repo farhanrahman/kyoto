@@ -2,7 +2,7 @@
 
 We have carried out a variety of simulations which involved different countries and available behaviours, as well as different restrictions and valuations applied by our Kyoto Protocol's backbone systems. An individual simulation, with specific configurations regarding which countries are present, what behaviours are being used, and how services act is referred to as a scenario.
 
-\subsection{Scenarios}
+\subsection{Possible Scenarios}
 
 During the design and implementation of our Kyoto Protocol simulator, we made any individual simulation configurable in the following ways. This allows us to make sweeping changes to outcomes and agent activities without altering implementation of components of our system. This allows us to construct theoretical alternative scenarios to the real world Kyoto Protocol.
 
@@ -48,7 +48,33 @@ We have enforced an upper and lower limit on \textsc{gdp} growth of $\pm$-7\%. T
 These effect the chances of the global economy being in recession or growth, with a weighting towards remaining stable. These could be varies to emulate the protocol during an extended period of either negative or positive growth. The effects would be very similar to changing the \textsc{gdp} growth range as above.
 \end{description}
 
-\subsection{Comparing Reduction Rates}
+\subsection{Tested Scenarios}
+
+%
+%	TODO: Intro here
+%
+
+\subsubsection{Annex I Only}
+
+This simulation only takes countries that are part of Annex I into account, but is otherwise identical to the Main Simulation.
+
+Non-Annex countries put additional burden on Annex I countries due to their emissions forming part of the global output. Since the former are not set emission targets, they will generally increase their energy and carbon output to help their developing economies. This means stricter emission goals for developed countries, so that the global emissions can still be decreased by 5% every session. If we remove Non-Annex countries from the simulation, achieving that target becomes significantly easier and cheaper for Annex I countries, as their individual targets are lower.
+
+This behaviour has been evident from the simulation data. With agents being able to meet their targets early on, energy output and \textsc{gdp} would not need to be cut. With countries now able to afford to lower their emissions by means of carbon reduction and absorption, they have enough funds left to invest in industry and increasing their \textsc{gdp}. It is noted that after ~35 years, carbon reduction and absorption becomes prohibitively expensive, and some participants need to scale back their economies to reach their emission targets. Likewise, countries start leaving Kyoto much later than Canada does in the main simulation, with Estonia, Slovakia and Poland being the first to do so in the 38th year.
+
+As a consequence, the global increase of \textsc{gdp} almost doubles compared to the original simulation. There may be two reasons for that:
+
+Allowing developed countries to keep investing in and increasing their economies produces much higher gains than what developing countries can generate, even when they do not need to keep to any targets, or
+
+The economy state - which is random for every simulation - was significantly more favourable for the Annex One only simulation than for the Main simulation.
+
+Another significant difference is the price of obtaining carbon credits. Following the free market rules, removing the option to invest in developing countries in exchange for the credits should decrease their supply on the market, and hence increase their price. However, the existence of United States disrupts that theoretical model completely. They cannot participate in trading, but still have significant funds to spend and a will to contribute to lowering global carbon emissions. Hence, they invest heavily in Non-Annex countries, regardless of the price. This explains why the average price of obtaining carbon credits is almost 4 times lower if \textsc{us} is removed from the simulation.
+
+\textsc{cdm} also acts as a form of price stabiliser since the value of a credit is derived and not determined by the \textsc{ai}.  This can account for the greater deviation in price from the main simulation.
+
+All of the other figures scale linearly with the number of countries being simulated. Global emission target and reduced carbon emissions, as well as the total number of credit trades and their combined value are decreased by a factor of 6-8 comparing to the original simulation, which matches the decrease in number of participating countries.
+
+\subsubsection{Comparing Reduction Rates}
 
 We ran a set of three scenarios which used reduction rates of 0.98, 0.95, and 0.92. These scenarios were otherwise identical, so that we could analyse the effect reduction rates have on the efficacy of the Kyoto Protocol.
 
