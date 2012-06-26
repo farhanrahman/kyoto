@@ -4,40 +4,37 @@ We have carried out a variety of simulations which involved different countries 
 
 \subsection{Possible Scenarios}
 
-During the design and implementation of our Kyoto Protocol simulator, we made any individual simulation configurable in the following ways. This allows us to make sweeping changes to outcomes and agent activities without altering implementation of components of our system. This allows us to construct theoretical alternative scenarios to the real world Kyoto Protocol.
+During the design and implementation of our Kyoto Protocol simulator, we made any individual simulation configurable in the following ways. This allows us to make sweeping changes to outcomes and agent activities without altering implementation of components of our system. Theoretical alternative scenarios can be contructed in order to test aspects of the real world Kyoto Protocol.
 
 \begin{description}
 \item[Session Length] \hfill \\
 
-Session length refers to the number of years in a given commitment period. The longer the sessions, the longer countries will have to meet their target. If this is set too short, countries will be more likely to miss their targets or cheat. This will have repercussions on their ability to spend and invest. They may also choose to just leave the protocol altogether.
+Session length refers to the number of years in a given commitment period. The longer the sessions, the longer countries will have to meet their target. If this is set too short, countries will be more likely to miss their targets or cheat. This will have repercussions on their ability to spend and invest. They may also choose to just leave the protocol altogether.  The first session of the actual Kyoto Protocol has been extended.
 
 \item[Monitor Price] \hfill \\
 
-This is the price to monitor each country every year. This has been chosen to allow fewer countries than there are in the simulation to be monitored. We were aiming for approximately 10\% of cheating countries to be caught. This was to emulate a more realistic situation where monitoring everyone is not possible. However we didn't want to set the price too high, or cheating might become the optimal behaviour.
-
-\item[Investment in Industry] \hfill \\
-
-This will effect how large an increase in \textsc{gdp} rate countries will see for a given investment. If this is too low, it would take too long for countries to see any benefit, and they would prefer to hang on to their money. Too large, and it would become unrealistically easy to meet targets without trading.
+The action of monitoing each country has an associated cost. This has been chosen to allow fewer countries than there are in the simulation to be monitored. We were aiming for approximately 10\% of cheating countries to be caught. This was to emulate a more realistic situation where monitoring everyone is not possible, and to allow for countries to cheat and not be caught. However, setting the price to high would reduce the number of countries monitored and lead to cheating becoming an optimal behaviour.
 
 \item[Disabling Monitoring] \hfill \\
 
-This could be achieved by setting the monitor tax to 0. Although our behaviours make little use of cheating, disabling the monitor would yield interesting results in a more realistic simulation. Giving countries free reign over meeting their carbon targets would be a test of the morality in their behaviour (if any). The likely result would be no targets being met and global carbon emissions increasing.
+The monitor provides a form of insurance against countries cheating. Giving countries free reign over meeting their carbon targets would be a test of the morality in their behaviour. The likely result would be no targets being met and global carbon emissions increasing.
 
 \item[Participants] \hfill \\
 
-Removing the so called `rogue' countries (\textsc{us}) from our simulation would have a large beneficial effect on global emission  targets for the remaining participants. This scenario could be compared to a real-world situation where these countries' outputs don't contribute to the way Kyoto set its targets. Although this probably wouldn't help the global carbon emission problem, countries would be more likely to stay if their targets were easier (see Canada).
+Removing the so called `rogue' countries (\textsc{us}) from our simulation would have a large beneficial effect on global emission targets for the remaining participants. This scenario could be compared to a real-world situation where these countries' outputs don't contribute to the way Kyoto set its targets. Although this probably wouldn't help the global carbon emission problem, countries would be more likely to stay if their targets were easier (see Canada).
 
 On the other hand, we could simulate only having `rogue' countries who behave only according to their own internally-set targets. The resulting behaviour would probably be chaotic and not beneficial to the global emission problem. This would be similar to the possible real-world situation where all countries withdraw their support for Kyoto, but commit to their own reduction targets.
 
-The last hypothetical situation we thought would be of interest was if all countries ratified and were classified as Annex 1. Emission targets would be much simpler to understand (and fairer compared to the \textsc{us}'s current unrattified status). Also no \textsc{cdm} would take place. This would take away one of the easiest ways for a country to meet their targets while keeping their heavy carbon industry. There is much concern in the real world over the effectiveness and morality of using \textsc{cdm} to reduce carbon emissions. Taking away arable land from third world countries that could be used to grow crops, just to plant trees which will take several decades to become effective carbon sinks sounds very dubious.
+The last hypothetical situation we thought would be of interest was if all countries ratified and were classified as Annex 1. Emission targets would be simpler to understand (and fairer compared to the \textsc{us}'s current unrattified status). Also no \textsc{cdm} would take place. This would take away one of the easiest ways for a country to meet their targets while keeping their heavy carbon industry. There is much concern in the real world over the effectiveness and morality of using \textsc{cdm} to reduce carbon emissions. Taking away arable land from third world countries that could be used to grow crops, just to plant trees which will take several decades to become effective carbon sinks sounds very dubious.
 
 \item[CO$_2$ Reduction Rate] \hfill \\
 
-The reduction rate defines the factor by which global emissions must be reduced by over the course of a single session. For example, a factor of 0.95 will define a 5\% reduction for each session in a scenario. The faster countries have to reduce their carbon, the more likely they are to miss their target, cheat and/or leave the protocol. We predict a lower reduction rate would be the most beneficial in the long term.
+Kyoto aims to reduce the global \CO output by a set amount per session. The faster countries have to reduce their carbon, the more likely they are to miss their target, cheat and/or leave the protocol. We predict a lower reduction rate would be the most beneficial in the long term.
+
 
 \item[GDP Investment] \hfill \\
 
-Realistically, will invest a different proportion of \textsc{gdp} into clean initiatives. Due to countries not needing to worry about spending money on anything non-Kyoto related in our system, we set a fixed percentage to be invested in clean initiatives and industry expansion. If this parameter is high, countries will have plenty of money to invest in their own industry and international projects, so targets will be much easier to meet. The opposite would make each move more valuable and although targets would be harder to meet, countries may make `wiser' decisions.
+Realistically, countries will invest a different proportion of \textsc{gdp} into clean initiatives. Due to countries not needing to worry about spending money on anything non-Kyoto related in our system, we set a fixed percentage to be invested in clean initiatives and industry expansion.   The amount of money a country can spend significantly affects their behaviour.  A lower percentage can cause countries to leave Kyoto as their financial postiion becomes untenable.  Greater percentages may lead to price inflation, or a possiblity of increasing the reduction per year.
 
 \item[GDP Growth] \hfill \\
 
@@ -45,7 +42,7 @@ We have enforced an upper and lower limit on \textsc{gdp} growth of $\pm$-7\%. T
 
 \item[Market State Factors] \hfill \\
 
-These effect the chances of the global economy being in recession or growth, with a weighting towards remaining stable. These could be varies to emulate the protocol during an extended period of either negative or positive growth. The effects would be very similar to changing the \textsc{gdp} growth range as above.
+These effect the chances of the global economy being in recession or growth, with a weighting towards remaining stable. The state of the market makes industry investment more effective by scaling it.  These could be varied to emulate the protocol during an extended period of either negative or positive growth. The effects would be very similar to changing the \textsc{gdp} growth range as above.
 \end{description}
 
 \subsection{Tested Scenarios}
@@ -74,7 +71,7 @@ Canada is the first Annex country to leave Kyoto.  It has a large emissions tar
 
 This simulation only takes countries that are part of Annex I into account, but is otherwise identical to the Main Simulation.
 
-Non-Annex countries put additional burden on Annex I countries due to their emissions forming part of the global output. Since the former are not set emission targets, they will generally increase their energy and carbon output to help their developing economies. This means stricter emission goals for developed countries, so that the global emissions can still be decreased by 5% every session. If we remove Non-Annex countries from the simulation, achieving that target becomes significantly easier and cheaper for Annex I countries, as their individual targets are lower.
+Non-Annex countries put additional burden on Annex I countries due to their emissions forming part of the global output. Since the former are not set emission targets, they will generally increase their energy and carbon output to help their developing economies. This means stricter emission goals for developed countries, so that the global emissions can still be decreased by 5\% every session. If we remove Non-Annex countries from the simulation, achieving that target becomes significantly easier and cheaper for Annex I countries, as their individual targets are lower.
 
 This behaviour has been evident from the simulation data. With agents being able to meet their targets early on, energy output and \textsc{gdp} would not need to be cut. With countries now able to afford to lower their emissions by means of carbon reduction and absorption, they have enough funds left to invest in industry and increasing their \textsc{gdp}. It is noted that after ~35 years, carbon reduction and absorption becomes prohibitively expensive, and some participants need to scale back their economies to reach their emission targets. Likewise, countries start leaving Kyoto much later than Canada does in the main simulation, with Estonia, Slovakia and Poland being the first to do so in the 38th year.
 
