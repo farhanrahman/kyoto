@@ -32,7 +32,7 @@ One of the simpler issues which was did solve in most instances was that of conc
 In order to manage access to the large quantity of shared code accessed by countries as they act during a simulation, we introduced semaphores to manage shared resources.
 
 \paragraph{Shared State}
-At the beginning of the project, our understanding of the shared state, as it was implemented in Presage2 and even the concept of its existence in the context of multi-agent systems, was severely limited. When our code interacted with the shared state, since we structured our queries incorrectly, we encountered null pointer exceptions that were difficult to track down through debug step throughs since Maven's dependency system meant many components were compiled binaries only.
+At the beginning of the project, our understanding of the shared state, as it was implemented in Presage2 and even the concept of its existence in the context of multi-agent systems, was severely limited. When our code interacted with the shared state, since we structured our queries incorrectly, we encountered \texttt{NullPointerException} that were difficult to track down through debug step throughs since Maven's dependency system meant many components were compiled binaries only.
 
 \subsection{Carbon Reporting Synchronisation}
 
