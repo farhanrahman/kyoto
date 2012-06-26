@@ -47,9 +47,7 @@ These effect the chances of the global economy being in recession or growth, wit
 
 \subsection{Tested Scenarios}
 
-%
-%	TODO: Intro here
-%
+We have a variety of scenarios which have been simulated and run through to completion, with the results then collated and analysed for graphical representation. We attempted to cover a wide variety of Kyoto Protocol environments across our scenarios, while also maintaining baselines for comparison between them. However, we were also limited by the net processing time of running so many scenarios. Running multiple scenarios concurrently, as addressed in the Issues section, presents problems with the MongoDB server, so they must be run relatively sequentially. A single scenario can take up to four hours to run, depending on complexity and number of agents. After execution, the raw data dumped to the database must be processed for representation, which can take up to an additional two hours.
 
 \subsubsection{Real World Scenario}
 
@@ -69,7 +67,7 @@ Canada is the first Annex country to leave Kyoto. It has a large emissions targe
 
 \subsubsection{Annex I Only}
 
-This simulation only takes countries that are part of Annex I into account, but is otherwise identical to the Main Simulation.
+This simulation only takes countries that are part of Annex I into account, but is otherwise identical to the Real World Simulation.
 
 Non-Annex countries put additional burden on Annex I countries due to their emissions forming part of the global output. Since the former are not set emission targets, they will generally increase their energy and carbon output to help their developing economies. This means stricter emission goals for developed countries, so that the global emissions can still be decreased by 5\% every session. If we remove Non-Annex countries from the simulation, achieving that target becomes significantly easier and cheaper for Annex I countries, as their individual targets are lower.
 
@@ -98,3 +96,39 @@ Global reductions in the high and low scenarios are in the range of 2000 megaton
 In the low simulation, the first country to go from being an Annex I country to a rogue state does so 12 years after the start of the simulation. In the high scenario, the first country does so after 17 years. This difference demonstrates the variation introduced by the reduction rates.
 
 As can be seen by comparing figure X and figure Y, the Annex I countries are most drastically affected by more or less severe emissions targets.
+
+\begin{figure}[h!]
+		\centering
+        \begin{subfigure}[b]{\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{img/simulations/350-reduction-rate-before.png}
+				\caption{Data at start of simulation.}
+				\label{subfig:350-1}
+        \end{subfigure}
+        \\
+        \begin{subfigure}[b]{\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{img/simulations/350-reduction-rate-after.png}
+				\caption{Data at end of simulation.}
+				\label{subfig:350-2}
+        \end{subfigure}
+        \caption{350}\label{fig:350}
+\end{figure}
+
+\begin{figure}[h!]
+		\centering
+        \begin{subfigure}[b]{\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{img/simulations/352-reduction-rate-before.png}
+				\caption{Data at start of simulation.}
+				\label{subfig:352-1}
+        \end{subfigure}
+        \\
+        \begin{subfigure}[b]{\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{img/simulations/352-reduction-rate-after.png}
+				\caption{Data at end of simulation.}
+				\label{subfig:352-2}
+        \end{subfigure}
+        \caption{352}\label{fig:352}
+\end{figure}
