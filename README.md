@@ -31,4 +31,3 @@ Recommended reading:
 This README will be updated later on with proper instructions to make it
 look amazing with proper wiki page setup.
 
-We are gonna go big guys!!!!!
